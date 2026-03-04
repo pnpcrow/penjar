@@ -158,3 +158,8 @@ A task is considered complete only when:
 3. Lock autosave + recovery SLAs and validate against storage backends.
 4. Stand up a Flutter desktop spike focused on authentication, file open/save, and embedded MCP bootstrap.
 5. Create an LLM export contract with golden sample fixtures for regression checks.
+## Tracking artifacts published
+
+- [Web + MCP + Desktop Detailed Implementation Plan](/technical-guide/developer/web-mcp-desktop-implementation-plan/)
+- [Web ↔ MCP Capability Matrix](/technical-guide/developer/web-mcp-capability-matrix/)
+
