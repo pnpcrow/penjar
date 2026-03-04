@@ -35,3 +35,9 @@ You can then point a browser to [http://localhost:8080](http://localhost:8080).
 * [arc42](https://arc42.org/overview) template.
 * [c4model](https://c4model.com) for software architecture, and an
 [implementation in plantuml](https://github.com/plantuml-stdlib/C4-PlantUML).
+
+## Repository review docs
+
+For a quick repository-wide onboarding summary, see:
+
+- [Project Overview](./project-overview/README.md)
