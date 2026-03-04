@@ -9,8 +9,12 @@ echo "Preparing bundle for types from $URL"
 
 set -ex
 
-corepack enable;
-corepack install;
+if command -v corepack >/dev/null 2>&1; then
+    corepack enable;
+    corepack install;
+else
+    echo "[WARN] corepack was not found; using existing pnpm installation."
+fi
 
 # Ensure clean working directory
 rm -rf dist;
@@ -37,8 +41,12 @@ touch ./dist/pnpm-workspace.yaml;
 cat <<EOF | tee ./dist/setup
 #/usr/bin/env bash
 set -e;
-corepack enable;
-corepack install;
+if command -v corepack >/dev/null 2>&1; then
+  corepack enable;
+  corepack install;
+else
+  echo "[WARN] corepack was not found; continuing with the existing pnpm installation."
+fi
 pnpm install -P
 EOF
 

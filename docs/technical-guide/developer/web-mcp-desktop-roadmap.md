@@ -162,4 +162,5 @@ A task is considered complete only when:
 
 - [Web + MCP + Desktop Detailed Implementation Plan](/technical-guide/developer/web-mcp-desktop-implementation-plan/)
 - [Web ↔ MCP Capability Matrix](/technical-guide/developer/web-mcp-capability-matrix/)
-
+- [Web ↔ MCP Parity Backlog](/technical-guide/developer/web-mcp-parity-backlog/)
+- [Web + MCP Phase A Execution Log](/technical-guide/developer/web-mcp-phase-a-execution-log/)

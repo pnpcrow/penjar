@@ -17,6 +17,14 @@ capabilities for AI clients supporting the model context protocol (MCP).
 
         pnpm run start
 
+4. Check Runtime Diagnostics
+
+        curl http://localhost:4401/health
+
+The health payload includes plugin connection counters, pending task/session state,
+and remediation hints for common bridge failures.
+HTTP status remains `200`; consume the payload `status` field to detect degraded bridge state.
+
 
 ## Penpot Plugin API REPL
 

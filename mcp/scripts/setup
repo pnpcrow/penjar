@@ -2,6 +2,13 @@
 
 set -e;
 
-corepack enable;
-corepack install;
+SCRIPT_DIR=$(dirname "$0");
+
+bash "$SCRIPT_DIR/preflight";
+if command -v corepack >/dev/null 2>&1; then
+    corepack enable;
+    corepack install;
+else
+    echo "[WARN] corepack was not found; continuing with the existing pnpm installation."
+fi
 pnpm -r install;

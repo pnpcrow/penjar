@@ -196,7 +196,49 @@ export class PenpotMcpServer {
         }, checkIntervalMs);
     }
 
+    private getHealthPayload() {
+        const bridge = this.pluginBridge.getHealthSnapshot();
+        const streamableSessions = Object.keys(this.streamableTransports).length;
+        const sseSessions = Object.keys(this.sseTransports).length;
+        const hasPluginConnection = bridge.connectedClients > 0;
+        const status = hasPluginConnection ? "ok" : "degraded";
+
+        return {
+            status,
+            checkedAt: new Date().toISOString(),
+            mode: {
+                multiUser: this.isMultiUserMode(),
+                remote: this.isRemoteMode(),
+                fileSystemAccessEnabled: this.isFileSystemAccessEnabled(),
+            },
+            sessions: {
+                streamable: streamableSessions,
+                sse: sseSessions,
+            },
+            endpoints: {
+                mcp: `/mcp`,
+                sse: `/sse`,
+                messages: `/messages`,
+                health: `/health`,
+                websocketPort: this.webSocketPort,
+                replPort: this.replPort,
+            },
+            pluginBridge: bridge,
+            diagnosticsCatalog: this.pluginBridge.getKnownDiagnostics(),
+        };
+    }
+
     private setupHttpEndpoints(): void {
+        /**
+         * Health endpoint for operator diagnostics.
+         *
+         * Returns connection/session counters plus known remediation hints for common bridge failures.
+         */
+        this.app.get("/health", (req: any, res: any) => {
+            const payload = this.getHealthPayload();
+            res.status(200).json(payload);
+        });
+
         /**
          * Modern Streamable HTTP connection endpoint.
          *

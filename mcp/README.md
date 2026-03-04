@@ -85,6 +85,12 @@ cd penpot/mcp
 
 ### 1. Build & Launch the MCP Server and the Plugin Server
 
+Run preflight checks first (runtime + port availability):
+
+```shell
+pnpm run preflight
+```
+
 If it's your first execution, install the required dependencies.
 (If you are using the Penpot devenv, this step is not necessary, as dependencies are already installed.)
 
@@ -92,7 +98,7 @@ If it's your first execution, install the required dependencies.
 ./scripts/setup
 ```
 
-Then build all components and start the two servers:
+Then build all components and start the two servers with one command:
 
 ```shell
 pnpm run bootstrap
@@ -100,9 +106,17 @@ pnpm run bootstrap
 
 This bootstrap command will:
 
+  * run preflight checks (Node/corepack/pnpm + required ports)
   * install dependencies for all components
   * build all components
   * start all components
+
+If preflight fails, fix the reported issues and retry. Common fixes:
+
+  * install/upgrade Node.js (validated track: v22.x)
+  * run `corepack enable && corepack install`
+  * free occupied ports (4400/4401/4402/4403) or override with environment variables
+    (`PENPOT_MCP_PLUGIN_PORT`, `PENPOT_MCP_SERVER_PORT`, `PENPOT_MCP_WEBSOCKET_PORT`, `PENPOT_MCP_REPL_PORT`)
 
 ### 2. Load the Plugin in Penpot and Establish the Connection
 
@@ -141,9 +155,19 @@ By default, the server runs on port 4401 and provides:
 
 - **Modern Streamable HTTP endpoint**: `http://localhost:4401/mcp`
 - **Legacy SSE endpoint**: `http://localhost:4401/sse`
+- **Health diagnostics endpoint**: `http://localhost:4401/health`
 
 These endpoints can be used directly by MCP clients that support them.
 Simply configure the client to connect the MCP server by providing the respective URL.
+
+The `/health` endpoint is intended for operators and automation checks. It reports:
+
+- plugin bridge connectivity counters,
+- pending task/session counts,
+- last timeout/disconnect/failure metadata,
+- a remediation catalog for common issues (plugin disconnected, websocket timeout, token/session problems).
+
+The endpoint always returns HTTP `200`; use the JSON `status` field (`ok` / `degraded`) for operational decisions.
 
 When using a client that only supports stdio transport,
 a proxy like `mcp-remote` is required.
@@ -257,6 +281,7 @@ The Penpot MCP server can be configured using environment variables.
 | Environment Variable                      | Description                                                                             | Default      |
 |-------------------------------------------|-----------------------------------------------------------------------------------------|--------------|
 | `PENPOT_MCP_PLUGIN_SERVER_LISTEN_ADDRESS` | Address on which the plugin web server listens (single address or comma-separated list) | (local only) |
+| `PENPOT_MCP_PLUGIN_PORT`                  | Port used by the plugin preview server (`vite-live-preview`)                            | `4400`       |
 
 ## Beyond Local Execution
 

@@ -3,9 +3,11 @@ import livePreview from "vite-live-preview";
 
 let WS_URI = process.env.WS_URI || "http://localhost:4402";
 let MULTI_USER_MODE = process.env.MULTI_USER_MODE === "true";
+const PLUGIN_PORT = parseInt(process.env.PENPOT_MCP_PLUGIN_PORT || "4400", 10);
 
 console.log("Will define IS_MULTI_USER_MODE as:", JSON.stringify(MULTI_USER_MODE));
 console.log("Will define PENPOT_MCP_WEBSOCKET_URL as:", JSON.stringify(WS_URI));
+console.log("Will expose plugin preview on port:", PLUGIN_PORT);
 
 export default defineConfig({
     base: "./",
@@ -32,7 +34,7 @@ export default defineConfig({
     },
     preview: {
         host: "0.0.0.0",
-        port: 4400,
+        port: PLUGIN_PORT,
         cors: true,
         allowedHosts: [],
     },

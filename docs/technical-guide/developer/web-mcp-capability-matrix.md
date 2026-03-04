@@ -32,8 +32,8 @@ This is the execution artifact for Phase A in the Web + MCP + Desktop roadmap.
 | Inspect/code handoff | Extract inspect metadata for implementation | Partial | P0 | Add explicit contract tests for inspect output completeness. |
 | Export workflows | Trigger export and retrieve artifacts | Partial | P1 | Verify multi-format export coverage and error reporting path. |
 | Authentication/session | Recover from token/session expiration | Missing | P0 | Define token lifecycle and renewal UX for MCP clients. |
-| Diagnostics/health | Detect plugin/server disconnect and recovery | Partial | P0 | Add health endpoint + operator-facing troubleshooting mapping. |
-| Setup/bootstrap | Clean-environment install to first successful request | Partial | P0 | Add preflight checks and step-by-step failure remediation. |
+| Diagnostics/health | Detect plugin/server disconnect and recovery | Partial | P0 | `/health` endpoint and bridge diagnostics catalog shipped; add scenario-level recovery tests for closure. |
+| Setup/bootstrap | Clean-environment install to first successful request | Partial | P0 | `preflight` + one-command bootstrap remediation shipped; add clean-machine KPI measurements to close. |
 
 ## Gap-closure operating rules
 

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import "reflect-metadata";
+import { buildBridgeDiagnostic, formatBridgeDiagnostic, getErrorMessage } from "./BridgeDiagnostics";
 import { TextResponse, ToolResponse } from "./ToolResponse";
 import type { PenpotMcpServer, SessionContext } from "./PenpotMcpServer";
 import { createLogger } from "./logger";
@@ -51,8 +52,15 @@ export abstract class Tool<TArgs extends object> {
             this.logger.info("Tool execution #%d complete: %s", executionId, this.getToolName());
             return result;
         } catch (error) {
+            const errorMessage = getErrorMessage(error);
+            const bridgeDiagnostic = buildBridgeDiagnostic(error);
             this.logger.error("Tool execution #%d failed: %s; error: %s", executionId, this.getToolName(), error);
-            return new TextResponse(`Tool execution failed: ${String(error)}`);
+            if (bridgeDiagnostic) {
+                return new TextResponse(
+                    `Tool execution failed: ${errorMessage}\n\n${formatBridgeDiagnostic(bridgeDiagnostic)}`
+                );
+            }
+            return new TextResponse(`Tool execution failed: ${errorMessage}`);
         }
     }
 

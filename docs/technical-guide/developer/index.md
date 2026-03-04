@@ -20,7 +20,9 @@ related HOWTO articles about dev-centric subjects.
 For implementation planning across web, MCP, and desktop channels, see the
 [Web + MCP + Desktop Delivery Roadmap][4],
 [Detailed Implementation Plan][5], and
-[Web ↔ MCP Capability Matrix][6].
+[Web ↔ MCP Capability Matrix][6],
+[Web ↔ MCP Parity Backlog][7], and
+[Web + MCP Phase A Execution Log][8].
 
 [1]: /technical-guide/developer/architecture/
 [2]: /technical-guide/developer/data-model/
@@ -28,3 +30,5 @@ For implementation planning across web, MCP, and desktop channels, see the
 [4]: /technical-guide/developer/web-mcp-desktop-roadmap/
 [5]: /technical-guide/developer/web-mcp-desktop-implementation-plan/
 [6]: /technical-guide/developer/web-mcp-capability-matrix/
+[7]: /technical-guide/developer/web-mcp-parity-backlog/
+[8]: /technical-guide/developer/web-mcp-phase-a-execution-log/

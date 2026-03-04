@@ -1,13 +1,50 @@
-import { WebSocket, WebSocketServer } from "ws";
 import * as http from "http";
-import { PluginTask } from "./PluginTask";
 import { PluginTaskResponse, PluginTaskResult } from "@penpot/mcp-common";
+import { WebSocket, WebSocketServer } from "ws";
+import { PluginTask } from "./PluginTask";
+import {
+    BridgeDiagnosticCode,
+    buildBridgeDiagnostic,
+    getBridgeDiagnosticTemplates,
+    getErrorMessage,
+} from "./BridgeDiagnostics";
 import { createLogger } from "./logger";
 import type { PenpotMcpServer } from "./PenpotMcpServer";
 
 interface ClientConnection {
     socket: WebSocket;
     userToken: string | null;
+}
+
+interface BridgeFailureSnapshot {
+    at: string;
+    message: string;
+    diagnosticCode?: BridgeDiagnosticCode;
+}
+
+interface BridgeDisconnectSnapshot {
+    at: string;
+    code: number;
+    reason: string;
+    userToken: string | null;
+}
+
+interface BridgeTimeoutSnapshot {
+    at: string;
+    taskId: string;
+    timeoutSecs: number;
+}
+
+export interface PluginBridgeHealthSnapshot {
+    websocketPort: number;
+    taskTimeoutSecs: number;
+    connectedClients: number;
+    connectedTokenSessions: number;
+    pendingTasks: number;
+    lastConnectionAt: string | null;
+    lastDisconnect: BridgeDisconnectSnapshot | null;
+    lastTaskTimeout: BridgeTimeoutSnapshot | null;
+    lastFailure: BridgeFailureSnapshot | null;
 }
 
 /**
@@ -22,6 +59,11 @@ export class PluginBridge {
     private readonly pendingTasks: Map<string, PluginTask<any, any>> = new Map();
     private readonly taskTimeouts: Map<string, NodeJS.Timeout> = new Map();
 
+    private lastConnectionAt: string | null = null;
+    private lastDisconnect: BridgeDisconnectSnapshot | null = null;
+    private lastTaskTimeout: BridgeTimeoutSnapshot | null = null;
+    private lastFailure: BridgeFailureSnapshot | null = null;
+
     constructor(
         public readonly mcpServer: PenpotMcpServer,
         private port: number,
@@ -29,6 +71,34 @@ export class PluginBridge {
     ) {
         this.wsServer = new WebSocketServer({ port: port });
         this.setupWebSocketHandlers();
+    }
+
+    private nowIso(): string {
+        return new Date().toISOString();
+    }
+
+    private recordFailure(error: unknown): Error {
+        const message = getErrorMessage(error);
+        const normalized = error instanceof Error ? error : new Error(message);
+        const diagnostic = buildBridgeDiagnostic(normalized);
+        this.lastFailure = {
+            at: this.nowIso(),
+            message,
+            diagnosticCode: diagnostic?.code,
+        };
+        return normalized;
+    }
+
+    private unregisterConnection(ws: WebSocket): ClientConnection | undefined {
+        const connection = this.connectedClients.get(ws);
+        this.connectedClients.delete(ws);
+        if (connection?.userToken) {
+            const indexed = this.clientsByToken.get(connection.userToken);
+            if (indexed?.socket === ws) {
+                this.clientsByToken.delete(connection.userToken);
+            }
+        }
+        return connection;
     }
 
     /**
@@ -50,6 +120,14 @@ export class PluginBridge {
                 return;
             }
 
+            if (userToken && this.clientsByToken.has(userToken)) {
+                const duplicateMessage = "Duplicate connection for given user token; close previous connection first.";
+                this.logger.warn(duplicateMessage);
+                this.recordFailure(new Error(duplicateMessage));
+                ws.close(1008, duplicateMessage);
+                return;
+            }
+
             if (userToken) {
                 this.logger.info("New WebSocket connection established (token provided)");
             } else {
@@ -60,14 +138,9 @@ export class PluginBridge {
             const connection: ClientConnection = { socket: ws, userToken };
             this.connectedClients.set(ws, connection);
             if (userToken) {
-                // ensure only one connection per userToken
-                if (this.clientsByToken.has(userToken)) {
-                    this.logger.warn("Duplicate connection for given user token; rejecting new connection");
-                    ws.close(1008, "Duplicate connection for given user token; close previous connection first.");
-                }
-
                 this.clientsByToken.set(userToken, connection);
             }
+            this.lastConnectionAt = this.nowIso();
 
             ws.on("message", (data: Buffer) => {
                 this.logger.debug("Received WebSocket message: %s", data.toString());
@@ -79,26 +152,32 @@ export class PluginBridge {
                     const response: PluginTaskResponse<any> = JSON.parse(data.toString());
                     this.handlePluginTaskResponse(response);
                 } catch (error) {
+                    this.recordFailure(error);
                     this.logger.error(error, "Failure while processing WebSocket message");
                 }
             });
 
-            ws.on("close", () => {
-                this.logger.info("WebSocket connection closed");
-                const connection = this.connectedClients.get(ws);
-                this.connectedClients.delete(ws);
-                if (connection?.userToken) {
-                    this.clientsByToken.delete(connection.userToken);
+            ws.on("close", (code: number, reason: Buffer) => {
+                const reasonText = reason.toString() || "No reason provided";
+                this.logger.info("WebSocket connection closed: code=%d reason=%s", code, reasonText);
+
+                const closedConnection = this.unregisterConnection(ws);
+                this.lastDisconnect = {
+                    at: this.nowIso(),
+                    code,
+                    reason: reasonText,
+                    userToken: closedConnection?.userToken ?? null,
+                };
+
+                if (code !== 1000 && code !== 1001) {
+                    this.recordFailure(new Error(`WebSocket closed unexpectedly (code ${code}): ${reasonText}`));
                 }
             });
 
             ws.on("error", (error) => {
+                this.recordFailure(error);
                 this.logger.error(error, "WebSocket connection error");
-                const connection = this.connectedClients.get(ws);
-                this.connectedClients.delete(ws);
-                if (connection?.userToken) {
-                    this.clientsByToken.delete(connection.userToken);
-                }
+                this.unregisterConnection(ws);
             });
         });
 
@@ -120,7 +199,7 @@ export class PluginBridge {
             return;
         }
 
-        // Clear the timeout and remove the task from pending tasks
+        // clear the timeout and remove the task from pending tasks
         const timeoutHandle = this.taskTimeouts.get(response.id);
         if (timeoutHandle) {
             clearTimeout(timeoutHandle);
@@ -128,11 +207,12 @@ export class PluginBridge {
         }
         this.pendingTasks.delete(response.id);
 
-        // Resolve or reject the task's promise based on the result
+        // resolve or reject the task's promise based on the result
         if (response.success) {
             task.resolveWithResult({ data: response.data });
         } else {
             const error = new Error(response.error || "Task execution failed (details not provided)");
+            this.recordFailure(error);
             task.rejectWithError(error);
         }
 
@@ -158,29 +238,47 @@ export class PluginBridge {
             const connection = this.clientsByToken.get(sessionContext.userToken);
             if (!connection) {
                 throw new Error(
-                    `No plugin instance connected for user token. Please ensure the plugin is running and connected with the correct token.`
+                    "No plugin instance connected for user token. Please ensure the plugin is running and connected with the correct token."
                 );
             }
 
             return connection;
-        } else {
-            // single-user mode: return the single connected client
-            if (this.connectedClients.size === 0) {
-                throw new Error(
-                    `No Penpot plugin instances are currently connected. Please ensure the plugin is running and connected.`
-                );
-            }
-            if (this.connectedClients.size > 1) {
-                throw new Error(
-                    `Multiple (${this.connectedClients.size}) Penpot MCP Plugin instances are connected. ` +
-                        `Ask the user to ensure that only one instance is connected at a time.`
-                );
-            }
-
-            // return the first (and only) connection
-            const connection = this.connectedClients.values().next().value;
-            return <ClientConnection>connection;
         }
+
+        // single-user mode: return the single connected client
+        if (this.connectedClients.size === 0) {
+            throw new Error(
+                "No Penpot plugin instances are currently connected. Please ensure the plugin is running and connected."
+            );
+        }
+        if (this.connectedClients.size > 1) {
+            throw new Error(
+                `Multiple (${this.connectedClients.size}) Penpot MCP Plugin instances are connected. ` +
+                    "Ask the user to ensure that only one instance is connected at a time."
+            );
+        }
+
+        // return the first (and only) connection
+        const connection = this.connectedClients.values().next().value;
+        return <ClientConnection>connection;
+    }
+
+    public getHealthSnapshot(): PluginBridgeHealthSnapshot {
+        return {
+            websocketPort: this.port,
+            taskTimeoutSecs: this.taskTimeoutSecs,
+            connectedClients: this.connectedClients.size,
+            connectedTokenSessions: this.clientsByToken.size,
+            pendingTasks: this.pendingTasks.size,
+            lastConnectionAt: this.lastConnectionAt,
+            lastDisconnect: this.lastDisconnect,
+            lastTaskTimeout: this.lastTaskTimeout,
+            lastFailure: this.lastFailure,
+        };
+    }
+
+    public getKnownDiagnostics() {
+        return getBridgeDiagnosticTemplates();
     }
 
     /**
@@ -195,31 +293,46 @@ export class PluginBridge {
     public async executePluginTask<TResult extends PluginTaskResult<any>>(
         task: PluginTask<any, TResult>
     ): Promise<TResult> {
-        // get the appropriate client connection based on mode
-        const connection = this.getClientConnection();
+        let connection: ClientConnection;
+        try {
+            // get the appropriate client connection based on mode
+            connection = this.getClientConnection();
+        } catch (error) {
+            throw this.recordFailure(error);
+        }
 
         // register the task for result correlation
         this.pendingTasks.set(task.id, task);
 
         // send task to the selected client
         const requestMessage = JSON.stringify(task.toRequest());
-        if (connection.socket.readyState !== 1) {
+        if (connection.socket.readyState !== WebSocket.OPEN) {
             // WebSocket is not open
             this.pendingTasks.delete(task.id);
-            throw new Error(`Plugin instance is disconnected. Task could not be sent.`);
+            throw this.recordFailure(new Error("Plugin instance is disconnected. Task could not be sent."));
         }
 
-        connection.socket.send(requestMessage);
+        try {
+            connection.socket.send(requestMessage);
+        } catch (error) {
+            this.pendingTasks.delete(task.id);
+            throw this.recordFailure(error);
+        }
 
-        // Set up a timeout to reject the task if no response is received
+        // set up a timeout to reject the task if no response is received
         const timeoutHandle = setTimeout(() => {
             const pendingTask = this.pendingTasks.get(task.id);
             if (pendingTask) {
+                const timeoutError = new Error(`Task ${task.id} timed out after ${this.taskTimeoutSecs} seconds`);
                 this.pendingTasks.delete(task.id);
                 this.taskTimeouts.delete(task.id);
-                pendingTask.rejectWithError(
-                    new Error(`Task ${task.id} timed out after ${this.taskTimeoutSecs} seconds`)
-                );
+                this.lastTaskTimeout = {
+                    at: this.nowIso(),
+                    taskId: task.id,
+                    timeoutSecs: this.taskTimeoutSecs,
+                };
+                this.recordFailure(timeoutError);
+                pendingTask.rejectWithError(timeoutError);
             }
         }, this.taskTimeoutSecs * 1000);
 
