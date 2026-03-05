@@ -23,6 +23,7 @@ This document turns the roadmap into an execution plan that can be tracked sprin
   - [Desktop Flutter Parity Acceptance Baseline](/technical-guide/developer/desktop-flutter-parity-acceptance-baseline/)
   - [Desktop Flutter Development Runbook](/technical-guide/developer/desktop-flutter-development-runbook/)
   - [Desktop Flutter Release Validation Baseline](/technical-guide/developer/desktop-flutter-release-validation-baseline/)
+  - [Desktop Flutter Release Evidence Index](/technical-guide/developer/desktop-flutter-release-evidence-index/)
 
 ## 1. Scope and sequencing
 

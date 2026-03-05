@@ -14,6 +14,7 @@ This baseline defines minimum release validation requirements for desktop distri
 - [Desktop Flutter Development Runbook](/technical-guide/developer/desktop-flutter-development-runbook/)
 - [Desktop Flutter Parity Acceptance Baseline](/technical-guide/developer/desktop-flutter-parity-acceptance-baseline/)
 - [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/)
+- [Desktop Flutter Release Evidence Index](/technical-guide/developer/desktop-flutter-release-evidence-index/)
 
 ## 1) Target release channels
 
@@ -74,4 +75,4 @@ This baseline defines minimum release validation requirements for desktop distri
 1. Add CI/release workflow for macOS signed packaging and validation report artifact upload.
 2. Add CI/release workflow for Windows signed installer packaging and validation report artifact upload.
 3. Add scripted update simulation harness for desktop channel manifests.
-4. Add release evidence index document linking artifact manifests and validation reports.
+4. Automate release evidence index updates linking artifact manifests and validation reports.

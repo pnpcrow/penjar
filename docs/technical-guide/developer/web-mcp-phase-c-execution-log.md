@@ -1503,8 +1503,51 @@ Increase backend-adapter readiness by giving remote-stub mode an executable degr
   - New degraded-path parity test passes in canonical parity suite.
   - Full verification chain remains green with fault-profile expansion.
 
+## Unit WS-D-38: Release evidence index baseline
+
+### Planned objective
+
+Close release-audit traceability gaps by introducing a canonical release evidence index document and linking it into the Phase C documentation chain.
+
+### Implemented changes
+
+1. Added release evidence index artifact:
+   - `docs/technical-guide/developer/desktop-flutter-release-evidence-index.md`.
+2. Defined evidence index schema and table baseline:
+   - RC/version/platform records,
+   - artifact manifest links,
+   - installer/update report links,
+   - CI run links,
+   - execution-log references,
+   - promotion/block decisions.
+3. Linked evidence index into release baseline:
+   - `desktop-flutter-release-validation-baseline.md` related artifacts now include release evidence index,
+   - backlog seed updated from document creation to evidence-index automation.
+4. Linked evidence index into Phase C continuity map:
+   - `web-mcp-documentation-map.md`,
+   - `web-mcp-desktop-implementation-plan.md`,
+   - `developer/index.md`,
+   - `desktop-flutter-development-runbook.md`.
+5. Re-ran canonical fast verification chain:
+   - `pnpm run desktop:verify:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - adequacy of evidence fields for release audit traceability,
+  - cross-document link integrity after adding new artifact,
+  - consistency of remaining-gap statements with newly published evidence baseline.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Evidence index is reachable from release baseline, documentation map, implementation plan, developer index, and runbook.
+  - Release baseline backlog now targets automation instead of baseline creation.
+  - Fast verification chain remains green after documentation expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts and macOS build validation, and release-validation baseline documentation is published, but automated installer/update validation execution pipelines and evidence artifact automation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts and macOS build validation, and release-validation/evidence-index baselines are published, but automated installer/update validation execution pipelines and evidence artifact automation are not yet configured.
