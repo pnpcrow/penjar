@@ -1434,6 +1434,61 @@ void main() {
     );
 
     test(
+      'auth backend nested signed-out error code overrides token inference',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'message': 'Nested backend session expired.',
+                'state': <String, Object?>{
+                  'authentication': <String, Object?>{
+                    'errorCode': 'SESSION_EXPIRED',
+                  },
+                  'tokens': <String, Object?>{
+                    'accessToken': 'nested-stale-access-token',
+                  },
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Nested backend session expired.',
+        );
+      },
+    );
+
+    test(
+      'auth backend nested explicit signed-in alias overrides nested error code',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'state': <String, Object?>{
+                  'authentication': <String, Object?>{
+                    'errorCode': 'AUTH_REQUIRED',
+                    'authenticated': true,
+                    'remember': true,
+                  },
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
+
+    test(
       'skips auth delegate mutation when backend response snapshot is present',
       () {
         final _TrackingAuthSessionContract trackingDelegate =

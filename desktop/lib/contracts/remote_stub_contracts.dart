@@ -865,16 +865,24 @@ String? _resolveBackendCodeValue({
   required Map<String, Object?> responsePayload,
   required Map<String, Object?> envelopePayload,
   required Map<String, Object?> statePayload,
+  List<Map<String, Object?>> additionalPayloads =
+      const <Map<String, Object?>>[],
 }) {
-  return _coerceNonEmptyString(responsePayload['code']) ??
-      _coerceNonEmptyString(responsePayload['errorCode']) ??
-      _coerceNonEmptyString(responsePayload['reasonCode']) ??
-      _coerceNonEmptyString(envelopePayload['code']) ??
-      _coerceNonEmptyString(envelopePayload['errorCode']) ??
-      _coerceNonEmptyString(envelopePayload['reasonCode']) ??
-      _coerceNonEmptyString(statePayload['code']) ??
-      _coerceNonEmptyString(statePayload['errorCode']) ??
-      _coerceNonEmptyString(statePayload['reasonCode']);
+  for (final Map<String, Object?> payload in <Map<String, Object?>>[
+    responsePayload,
+    envelopePayload,
+    statePayload,
+    ...additionalPayloads,
+  ]) {
+    final String? code =
+        _coerceNonEmptyString(payload['code']) ??
+        _coerceNonEmptyString(payload['errorCode']) ??
+        _coerceNonEmptyString(payload['reasonCode']);
+    if (code != null) {
+      return code;
+    }
+  }
+  return null;
 }
 
 bool _backendCodeIndicatesSignedOut(String rawCode) {
@@ -1030,6 +1038,7 @@ AuthSessionState? _authStateFromBackendPayload(
       responsePayload: responsePayload,
       envelopePayload: envelopePayload,
       statePayload: statePayload,
+      additionalPayloads: authSources,
     );
     final bool signedOutByCode =
         backendCode != null && _backendCodeIndicatesSignedOut(backendCode);
