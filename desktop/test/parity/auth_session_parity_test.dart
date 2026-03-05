@@ -345,6 +345,37 @@ class _AuthBackendCyclicErrorContainerParityTransportClient
   }
 }
 
+class _AuthBackendDeepEnvelopeParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendDeepEnvelopeParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'result': <String, Object?>{
+            'data': <String, Object?>{
+              'payload': <String, Object?>{
+                'result': <String, Object?>{
+                  'data': <String, Object?>{
+                    'detail': 'Backend deep envelope payload handled.',
+                    'authState': <String, Object?>{
+                      'isAuthenticated': true,
+                      'remember_session': true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 class _AuthBackendPayloadEnvelopeParityTransportClient
     extends RemoteStubTransportClient {
   const _AuthBackendPayloadEnvelopeParityTransportClient();
@@ -925,6 +956,43 @@ void main() {
     expect(
       find.textContaining(
         'Status: [remote-stub] Backend cyclic payload handled.',
+      ),
+      findsOneWidget,
+    );
+    final CheckboxListTile rememberSessionTile = tester.widget(
+      find.byKey(const ValueKey<String>('auth-remember')),
+    );
+    expect(rememberSessionTile.value, isTrue);
+
+    expect(find.textContaining('Signed in (simulated).'), findsNothing);
+  });
+
+  testWidgets('auth/session parity supports deep backend envelope chains', (
+    WidgetTester tester,
+  ) async {
+    await pumpDesktopApp(
+      tester,
+      contracts: DesktopContractBundle.fromMode(
+        DesktopContractMode.remoteStub,
+        remoteStubTransportClient:
+            const _AuthBackendDeepEnvelopeParityTransportClient(),
+      ),
+    );
+    await openWorkflowSection(tester, 'auth');
+
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('auth-password')),
+      'desktop-pass',
+    );
+    await tester.ensureVisible(
+      find.byKey(const ValueKey<String>('auth-sign-in')),
+    );
+    await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining(
+        'Status: [remote-stub] Backend deep envelope payload handled.',
       ),
       findsOneWidget,
     );

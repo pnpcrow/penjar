@@ -8261,6 +8261,56 @@ while preserving existing nested error/status/code extraction semantics and alia
   - nested error/status/code extraction semantics remain unchanged for non-cyclic payloads.
   - targeted tests and full desktop verification remain green after parser hardening.
 
+## Unit WS-D-182: Deep envelope-chain traversal + cyclic-envelope guard hardening
+
+### Planned objective
+
+Remove fixed-depth backend envelope unwrapping limits so deep auth envelope chains remain
+compatible, while preserving malformed cyclic envelope safety and parity-level UI determinism.
+
+### Implemented changes
+
+1. Hardened backend envelope extraction in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_extractBackendEnvelopePayload(...)` now uses identity-based visited tracking
+     (`Set<Object>.identity()`) with cycle-safe traversal instead of prior bounded-depth loop.
+2. Added contract regressions in `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `supports deep backend response envelope chains beyond four levels`,
+   - `auth backend cyclic envelope references do not loop indefinitely`.
+3. Added parity regression in `desktop/test/parity/auth_session_parity_test.dart`:
+   - `_AuthBackendDeepEnvelopeParityTransportClient`,
+   - `auth/session parity supports deep backend envelope chains`.
+4. Synced continuity docs for deep-envelope/cycle-safety evidence:
+   - `desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `desktop-flutter-development-runbook.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+5. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - backend envelope compatibility for deep `result/data/payload` wrapper chains,
+  - malformed cyclic envelope safety under unbounded traversal strategy,
+  - parity-level auth UI stability with deep envelope payload snapshots.
+- **Issues found during review**
+  1. Previous envelope extraction relied on fixed-depth loop bounds, which could miss backend auth
+     state/status payloads when wrapper depth exceeded the bound.
+  2. Removing depth bounds without cycle detection would reintroduce infinite-loop risk for malformed
+     self-referential envelope graphs.
+- **Fix applied**
+  1. Replaced bounded depth loop with identity-based visited tracking so traversal continues across
+     deep chains and stops safely on cycle re-entry.
+  2. Added contract regressions for deep-chain extraction and cyclic envelope handling.
+  3. Added parity regression for deep envelope auth snapshot behavior to lock UI-level compatibility.
+- **Post-fix validation criteria**
+  - deep backend wrapper chains resolve auth state/status without delegate-fallback drift.
+  - cyclic envelope references do not cause traversal loops.
+  - targeted tests and full desktop verification remain green after traversal hardening.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

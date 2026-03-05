@@ -1427,6 +1427,81 @@ void main() {
     });
 
     test(
+      'supports deep backend response envelope chains beyond four levels',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.signIn: <String, Object?>{
+                'result': <String, Object?>{
+                  'data': <String, Object?>{
+                    'payload': <String, Object?>{
+                      'result': <String, Object?>{
+                        'data': <String, Object?>{
+                          'detail':
+                              'Backend deep envelope auth snapshot applied.',
+                          'authState': <String, Object?>{
+                            'isAuthenticated': true,
+                            'remember_session': true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.signIn(
+          const AuthSignInRequest(
+            email: 'designer@penjar.app',
+            password: 'desktop-pass',
+          ),
+        );
+
+        expect(authContract.state.rememberSession, isTrue);
+        expect(authContract.state.signedIn, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend deep envelope auth snapshot applied.',
+        );
+      },
+    );
+
+    test(
+      'auth backend cyclic envelope references do not loop indefinitely',
+      () {
+        final Map<String, Object?> cyclicEnvelopePayload = <String, Object?>{
+          'detail': 'Backend cyclic envelope auth snapshot applied.',
+          'state': <String, Object?>{'signedIn': true, 'rememberSession': true},
+        };
+        cyclicEnvelopePayload['result'] = cyclicEnvelopePayload;
+
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.signIn: cyclicEnvelopePayload,
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.signIn(
+          const AuthSignInRequest(
+            email: 'designer@penjar.app',
+            password: 'desktop-pass',
+          ),
+        );
+
+        expect(authContract.state.rememberSession, isTrue);
+        expect(authContract.state.signedIn, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend cyclic envelope auth snapshot applied.',
+        );
+      },
+    );
+
+    test(
       'auth backend payload infers signed-in from token/session aliases',
       () {
         final _BackendResponseTransportClient transportClient =

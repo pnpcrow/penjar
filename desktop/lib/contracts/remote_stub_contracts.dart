@@ -776,7 +776,9 @@ Map<String, Object?> _extractBackendEnvelopePayload(
   Map<String, Object?> responsePayload,
 ) {
   Map<String, Object?> currentPayload = responsePayload;
-  for (int depth = 0; depth < 4; depth += 1) {
+  final Set<Object> visitedPayloads = Set<Object>.identity()
+    ..add(currentPayload);
+  while (true) {
     Map<String, Object?>? nextPayload;
     for (final String key in const <String>['result', 'data', 'payload']) {
       final Map<String, Object?> nestedPayload = _coerceStringKeyedMap(
@@ -788,6 +790,9 @@ Map<String, Object?> _extractBackendEnvelopePayload(
       }
     }
     if (nextPayload == null) {
+      break;
+    }
+    if (!visitedPayloads.add(nextPayload)) {
       break;
     }
     currentPayload = nextPayload;
