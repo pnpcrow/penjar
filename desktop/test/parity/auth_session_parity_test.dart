@@ -4608,6 +4608,52 @@ void main() {
           absentSuccessText: 'Session restored (simulated).',
         ),
         (
+          description: 'result envelope authState signed_in false alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'signed_in': false,
+                'sessionToken': 'auth-state-signed-in-false-result-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
+          description: 'data envelope authState logged_in false alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'logged_in': false,
+                'sessionToken': 'auth-state-logged-in-snake-false-data-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
+          description: 'result envelope authState is_logged_in false alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_logged_in': false,
+                'sessionToken':
+                    'auth-state-is-logged-in-snake-false-result-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
           description:
               'data envelope authState explicit signed-out authentication over token',
           restoreSessionPayload: <String, Object?>{
