@@ -2823,8 +2823,47 @@ Prevent test omission regressions by validating that canonical verify runners co
   - Verify coverage report is generated in local and CI runs.
   - Full-fast desktop verification remains green after coverage guard integration.
 
+## Unit WS-D-66: Release smoke readiness preflight hardening
+
+### Planned objective
+
+Ensure release smoke workflow always performs script-syntax and verify-coverage preflight checks before signing readiness and smoke execution.
+
+### Implemented changes
+
+1. Hardened release smoke preflight chain:
+   - `.github/workflows/release-desktop-installer-smoke.yml` `signing-readiness` job now runs:
+     - `./scripts/check_release_script_syntax.sh`,
+     - `./scripts/check_verify_test_coverage.sh`,
+     before gate-policy and signing-readiness checks.
+2. Extended smoke workflow artifacts:
+   - uploads `desktop-release-script-syntax-report-smoke` (`release_script_syntax_report.md`),
+   - uploads `desktop-verify-test-coverage-report-smoke` (`verify_test_coverage_report.md`).
+3. Updated release baseline docs:
+   - `desktop-flutter-release-validation-baseline.md` now documents smoke preflight coverage/syntax checks and artifact names in CI baseline notes.
+4. Re-ran validation commands:
+   - `pnpm run desktop:release:scripts:syntax:check`,
+   - `pnpm run desktop:test:coverage:check`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - smoke workflow preflight ordering and failure propagation before signing checks,
+  - artifact traceability for newly added preflight reports,
+  - baseline documentation consistency with workflow behavior.
+- **Issues found during review**
+  1. Release smoke workflow did not independently enforce script-syntax and verify-coverage guards if desktop parity CI was bypassed.
+- **Fix applied**
+  1. Added explicit preflight guard steps and artifact uploads inside smoke `signing-readiness` job.
+- **Post-fix validation criteria**
+  - Smoke workflow fails early when syntax/coverage guards fail.
+  - Smoke workflow consistently publishes preflight report artifacts.
+  - Full-fast desktop verification remains green after workflow hardening.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, de-duplicated contract/parity/mode-matrix verification chain, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, de-duplicated contract/parity/mode-matrix verification chain, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow with preflight syntax/coverage readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

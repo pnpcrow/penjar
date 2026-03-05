@@ -102,6 +102,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Run release script syntax check
+        working-directory: ./desktop
+        run: ./scripts/check_release_script_syntax.sh
+
+      - name: Run verify test coverage check
+        working-directory: ./desktop
+        run: ./scripts/check_verify_test_coverage.sh
+
       - name: Run release smoke gate policy check
         working-directory: ./desktop
         env:
@@ -146,6 +154,22 @@ jobs:
         with:
           name: desktop-release-smoke-gate-policy-report
           path: desktop/release/reports/release_smoke_gate_policy_report.md
+          if-no-files-found: warn
+
+      - name: Upload release script syntax report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-release-script-syntax-report-smoke
+          path: desktop/release/reports/release_script_syntax_report.md
+          if-no-files-found: warn
+
+      - name: Upload verify test coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-verify-test-coverage-report-smoke
+          path: desktop/release/reports/verify_test_coverage_report.md
           if-no-files-found: warn
 
   installer-smoke:

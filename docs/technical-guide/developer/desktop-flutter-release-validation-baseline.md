@@ -147,6 +147,7 @@ CI baseline note:
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads release script syntax report artifacts (`desktop-release-script-syntax-report-*`).
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads verify test coverage report artifacts (`desktop-verify-test-coverage-report-*`).
 - `.github/workflows/release-desktop-installer-smoke.yml` includes `signing-readiness` job with optional strict enforcement via workflow input.
+- `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job runs release script syntax and verify test coverage checks, and uploads `desktop-release-script-syntax-report-smoke` + `desktop-verify-test-coverage-report-smoke` artifacts.
 - `desktop/scripts/verify_desktop.sh` now runs release script syntax checks and verify test coverage checks before test/analyze/build phases, and executes contract/parity/mode-matrix tests through dedicated scripts to avoid duplicate suite execution.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job runs release smoke gate policy preflight and uploads gate policy report artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing command-hook enforcement via `enforce_signing_command_hooks` input.
