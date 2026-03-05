@@ -1647,6 +1647,38 @@ void main() {
     );
 
     test(
+      'inspect backend sibling data envelope is used when result envelope lacks inspect state',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.generateSnippet: <String, Object?>{
+                'result': <String, Object?>{
+                  'meta': <String, Object?>{'requestId': 'req-inspect-1'},
+                },
+                'data': <String, Object?>{
+                  'detail': 'Backend sibling data inspect snapshot applied.',
+                  'inspectState': <String, Object?>{
+                    'target': 'swiftui',
+                    'snippet': 'Text("Remote")',
+                  },
+                },
+              },
+            });
+        final RemoteStubInspectHandoffContract inspectContract =
+            RemoteStubInspectHandoffContract(transportClient: transportClient);
+
+        inspectContract.generateSnippet('ignored');
+
+        expect(inspectContract.state.target, 'swiftui');
+        expect(inspectContract.state.snippet, 'Text("Remote")');
+        expect(
+          inspectContract.state.status,
+          '[remote-stub] Backend sibling data inspect snapshot applied.',
+        );
+      },
+    );
+
+    test(
       'supports deep backend response envelope chains beyond four levels',
       () {
         final _BackendResponseTransportClient transportClient =

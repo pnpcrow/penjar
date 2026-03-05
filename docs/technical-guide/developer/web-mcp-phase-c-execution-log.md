@@ -8662,6 +8662,56 @@ wrappers (`data.collaborationState`).
     payloads.
   - targeted tests and full desktop verification remain green after collaboration regression lock.
 
+## Unit WS-D-190: Inspect workflow sibling-envelope fallback regression lock
+
+### Planned objective
+
+Extend sibling-envelope fallback evidence to inspect workflows by locking contract/parity behavior
+for metadata-only primary wrappers (`result.meta`) with inspect state in sibling wrappers
+(`data.inspectState`).
+
+### Implemented changes
+
+1. Added inspect contract regression in `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `inspect backend sibling data envelope is used when result envelope lacks inspect state`.
+2. Added inspect parity regression in `desktop/test/parity/inspect_handoff_parity_test.dart`:
+   - `_InspectBackendSiblingDataEnvelopeParityTransportClient`,
+   - `inspect parity uses sibling data envelope when result lacks inspect state`.
+3. Synced continuity docs for cross-workflow sibling-envelope evidence:
+   - `desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `desktop-flutter-development-runbook.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/inspect_handoff_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - sibling-envelope fallback correctness for inspect state extraction paths,
+  - parity UI status/target/snippet rendering under metadata-only primary wrapper payloads,
+  - regression impact on full verification chain.
+- **Issues found during review**
+  1. Project/file/canvas/asset/collaboration sibling-envelope regressions were locked, but inspect
+     workflow still had no dedicated regression for `result.meta` + sibling `data.inspectState`.
+  2. Without inspect-specific locks, parser changes could regress target/snippet/status extraction
+     paths while other workflow sibling-fallback tests remained green.
+- **Fix applied**
+  1. Added contract regression for `generateSnippet` backend payloads with sibling
+     `data.inspectState`.
+  2. Added parity regression to assert backend-driven status text, snippet text, and inspect target
+     surface from sibling-envelope payloads.
+  3. Updated continuity docs so inspect rows and runbook/plan narrative include sibling-envelope
+     coverage evidence.
+- **Post-fix validation criteria**
+  - inspect snapshots resolve from sibling `data.inspectState` when primary `result` wrappers are
+    metadata-only.
+  - parity UI status/target/snippet surfaces reflect backend snapshots under sibling-envelope
+    payloads.
+  - targeted tests and full desktop verification remain green after inspect regression lock.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
