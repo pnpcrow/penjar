@@ -535,24 +535,6 @@ class _ProjectLifecyclePanelState extends State<ProjectLifecyclePanel> {
   }
 }
 
-class _CanvasShape {
-  _CanvasShape({
-    required this.id,
-    required this.x,
-    required this.y,
-    required this.width,
-    required this.height,
-    required this.fillHex,
-  });
-
-  final String id;
-  double x;
-  double y;
-  double width;
-  double height;
-  String fillHex;
-}
-
 class CanvasEditingPanel extends StatefulWidget {
   const CanvasEditingPanel({super.key});
 
@@ -561,83 +543,36 @@ class CanvasEditingPanel extends StatefulWidget {
 }
 
 class _CanvasEditingPanelState extends State<CanvasEditingPanel> {
-  final List<_CanvasShape> _shapes = <_CanvasShape>[];
-  int _nextShapeNumber = 1;
-  int _selectedIndex = -1;
-  String _status = 'Idle';
-
-  _CanvasShape? get _selectedShape {
-    if (_selectedIndex < 0 || _selectedIndex >= _shapes.length) {
-      return null;
-    }
-    return _shapes[_selectedIndex];
-  }
-
-  void _setStatus(String status) {
-    setState(() {
-      _status = status;
-    });
-  }
+  final CanvasEditingContract _contract = InMemoryCanvasEditingContract();
 
   void _createRectangle() {
     setState(() {
-      final _CanvasShape shape = _CanvasShape(
-        id: 'rect-${_nextShapeNumber++}',
-        x: 10,
-        y: 10,
-        width: 120,
-        height: 80,
-        fillHex: '#007A61',
-      );
-      _shapes.add(shape);
-      _selectedIndex = _shapes.length - 1;
-      _status = 'Rectangle created: ${shape.id}.';
+      _contract.createRectangle();
     });
   }
 
   void _moveSelected() {
-    final _CanvasShape? shape = _selectedShape;
-    if (shape == null) {
-      _setStatus('Move skipped: no shape selected.');
-      return;
-    }
     setState(() {
-      shape.x += 10;
-      shape.y += 5;
-      _status =
-          'Moved ${shape.id} to (${shape.x.toInt()}, ${shape.y.toInt()}).';
+      _contract.moveSelected();
     });
   }
 
   void _resizeSelected() {
-    final _CanvasShape? shape = _selectedShape;
-    if (shape == null) {
-      _setStatus('Resize skipped: no shape selected.');
-      return;
-    }
     setState(() {
-      shape.width += 20;
-      shape.height += 20;
-      _status =
-          'Resized ${shape.id} to ${shape.width.toInt()}x${shape.height.toInt()}.';
+      _contract.resizeSelected();
     });
   }
 
   void _toggleFillSelected() {
-    final _CanvasShape? shape = _selectedShape;
-    if (shape == null) {
-      _setStatus('Fill toggle skipped: no shape selected.');
-      return;
-    }
     setState(() {
-      shape.fillHex = shape.fillHex == '#007A61' ? '#FF8A00' : '#007A61';
-      _status = 'Fill updated for ${shape.id}: ${shape.fillHex}.';
+      _contract.toggleFillSelected();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final _CanvasShape? shape = _selectedShape;
+    final CanvasEditingState canvasState = _contract.state;
+    final CanvasShapeRecord? shape = canvasState.selectedShape;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Column(
@@ -658,17 +593,18 @@ class _CanvasEditingPanelState extends State<CanvasEditingPanel> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: List<Widget>.generate(_shapes.length, (int index) {
-            final _CanvasShape item = _shapes[index];
-            final bool selected = index == _selectedIndex;
+          children: List<Widget>.generate(canvasState.shapes.length, (
+            int index,
+          ) {
+            final CanvasShapeRecord item = canvasState.shapes[index];
+            final bool selected = index == canvasState.selectedIndex;
             return ChoiceChip(
               key: ValueKey<String>('canvas-shape-${item.id}'),
               label: Text(item.id),
               selected: selected,
               onSelected: (_) {
                 setState(() {
-                  _selectedIndex = index;
-                  _status = 'Shape selected: ${item.id}.';
+                  _contract.selectShape(index);
                 });
               },
             );
@@ -709,7 +645,7 @@ class _CanvasEditingPanelState extends State<CanvasEditingPanel> {
           ),
         const SizedBox(height: 16),
         Text(
-          'Status: $_status',
+          'Status: ${canvasState.status}',
           key: const ValueKey<String>('canvas-status'),
           style: textTheme.bodyMedium,
         ),

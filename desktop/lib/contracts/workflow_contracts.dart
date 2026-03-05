@@ -210,6 +210,168 @@ class InMemoryProjectLifecycleContract implements ProjectLifecycleContract {
   }
 }
 
+class CanvasShapeRecord {
+  const CanvasShapeRecord({
+    required this.id,
+    required this.x,
+    required this.y,
+    required this.width,
+    required this.height,
+    required this.fillHex,
+  });
+
+  final String id;
+  final double x;
+  final double y;
+  final double width;
+  final double height;
+  final String fillHex;
+}
+
+class CanvasEditingState {
+  const CanvasEditingState({
+    required this.shapes,
+    required this.selectedIndex,
+    required this.status,
+  });
+
+  final List<CanvasShapeRecord> shapes;
+  final int selectedIndex;
+  final String status;
+
+  CanvasShapeRecord? get selectedShape {
+    if (selectedIndex < 0 || selectedIndex >= shapes.length) {
+      return null;
+    }
+    return shapes[selectedIndex];
+  }
+}
+
+abstract class CanvasEditingContract {
+  CanvasEditingState get state;
+  CanvasEditingState createRectangle();
+  CanvasEditingState selectShape(int index);
+  CanvasEditingState moveSelected();
+  CanvasEditingState resizeSelected();
+  CanvasEditingState toggleFillSelected();
+}
+
+class _MutableCanvasShape {
+  _MutableCanvasShape({
+    required this.id,
+    required this.x,
+    required this.y,
+    required this.width,
+    required this.height,
+    required this.fillHex,
+  });
+
+  final String id;
+  double x;
+  double y;
+  double width;
+  double height;
+  String fillHex;
+}
+
+class InMemoryCanvasEditingContract implements CanvasEditingContract {
+  final List<_MutableCanvasShape> _shapes = <_MutableCanvasShape>[];
+  int _nextShapeNumber = 1;
+  int _selectedIndex = -1;
+  String _status = 'Idle';
+
+  @override
+  CanvasEditingState get state => CanvasEditingState(
+    shapes: List<CanvasShapeRecord>.unmodifiable(
+      _shapes.map(
+        (_MutableCanvasShape shape) => CanvasShapeRecord(
+          id: shape.id,
+          x: shape.x,
+          y: shape.y,
+          width: shape.width,
+          height: shape.height,
+          fillHex: shape.fillHex,
+        ),
+      ),
+    ),
+    selectedIndex: _selectedIndex,
+    status: _status,
+  );
+
+  _MutableCanvasShape? get _selectedShape {
+    if (_selectedIndex < 0 || _selectedIndex >= _shapes.length) {
+      return null;
+    }
+    return _shapes[_selectedIndex];
+  }
+
+  @override
+  CanvasEditingState createRectangle() {
+    final _MutableCanvasShape shape = _MutableCanvasShape(
+      id: 'rect-${_nextShapeNumber++}',
+      x: 10,
+      y: 10,
+      width: 120,
+      height: 80,
+      fillHex: '#007A61',
+    );
+    _shapes.add(shape);
+    _selectedIndex = _shapes.length - 1;
+    _status = 'Rectangle created: ${shape.id}.';
+    return state;
+  }
+
+  @override
+  CanvasEditingState selectShape(int index) {
+    if (index < 0 || index >= _shapes.length) {
+      _status = 'Shape select failed: invalid index.';
+      return state;
+    }
+    _selectedIndex = index;
+    _status = 'Shape selected: ${_shapes[index].id}.';
+    return state;
+  }
+
+  @override
+  CanvasEditingState moveSelected() {
+    final _MutableCanvasShape? shape = _selectedShape;
+    if (shape == null) {
+      _status = 'Move skipped: no shape selected.';
+      return state;
+    }
+    shape.x += 10;
+    shape.y += 5;
+    _status = 'Moved ${shape.id} to (${shape.x.toInt()}, ${shape.y.toInt()}).';
+    return state;
+  }
+
+  @override
+  CanvasEditingState resizeSelected() {
+    final _MutableCanvasShape? shape = _selectedShape;
+    if (shape == null) {
+      _status = 'Resize skipped: no shape selected.';
+      return state;
+    }
+    shape.width += 20;
+    shape.height += 20;
+    _status =
+        'Resized ${shape.id} to ${shape.width.toInt()}x${shape.height.toInt()}.';
+    return state;
+  }
+
+  @override
+  CanvasEditingState toggleFillSelected() {
+    final _MutableCanvasShape? shape = _selectedShape;
+    if (shape == null) {
+      _status = 'Fill toggle skipped: no shape selected.';
+      return state;
+    }
+    shape.fillHex = shape.fillHex == '#007A61' ? '#FF8A00' : '#007A61';
+    _status = 'Fill updated for ${shape.id}: ${shape.fillHex}.';
+    return state;
+  }
+}
+
 class ExportRequest {
   const ExportRequest({
     required this.fileName,

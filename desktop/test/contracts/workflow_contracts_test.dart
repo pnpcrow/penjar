@@ -106,6 +106,43 @@ void main() {
     });
   });
 
+  group('InMemoryCanvasEditingContract', () {
+    test('supports create/select/move/resize/fill lifecycle', () {
+      final InMemoryCanvasEditingContract contract =
+          InMemoryCanvasEditingContract();
+
+      expect(contract.state.shapes, isEmpty);
+      expect(contract.state.selectedShape, isNull);
+      expect(contract.state.status, 'Idle');
+
+      contract.moveSelected();
+      expect(contract.state.status, 'Move skipped: no shape selected.');
+
+      contract.createRectangle();
+      expect(contract.state.status, 'Rectangle created: rect-1.');
+      expect(contract.state.shapes, hasLength(1));
+      expect(contract.state.selectedShape?.id, 'rect-1');
+
+      contract.moveSelected();
+      expect(contract.state.status, 'Moved rect-1 to (20, 15).');
+
+      contract.resizeSelected();
+      expect(contract.state.status, 'Resized rect-1 to 140x100.');
+
+      contract.toggleFillSelected();
+      expect(contract.state.status, 'Fill updated for rect-1: #FF8A00.');
+      expect(contract.state.selectedShape?.fillHex, '#FF8A00');
+    });
+
+    test('guards invalid shape selection', () {
+      final InMemoryCanvasEditingContract contract =
+          InMemoryCanvasEditingContract();
+
+      contract.selectShape(2);
+      expect(contract.state.status, 'Shape select failed: invalid index.');
+    });
+  });
+
   group('InMemoryExportWorkflowContract', () {
     test('returns validation failure for empty file name', () {
       final InMemoryExportWorkflowContract contract =
