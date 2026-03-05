@@ -1254,6 +1254,71 @@ void main() {
     });
 
     test(
+      'auth backend payload infers signed-in from token/session aliases',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.signIn: <String, Object?>{
+                'detail': 'Backend auth alias payload applied.',
+                'state': <String, Object?>{
+                  'remember': true,
+                  'accessToken': 'access-token-from-backend',
+                  'sessionId': 'session-from-backend',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.signIn(
+          const AuthSignInRequest(
+            email: 'designer@penjar.app',
+            password: 'desktop-pass',
+          ),
+        );
+
+        expect(authContract.state.rememberSession, isTrue);
+        expect(authContract.state.signedIn, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend auth alias payload applied.',
+        );
+      },
+    );
+
+    test(
+      'auth backend explicit signed-out state overrides token/session aliases',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.signIn: <String, Object?>{
+                'status': 'Backend auth alias payload applied.',
+                'state': <String, Object?>{
+                  'signedIn': false,
+                  'accessToken': 'ignored-for-explicit-sign-out',
+                  'sessionId': 'ignored-for-explicit-sign-out',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.signIn(
+          const AuthSignInRequest(
+            email: 'designer@penjar.app',
+            password: 'desktop-pass',
+          ),
+        );
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend auth alias payload applied.',
+        );
+      },
+    );
+
+    test(
       'skips auth delegate mutation when backend response snapshot is present',
       () {
         final _TrackingAuthSessionContract trackingDelegate =

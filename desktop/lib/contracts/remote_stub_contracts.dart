@@ -769,6 +769,27 @@ bool _containsAnyKey(Map<String, Object?> payload, Set<String> keys) {
   return false;
 }
 
+Object? _firstPresentValue(Map<String, Object?> payload, List<String> aliases) {
+  for (final String alias in aliases) {
+    if (payload.containsKey(alias)) {
+      return payload[alias];
+    }
+  }
+  return null;
+}
+
+bool _containsAnyNonEmptyString(
+  Map<String, Object?> payload,
+  List<String> aliases,
+) {
+  for (final String alias in aliases) {
+    if (_coerceNonEmptyString(payload[alias]) != null) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool _hasBackendStatus({
   required Map<String, Object?> responsePayload,
   required Map<String, Object?> envelopePayload,
@@ -844,10 +865,30 @@ AuthSessionState? _authStateFromBackendPayload(
     envelopePayload: envelopePayload,
     aliases: const <String>['authState'],
   );
-  final bool hasFields = _containsAnyKey(statePayload, const <String>{
-    'rememberSession',
+  final bool hasRememberSessionFields = _containsAnyKey(
+    statePayload,
+    const <String>{'rememberSession', 'remember', 'persistSession'},
+  );
+  final bool hasSignedInFields = _containsAnyKey(statePayload, const <String>{
     'signedIn',
+    'isAuthenticated',
+    'authenticated',
   });
+  final bool hasCredentialFields = _containsAnyNonEmptyString(statePayload, [
+    'accessToken',
+    'token',
+    'sessionToken',
+    'refreshToken',
+    'sessionId',
+  ]);
+  final bool hasUserPayload = _coerceStringKeyedMap(
+    statePayload['user'],
+  ).isNotEmpty;
+  final bool hasFields =
+      hasRememberSessionFields ||
+      hasSignedInFields ||
+      hasCredentialFields ||
+      hasUserPayload;
   final bool hasStatus = _hasBackendStatus(
     responsePayload: responsePayload,
     envelopePayload: envelopePayload,
@@ -856,11 +897,34 @@ AuthSessionState? _authStateFromBackendPayload(
   if (!hasFields && !hasStatus) {
     return null;
   }
+
+  final bool? resolvedRememberSession = _coerceBool(
+    _firstPresentValue(statePayload, const <String>[
+      'rememberSession',
+      'remember',
+      'persistSession',
+    ]),
+  );
+  final bool? resolvedSignedIn = _coerceBool(
+    _firstPresentValue(statePayload, const <String>[
+      'signedIn',
+      'isAuthenticated',
+      'authenticated',
+    ]),
+  );
+  final bool inferredSignedIn;
+  if (resolvedSignedIn == true) {
+    inferredSignedIn = true;
+  } else if (resolvedSignedIn == false) {
+    inferredSignedIn = false;
+  } else {
+    inferredSignedIn = hasCredentialFields || hasUserPayload;
+  }
+
   return AuthSessionState(
-    rememberSession:
-        _coerceBool(statePayload['rememberSession']) ??
-        currentState.rememberSession,
-    signedIn: _coerceBool(statePayload['signedIn']) ?? currentState.signedIn,
+    rememberSession: resolvedRememberSession ?? currentState.rememberSession,
+    signedIn:
+        resolvedSignedIn ?? (inferredSignedIn ? true : currentState.signedIn),
     status: _resolveBackendStatusValue(
       responsePayload: responsePayload,
       envelopePayload: envelopePayload,
