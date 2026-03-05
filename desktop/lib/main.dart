@@ -369,14 +369,6 @@ class _AuthSessionPanelState extends State<AuthSessionPanel> {
   }
 }
 
-class _ProjectRecord {
-  _ProjectRecord({required this.id, required this.name, required this.files});
-
-  final String id;
-  String name;
-  final List<String> files;
-}
-
 class ProjectLifecyclePanel extends StatefulWidget {
   const ProjectLifecyclePanel({super.key});
 
@@ -385,18 +377,9 @@ class ProjectLifecyclePanel extends StatefulWidget {
 }
 
 class _ProjectLifecyclePanelState extends State<ProjectLifecyclePanel> {
+  final ProjectLifecycleContract _contract = InMemoryProjectLifecycleContract();
   final TextEditingController _projectNameController = TextEditingController();
   final TextEditingController _fileNameController = TextEditingController();
-  final List<_ProjectRecord> _projects = <_ProjectRecord>[
-    _ProjectRecord(
-      id: 'project-core',
-      name: 'Core Product',
-      files: <String>['landing.penjar'],
-    ),
-  ];
-  int _selectedProjectIndex = 0;
-  String _status = 'Idle';
-  int _nextProjectNumber = 1;
 
   @override
   void dispose() {
@@ -405,69 +388,48 @@ class _ProjectLifecyclePanelState extends State<ProjectLifecyclePanel> {
     super.dispose();
   }
 
-  _ProjectRecord get _selectedProject => _projects[_selectedProjectIndex];
-
-  void _setStatus(String status) {
-    setState(() {
-      _status = status;
-    });
-  }
-
   void _createProject() {
-    final String projectName = _projectNameController.text.trim();
-    if (projectName.isEmpty) {
-      _setStatus('Project create failed: project name is required.');
-      return;
-    }
-
     setState(() {
-      final _ProjectRecord created = _ProjectRecord(
-        id: 'project-${_nextProjectNumber++}',
-        name: projectName,
-        files: <String>[],
+      final String previousStatus = _contract.state.status;
+      final ProjectLifecycleState nextState = _contract.createProject(
+        _projectNameController.text,
       );
-      _projects.add(created);
-      _selectedProjectIndex = _projects.length - 1;
-      _projectNameController.clear();
-      _status = 'Project created: ${created.name}.';
+      if (nextState.status != previousStatus &&
+          nextState.status.startsWith('Project created:')) {
+        _projectNameController.clear();
+      }
     });
   }
 
   void _switchProject(int index) {
     setState(() {
-      _selectedProjectIndex = index;
-      _status = 'Project selected: ${_selectedProject.name}.';
+      _contract.switchProject(index);
     });
   }
 
   void _createFile() {
-    final String fileName = _fileNameController.text.trim();
-    if (fileName.isEmpty) {
-      _setStatus('File create failed: file name is required.');
-      return;
-    }
-
     setState(() {
-      _selectedProject.files.add(fileName);
-      _fileNameController.clear();
-      _status = 'File created in ${_selectedProject.name}: $fileName.';
+      final String previousStatus = _contract.state.status;
+      final ProjectLifecycleState nextState = _contract.createFile(
+        _fileNameController.text,
+      );
+      if (nextState.status != previousStatus &&
+          nextState.status.startsWith('File created in ')) {
+        _fileNameController.clear();
+      }
     });
   }
 
   void _deleteFirstFile() {
-    if (_selectedProject.files.isEmpty) {
-      _setStatus('File delete skipped: no file exists.');
-      return;
-    }
-
     setState(() {
-      final String removed = _selectedProject.files.removeAt(0);
-      _status = 'File deleted from ${_selectedProject.name}: $removed.';
+      _contract.deleteFirstFile();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final ProjectLifecycleState projectState = _contract.state;
+    final ProjectRecord selectedProject = projectState.selectedProject;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Column(
@@ -480,7 +442,7 @@ class _ProjectLifecyclePanelState extends State<ProjectLifecyclePanel> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Projects: ${_projects.length} · Files in selected: ${_selectedProject.files.length}',
+          'Projects: ${projectState.projects.length} · Files in selected: ${selectedProject.files.length}',
           key: const ValueKey<String>('project-summary'),
           style: textTheme.bodyMedium,
         ),
@@ -503,9 +465,11 @@ class _ProjectLifecyclePanelState extends State<ProjectLifecyclePanel> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: List<Widget>.generate(_projects.length, (int index) {
-            final _ProjectRecord project = _projects[index];
-            final bool selected = index == _selectedProjectIndex;
+          children: List<Widget>.generate(projectState.projects.length, (
+            int index,
+          ) {
+            final ProjectRecord project = projectState.projects[index];
+            final bool selected = index == projectState.selectedProjectIndex;
             return ChoiceChip(
               key: ValueKey<String>('project-chip-${project.id}'),
               label: Text(project.name),
@@ -541,20 +505,20 @@ class _ProjectLifecyclePanelState extends State<ProjectLifecyclePanel> {
           ],
         ),
         const SizedBox(height: 16),
-        if (_selectedProject.files.isEmpty)
+        if (selectedProject.files.isEmpty)
           Text(
-            'No files in ${_selectedProject.name}.',
+            'No files in ${selectedProject.name}.',
             key: const ValueKey<String>('file-empty'),
           )
         else
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: _selectedProject.files
+            children: selectedProject.files
                 .map(
                   (String file) => Text(
                     file,
                     key: ValueKey<String>(
-                      'file-item-${_selectedProject.id}-$file',
+                      'file-item-${selectedProject.id}-$file',
                     ),
                   ),
                 )
@@ -562,7 +526,7 @@ class _ProjectLifecyclePanelState extends State<ProjectLifecyclePanel> {
           ),
         const SizedBox(height: 16),
         Text(
-          'Status: $_status',
+          'Status: ${projectState.status}',
           key: const ValueKey<String>('project-status'),
           style: textTheme.bodyMedium,
         ),

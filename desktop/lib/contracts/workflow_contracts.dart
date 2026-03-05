@@ -77,6 +77,139 @@ class InMemoryAuthSessionContract implements AuthSessionContract {
   }
 }
 
+class ProjectRecord {
+  const ProjectRecord({
+    required this.id,
+    required this.name,
+    required this.files,
+  });
+
+  final String id;
+  final String name;
+  final List<String> files;
+}
+
+class ProjectLifecycleState {
+  const ProjectLifecycleState({
+    required this.projects,
+    required this.selectedProjectIndex,
+    required this.status,
+  });
+
+  final List<ProjectRecord> projects;
+  final int selectedProjectIndex;
+  final String status;
+
+  ProjectRecord get selectedProject => projects[selectedProjectIndex];
+}
+
+abstract class ProjectLifecycleContract {
+  ProjectLifecycleState get state;
+  ProjectLifecycleState createProject(String projectName);
+  ProjectLifecycleState switchProject(int index);
+  ProjectLifecycleState createFile(String fileName);
+  ProjectLifecycleState deleteFirstFile();
+}
+
+class _MutableProjectRecord {
+  _MutableProjectRecord({
+    required this.id,
+    required this.name,
+    required this.files,
+  });
+
+  final String id;
+  String name;
+  final List<String> files;
+}
+
+class InMemoryProjectLifecycleContract implements ProjectLifecycleContract {
+  final List<_MutableProjectRecord> _projects = <_MutableProjectRecord>[
+    _MutableProjectRecord(
+      id: 'project-core',
+      name: 'Core Product',
+      files: <String>['landing.penjar'],
+    ),
+  ];
+  int _selectedProjectIndex = 0;
+  int _nextProjectNumber = 1;
+  String _status = 'Idle';
+
+  @override
+  ProjectLifecycleState get state => ProjectLifecycleState(
+    projects: List<ProjectRecord>.unmodifiable(
+      _projects.map(
+        (_MutableProjectRecord project) => ProjectRecord(
+          id: project.id,
+          name: project.name,
+          files: List<String>.unmodifiable(project.files),
+        ),
+      ),
+    ),
+    selectedProjectIndex: _selectedProjectIndex,
+    status: _status,
+  );
+
+  _MutableProjectRecord get _selectedProject =>
+      _projects[_selectedProjectIndex];
+
+  @override
+  ProjectLifecycleState createProject(String projectName) {
+    final String normalizedName = projectName.trim();
+    if (normalizedName.isEmpty) {
+      _status = 'Project create failed: project name is required.';
+      return state;
+    }
+
+    final _MutableProjectRecord created = _MutableProjectRecord(
+      id: 'project-${_nextProjectNumber++}',
+      name: normalizedName,
+      files: <String>[],
+    );
+    _projects.add(created);
+    _selectedProjectIndex = _projects.length - 1;
+    _status = 'Project created: ${created.name}.';
+    return state;
+  }
+
+  @override
+  ProjectLifecycleState switchProject(int index) {
+    if (index < 0 || index >= _projects.length) {
+      _status = 'Project switch failed: invalid project index.';
+      return state;
+    }
+
+    _selectedProjectIndex = index;
+    _status = 'Project selected: ${_selectedProject.name}.';
+    return state;
+  }
+
+  @override
+  ProjectLifecycleState createFile(String fileName) {
+    final String normalizedName = fileName.trim();
+    if (normalizedName.isEmpty) {
+      _status = 'File create failed: file name is required.';
+      return state;
+    }
+
+    _selectedProject.files.add(normalizedName);
+    _status = 'File created in ${_selectedProject.name}: $normalizedName.';
+    return state;
+  }
+
+  @override
+  ProjectLifecycleState deleteFirstFile() {
+    if (_selectedProject.files.isEmpty) {
+      _status = 'File delete skipped: no file exists.';
+      return state;
+    }
+
+    final String removed = _selectedProject.files.removeAt(0);
+    _status = 'File deleted from ${_selectedProject.name}: $removed.';
+    return state;
+  }
+}
+
 class ExportRequest {
   const ExportRequest({
     required this.fileName,

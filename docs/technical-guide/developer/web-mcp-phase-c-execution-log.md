@@ -738,8 +738,50 @@ Continue WS-D contract-boundary hardening by extracting auth/session interaction
   - Auth contract unit tests pass for validation and lifecycle transitions.
   - Desktop test/analyze/build chain remains green after extraction.
 
+## Unit WS-D-19: Project/file contract boundary extraction
+
+### Planned objective
+
+Extend WS-D contract-boundary hardening to project/file lifecycle flows by extracting project selection and file create/delete rules out of widget-local mutable state into an in-memory contract adapter.
+
+### Implemented changes
+
+1. Extended contract module:
+   - `desktop/lib/contracts/workflow_contracts.dart`.
+2. Implemented project/file contract baseline:
+   - `ProjectLifecycleContract` interface,
+   - `InMemoryProjectLifecycleContract` adapter,
+   - project/state models covering project create/switch and file create/delete transitions.
+3. Refactored `ProjectLifecyclePanel` to use contract adapter:
+   - project/file actions now delegate to contract methods,
+   - selected project summary/list/status are now rendered from contract state snapshot.
+4. Added project/file contract unit tests:
+   - expanded `desktop/test/contracts/workflow_contracts_test.dart` with lifecycle and invalid-index coverage.
+5. Re-ran desktop verification chain:
+   - `pnpm run desktop:test`,
+   - `pnpm run desktop:test:parity`,
+   - `pnpm run desktop:analyze`,
+   - `pnpm run desktop:build:macos:debug`.
+6. Updated migration/parity trackers:
+   - project and file notes now explicitly reference in-memory contract boundary baseline.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of project/file state transitions after contract extraction,
+  - parity regression risk for existing project/file widget interactions,
+  - consistency between tracker notes and implementation state.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Project/file parity tests remain green with contract-driven state.
+  - Project/file contract unit tests pass for lifecycle and guard paths.
+  - Desktop test/analyze/build chain remains green after extraction.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, and auth/export/diagnostics include contract-boundary pilots, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
+- All workflow domains now have Flutter parity scaffolds/harnesses, and auth/project/file/export/diagnostics include contract-boundary pilots, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
 - Desktop parity CI baseline is now configured on Linux, but macOS/Windows build-matrix coverage and release-grade installer/update validation are not yet configured.

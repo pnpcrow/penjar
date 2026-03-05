@@ -46,6 +46,66 @@ void main() {
     });
   });
 
+  group('InMemoryProjectLifecycleContract', () {
+    test('supports project/file lifecycle transitions', () {
+      final InMemoryProjectLifecycleContract contract =
+          InMemoryProjectLifecycleContract();
+
+      expect(contract.state.projects, hasLength(1));
+      expect(contract.state.selectedProject.name, 'Core Product');
+      expect(contract.state.selectedProject.files, <String>['landing.penjar']);
+
+      contract.createProject('');
+      expect(
+        contract.state.status,
+        'Project create failed: project name is required.',
+      );
+
+      contract.createProject('Mobile Revamp');
+      expect(contract.state.status, 'Project created: Mobile Revamp.');
+      expect(contract.state.projects, hasLength(2));
+      expect(contract.state.selectedProject.name, 'Mobile Revamp');
+
+      contract.createFile('');
+      expect(
+        contract.state.status,
+        'File create failed: file name is required.',
+      );
+
+      contract.createFile('spec.penjar');
+      expect(
+        contract.state.status,
+        'File created in Mobile Revamp: spec.penjar.',
+      );
+      expect(contract.state.selectedProject.files, <String>['spec.penjar']);
+
+      contract.switchProject(0);
+      expect(contract.state.status, 'Project selected: Core Product.');
+
+      contract.deleteFirstFile();
+      expect(
+        contract.state.status,
+        'File deleted from Core Product: landing.penjar.',
+      );
+      expect(contract.state.selectedProject.files, isEmpty);
+
+      contract.deleteFirstFile();
+      expect(contract.state.status, 'File delete skipped: no file exists.');
+    });
+
+    test('handles invalid project switch index', () {
+      final InMemoryProjectLifecycleContract contract =
+          InMemoryProjectLifecycleContract();
+
+      contract.switchProject(3);
+      expect(
+        contract.state.status,
+        'Project switch failed: invalid project index.',
+      );
+      expect(contract.state.selectedProject.name, 'Core Product');
+    });
+  });
+
   group('InMemoryExportWorkflowContract', () {
     test('returns validation failure for empty file name', () {
       final InMemoryExportWorkflowContract contract =
