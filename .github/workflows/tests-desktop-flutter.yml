@@ -14,6 +14,9 @@ on:
       - "desktop/**"
       - "package.json"
       - ".github/workflows/tests-desktop-flutter.yml"
+      - "docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md"
+      - "docs/technical-guide/developer/desktop-flutter-release-evidence-index.md"
+      - "docs/technical-guide/developer/web-mcp-phase-c-execution-log.md"
   push:
     branches:
       - develop
@@ -23,6 +26,9 @@ on:
       - "desktop/**"
       - "package.json"
       - ".github/workflows/tests-desktop-flutter.yml"
+      - "docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md"
+      - "docs/technical-guide/developer/desktop-flutter-release-evidence-index.md"
+      - "docs/technical-guide/developer/web-mcp-phase-c-execution-log.md"
 
 concurrency:
   group: desktop-flutter-${{ github.event.pull_request.number || github.ref }}
@@ -62,4 +68,36 @@ jobs:
 
       - name: Run desktop verification chain
         working-directory: ./desktop
-        run: INCLUDE_BUILD=${{ matrix.include_build }} ./scripts/verify_desktop.sh
+        run: |
+          set -eo pipefail
+          INCLUDE_BUILD=${{ matrix.include_build }} ./scripts/verify_desktop.sh | tee verify-${{ matrix.label }}.log
+
+      - name: Upload verification log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-verify-log-${{ matrix.label }}
+          path: desktop/verify-${{ matrix.label }}.log
+
+      - name: Upload macOS debug app artifact
+        if: matrix.label == 'macos'
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-macos-debug-app
+          path: desktop/build/macos/Build/Products/Debug/Penjar Desktop.app
+
+  release-evidence-guard:
+    name: "Desktop Release Evidence Guard"
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run release evidence guard
+        working-directory: ./desktop
+        run: ./scripts/check_release_evidence_index.sh

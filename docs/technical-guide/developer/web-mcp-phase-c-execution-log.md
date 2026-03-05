@@ -1585,8 +1585,47 @@ Add executable guardrails for release evidence quality so accidental promotion r
   - Guard fails when invalid promoted rows contain placeholder/TBD data.
   - Fast verification chain remains green after release guard integration.
 
+## Unit WS-D-40: CI artifact upload and release-evidence guard job integration
+
+### Planned objective
+
+Reduce release-traceability gaps by adding CI-level verification artifact uploads and wiring release-evidence guard execution into desktop CI workflow.
+
+### Implemented changes
+
+1. Extended desktop CI workflow execution model:
+   - `.github/workflows/tests-desktop-flutter.yml` now captures parity job output logs per matrix platform (`linux`, `macos`, `windows`) via `tee`.
+2. Added CI artifact upload automation:
+   - uploads per-platform verification log artifacts,
+   - uploads macOS debug app artifact from build-enabled matrix leg.
+3. Added CI release evidence guard job:
+   - new `release-evidence-guard` job executes `desktop/scripts/check_release_evidence_index.sh` on CI.
+4. Expanded workflow path filters:
+   - release evidence baseline/index and Phase C execution log changes now trigger the desktop CI workflow.
+5. Updated docs for CI anchor continuity:
+   - `desktop-flutter-parity-acceptance-baseline.md` now notes verification log + macOS artifact upload behavior,
+   - `desktop-flutter-release-validation-baseline.md` now notes CI release-evidence guard job presence.
+6. Re-ran local validation chain:
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of workflow matrix artifact-path handling,
+  - risk of CI job dependency/tooling mismatches for evidence guard execution,
+  - consistency between CI behavior and release/parity documentation anchors.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Desktop CI publishes verification logs across matrix runs.
+  - macOS build leg uploads debug app artifact for audit/reference.
+  - Release evidence guard runs as dedicated CI job on relevant doc/workflow changes.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts and macOS build validation, and release-validation/evidence-index baselines plus baseline evidence guard automation are published, but automated installer/update validation execution pipelines and CI artifact upload automation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, and release-evidence guard automation, but automated installer/update validation execution pipelines are not yet configured.

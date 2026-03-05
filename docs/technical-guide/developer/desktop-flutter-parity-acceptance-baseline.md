@@ -54,6 +54,7 @@ the [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-pha
 
 - Desktop parity CI baseline workflow: `.github/workflows/tests-desktop-flutter.yml`.
 - CI matrix baseline now runs Linux parity chain, macOS parity+build chain, and Windows parity chain.
+- CI now uploads per-platform verification logs and macOS debug app artifact from parity workflow.
 - Canonical desktop verification chain script: `desktop/scripts/verify_desktop.sh`.
 - Local fast verification path is available through `SKIP_PUB_GET=1` (`desktop:verify:fast`, `desktop:verify:full:fast`) when dependency lock is unchanged.
 - Canonical parity test-file list is managed in `desktop/scripts/run_parity_tests.sh` and consumed by root `desktop:test:parity` script + CI workflow.

@@ -71,6 +71,9 @@ This baseline defines minimum release validation requirements for desktop distri
 4. Record evidence in release checklist ticket and Phase C execution log.
 5. Block release promotion if any required gate is missing or only manually asserted without evidence.
 
+CI baseline note:
+- `.github/workflows/tests-desktop-flutter.yml` includes `release-evidence-guard` job and uploads parity/build artifacts for audit traceability.
+
 ## 5) Implementation backlog seeds
 
 1. Add CI/release workflow for macOS signed packaging and validation report artifact upload.
