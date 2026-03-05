@@ -1427,6 +1427,52 @@ void main() {
     });
 
     test(
+      'project backend sibling data envelope is used when result envelope lacks workflow state',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.createProject: <String, Object?>{
+                'result': <String, Object?>{
+                  'meta': <String, Object?>{'requestId': 'req-project-1'},
+                },
+                'data': <String, Object?>{
+                  'detail': 'Backend sibling data project snapshot applied.',
+                  'workflowState': <String, Object?>{
+                    'projects': <Map<String, Object?>>[
+                      <String, Object?>{
+                        'id': 'project-sibling-envelope',
+                        'name': 'Sibling Envelope Project',
+                        'files': <String>['sibling-envelope.penjar'],
+                      },
+                    ],
+                    'selectedProjectIndex': 0,
+                  },
+                },
+              },
+            });
+        final RemoteStubProjectLifecycleContract projectContract =
+            RemoteStubProjectLifecycleContract(
+              transportClient: transportClient,
+            );
+
+        projectContract.createProject('ignored');
+
+        expect(projectContract.state.projects, hasLength(1));
+        expect(
+          projectContract.state.selectedProject.name,
+          'Sibling Envelope Project',
+        );
+        expect(projectContract.state.selectedProject.files, <String>[
+          'sibling-envelope.penjar',
+        ]);
+        expect(
+          projectContract.state.status,
+          '[remote-stub] Backend sibling data project snapshot applied.',
+        );
+      },
+    );
+
+    test(
       'supports deep backend response envelope chains beyond four levels',
       () {
         final _BackendResponseTransportClient transportClient =

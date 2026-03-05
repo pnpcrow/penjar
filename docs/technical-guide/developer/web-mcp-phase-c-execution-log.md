@@ -8417,6 +8417,55 @@ sibling wrappers (for example `data.authState`).
   - deep/cyclic envelope compatibility remains stable under the expanded candidate scan.
   - targeted tests and full desktop verification remain green after sibling-fallback hardening.
 
+## Unit WS-D-185: Project workflow sibling-envelope fallback regression lock
+
+### Planned objective
+
+Validate that WS-D-184 sibling-envelope fallback logic is not auth-only by adding explicit
+project-workflow contract/parity regressions for metadata-only primary wrappers (`result.meta`) with
+state payload in sibling wrappers (`data.workflowState`).
+
+### Implemented changes
+
+1. Added project contract regression in `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `project backend sibling data envelope is used when result envelope lacks workflow state`.
+2. Added project parity regression in `desktop/test/parity/project_lifecycle_parity_test.dart`:
+   - `_ProjectBackendSiblingDataEnvelopeParityTransportClient`,
+   - `project lifecycle parity uses sibling data envelope when result lacks workflow state`.
+3. Synced continuity docs for cross-workflow sibling-envelope evidence:
+   - `desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `desktop-flutter-development-runbook.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/project_lifecycle_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - cross-workflow correctness of sibling-envelope fallback behavior (project domain),
+  - parity UI visibility of backend snapshot/status under metadata-only primary wrappers,
+  - regression impact on full verification chain.
+- **Issues found during review**
+  1. WS-D-184 parser hardening proved auth fallback behavior, but non-auth workflow domains lacked
+     direct sibling-envelope regressions.
+  2. Without non-auth locks, future parser changes could reintroduce workflow-specific drift where
+     `workflowState` is ignored under metadata-only `result` wrappers.
+- **Fix applied**
+  1. Added contract-level project sibling-envelope regression using `result.meta` + sibling
+     `data.workflowState`.
+  2. Added parity-level project sibling-envelope regression to verify status and selected-project UI
+     behavior under remote-stub backend snapshots.
+  3. Updated continuity docs so sibling-envelope compatibility statements explicitly include project
+     workflow evidence.
+- **Post-fix validation criteria**
+  - project workflow snapshots resolve from sibling `data.workflowState` when primary `result`
+    wrappers are metadata-only.
+  - parity UI status/project selection reflects backend snapshots for the sibling-envelope shape.
+  - targeted tests and full desktop verification remain green after project regression lock.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
