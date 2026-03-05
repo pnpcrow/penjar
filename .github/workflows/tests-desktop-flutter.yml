@@ -101,3 +101,19 @@ jobs:
       - name: Run release evidence guard
         working-directory: ./desktop
         run: ./scripts/check_release_evidence_index.sh
+
+  release-update-manifest-guard:
+    name: "Desktop Release Update Manifest Guard"
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run update manifest guard
+        working-directory: ./desktop
+        run: ./scripts/check_update_manifest.sh

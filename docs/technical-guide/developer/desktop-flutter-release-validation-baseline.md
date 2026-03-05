@@ -68,11 +68,13 @@ This baseline defines minimum release validation requirements for desktop distri
 1. Before RC cut, confirm Flutter parity verification chain is green.
 2. Execute platform-specific installer/signing/update validation.
 3. Run release evidence index guard: `pnpm run desktop:release:evidence:check`.
-4. Record evidence in release checklist ticket and Phase C execution log.
-5. Block release promotion if any required gate is missing or only manually asserted without evidence.
+4. Run update manifest guard: `pnpm run desktop:release:update-manifest:check`.
+5. Record evidence in release checklist ticket and Phase C execution log.
+6. Block release promotion if any required gate is missing or only manually asserted without evidence.
 
 CI baseline note:
-- `.github/workflows/tests-desktop-flutter.yml` includes `release-evidence-guard` job and uploads parity/build artifacts for audit traceability.
+- `.github/workflows/tests-desktop-flutter.yml` includes `release-evidence-guard` and `release-update-manifest-guard` jobs, and uploads parity/build artifacts for audit traceability.
+- Update manifest baseline file: `desktop/release/update_manifest.example.json`.
 
 ## 5) Implementation backlog seeds
 

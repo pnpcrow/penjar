@@ -1624,8 +1624,54 @@ Reduce release-traceability gaps by adding CI-level verification artifact upload
   - macOS build leg uploads debug app artifact for audit/reference.
   - Release evidence guard runs as dedicated CI job on relevant doc/workflow changes.
 
+## Unit WS-D-41: Update-manifest guard automation baseline
+
+### Planned objective
+
+Introduce executable baseline checks for desktop update manifest quality so release metadata errors can be caught automatically before promotion.
+
+### Implemented changes
+
+1. Added update manifest baseline file:
+   - `desktop/release/update_manifest.example.json`.
+2. Added update manifest guard script:
+   - `desktop/scripts/check_update_manifest.sh`.
+3. Implemented baseline validations:
+   - required fields presence (`version`, `channel`, `publishedAt`, artifact URLs, release-notes URL),
+   - semver-like version format check,
+   - channel enum check (`stable|beta|dev`),
+   - ISO8601 UTC timestamp check,
+   - HTTPS URL enforcement.
+4. Added root command surface:
+   - `desktop:release:update-manifest:check`.
+5. Added CI guard job:
+   - `.github/workflows/tests-desktop-flutter.yml` now includes `release-update-manifest-guard` job.
+6. Updated release/runbook documentation:
+   - `desktop-flutter-release-validation-baseline.md` now requires running update-manifest guard in operating protocol and documents CI guard presence,
+   - `desktop-flutter-development-runbook.md` command list now includes update-manifest guard,
+   - `desktop-flutter-release-evidence-index.md` maintenance rules now include update-manifest guard execution.
+7. Re-ran guard and verification commands:
+   - `pnpm run desktop:release:update-manifest:check`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of manifest field extraction/validation semantics in shell script,
+  - CI guard integration consistency with existing desktop/release jobs,
+  - alignment of release protocol docs with new automation command.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Update-manifest guard passes for baseline example manifest.
+  - CI workflow runs dedicated update-manifest guard job.
+  - Fast verification chain remains green after update-manifest automation integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, and release-evidence guard automation, but automated installer/update validation execution pipelines are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, and update-manifest guard automation, but automated installer build-sign-notarize-update execution pipelines are not yet configured.

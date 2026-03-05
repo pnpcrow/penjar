@@ -1,0 +1,8 @@
+{
+  "version": "0.0.0",
+  "channel": "stable",
+  "publishedAt": "2026-03-06T00:00:00Z",
+  "macosArtifactUrl": "https://example.com/penjar/macos/Penjar-0.0.0.dmg",
+  "windowsArtifactUrl": "https://example.com/penjar/windows/Penjar-0.0.0.msi",
+  "releaseNotesUrl": "https://example.com/penjar/releases/0.0.0"
+}
