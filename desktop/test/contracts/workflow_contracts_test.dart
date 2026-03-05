@@ -2479,6 +2479,66 @@ void main() {
       ),
       const _AuthBackendFixtureCase(
         name:
+            'restore-session result envelope authState isAuthenticated false alias maps fallback status',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'authState': <String, Object?>{
+              'isAuthenticated': false,
+              'sessionToken': 'fixture-is-authenticated-false-result-token',
+            },
+          },
+        },
+        expectedSignedIn: false,
+        expectedStatus: '[remote-stub] Authentication required.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session data envelope authState loggedIn false alias maps fallback status',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'data': <String, Object?>{
+            'authState': <String, Object?>{
+              'loggedIn': false,
+              'sessionToken': 'fixture-logged-in-false-data-token',
+            },
+          },
+        },
+        expectedSignedIn: false,
+        expectedStatus: '[remote-stub] Authentication required.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session result envelope authState isLoggedIn false alias maps fallback status',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'authState': <String, Object?>{
+              'isLoggedIn': false,
+              'sessionToken': 'fixture-is-logged-in-false-result-token',
+            },
+          },
+        },
+        expectedSignedIn: false,
+        expectedStatus: '[remote-stub] Authentication required.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session data envelope authState is_authenticated false alias maps fallback status',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'data': <String, Object?>{
+            'authState': <String, Object?>{
+              'is_authenticated': false,
+              'sessionToken': 'fixture-is-authenticated-false-data-token',
+            },
+          },
+        },
+        expectedSignedIn: false,
+        expectedStatus: '[remote-stub] Authentication required.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
             'restore-session data envelope explicit signed-out overrides token',
         operationId: RemoteStubOperationIds.restoreSession,
         responsePayload: <String, Object?>{
