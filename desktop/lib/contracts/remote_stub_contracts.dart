@@ -1050,9 +1050,11 @@ bool _containsExplicitFalseInContainer(
   }
   final Map<String, Object?> payload = _coerceStringKeyedMap(value);
   if (payload.isNotEmpty) {
-    final Object? rawValue = _firstPresentValue(payload, aliases);
-    if (rawValue != null) {
-      final bool? resolved = _coerceBool(rawValue);
+    for (final String alias in aliases) {
+      if (!payload.containsKey(alias)) {
+        continue;
+      }
+      final bool? resolved = _coerceBool(payload[alias]);
       if (resolved == false) {
         return true;
       }

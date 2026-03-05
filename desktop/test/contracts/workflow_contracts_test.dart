@@ -3035,6 +3035,33 @@ void main() {
     );
 
     test(
+      'auth backend mixed failure-flag aliases prioritize explicit false values',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'success': true,
+                'is_success': false,
+                'state': <String, Object?>{
+                  'sessionToken': 'mixed-failure-flag-session-token',
+                  'user': <String, Object?>{'id': 'mixed-failure-flag-user'},
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend auth request failed.',
+        );
+      },
+    );
+
+    test(
       'auth backend explicit failure flag forces signed-out from signed-in snapshot',
       () {
         final _BackendResponseTransportClient transportClient =
