@@ -32,6 +32,8 @@ This runbook defines the repeatable execution loop for the Flutter desktop full-
    - `pnpm run desktop:test:mode-matrix`
    - `pnpm run desktop:release:evidence:check`
    - `pnpm run desktop:release:update-manifest:check`
+   - `pnpm run desktop:release:installer-smoke:macos`
+   - `pnpm run desktop:release:installer-smoke:windows`
 
 ## 2) Unit execution loop
 
@@ -76,6 +78,7 @@ Every unit entry must contain:
 - CI must keep using canonical script entrypoint: `desktop/scripts/verify_desktop.sh`.
 - CI matrix should include Linux parity and macOS parity+build at minimum.
 - Any local verification command-chain change requires same-unit CI/doc synchronization.
+- Installer/update smoke workflow should use canonical smoke entrypoint: `desktop/scripts/release_installer_update_smoke.sh`.
 
 ## 6) Handoff checklist
 
@@ -89,5 +92,5 @@ Before pausing or transferring work:
 ## 7) Current next-unit candidates
 
 1. Backend transport wiring for runtime-switchable contract adapters.
-2. Windows/macOS build artifact and signing pipeline validation policy.
-3. Release evidence index CI artifact upload automation.
+2. Signed packaging + notarization integration in installer smoke workflow.
+3. Automated release evidence index row generation from smoke report outputs.

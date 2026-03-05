@@ -1670,8 +1670,55 @@ Introduce executable baseline checks for desktop update manifest quality so rele
   - CI workflow runs dedicated update-manifest guard job.
   - Fast verification chain remains green after update-manifest automation integration.
 
+## Unit WS-D-42: Installer/update smoke pipeline baseline
+
+### Planned objective
+
+Reduce desktop release pipeline gaps by adding executable installer/update smoke automation that builds platform outputs and emits traceable report artifacts.
+
+### Implemented changes
+
+1. Added installer/update smoke report generator:
+   - `desktop/scripts/generate_installer_update_report.sh`.
+2. Added installer/update smoke orchestrator:
+   - `desktop/scripts/release_installer_update_smoke.sh`.
+3. Implemented report-generation semantics:
+   - validates update manifest through `check_update_manifest.sh`,
+   - packages platform build outputs into zip archive artifacts,
+   - computes SHA-256 archive hash,
+   - emits JSON report with version/channel/publishedAt/artifact/report trace fields.
+4. Added root command surfaces:
+   - `desktop:release:installer-smoke:macos`,
+   - `desktop:release:installer-smoke:windows`.
+5. Added manual CI smoke workflow:
+   - `.github/workflows/release-desktop-installer-smoke.yml` (`workflow_dispatch`) with macOS/Windows matrix execution and artifact upload.
+6. Updated release/runbook/index docs for continuity:
+   - `desktop-flutter-release-validation-baseline.md` now includes smoke workflow protocol and backlog delta updates,
+   - `desktop-flutter-development-runbook.md` command inventory and CI policy now include installer smoke entrypoint,
+   - `desktop-flutter-release-evidence-index.md` maintenance rules now require smoke report artifact links before promotion.
+7. Re-ran validation commands:
+   - `pnpm run desktop:release:update-manifest:check`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `cd desktop && SKIP_PUB_GET=1 ./scripts/release_installer_update_smoke.sh macos debug`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of installer smoke script orchestration and platform/mode argument guards,
+  - report archive/hash generation and manifest-to-report field mapping integrity,
+  - documentation and workflow continuity with release validation protocol.
+- **Issues found during review**
+  1. Initial archive writer preserved host path separators in ZIP entries, which can create inconsistent internal paths between macOS and Windows smoke outputs.
+- **Fix applied**
+  1. Normalized ZIP entry paths to `/` and added explicit empty-archive guard in `generate_installer_update_report.sh`.
+- **Post-fix validation criteria**
+  - Smoke command generates archive + JSON report for macOS build output.
+  - Manual smoke workflow is available with macOS/Windows matrix jobs and report/archive uploads.
+  - Full-fast desktop verification remains green after smoke automation integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, and update-manifest guard automation, but automated installer build-sign-notarize-update execution pipelines are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, and on-demand installer/update smoke build-report workflow, but signed installer packaging/notarization and automated production update-promotion pipelines are not yet configured.

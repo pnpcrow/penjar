@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+platform="${1:-}"
+build_mode="${2:-release}"
+manifest_file="${3:-release/update_manifest.example.json}"
+
+if [[ -z "$platform" ]]; then
+  echo "usage: $0 <macos|windows> [release|debug] [manifest-file]" >&2
+  exit 1
+fi
+
+build_flag=""
+case "$build_mode" in
+  release) build_flag="--release" ;;
+  debug) build_flag="--debug" ;;
+  *)
+    echo "[installer-update-smoke] invalid build mode: $build_mode (allowed: release|debug)" >&2
+    exit 1
+    ;;
+esac
+
+if [[ "${SKIP_PUB_GET:-0}" != "1" ]]; then
+  flutter pub get
+fi
+
+case "$platform" in
+  macos)
+    flutter build macos "$build_flag" --no-pub
+    ;;
+  windows)
+    flutter build windows "$build_flag" --no-pub
+    ;;
+  *)
+    echo "[installer-update-smoke] invalid platform: $platform (allowed: macos|windows)" >&2
+    exit 1
+    ;;
+esac
+
+./scripts/generate_installer_update_report.sh "$platform" "$build_mode" "$manifest_file"

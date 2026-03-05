@@ -39,3 +39,4 @@ Each release candidate record should include:
 4. Keep artifact/report links immutable after promotion.
 5. Run `pnpm run desktop:release:evidence:check` before release promotion.
 6. Run `pnpm run desktop:release:update-manifest:check` before release promotion.
+7. Attach installer/update smoke report artifact links from `.github/workflows/release-desktop-installer-smoke.yml` before promotion review.

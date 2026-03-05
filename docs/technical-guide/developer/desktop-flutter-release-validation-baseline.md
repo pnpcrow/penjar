@@ -66,7 +66,12 @@ This baseline defines minimum release validation requirements for desktop distri
 ## 4) Operating protocol
 
 1. Before RC cut, confirm Flutter parity verification chain is green.
-2. Execute platform-specific installer/signing/update validation.
+2. Execute platform-specific installer/update smoke automation:
+   - local/manual entrypoints:
+     - `pnpm run desktop:release:installer-smoke:macos`
+     - `pnpm run desktop:release:installer-smoke:windows`
+   - CI workflow entrypoint:
+     - `.github/workflows/release-desktop-installer-smoke.yml` (`workflow_dispatch`).
 3. Run release evidence index guard: `pnpm run desktop:release:evidence:check`.
 4. Run update manifest guard: `pnpm run desktop:release:update-manifest:check`.
 5. Record evidence in release checklist ticket and Phase C execution log.
@@ -74,11 +79,13 @@ This baseline defines minimum release validation requirements for desktop distri
 
 CI baseline note:
 - `.github/workflows/tests-desktop-flutter.yml` includes `release-evidence-guard` and `release-update-manifest-guard` jobs, and uploads parity/build artifacts for audit traceability.
+- `.github/workflows/release-desktop-installer-smoke.yml` builds macOS/Windows release artifacts on demand and uploads installer/update smoke archives + JSON reports.
 - Update manifest baseline file: `desktop/release/update_manifest.example.json`.
+- Installer/update smoke report generator: `desktop/scripts/generate_installer_update_report.sh`.
 
 ## 5) Implementation backlog seeds
 
-1. Add CI/release workflow for macOS signed packaging and validation report artifact upload.
-2. Add CI/release workflow for Windows signed installer packaging and validation report artifact upload.
+1. Extend installer smoke workflow with platform signing/notarization steps backed by release secrets.
+2. Promote Windows runner output from app-directory bundle to signed installer package (`.msi`/`exe`) artifact.
 3. Add scripted update simulation harness for desktop channel manifests.
 4. Automate release evidence index updates linking artifact manifests and validation reports.
