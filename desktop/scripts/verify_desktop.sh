@@ -84,6 +84,7 @@ fi
 run_stage "release script syntax check" ./scripts/check_release_script_syntax.sh
 run_stage "verify test coverage check" ./scripts/check_verify_test_coverage.sh
 run_stage "desktop command inventory check" ./scripts/check_desktop_command_inventory.sh
+run_stage "update manifest check" ./scripts/check_update_manifest.sh
 
 run_stage "contract tests" env FLUTTER_NO_PUB=1 ./scripts/run_contract_tests.sh
 run_stage "parity tests" env FLUTTER_NO_PUB=1 ./scripts/run_parity_tests.sh

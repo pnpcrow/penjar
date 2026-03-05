@@ -111,6 +111,14 @@ jobs:
           path: desktop/release/reports/desktop_command_inventory_report.md
           if-no-files-found: warn
 
+      - name: Upload update manifest validation report (verify matrix)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-update-manifest-validation-report-${{ matrix.label }}
+          path: desktop/release/reports/update_manifest_validation_report.md
+          if-no-files-found: warn
+
       - name: Upload macOS debug app artifact
         if: matrix.label == 'macos'
         uses: actions/upload-artifact@v4

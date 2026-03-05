@@ -3126,8 +3126,43 @@ Add stage-level timing instrumentation to desktop verification so performance re
   - Stage-level timing/status entries cover each canonical verify stage.
   - Full-fast desktop verification remains green after instrumentation.
 
+## Unit WS-D-73: Canonical verify update-manifest gate integration
+
+### Planned objective
+
+Align canonical desktop verification with release guard expectations by executing update-manifest validation in the verify chain and publishing matrix-level manifest validation artifacts.
+
+### Implemented changes
+
+1. Extended canonical verify preflight chain:
+   - `desktop/scripts/verify_desktop.sh` now runs `check_update_manifest.sh` as a timed stage before contract/parity/mode-matrix tests.
+2. Extended desktop CI matrix artifacts:
+   - `.github/workflows/tests-desktop-flutter.yml` now uploads `desktop-update-manifest-validation-report-*` artifacts from verify matrix jobs.
+3. Updated release baseline docs:
+   - `desktop-flutter-release-validation-baseline.md` now documents verify-chain update-manifest execution and matrix artifact publication.
+4. Re-ran validation commands:
+   - `pnpm run desktop:release:update-manifest:check`,
+   - `pnpm run desktop:verify:full:fast`,
+   - validated verify timing report includes `update manifest check` stage,
+   - `pnpm run desktop:release:evidence:check`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - verify-stage ordering impact after adding update-manifest check,
+  - CI artifact continuity for per-platform matrix verify outputs,
+  - compatibility with existing standalone update-manifest guard job.
+- **Issues found during review**
+  1. Update-manifest validation existed as standalone guard, but canonical verify chain did not enforce it, allowing local/fast verification to miss manifest regressions.
+- **Fix applied**
+  1. Added update-manifest check into canonical verify preflight and aligned matrix artifact publication accordingly.
+- **Post-fix validation criteria**
+  - Canonical verify fails when update manifest validation fails.
+  - Verify timing reports include update-manifest stage data.
+  - Full-fast desktop verification remains green after verify-chain integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode plus placeholder hygiene strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode plus placeholder hygiene strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
