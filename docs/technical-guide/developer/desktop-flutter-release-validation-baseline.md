@@ -118,7 +118,9 @@ This baseline defines minimum release validation requirements for desktop distri
      - `pnpm run desktop:release:windows-installer:provenance:strict`.
    - CI workflow entrypoint:
      - `.github/workflows/release-desktop-installer-smoke.yml` (`workflow_dispatch`).
-4. Run release evidence index guard: `pnpm run desktop:release:evidence:check`.
+4. Run release evidence index guard suite:
+   - `pnpm run desktop:release:evidence:check`
+   - `pnpm run desktop:release:evidence:contract:check`
 5. Run update manifest guard: `pnpm run desktop:release:update-manifest:check`.
 6. Run release smoke gate policy contract guard: `pnpm run desktop:release:smoke:gate-policy:contract:check`.
 7. Generate and review evidence row snippets:
@@ -171,13 +173,15 @@ CI baseline note:
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads desktop command inventory report artifacts (`desktop-command-inventory-report-*`).
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads update manifest validation report artifacts (`desktop-update-manifest-validation-report-*`).
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads release smoke gate policy contract report artifacts (`desktop-release-smoke-gate-policy-contract-report-*`).
+- `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads release evidence index contract report artifacts (`desktop-release-evidence-index-contract-report-*`).
 - `.github/workflows/release-desktop-installer-smoke.yml` includes `signing-readiness` job with optional strict enforcement via workflow input.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job runs release script syntax and verify test coverage checks, and uploads `desktop-release-script-syntax-report-smoke` + `desktop-verify-test-coverage-report-smoke` artifacts.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs release script syntax contract checks and uploads `desktop-release-script-syntax-contract-report-smoke` artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs desktop command inventory checks and uploads `desktop-command-inventory-report-smoke` artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs update manifest checks and uploads `desktop-update-manifest-validation-report-smoke` artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs release smoke gate policy contract checks and uploads `desktop-release-smoke-gate-policy-contract-report` artifact.
-- `desktop/scripts/verify_desktop.sh` now runs release script syntax checks, release script syntax contract checks, verify test coverage checks, desktop command inventory checks, update manifest checks, and release smoke gate policy contract checks before test/analyze/build phases, and executes contract/parity/mode-matrix tests through dedicated scripts to avoid duplicate suite execution.
+- `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs release evidence index contract checks and uploads `desktop-release-evidence-index-contract-report-smoke` artifact.
+- `desktop/scripts/verify_desktop.sh` now runs release script syntax checks, release script syntax contract checks, verify test coverage checks, desktop command inventory checks, update manifest checks, release smoke gate policy contract checks, and release evidence index contract checks before test/analyze/build phases, and executes contract/parity/mode-matrix tests through dedicated scripts to avoid duplicate suite execution.
 - `desktop/scripts/verify_desktop.sh` emits verify stage timing reports (`release/reports/verify_stage_timing_report.md`) including stage-level durations and status.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job runs release smoke gate policy preflight and uploads gate policy report artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing command-hook enforcement via `enforce_signing_command_hooks` input.
@@ -235,6 +239,7 @@ CI baseline note:
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
 - Release evidence bundle checker: `desktop/scripts/check_release_evidence_bundle.sh`.
 - Release evidence index updater: `desktop/scripts/update_release_evidence_index.sh`.
+- Release evidence index contract checker: `desktop/scripts/check_release_evidence_index_contract.sh`.
 - Appcast preview generator/checker: `desktop/scripts/generate_appcast_from_reports.sh`, `desktop/scripts/check_appcast.sh`.
 - Appcast publish dry-run script: `desktop/scripts/publish_appcast.sh`.
 - Appcast publication bundle generator/checker: `desktop/scripts/generate_appcast_publication_bundle.sh`, `desktop/scripts/check_appcast_publication_bundle.sh`.

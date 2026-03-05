@@ -113,6 +113,7 @@ required_attachment_paths=(
   "release/reports/release_evidence_bundle_check_macos.md"
   "release/reports/release_evidence_bundle_check_windows.md"
   "release/reports/release_smoke_gate_policy_contract_report.md"
+  "release/reports/release_evidence_index_contract_report.md"
 )
 
 for attachment_path in "${required_attachment_paths[@]}"; do

@@ -135,6 +135,14 @@ jobs:
           path: desktop/release/reports/release_smoke_gate_policy_contract_report.md
           if-no-files-found: warn
 
+      - name: Upload release evidence index contract report (verify matrix)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-release-evidence-index-contract-report-${{ matrix.label }}
+          path: desktop/release/reports/release_evidence_index_contract_report.md
+          if-no-files-found: warn
+
       - name: Upload macOS debug app artifact
         if: matrix.label == 'macos'
         uses: actions/upload-artifact@v4
