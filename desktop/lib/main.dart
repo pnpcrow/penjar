@@ -969,11 +969,9 @@ class InspectHandoffPanel extends StatefulWidget {
 }
 
 class _InspectHandoffPanelState extends State<InspectHandoffPanel> {
+  final InspectHandoffContract _contract = InMemoryInspectHandoffContract();
   final TextEditingController _elementIdController = TextEditingController();
   final List<String> _targets = <String>['css', 'flutter', 'swiftui'];
-  String _target = 'flutter';
-  String _snippet = 'No snippet generated.';
-  String _status = 'Idle';
 
   @override
   void initState() {
@@ -987,44 +985,21 @@ class _InspectHandoffPanelState extends State<InspectHandoffPanel> {
     super.dispose();
   }
 
-  void _setStatus(String status) {
-    setState(() {
-      _status = status;
-    });
-  }
-
   void _generateSnippet() {
-    final String elementId = _elementIdController.text.trim();
-    if (elementId.isEmpty) {
-      _setStatus('Snippet generation failed: element id is required.');
-      return;
-    }
-
-    final String snippet = switch (_target) {
-      'css' => '.button-primary { border-radius: 8px; padding: 12px 16px; }',
-      'swiftui' =>
-        'Text("Primary")\n  .padding(.horizontal, 16)\n  .padding(.vertical, 12)',
-      _ =>
-        'Container(\n  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),\n  decoration: const BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(8))),\n)',
-    };
-
     setState(() {
-      _snippet = snippet;
-      _status = 'Snippet generated for $elementId ($_target).';
+      _contract.generateSnippet(_elementIdController.text);
     });
   }
 
   void _copyMetadata() {
-    final String elementId = _elementIdController.text.trim();
-    if (elementId.isEmpty) {
-      _setStatus('Metadata copy failed: element id is required.');
-      return;
-    }
-    _setStatus('Metadata copied (simulated) for $elementId.');
+    setState(() {
+      _contract.copyMetadata(_elementIdController.text);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final InspectHandoffState inspectState = _contract.state;
     final String elementId = _elementIdController.text.trim();
     final TextTheme textTheme = Theme.of(context).textTheme;
 
@@ -1051,7 +1026,7 @@ class _InspectHandoffPanelState extends State<InspectHandoffPanel> {
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
           key: const ValueKey<String>('inspect-target'),
-          initialValue: _target,
+          initialValue: inspectState.target,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             labelText: 'Code Target',
@@ -1069,7 +1044,7 @@ class _InspectHandoffPanelState extends State<InspectHandoffPanel> {
               return;
             }
             setState(() {
-              _target = value;
+              _contract.setTarget(value);
             });
           },
         ),
@@ -1092,14 +1067,17 @@ class _InspectHandoffPanelState extends State<InspectHandoffPanel> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Inspect metadata: id=${elementId.isEmpty ? '<empty>' : elementId}, target=$_target',
+          'Inspect metadata: id=${elementId.isEmpty ? '<empty>' : elementId}, target=${inspectState.target}',
           key: const ValueKey<String>('inspect-metadata'),
         ),
         const SizedBox(height: 12),
-        Text(_snippet, key: const ValueKey<String>('inspect-snippet')),
+        Text(
+          inspectState.snippet,
+          key: const ValueKey<String>('inspect-snippet'),
+        ),
         const SizedBox(height: 12),
         Text(
-          'Status: $_status',
+          'Status: ${inspectState.status}',
           key: const ValueKey<String>('inspect-status'),
           style: textTheme.bodyMedium,
         ),

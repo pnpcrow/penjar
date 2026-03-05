@@ -225,6 +225,43 @@ void main() {
     });
   });
 
+  group('InMemoryInspectHandoffContract', () {
+    test('supports snippet generation and metadata copy lifecycle', () {
+      final InMemoryInspectHandoffContract contract =
+          InMemoryInspectHandoffContract();
+
+      expect(contract.state.target, 'flutter');
+      expect(contract.state.snippet, 'No snippet generated.');
+      expect(contract.state.status, 'Idle');
+
+      contract.generateSnippet('');
+      expect(
+        contract.state.status,
+        'Snippet generation failed: element id is required.',
+      );
+
+      contract.setTarget('css');
+      contract.generateSnippet('button/primary');
+      expect(
+        contract.state.status,
+        'Snippet generated for button/primary (css).',
+      );
+      expect(contract.state.snippet, contains('.button-primary'));
+
+      contract.copyMetadata('');
+      expect(
+        contract.state.status,
+        'Metadata copy failed: element id is required.',
+      );
+
+      contract.copyMetadata('button/primary');
+      expect(
+        contract.state.status,
+        'Metadata copied (simulated) for button/primary.',
+      );
+    });
+  });
+
   group('InMemoryExportWorkflowContract', () {
     test('returns validation failure for empty file name', () {
       final InMemoryExportWorkflowContract contract =

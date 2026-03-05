@@ -640,6 +640,71 @@ class InMemoryCollaborationContextContract
   }
 }
 
+class InspectHandoffState {
+  const InspectHandoffState({
+    required this.target,
+    required this.snippet,
+    required this.status,
+  });
+
+  final String target;
+  final String snippet;
+  final String status;
+}
+
+abstract class InspectHandoffContract {
+  InspectHandoffState get state;
+  InspectHandoffState setTarget(String target);
+  InspectHandoffState generateSnippet(String elementId);
+  InspectHandoffState copyMetadata(String elementId);
+}
+
+class InMemoryInspectHandoffContract implements InspectHandoffContract {
+  String _target = 'flutter';
+  String _snippet = 'No snippet generated.';
+  String _status = 'Idle';
+
+  @override
+  InspectHandoffState get state =>
+      InspectHandoffState(target: _target, snippet: _snippet, status: _status);
+
+  @override
+  InspectHandoffState setTarget(String target) {
+    _target = target;
+    return state;
+  }
+
+  @override
+  InspectHandoffState generateSnippet(String elementId) {
+    final String normalizedId = elementId.trim();
+    if (normalizedId.isEmpty) {
+      _status = 'Snippet generation failed: element id is required.';
+      return state;
+    }
+
+    _snippet = switch (_target) {
+      'css' => '.button-primary { border-radius: 8px; padding: 12px 16px; }',
+      'swiftui' =>
+        'Text("Primary")\n  .padding(.horizontal, 16)\n  .padding(.vertical, 12)',
+      _ =>
+        'Container(\n  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),\n  decoration: const BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(8))),\n)',
+    };
+    _status = 'Snippet generated for $normalizedId ($_target).';
+    return state;
+  }
+
+  @override
+  InspectHandoffState copyMetadata(String elementId) {
+    final String normalizedId = elementId.trim();
+    if (normalizedId.isEmpty) {
+      _status = 'Metadata copy failed: element id is required.';
+      return state;
+    }
+    _status = 'Metadata copied (simulated) for $normalizedId.';
+    return state;
+  }
+}
+
 class ExportRequest {
   const ExportRequest({
     required this.fileName,
