@@ -178,6 +178,7 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing placeholder hygiene enforcement via `enforce_signing_placeholder_hygiene` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness command-hook checks include sign-verify/provenance hooks (`PENJAR_MACOS_SIGN_VERIFY_COMMAND`, `PENJAR_WINDOWS_SIGN_VERIFY_COMMAND`, `PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND`).
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing execution enforcement via `enforce_signing_execution` input.
+- `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now requires `enforce_signing_placeholder_hygiene=true` when `enforce_signing_execution=true`.
 - `.github/workflows/release-desktop-installer-smoke.yml` strict signing execution checks now enforce placeholder-hygiene for sign/notarize command hooks.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing provenance enforcement via `enforce_signing_provenance` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing provenance checks now enforce verify-command placeholder hygiene in strict mode.
