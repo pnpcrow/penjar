@@ -269,12 +269,24 @@ jobs:
             "WS-D-43" \
             "blocked (unsigned smoke baseline)"
 
+      - name: Generate release evidence bundle summary
+        working-directory: ./desktop
+        run: ./scripts/generate_release_evidence_bundle.sh "${{ matrix.label }}"
+
       - name: Upload release evidence row snippet
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: desktop-release-evidence-row-${{ matrix.label }}
           path: desktop/release/reports/release_evidence_row_${{ matrix.label }}.md
+          if-no-files-found: warn
+
+      - name: Upload release evidence bundle summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-release-evidence-bundle-${{ matrix.label }}
+          path: desktop/release/reports/release_evidence_bundle_${{ matrix.label }}.md
           if-no-files-found: warn
 
       - name: Generate release evidence index preview

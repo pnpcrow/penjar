@@ -55,3 +55,4 @@ Each release candidate record should include:
 20. Attach external production guard report (`release/reports/appcast_external_production_guard_report.md`) when external publication stage is executed.
 21. Attach Windows installer provenance report (`release/reports/windows_installer_provenance_report.md`) before promotion decision when installer smoke is executed.
 22. Attach release smoke gate policy report (`release/reports/release_smoke_gate_policy_report.md`) before promotion decision.
+23. Attach platform release evidence bundle summaries (`release/reports/release_evidence_bundle_macos.md`, `release/reports/release_evidence_bundle_windows.md`) before promotion decision.

@@ -30,6 +30,8 @@
     "desktop:release:installer-smoke:windows": "cd desktop && ./scripts/release_installer_update_smoke.sh windows release",
     "desktop:release:evidence:row:macos": "cd desktop && ./scripts/generate_release_evidence_row.sh release/reports/installer_update_report_macos.json",
     "desktop:release:evidence:row:windows": "cd desktop && ./scripts/generate_release_evidence_row.sh release/reports/installer_update_report_windows.json",
+    "desktop:release:evidence:bundle:macos": "cd desktop && ./scripts/generate_release_evidence_bundle.sh macos",
+    "desktop:release:evidence:bundle:windows": "cd desktop && ./scripts/generate_release_evidence_bundle.sh windows",
     "desktop:release:evidence:index:preview:macos": "cd desktop && ./scripts/update_release_evidence_index.sh release/reports/release_evidence_row_macos.md ../docs/technical-guide/developer/desktop-flutter-release-evidence-index.md release/reports/release_evidence_index_preview_macos.md",
     "desktop:release:evidence:index:preview:windows": "cd desktop && ./scripts/update_release_evidence_index.sh release/reports/release_evidence_row_windows.md ../docs/technical-guide/developer/desktop-flutter-release-evidence-index.md release/reports/release_evidence_index_preview_windows.md",
     "desktop:release:evidence:index:apply:macos": "cd desktop && ./scripts/update_release_evidence_index.sh release/reports/release_evidence_row_macos.md ../docs/technical-guide/developer/desktop-flutter-release-evidence-index.md",

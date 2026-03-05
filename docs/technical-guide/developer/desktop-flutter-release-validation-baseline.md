@@ -111,31 +111,34 @@ This baseline defines minimum release validation requirements for desktop distri
 6. Generate and review evidence row snippets:
    - `pnpm run desktop:release:evidence:row:macos`
    - `pnpm run desktop:release:evidence:row:windows`
-7. Generate evidence-index previews before applying table updates:
+7. Generate and review evidence bundle summaries:
+   - `pnpm run desktop:release:evidence:bundle:macos`
+   - `pnpm run desktop:release:evidence:bundle:windows`
+8. Generate evidence-index previews before applying table updates:
    - `pnpm run desktop:release:evidence:index:preview:macos`
    - `pnpm run desktop:release:evidence:index:preview:windows`
-8. Generate and validate appcast preview:
+9. Generate and validate appcast preview:
    - `pnpm run desktop:release:appcast:generate`
    - `pnpm run desktop:release:appcast:check`
-9. Publish appcast dry-run targets:
+10. Publish appcast dry-run targets:
    - `pnpm run desktop:release:appcast:publish:dry-run`
-10. Generate/check appcast publication bundle:
+11. Generate/check appcast publication bundle:
    - `pnpm run desktop:release:appcast:bundle:generate`
    - `pnpm run desktop:release:appcast:bundle:check`
-11. Run external production guard:
+12. Run external production guard:
    - `pnpm run desktop:release:appcast:external:production:guard`
    - non-dry-run publication requires explicit workflow input `allow_appcast_external_production=true`.
-12. Run external publication readiness checks:
+13. Run external publication readiness checks:
    - `pnpm run desktop:release:appcast:external:readiness`
    - use strict mode when production credentials/execution are expected: `pnpm run desktop:release:appcast:external:readiness:strict`.
    - strict production readiness additionally expects:
      - `APPCAST_EXTERNAL_IDENTITY_CHECK_COMMAND` (credential identity validation command),
      - `APPCAST_EXTERNAL_INVALIDATION_CHECK_COMMAND` (invalidation validation command),
      - `APPCAST_CACHE_INVALIDATION_COMMAND` (actual invalidation execution command).
-13. Run external publication dry-run report:
+14. Run external publication dry-run report:
    - `pnpm run desktop:release:appcast:publish:external:dry-run`
-14. Record evidence in release checklist ticket and Phase C execution log.
-15. Block release promotion if any required gate is missing or only manually asserted without evidence.
+15. Record evidence in release checklist ticket and Phase C execution log.
+16. Block release promotion if any required gate is missing or only manually asserted without evidence.
 
 CI baseline note:
 - `.github/workflows/tests-desktop-flutter.yml` includes `release-evidence-guard` and `release-update-manifest-guard` jobs, and uploads parity/build artifacts for audit traceability.
@@ -153,6 +156,7 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` uploads per-platform signing provenance reports generated during smoke execution.
 - `.github/workflows/release-desktop-installer-smoke.yml` uploads Windows installer packaging/pipeline/provenance report artifacts only on `windows` matrix runs.
 - `.github/workflows/release-desktop-installer-smoke.yml` also uploads platform release-evidence row snippet artifacts generated from smoke reports.
+- `.github/workflows/release-desktop-installer-smoke.yml` also uploads platform release-evidence bundle summary artifacts generated from smoke reports.
 - `.github/workflows/release-desktop-installer-smoke.yml` also uploads release-evidence index preview artifacts generated from row snippets.
 - `.github/workflows/release-desktop-installer-smoke.yml` runs an `appcast-preview` job that generates/checks/uploads appcast preview JSON from smoke reports.
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job also produces channel/version appcast publish dry-run targets.
@@ -167,6 +171,7 @@ CI baseline note:
 - Installer/update smoke report generator: `desktop/scripts/generate_installer_update_report.sh`.
 - Release smoke gate policy checker: `desktop/scripts/check_release_smoke_gate_policy.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
+- Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
 - Release evidence index updater: `desktop/scripts/update_release_evidence_index.sh`.
 - Appcast preview generator/checker: `desktop/scripts/generate_appcast_from_reports.sh`, `desktop/scripts/check_appcast.sh`.
 - Appcast publish dry-run script: `desktop/scripts/publish_appcast.sh`.

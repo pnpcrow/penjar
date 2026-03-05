@@ -36,6 +36,8 @@ This runbook defines the repeatable execution loop for the Flutter desktop full-
    - `pnpm run desktop:release:installer-smoke:windows`
    - `pnpm run desktop:release:evidence:row:macos`
    - `pnpm run desktop:release:evidence:row:windows`
+   - `pnpm run desktop:release:evidence:bundle:macos`
+   - `pnpm run desktop:release:evidence:bundle:windows`
    - `pnpm run desktop:release:evidence:index:preview:macos`
    - `pnpm run desktop:release:evidence:index:preview:windows`
    - `pnpm run desktop:release:evidence:index:apply:macos`
