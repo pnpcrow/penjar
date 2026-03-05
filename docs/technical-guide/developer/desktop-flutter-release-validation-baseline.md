@@ -256,7 +256,7 @@ CI baseline note:
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
 - Release evidence bundle checker: `desktop/scripts/check_release_evidence_bundle.sh`.
 - Release evidence index updater: `desktop/scripts/update_release_evidence_index.sh`.
-- Release evidence index contract checker: `desktop/scripts/check_release_evidence_index_contract.sh`.
+- Release evidence index contract checker: `desktop/scripts/check_release_evidence_index_contract.sh` (includes missing-base-check-report attachment regression case).
 - Appcast preview generator/checker: `desktop/scripts/generate_appcast_from_reports.sh`, `desktop/scripts/check_appcast.sh`.
 - Appcast publish dry-run script: `desktop/scripts/publish_appcast.sh`.
 - Appcast publication bundle generator/checker: `desktop/scripts/generate_appcast_publication_bundle.sh`, `desktop/scripts/check_appcast_publication_bundle.sh`.

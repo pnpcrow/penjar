@@ -38,6 +38,16 @@ setup_missing_attachment_case() {
   mv "$filtered_index" "$case_index"
 }
 
+setup_missing_check_report_attachment_case() {
+  local source_index="$1"
+  local case_index="$2"
+  local filtered_index
+  cp "$source_index" "$case_index"
+  filtered_index="$(mktemp)"
+  awk '!/release_evidence_index_check_report\.md/' "$case_index" > "$filtered_index"
+  mv "$filtered_index" "$case_index"
+}
+
 setup_duplicate_key_case() {
   local source_index="$1"
   local case_index="$2"
@@ -121,6 +131,14 @@ run_case \
   setup_missing_attachment_case \
   "missing required attachment reference: release/reports/release_script_syntax_contract_report.md" \
   "missing required attachment reference: release/reports/release_script_syntax_contract_report.md"
+
+run_case \
+  "missing-evidence-check-report-attachment-fail" \
+  "fail" \
+  "Removing base-check report attachment reference must fail guard checks." \
+  setup_missing_check_report_attachment_case \
+  "missing required attachment reference: release/reports/release_evidence_index_check_report.md" \
+  "missing required attachment reference: release/reports/release_evidence_index_check_report.md"
 
 run_case \
   "duplicate-rc-platform-fail" \
