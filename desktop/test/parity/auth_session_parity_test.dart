@@ -1278,6 +1278,37 @@ class _AuthBackendPayloadEnvelopeParityTransportClient
   }
 }
 
+class _AuthBackendAuthStateEnvelopeFixtureParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendAuthStateEnvelopeFixtureParityTransportClient({
+    required this.signInPayload,
+    this.restoreSessionPayload,
+    this.refreshTokenPayload,
+  });
+
+  final Map<String, Object?> signInPayload;
+  final Map<String, Object?>? restoreSessionPayload;
+  final Map<String, Object?>? refreshTokenPayload;
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(signInPayload);
+    }
+    if (request.operation == RemoteStubOperationIds.restoreSession &&
+        restoreSessionPayload != null) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        restoreSessionPayload!,
+      );
+    }
+    if (request.operation == RemoteStubOperationIds.refreshToken &&
+        refreshTokenPayload != null) {
+      return RemoteStubTransportResult.allowedWithPayload(refreshTokenPayload!);
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 class _AuthBackendNestedErrorListSignedInAliasOverrideParityTransportClient
     extends RemoteStubTransportClient {
   const _AuthBackendNestedErrorListSignedInAliasOverrideParityTransportClient();
@@ -4315,6 +4346,288 @@ void main() {
       expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
     },
   );
+
+  final List<
+    ({
+      String description,
+      Map<String, Object?> signInPayload,
+      String expectedStatus,
+    })
+  >
+  authStateSignedInEnvelopeCases =
+      <
+        ({
+          String description,
+          Map<String, Object?> signInPayload,
+          String expectedStatus,
+        })
+      >[
+        (
+          description: 'result envelope authState isAuthenticated alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'message': 'Backend authState result envelope applied.',
+              'authState': <String, Object?>{
+                'isAuthenticated': true,
+                'remember': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend authState result envelope applied.',
+        ),
+        (
+          description: 'data envelope authState loggedIn alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend authState data envelope loggedIn applied.',
+              'authState': <String, Object?>{
+                'loggedIn': true,
+                'persistSession': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend authState data envelope loggedIn applied.',
+        ),
+        (
+          description: 'result envelope authState isLoggedIn alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail': 'Backend authState result envelope isLoggedIn applied.',
+              'authState': <String, Object?>{
+                'isLoggedIn': true,
+                'persistSession': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend authState result envelope isLoggedIn applied.',
+        ),
+      ];
+
+  for (final ({
+        String description,
+        Map<String, Object?> signInPayload,
+        String expectedStatus,
+      })
+      caseData
+      in authStateSignedInEnvelopeCases) {
+    testWidgets(
+      'auth/session parity normalizes ${caseData.description} sign-in snapshot',
+      (WidgetTester tester) async {
+        await pumpDesktopApp(
+          tester,
+          contracts: DesktopContractBundle.fromMode(
+            DesktopContractMode.remoteStub,
+            remoteStubTransportClient:
+                _AuthBackendAuthStateEnvelopeFixtureParityTransportClient(
+                  signInPayload: caseData.signInPayload,
+                ),
+          ),
+        );
+        await openWorkflowSection(tester, 'auth');
+
+        await tester.enterText(
+          find.byKey(const ValueKey<String>('auth-password')),
+          'desktop-pass',
+        );
+        await tester.ensureVisible(
+          find.byKey(const ValueKey<String>('auth-sign-in')),
+        );
+        await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining(
+            'Status: [remote-stub] ${caseData.expectedStatus}',
+          ),
+          findsOneWidget,
+        );
+        final CheckboxListTile rememberSessionTile = tester.widget(
+          find.byKey(const ValueKey<String>('auth-remember')),
+        );
+        expect(rememberSessionTile.value, isTrue);
+        expect(find.textContaining('Signed in (simulated).'), findsNothing);
+      },
+    );
+  }
+
+  final List<
+    ({
+      String description,
+      Map<String, Object?>? restoreSessionPayload,
+      Map<String, Object?>? refreshTokenPayload,
+      ValueKey<String> actionKey,
+      String expectedStatus,
+      String absentSuccessText,
+    })
+  >
+  authStateSignedOutEnvelopeCases =
+      <
+        ({
+          String description,
+          Map<String, Object?>? restoreSessionPayload,
+          Map<String, Object?>? refreshTokenPayload,
+          ValueKey<String> actionKey,
+          String expectedStatus,
+          String absentSuccessText,
+        })
+      >[
+        (
+          description: 'result envelope authState signedOut alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'signedOut': true,
+                'sessionToken': 'auth-state-signed-out-result-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description: 'result envelope authState loggedOut alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'loggedOut': true,
+                'sessionToken': 'auth-state-logged-out-result-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description: 'data envelope authState is_signed_out alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_signed_out': true,
+                'sessionToken': 'auth-state-signed-out-data-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
+          description: 'data envelope authState is_logged_out alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_logged_out': true,
+                'sessionToken': 'auth-state-logged-out-data-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
+          description: 'result envelope authState isLoggedOut alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'isLoggedOut': true,
+                'sessionToken': 'auth-state-is-logged-out-result-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
+          description:
+              'data envelope authState explicit signed-out authentication over token',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'authentication': <String, Object?>{'authenticated': false},
+                'tokens': <String, Object?>{
+                  'accessToken': 'auth-state-ignored-token',
+                },
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Backend sign-in snapshot applied.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+      ];
+
+  for (final ({
+        String description,
+        Map<String, Object?>? restoreSessionPayload,
+        Map<String, Object?>? refreshTokenPayload,
+        ValueKey<String> actionKey,
+        String expectedStatus,
+        String absentSuccessText,
+      })
+      caseData
+      in authStateSignedOutEnvelopeCases) {
+    testWidgets(
+      'auth/session parity maps ${caseData.description} to deterministic signed-out fallback',
+      (WidgetTester tester) async {
+        await pumpDesktopApp(
+          tester,
+          contracts: DesktopContractBundle.fromMode(
+            DesktopContractMode.remoteStub,
+            remoteStubTransportClient:
+                _AuthBackendAuthStateEnvelopeFixtureParityTransportClient(
+                  signInPayload: const <String, Object?>{
+                    'status': 'Backend sign-in snapshot applied.',
+                    'state': <String, Object?>{
+                      'signedIn': true,
+                      'rememberSession': true,
+                    },
+                  },
+                  restoreSessionPayload: caseData.restoreSessionPayload,
+                  refreshTokenPayload: caseData.refreshTokenPayload,
+                ),
+          ),
+        );
+        await openWorkflowSection(tester, 'auth');
+
+        await tester.enterText(
+          find.byKey(const ValueKey<String>('auth-password')),
+          'desktop-pass',
+        );
+        await tester.ensureVisible(
+          find.byKey(const ValueKey<String>('auth-sign-in')),
+        );
+        await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining(
+            'Status: [remote-stub] Backend sign-in snapshot applied.',
+          ),
+          findsOneWidget,
+        );
+
+        await tester.ensureVisible(find.byKey(caseData.actionKey));
+        await tester.tap(find.byKey(caseData.actionKey));
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining(
+            'Status: [remote-stub] ${caseData.expectedStatus}',
+          ),
+          findsOneWidget,
+        );
+        expect(find.textContaining(caseData.absentSuccessText), findsNothing);
+      },
+    );
+  }
 
   testWidgets(
     'auth/session parity required-state mode blocks empty backend payload fallback',
