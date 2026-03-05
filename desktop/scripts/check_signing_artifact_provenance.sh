@@ -57,6 +57,22 @@ verify_status="missing"
 overall_status="warning"
 hash_value=""
 error_message=""
+verify_command_placeholder_status="not-configured"
+
+is_placeholder_command() {
+  local command_value
+  command_value="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+  if [[ "$command_value" =~ ^[[:space:]]*echo([[:space:]]|$) ]]; then
+    return 0
+  fi
+  if printf '%s' "$command_value" | grep -Eq '<[^>]+>'; then
+    return 0
+  fi
+  if [[ "$command_value" =~ (^|[^a-z0-9_])(todo|tbd|placeholder|changeme|change_me|replace_me|example|dummy|sample|fixme)([^a-z0-9_]|$) ]]; then
+    return 0
+  fi
+  return 1
+}
 
 compute_hash() {
   local target="$1"
@@ -130,15 +146,26 @@ if [[ -e "$artifact_path" ]]; then
   fi
 
   if [[ -n "$verify_command" ]]; then
-    export PENJAR_SIGN_VERIFY_TARGET="$artifact_path"
-    if bash -lc "$verify_command"; then
-      verify_status="executed"
-    else
+    if is_placeholder_command "$verify_command"; then
+      verify_command_placeholder_status="detected"
       verify_status="failed"
       if [[ -z "$error_message" ]]; then
-        error_message="sign verify command failed"
+        error_message="verify command appears to be a placeholder"
+      fi
+    else
+      verify_command_placeholder_status="clear"
+      export PENJAR_SIGN_VERIFY_TARGET="$artifact_path"
+      if bash -lc "$verify_command"; then
+        verify_status="executed"
+      else
+        verify_status="failed"
+        if [[ -z "$error_message" ]]; then
+          error_message="sign verify command failed"
+        fi
       fi
     fi
+  else
+    verify_command_placeholder_status="not-configured"
   fi
 fi
 
@@ -177,6 +204,7 @@ fi
   echo "- Hash status: $hash_status"
   echo "- Artifact SHA256: ${hash_value:-n/a}"
   echo "- Verify command configured: $([[ -n "$verify_command" ]] && echo yes || echo no)"
+  echo "- Verify command placeholder status: $verify_command_placeholder_status"
   echo "- Verify command status: $verify_status"
   echo "- Overall status: $overall_status"
   if [[ -n "$error_message" ]]; then
