@@ -9183,6 +9183,58 @@ precedence rather than failure-flag fallback.
   - auth-failed fallback status is not shown for that explicit signed-in override case.
   - targeted auth tests and full desktop verification remain green after the parity lock.
 
+## Unit WS-D-200: Auth `ok`/`isSuccess` explicit signed-in parity precedence lock
+
+### Planned objective
+
+Extend explicit signed-in override parity evidence beyond `success=false` by locking UI-level
+precedence behavior for `ok=false` and `isSuccess=false` payloads when backend state also includes
+`signedIn=true`.
+
+### Implemented changes
+
+1. Added dedicated parity transport fixtures/tests in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - `_AuthBackendFailureFlagOkSignedInOverrideParityTransportClient`,
+   - `_AuthBackendFailureFlagIsSuccessSignedInOverrideParityTransportClient`,
+   - `auth/session parity keeps signed-in state when ok failure flag has explicit signed-in override`,
+   - `auth/session parity keeps signed-in state when isSuccess failure flag has explicit signed-in override`.
+2. Synced continuity docs so failure-flag explicit signed-in override coverage wording now
+   explicitly tracks success/ok/isSuccess parity locks:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+3. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - parity precedence behavior for `ok=false` and `isSuccess=false` collision payloads,
+  - consistency with existing contract-side signed-in precedence locks,
+  - accuracy of doc claims about explicit signed-in override parity coverage.
+- **Issues found during review**
+  1. Contract suite already had explicit signed-in precedence locks for `ok` and `isSuccess`
+     failure flags, but parity suite only covered the `success` alias.
+  2. Documentation used singular wording for explicit signed-in override parity evidence, which no
+     longer reflected alias-level lock granularity after extending the matrix.
+- **Fix applied**
+  1. Added dedicated `ok=false` and `isSuccess=false` parity transport fixtures with explicit
+     `signedIn=true` snapshot payloads.
+  2. Added UI assertions that signed-in status remains authoritative and auth-failed fallback text
+     is not rendered for those collisions.
+  3. Updated continuity docs to state explicit signed-in override parity locks for
+     success/ok/isSuccess aliases.
+- **Post-fix validation criteria**
+  - `ok=false` + explicit `signedIn=true` payloads preserve signed-in precedence in parity UI.
+  - `isSuccess=false` + explicit `signedIn=true` payloads preserve signed-in precedence in parity
+    UI.
+  - auth-failed fallback status is not shown for those explicit signed-in override cases.
+  - targeted auth tests and full desktop verification remain green after the new locks.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

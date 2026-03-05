@@ -217,6 +217,36 @@ class _AuthBackendFailureFlagOkParityTransportClient
   }
 }
 
+class _AuthBackendFailureFlagOkSignedInOverrideParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendFailureFlagOkSignedInOverrideParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend sign-in snapshot applied.',
+          'state': <String, Object?>{'signedIn': true, 'rememberSession': true},
+        },
+      );
+    }
+    if (request.operation == RemoteStubOperationIds.refreshToken) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'ok': false,
+          'state': <String, Object?>{
+            'signedIn': true,
+            'rememberSession': true,
+            'sessionToken': 'override-session-token',
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 class _AuthBackendFailureFlagIsSuccessParityTransportClient
     extends RemoteStubTransportClient {
   const _AuthBackendFailureFlagIsSuccessParityTransportClient();
@@ -236,6 +266,36 @@ class _AuthBackendFailureFlagIsSuccessParityTransportClient
         const <String, Object?>{
           'isSuccess': false,
           'state': <String, Object?>{'sessionToken': 'expired-session'},
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
+class _AuthBackendFailureFlagIsSuccessSignedInOverrideParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendFailureFlagIsSuccessSignedInOverrideParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend sign-in snapshot applied.',
+          'state': <String, Object?>{'signedIn': true, 'rememberSession': true},
+        },
+      );
+    }
+    if (request.operation == RemoteStubOperationIds.refreshToken) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'isSuccess': false,
+          'state': <String, Object?>{
+            'signedIn': true,
+            'rememberSession': true,
+            'sessionToken': 'override-session-token',
+          },
         },
       );
     }
@@ -980,7 +1040,9 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.textContaining('Status: [remote-stub] Backend auth request failed.'),
+        find.textContaining(
+          'Status: [remote-stub] Backend auth request failed.',
+        ),
         findsNothing,
       );
     },
@@ -1079,6 +1141,57 @@ void main() {
   );
 
   testWidgets(
+    'auth/session parity keeps signed-in state when ok failure flag has explicit signed-in override',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendFailureFlagOkSignedInOverrideParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend sign-in snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend sign-in snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend auth request failed.',
+        ),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets(
     'auth/session parity maps isSuccess failure flag to deterministic auth-failed status',
     (WidgetTester tester) async {
       await pumpDesktopApp(
@@ -1121,6 +1234,57 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'auth/session parity keeps signed-in state when isSuccess failure flag has explicit signed-in override',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendFailureFlagIsSuccessSignedInOverrideParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend sign-in snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend sign-in snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend auth request failed.',
+        ),
+        findsNothing,
+      );
     },
   );
 
