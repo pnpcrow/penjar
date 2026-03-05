@@ -9289,6 +9289,54 @@ explicit `signedIn=true`.
   - auth-failed fallback status is not shown for those explicit signed-in override cases.
   - targeted auth tests and full desktop verification remain green after the new locks.
 
+## Unit WS-D-202: Auth nested failure-flag explicit signed-in parity precedence lock
+
+### Planned objective
+
+Complete parity-side explicit signed-in override coverage by locking nested failure-flag collision
+behavior where payloads include nested `errors[].is_success=false` signals alongside explicit
+`signedIn=true`.
+
+### Implemented changes
+
+1. Added dedicated parity transport fixture/test in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - `_AuthBackendFailureFlagNestedSignedInOverrideParityTransportClient`,
+   - `auth/session parity keeps signed-in state when nested failure flag has explicit signed-in override`.
+2. Synced continuity docs so explicit signed-in override parity wording now includes nested
+   failure-flag container coverage:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+3. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - nested failure-flag precedence at parity UI level under explicit signed-in snapshots,
+  - completeness of parity vs contract explicit signed-in override matrix,
+  - continuity doc alignment for nested-collision coverage claims.
+- **Issues found during review**
+  1. After WS-D-201, parity explicit override locks covered top-level failure-flag aliases but
+     nested `errors[].is_success=false` collision behavior remained uncovered at parity level.
+  2. Continuity docs described alias-level explicit override locks but did not explicitly call out
+     nested failure-flag container parity coverage.
+- **Fix applied**
+  1. Added dedicated nested-failure parity transport fixture with explicit signed-in state payload.
+  2. Added parity assertions that signed-in status remains authoritative and auth-failed fallback
+     text is not rendered under the nested collision.
+  3. Updated continuity docs to include nested failure-flag container coverage in explicit override
+     parity wording.
+- **Post-fix validation criteria**
+  - nested `errors[].is_success=false` + explicit `signedIn=true` preserves signed-in precedence in
+    parity UI.
+  - auth-failed fallback status is not shown for that nested explicit signed-in override case.
+  - targeted auth tests and full desktop verification remain green after the new lock.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
