@@ -1032,8 +1032,50 @@ Eliminate per-panel contract re-instantiation and strengthen migration readiness
   - Shell persistence parity test passes and confirms status continuity across section switches.
   - Desktop test/analyze/build chain remains green after injection refactor.
 
+## Unit WS-D-26: Verification-chain script consolidation
+
+### Planned objective
+
+Reduce redundant command maintenance and improve local/CI verification performance by consolidating desktop validation commands into one script that runs `pub get` once and reuses `--no-pub` for subsequent steps.
+
+### Implemented changes
+
+1. Added canonical verification script:
+   - `desktop/scripts/verify_desktop.sh`.
+2. Implemented consolidated chain in script:
+   - `flutter pub get`,
+   - `flutter test --no-pub`,
+   - `FLUTTER_NO_PUB=1 ./scripts/run_parity_tests.sh`,
+   - `flutter analyze --no-pub`,
+   - optional `INCLUDE_BUILD=1` path for `flutter build macos --debug --no-pub`.
+3. Updated root command surface:
+   - added `desktop:verify`,
+   - added `desktop:verify:full`,
+   - added `desktop:test:parity:no-pub`.
+4. Updated desktop CI workflow:
+   - `.github/workflows/tests-desktop-flutter.yml` now runs `./scripts/verify_desktop.sh` as one verification step.
+5. Updated acceptance baseline CI anchor:
+   - documented canonical verification script path.
+6. Re-ran consolidated full verification:
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness and completeness of consolidated verification chain,
+  - parity between local and CI execution paths,
+  - runtime efficiency improvements from `--no-pub` reuse.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Consolidated verification script passes with full mode (`INCLUDE_BUILD=1`).
+  - CI workflow and local verification now share one canonical command chain.
+  - Command maintenance drift risk is reduced by centralizing verification orchestration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, contract-boundary pilots, and shared contract-bundle injection, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux with consolidated parity runner, but macOS/Windows build-matrix coverage and release-grade installer/update validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux with consolidated verification scripts, but macOS/Windows build-matrix coverage and release-grade installer/update validation are not yet configured.

@@ -47,18 +47,6 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install desktop dependencies
+      - name: Run desktop verification chain
         working-directory: ./desktop
-        run: flutter pub get
-
-      - name: Run desktop test suite
-        working-directory: ./desktop
-        run: flutter test --no-pub
-
-      - name: Run desktop parity gates
-        working-directory: ./desktop
-        run: FLUTTER_NO_PUB=1 ./scripts/run_parity_tests.sh
-
-      - name: Run desktop static analysis
-        working-directory: ./desktop
-        run: flutter analyze --no-pub
+        run: ./scripts/verify_desktop.sh
