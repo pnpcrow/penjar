@@ -1598,6 +1598,55 @@ void main() {
     );
 
     test(
+      'collaboration backend sibling data envelope is used when result envelope lacks collaboration state',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.createThread: <String, Object?>{
+                'result': <String, Object?>{
+                  'meta': <String, Object?>{'requestId': 'req-collaboration-1'},
+                },
+                'data': <String, Object?>{
+                  'detail':
+                      'Backend sibling data collaboration snapshot applied.',
+                  'collaborationState': <String, Object?>{
+                    'peerActive': true,
+                    'threads': <Map<String, Object?>>[
+                      <String, Object?>{
+                        'id': 'thread-sibling',
+                        'title': 'Backend Review',
+                      },
+                    ],
+                    'selectedThreadIndex': 0,
+                  },
+                },
+              },
+            });
+        final RemoteStubCollaborationContextContract collaborationContract =
+            RemoteStubCollaborationContextContract(
+              transportClient: transportClient,
+            );
+
+        collaborationContract.createThread('ignored');
+
+        expect(collaborationContract.state.peerActive, isTrue);
+        expect(collaborationContract.state.threads, hasLength(1));
+        expect(
+          collaborationContract.state.selectedThread?.id,
+          'thread-sibling',
+        );
+        expect(
+          collaborationContract.state.selectedThread?.title,
+          'Backend Review',
+        );
+        expect(
+          collaborationContract.state.status,
+          '[remote-stub] Backend sibling data collaboration snapshot applied.',
+        );
+      },
+    );
+
+    test(
       'supports deep backend response envelope chains beyond four levels',
       () {
         final _BackendResponseTransportClient transportClient =

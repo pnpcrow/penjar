@@ -8612,6 +8612,56 @@ metadata-only primary wrappers (`result.meta`) with asset state in sibling wrapp
     payloads.
   - targeted tests and full desktop verification remain green after asset regression lock.
 
+## Unit WS-D-189: Collaboration workflow sibling-envelope fallback regression lock
+
+### Planned objective
+
+Extend sibling-envelope fallback evidence to collaboration workflows by locking contract/parity
+behavior for metadata-only primary wrappers (`result.meta`) with collaboration state in sibling
+wrappers (`data.collaborationState`).
+
+### Implemented changes
+
+1. Added collaboration contract regression in `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `collaboration backend sibling data envelope is used when result envelope lacks collaboration state`.
+2. Added collaboration parity regression in `desktop/test/parity/collaboration_context_parity_test.dart`:
+   - `_CollaborationBackendSiblingDataEnvelopeParityTransportClient`,
+   - `collaboration parity uses sibling data envelope when result lacks collaboration state`.
+3. Synced continuity docs for cross-workflow sibling-envelope evidence:
+   - `desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `desktop-flutter-development-runbook.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/collaboration_context_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - sibling-envelope fallback correctness for collaboration state extraction paths,
+  - parity UI status/thread/session rendering under metadata-only primary wrapper payloads,
+  - regression impact on full verification chain.
+- **Issues found during review**
+  1. Project/file/canvas/asset sibling-envelope regressions were locked, but collaboration workflow
+     still had no dedicated regression for `result.meta` + sibling `data.collaborationState`.
+  2. Without collaboration-specific locks, parser changes could regress thread/session extraction
+     paths while other workflow sibling-fallback tests remained green.
+- **Fix applied**
+  1. Added contract regression for `createThread` backend payloads with sibling
+     `data.collaborationState`.
+  2. Added parity regression to assert backend-driven status text, thread chip rendering, and
+     active-session surface from sibling-envelope payloads.
+  3. Updated continuity docs so collaboration rows and runbook/plan narrative include
+     sibling-envelope coverage evidence.
+- **Post-fix validation criteria**
+  - collaboration snapshots resolve from sibling `data.collaborationState` when primary `result`
+    wrappers are metadata-only.
+  - parity UI status/thread/session surfaces reflect backend snapshots under sibling-envelope
+    payloads.
+  - targeted tests and full desktop verification remain green after collaboration regression lock.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
