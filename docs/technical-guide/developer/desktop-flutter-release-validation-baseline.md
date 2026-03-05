@@ -173,6 +173,7 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job runs external publication readiness checks and uploads readiness report artifacts.
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview readiness step accepts production identity/invalidation validation command hooks (`APPCAST_EXTERNAL_IDENTITY_CHECK_COMMAND`, `APPCAST_EXTERNAL_INVALIDATION_CHECK_COMMAND`).
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job optionally runs external publication stage and uploads publication report artifact.
+- `desktop/scripts/check_release_evidence_index.sh` now enforces release evidence table schema (8 columns), RC+platform uniqueness, and decision value validity.
 - Update manifest baseline file: `desktop/release/update_manifest.example.json`.
 - Installer/update smoke report generator: `desktop/scripts/generate_installer_update_report.sh`.
 - Release smoke gate policy checker: `desktop/scripts/check_release_smoke_gate_policy.sh`.

@@ -2862,8 +2862,47 @@ Ensure release smoke workflow always performs script-syntax and verify-coverage 
   - Smoke workflow consistently publishes preflight report artifacts.
   - Full-fast desktop verification remains green after workflow hardening.
 
+## Unit WS-D-67: Release evidence index schema + uniqueness guard hardening
+
+### Planned objective
+
+Harden release evidence index validation so malformed rows and duplicated RC/platform keys are blocked before promotion decisions.
+
+### Implemented changes
+
+1. Extended evidence index checker input contract:
+   - `desktop/scripts/check_release_evidence_index.sh` now accepts optional index-file path argument for testability (`default` remains canonical docs path).
+2. Implemented schema + uniqueness validation:
+   - enforces exact 8-column table schema for data rows,
+   - validates required RC/platform/decision fields are non-empty,
+   - validates decision value starts with `promoted` or `blocked`,
+   - enforces RC+platform uniqueness across rows,
+   - keeps promoted-row placeholder/TBD guards and now also verifies promoted required evidence fields are non-empty.
+3. Updated release baseline docs:
+   - `desktop-flutter-release-validation-baseline.md` now documents stronger `check_release_evidence_index.sh` guarantees (schema, uniqueness, decision validity).
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_release_evidence_index.sh`,
+   - `cd desktop && ./scripts/check_release_evidence_index.sh <temp-duplicate-index>` (expected failure: duplicate RC+platform),
+   - `cd desktop && ./scripts/check_release_evidence_index.sh <temp-malformed-index>` (expected failure: invalid column count),
+   - `cd desktop && SKIP_PUB_GET=1 INCLUDE_BUILD=1 ./scripts/verify_desktop.sh`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - evidence table row parsing robustness and schema constraints,
+  - duplicate RC/platform detection behavior,
+  - compatibility of stricter checks with existing placeholder rows.
+- **Issues found during review**
+  1. Previous checker accepted malformed table rows and duplicated RC/platform rows, enabling silent release evidence drift.
+- **Fix applied**
+  1. Added strict row schema and uniqueness checks with explicit error reporting line numbers.
+- **Post-fix validation criteria**
+  - Duplicate RC/platform rows fail the evidence check.
+  - Malformed table rows fail the evidence check.
+  - Full-fast desktop verification remains green with stricter evidence checks.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, de-duplicated contract/parity/mode-matrix verification chain, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow with preflight syntax/coverage readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, de-duplicated contract/parity/mode-matrix verification chain, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation, on-demand installer/update smoke build-report workflow with preflight syntax/coverage readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
