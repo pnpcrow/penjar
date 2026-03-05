@@ -138,7 +138,7 @@ Before pausing or transferring work:
 
 ## 7) Current next-unit candidates
 
-1. Durable backend session persistence alignment for remote-stub auth flows (remember-session + token/session restore continuity across restart boundaries).
+1. OS-backed auth snapshot store wiring for remote-stub mode (replace in-memory/noop auth-state store seam with desktop-secure persistence path and restart hydration contract).
 2. Real command wiring for signed packaging/notarization/verification in installer smoke workflow (`PENJAR_*_SIGN_COMMAND`, `PENJAR_*_SIGN_VERIFY_COMMAND` paths).
 3. Real Windows signed installer generation (`.msi/.exe`) command chain and provenance command/secret wiring.
 4. External appcast publication production rollout with real credentials/invalidation execution.

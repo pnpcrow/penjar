@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:penjar_desktop/contracts/remote_stub_contracts.dart';
 import 'package:penjar_desktop/contracts/workflow_contracts.dart';
 
@@ -61,6 +63,79 @@ Set<int> _parseAllowedHttpStatusCodes(String raw) {
     }
   }
   return statusCodes;
+}
+
+Map<String, Object?> _coerceJsonMap(Object? value) {
+  if (value is Map<String, Object?>) {
+    return value;
+  }
+  if (value is Map) {
+    final Map<String, Object?> mapped = <String, Object?>{};
+    value.forEach((Object? key, Object? item) {
+      mapped['$key'] = item;
+    });
+    return mapped;
+  }
+  return const <String, Object?>{};
+}
+
+bool? _coerceJsonBool(Object? value) {
+  if (value is bool) {
+    return value;
+  }
+  if (value is num) {
+    return value != 0;
+  }
+  if (value is String) {
+    final String lowered = value.trim().toLowerCase();
+    if (lowered == 'true' || lowered == '1') {
+      return true;
+    }
+    if (lowered == 'false' || lowered == '0') {
+      return false;
+    }
+  }
+  return null;
+}
+
+String? _coerceJsonString(Object? value) {
+  if (value is! String) {
+    return null;
+  }
+  final String trimmed = value.trim();
+  return trimmed.isEmpty ? null : trimmed;
+}
+
+AuthSessionState? _parseRemoteStubAuthInitialState(String rawJson) {
+  final String trimmed = rawJson.trim();
+  if (trimmed.isEmpty) {
+    return null;
+  }
+
+  final Object? decoded;
+  try {
+    decoded = jsonDecode(trimmed);
+  } on FormatException {
+    return null;
+  }
+
+  final Map<String, Object?> root = _coerceJsonMap(decoded);
+  if (root.isEmpty) {
+    return null;
+  }
+  final Map<String, Object?> state =
+      _coerceJsonMap(root['authState']).isNotEmpty
+      ? _coerceJsonMap(root['authState'])
+      : root;
+
+  return AuthSessionState(
+    rememberSession: _coerceJsonBool(state['rememberSession']) ?? false,
+    signedIn: _coerceJsonBool(state['signedIn']) ?? false,
+    status:
+        _coerceJsonString(state['status']) ??
+        _coerceJsonString(root['status']) ??
+        'Idle',
+  );
 }
 
 DesktopRemoteStubProfile _buildRemoteStubProfile({
@@ -248,6 +323,12 @@ class DesktopContractBundle {
     );
     final RemoteStubTransportClient transportClient =
         _buildRemoteStubTransportClientFromEnvironment();
+    final AuthSessionState? remoteStubAuthInitialState =
+        _parseRemoteStubAuthInitialState(
+          const String.fromEnvironment(
+            'PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_JSON',
+          ),
+        );
 
     return DesktopContractBundle.fromMode(
       mode,
@@ -256,6 +337,7 @@ class DesktopContractBundle {
         blockedOperations: blockedOperations,
       ),
       remoteStubTransportClient: transportClient,
+      remoteStubAuthInitialState: remoteStubAuthInitialState,
     );
   }
 
@@ -265,6 +347,7 @@ class DesktopContractBundle {
         const RemoteStubFaultProfile(),
     RemoteStubTransportClient remoteStubTransportClient =
         const RemoteStubNoopTransportClient(),
+    AuthSessionState? remoteStubAuthInitialState,
     DesktopRemoteStubProfile? remoteStubProfile,
   }) {
     return switch (mode) {
@@ -272,6 +355,7 @@ class DesktopContractBundle {
       DesktopContractMode.remoteStub => DesktopContractBundle.remoteStub(
         faultProfile: remoteStubFaultProfile,
         transportClient: remoteStubTransportClient,
+        authInitialState: remoteStubAuthInitialState,
         remoteStubProfile:
             remoteStubProfile ??
             _buildRemoteStubProfile(
@@ -300,6 +384,7 @@ class DesktopContractBundle {
     RemoteStubFaultProfile faultProfile = const RemoteStubFaultProfile(),
     RemoteStubTransportClient transportClient =
         const RemoteStubNoopTransportClient(),
+    AuthSessionState? authInitialState,
     DesktopRemoteStubProfile? remoteStubProfile,
   }) {
     return DesktopContractBundle(
@@ -307,6 +392,7 @@ class DesktopContractBundle {
       authSession: RemoteStubAuthSessionContract(
         faultProfile: faultProfile,
         transportClient: transportClient,
+        initialState: authInitialState,
       ),
       projectLifecycle: RemoteStubProjectLifecycleContract(
         faultProfile: faultProfile,

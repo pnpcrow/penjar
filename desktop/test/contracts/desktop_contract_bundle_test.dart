@@ -114,6 +114,26 @@ void main() {
     expect(blockedRemoteStubBundle.remoteStubProfile?.unavailable, isTrue);
   });
 
+  test('fromMode forwards remote-stub auth initial state snapshot', () {
+    final DesktopContractBundle remoteStubBundle =
+        DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubAuthInitialState: const AuthSessionState(
+            rememberSession: true,
+            signedIn: true,
+            status: 'Restored from bundle seed.',
+          ),
+        );
+
+    expect(remoteStubBundle.mode, DesktopContractMode.remoteStub);
+    expect(remoteStubBundle.authSession.state.rememberSession, isTrue);
+    expect(remoteStubBundle.authSession.state.signedIn, isTrue);
+    expect(
+      remoteStubBundle.authSession.state.status,
+      '[remote-stub] Restored from bundle seed.',
+    );
+  });
+
   test('remote-stub unavailable profile blocks mutating operations', () {
     final DesktopContractBundle bundle = DesktopContractBundle.remoteStub(
       faultProfile: const RemoteStubFaultProfile(unavailable: true),

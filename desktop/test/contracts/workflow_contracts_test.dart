@@ -1284,5 +1284,55 @@ void main() {
         );
       },
     );
+
+    test('restores and persists auth snapshot through auth state store', () {
+      final RemoteStubMemoryAuthStateStore authStateStore =
+          RemoteStubMemoryAuthStateStore(
+            const AuthSessionState(
+              rememberSession: true,
+              signedIn: true,
+              status: 'Restored auth snapshot.',
+            ),
+          );
+      final _BackendResponseTransportClient transportClient =
+          _BackendResponseTransportClient(<String, Map<String, Object?>>{
+            RemoteStubOperationIds.signIn: <String, Object?>{
+              'status': 'Backend auth persisted.',
+              'state': <String, Object?>{
+                'rememberSession': false,
+                'signedIn': false,
+              },
+            },
+          });
+      final RemoteStubAuthSessionContract authContract =
+          RemoteStubAuthSessionContract(
+            authStateStore: authStateStore,
+            transportClient: transportClient,
+          );
+
+      expect(authContract.state.rememberSession, isTrue);
+      expect(authContract.state.signedIn, isTrue);
+      expect(
+        authContract.state.status,
+        '[remote-stub] Restored auth snapshot.',
+      );
+
+      authContract.signIn(
+        const AuthSignInRequest(
+          email: 'designer@penjar.app',
+          password: 'desktop-pass',
+        ),
+      );
+
+      final AuthSessionState? persistedState = authStateStore.load();
+      expect(persistedState, isNotNull);
+      expect(persistedState?.rememberSession, isFalse);
+      expect(persistedState?.signedIn, isFalse);
+      expect(persistedState?.status, 'Backend auth persisted.');
+      expect(
+        authContract.state.status,
+        '[remote-stub] Backend auth persisted.',
+      );
+    });
   });
 }

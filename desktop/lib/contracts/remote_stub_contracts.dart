@@ -1603,16 +1603,71 @@ DiagnosticsRecoveryState _decorateDiagnosticsState(
   status: _decorateStatus(status ?? state.status),
 );
 
+String _stripRemoteStubPrefix(String status) {
+  if (!status.startsWith(_kRemoteStubPrefix)) {
+    return status;
+  }
+  return status.substring(_kRemoteStubPrefix.length);
+}
+
+AuthSessionState _undecorateAuthState(AuthSessionState state) =>
+    AuthSessionState(
+      rememberSession: state.rememberSession,
+      signedIn: state.signedIn,
+      status: _stripRemoteStubPrefix(state.status),
+    );
+
+abstract class RemoteStubAuthStateStore {
+  const RemoteStubAuthStateStore();
+
+  AuthSessionState? load();
+
+  void save(AuthSessionState state);
+}
+
+class RemoteStubNoopAuthStateStore extends RemoteStubAuthStateStore {
+  const RemoteStubNoopAuthStateStore();
+
+  @override
+  AuthSessionState? load() => null;
+
+  @override
+  void save(AuthSessionState state) {}
+}
+
+class RemoteStubMemoryAuthStateStore extends RemoteStubAuthStateStore {
+  RemoteStubMemoryAuthStateStore([this._snapshot]);
+
+  AuthSessionState? _snapshot;
+
+  @override
+  AuthSessionState? load() => _snapshot;
+
+  @override
+  void save(AuthSessionState state) {
+    _snapshot = state;
+  }
+}
+
 class RemoteStubAuthSessionContract implements AuthSessionContract {
   RemoteStubAuthSessionContract({
     AuthSessionContract? delegate,
     this.faultProfile = const RemoteStubFaultProfile(),
     this.transportClient = const RemoteStubNoopTransportClient(),
-  }) : _delegate = delegate ?? InMemoryAuthSessionContract();
+    this.authStateStore = const RemoteStubNoopAuthStateStore(),
+    AuthSessionState? initialState,
+  }) : _delegate = delegate ?? InMemoryAuthSessionContract() {
+    final AuthSessionState? restoredState =
+        initialState ?? authStateStore.load();
+    if (restoredState != null) {
+      _stateSnapshot = _decorateAuthState(restoredState);
+    }
+  }
 
   final AuthSessionContract _delegate;
   final RemoteStubFaultProfile faultProfile;
   final RemoteStubTransportClient transportClient;
+  final RemoteStubAuthStateStore authStateStore;
   AuthSessionState? _stateSnapshot;
   String? _statusOverride;
 
@@ -1656,6 +1711,7 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
       previousState,
     );
     _stateSnapshot = _decorateAuthState(backendState ?? delegateFallback());
+    authStateStore.save(_undecorateAuthState(_stateSnapshot!));
     return _stateSnapshot!;
   }
 
