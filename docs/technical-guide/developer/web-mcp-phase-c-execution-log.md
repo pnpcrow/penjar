@@ -3086,8 +3086,48 @@ Reduce false-ready signing states by detecting placeholder/dummy signing inputs 
   - Gate policy blocks strict placeholder mode when strict command-hook gate is disabled.
   - Full-fast desktop verification remains green after placeholder-hygiene integration.
 
+## Unit WS-D-72: Verify stage timing instrumentation baseline
+
+### Planned objective
+
+Add stage-level timing instrumentation to desktop verification so performance regressions can be tracked through consistent local/CI evidence artifacts.
+
+### Implemented changes
+
+1. Instrumented canonical verify chain:
+   - `desktop/scripts/verify_desktop.sh` now records per-stage status/duration (pub-get, syntax/coverage/inventory checks, contract/parity/mode-matrix tests, analyze, optional build).
+2. Implemented timing report semantics:
+   - emits `release/reports/verify_stage_timing_report.md`,
+   - includes overall status, total duration, and stage-level timing table,
+   - records skipped stages explicitly (`pub get` when skipped, macOS build when not requested),
+   - writes report on both success/failure via `EXIT` trap.
+3. Extended desktop CI artifact chain:
+   - `.github/workflows/tests-desktop-flutter.yml` now uploads `desktop-verify-stage-timing-report-*` artifacts per matrix run.
+4. Updated release/index docs:
+   - `desktop-flutter-release-validation-baseline.md` now documents verify timing report generation and CI artifact names,
+   - `desktop-flutter-release-evidence-index.md` now includes verify stage timing report attachment rule.
+5. Re-ran validation commands:
+   - `pnpm run desktop:verify:full:fast`,
+   - validated generated timing report content (`release/reports/verify_stage_timing_report.md`),
+   - `pnpm run desktop:release:evidence:check`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - timing instrumentation correctness and exit-path resilience,
+  - stage coverage completeness including skipped-path handling,
+  - CI artifact continuity for timing evidence.
+- **Issues found during review**
+  1. Performance insights were only inferred from raw logs; there was no normalized stage timing artifact for trend tracking.
+- **Fix applied**
+  1. Added stage-timed execution wrapper/report generation in `verify_desktop.sh` and wired report upload in desktop CI matrix.
+- **Post-fix validation criteria**
+  - Verify runs always generate timing report artifacts.
+  - Stage-level timing/status entries cover each canonical verify stage.
+  - Full-fast desktop verification remains green after instrumentation.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode plus placeholder hygiene strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode plus placeholder hygiene strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

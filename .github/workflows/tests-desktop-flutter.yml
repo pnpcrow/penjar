@@ -79,6 +79,14 @@ jobs:
           name: desktop-verify-log-${{ matrix.label }}
           path: desktop/verify-${{ matrix.label }}.log
 
+      - name: Upload verify stage timing report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-verify-stage-timing-report-${{ matrix.label }}
+          path: desktop/release/reports/verify_stage_timing_report.md
+          if-no-files-found: warn
+
       - name: Upload release script syntax report
         if: always()
         uses: actions/upload-artifact@v4

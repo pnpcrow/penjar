@@ -60,3 +60,4 @@ Each release candidate record should include:
 25. Attach verify test coverage report (`release/reports/verify_test_coverage_report.md`) before promotion decision.
 26. Attach desktop command inventory report (`release/reports/desktop_command_inventory_report.md`) before promotion decision.
 27. Attach update manifest validation report (`release/reports/update_manifest_validation_report.md`) before promotion decision.
+28. Attach verify stage timing report (`release/reports/verify_stage_timing_report.md`) before promotion decision.
