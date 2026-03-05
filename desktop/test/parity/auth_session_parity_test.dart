@@ -906,6 +906,38 @@ class _AuthBackendExpiredTokenSignedInOverrideParityTransportClient
   }
 }
 
+class _AuthBackendSignedInAliasCodeOverrideParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendSignedInAliasCodeOverrideParityTransportClient({
+    required this.signedInStatePayload,
+  });
+
+  final Map<String, Object?> signedInStatePayload;
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend sign-in snapshot applied.',
+          'state': <String, Object?>{'signedIn': true, 'rememberSession': true},
+        },
+      );
+    }
+    if (request.operation == RemoteStubOperationIds.refreshToken) {
+      final Map<String, Object?> statePayload = <String, Object?>{
+        'sessionToken': 'override-session-token',
+      };
+      statePayload.addAll(signedInStatePayload);
+      return RemoteStubTransportResult.allowedWithPayload(<String, Object?>{
+        'code': 'AUTH_REQUIRED',
+        'state': statePayload,
+      });
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 class _AuthBackendCyclicErrorContainerParityTransportClient
     extends RemoteStubTransportClient {
   const _AuthBackendCyclicErrorContainerParityTransportClient();
@@ -1644,6 +1676,73 @@ void main() {
       );
     },
   );
+
+  for (final MapEntry<String, Map<String, Object?>> aliasFixture
+      in <MapEntry<String, Map<String, Object?>>>[
+        const MapEntry<String, Map<String, Object?>>(
+          'signed_in',
+          <String, Object?>{'signed_in': true, 'remember_session': true},
+        ),
+        const MapEntry<String, Map<String, Object?>>(
+          'is_logged_in',
+          <String, Object?>{'is_logged_in': true, 'persist_session': true},
+        ),
+        const MapEntry<String, Map<String, Object?>>(
+          'isLoggedIn',
+          <String, Object?>{'isLoggedIn': true, 'persistSession': true},
+        ),
+      ]) {
+    testWidgets(
+      'auth/session parity keeps signed-in state when ${aliasFixture.key} alias overrides unauthorized code inference',
+      (WidgetTester tester) async {
+        await pumpDesktopApp(
+          tester,
+          contracts: DesktopContractBundle.fromMode(
+            DesktopContractMode.remoteStub,
+            remoteStubTransportClient:
+                _AuthBackendSignedInAliasCodeOverrideParityTransportClient(
+                  signedInStatePayload: aliasFixture.value,
+                ),
+          ),
+        );
+        await openWorkflowSection(tester, 'auth');
+
+        await tester.enterText(
+          find.byKey(const ValueKey<String>('auth-password')),
+          'desktop-pass',
+        );
+        await tester.ensureVisible(
+          find.byKey(const ValueKey<String>('auth-sign-in')),
+        );
+        await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining(
+            'Status: [remote-stub] Backend sign-in snapshot applied.',
+          ),
+          findsOneWidget,
+        );
+
+        await tester.ensureVisible(
+          find.byKey(const ValueKey<String>('auth-refresh-token')),
+        );
+        await tester.tap(
+          find.byKey(const ValueKey<String>('auth-refresh-token')),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining(
+            'Status: [remote-stub] Backend sign-in snapshot applied.',
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('Status: [remote-stub] Authentication required.'),
+          findsNothing,
+        );
+      },
+    );
+  }
 
   testWidgets(
     'auth/session parity maps statusCode backend failure to deterministic auth-required status',
