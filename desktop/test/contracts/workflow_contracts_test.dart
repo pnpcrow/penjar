@@ -1512,5 +1512,40 @@ void main() {
       expect(store.load()?.signedIn, isTrue);
       expect(store.load()?.status, 'Failure fallback.');
     });
+
+    test(
+      'composite auth state store falls back to secondary load and mirrors save',
+      () {
+        final RemoteStubMemoryAuthStateStore primaryStore =
+            RemoteStubMemoryAuthStateStore();
+        final RemoteStubMemoryAuthStateStore secondaryStore =
+            RemoteStubMemoryAuthStateStore(
+              const AuthSessionState(
+                rememberSession: true,
+                signedIn: false,
+                status: 'Legacy snapshot.',
+              ),
+            );
+        final RemoteStubCompositeAuthStateStore store =
+            RemoteStubCompositeAuthStateStore(
+              primary: primaryStore,
+              secondary: secondaryStore,
+            );
+
+        final AuthSessionState? loaded = store.load();
+        expect(loaded, isNotNull);
+        expect(loaded?.status, 'Legacy snapshot.');
+
+        store.save(
+          const AuthSessionState(
+            rememberSession: false,
+            signedIn: true,
+            status: 'Mirrored snapshot.',
+          ),
+        );
+        expect(primaryStore.load()?.status, 'Mirrored snapshot.');
+        expect(secondaryStore.load()?.status, 'Mirrored snapshot.');
+      },
+    );
   });
 }

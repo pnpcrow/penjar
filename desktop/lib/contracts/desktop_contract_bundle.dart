@@ -162,6 +162,13 @@ DesktopRemoteStubProfile _buildRemoteStubProfile({
 }
 
 String _describeAuthStateStore(RemoteStubAuthStateStore authStateStore) {
+  if (authStateStore is RemoteStubCompositeAuthStateStore) {
+    final String primaryLabel = _describeAuthStateStore(authStateStore.primary);
+    if (primaryLabel == 'secure-storage') {
+      return 'secure-storage+legacy-mirror';
+    }
+    return primaryLabel.isEmpty ? 'composite' : '$primaryLabel+mirror';
+  }
   if (authStateStore is RemoteStubSecureSnapshotAuthStateStore) {
     return 'secure-storage';
   }
@@ -288,31 +295,65 @@ String _secureStorageAuthStateKeyFromEnvironment() {
   return key.isEmpty ? _kRemoteStubSecureStorageDefaultKey : key;
 }
 
+bool _secureStorageAuthStateStrictModeFromEnvironment() {
+  return _envFlagEnabled(
+    const String.fromEnvironment(
+      'PENJAR_DESKTOP_REMOTE_STUB_AUTH_SECURE_STORAGE_STRICT',
+    ),
+  );
+}
+
+bool _secureStorageAuthStateMirrorLegacyFromEnvironment() {
+  return _envFlagEnabled(
+    const String.fromEnvironment(
+      'PENJAR_DESKTOP_REMOTE_STUB_AUTH_SECURE_STORAGE_MIRROR_LEGACY',
+    ),
+  );
+}
+
 Future<RemoteStubAuthStateStore>
 _buildRemoteStubAuthStateStoreFromEnvironmentAsync({
   FlutterSecureStorage? secureStorage,
 }) async {
+  final RemoteStubAuthStateStore legacyStore =
+      _buildRemoteStubAuthStateStoreFromEnvironment();
   if (!_secureStorageAuthStateEnabledFromEnvironment()) {
-    return _buildRemoteStubAuthStateStoreFromEnvironment();
+    return legacyStore;
   }
 
   final FlutterSecureStorage storage =
       secureStorage ?? const FlutterSecureStorage();
   final String storageKey = _secureStorageAuthStateKeyFromEnvironment();
+  final bool strictMode = _secureStorageAuthStateStrictModeFromEnvironment();
   AuthSessionState? initialSnapshot;
+  Object? readError;
   try {
     final String? rawSnapshot = await storage.read(key: storageKey);
     initialSnapshot = _parseRemoteStubAuthInitialState(rawSnapshot ?? '');
-  } on Object {
-    initialSnapshot = null;
+  } on Object catch (error) {
+    readError = error;
   }
 
-  return RemoteStubSecureSnapshotAuthStateStore(
-    initialSnapshot: initialSnapshot,
-    snapshotWriter: (String snapshotJson) {
-      return storage.write(key: storageKey, value: snapshotJson);
-    },
-  );
+  if (readError != null && !strictMode) {
+    return legacyStore;
+  }
+
+  final RemoteStubSecureSnapshotAuthStateStore secureStore =
+      RemoteStubSecureSnapshotAuthStateStore(
+        initialSnapshot: initialSnapshot,
+        snapshotWriter: (String snapshotJson) {
+          return storage.write(key: storageKey, value: snapshotJson);
+        },
+      );
+
+  if (_secureStorageAuthStateMirrorLegacyFromEnvironment() &&
+      legacyStore is! RemoteStubNoopAuthStateStore) {
+    return RemoteStubCompositeAuthStateStore(
+      primary: secureStore,
+      secondary: legacyStore,
+    );
+  }
+  return secureStore;
 }
 
 enum DesktopContractMode {

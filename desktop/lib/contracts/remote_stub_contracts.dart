@@ -1851,6 +1851,25 @@ class RemoteStubSecureSnapshotAuthStateStore extends RemoteStubAuthStateStore {
   }
 }
 
+class RemoteStubCompositeAuthStateStore extends RemoteStubAuthStateStore {
+  const RemoteStubCompositeAuthStateStore({
+    required this.primary,
+    required this.secondary,
+  });
+
+  final RemoteStubAuthStateStore primary;
+  final RemoteStubAuthStateStore secondary;
+
+  @override
+  AuthSessionState? load() => primary.load() ?? secondary.load();
+
+  @override
+  void save(AuthSessionState state) {
+    primary.save(state);
+    secondary.save(state);
+  }
+}
+
 class RemoteStubAuthSessionContract implements AuthSessionContract {
   RemoteStubAuthSessionContract({
     AuthSessionContract? delegate,

@@ -243,6 +243,26 @@ void main() {
     );
   });
 
+  test('remote-stub profile exposes auth store mirror label', () {
+    final DesktopContractBundle bundle = DesktopContractBundle.remoteStub(
+      authStateStore: RemoteStubCompositeAuthStateStore(
+        primary: RemoteStubSecureSnapshotAuthStateStore(
+          snapshotWriter: (_) async {},
+        ),
+        secondary: RemoteStubMemoryAuthStateStore(),
+      ),
+    );
+
+    expect(
+      bundle.remoteStubProfile?.authStoreLabel,
+      'secure-storage+legacy-mirror',
+    );
+    expect(
+      bundle.remoteStubProfile?.summaryLabel,
+      contains('auth-store: secure-storage+legacy-mirror'),
+    );
+  });
+
   test('remote-stub unavailable profile blocks mutating operations', () {
     final DesktopContractBundle bundle = DesktopContractBundle.remoteStub(
       faultProfile: const RemoteStubFaultProfile(unavailable: true),
