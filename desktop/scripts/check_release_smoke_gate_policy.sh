@@ -10,6 +10,7 @@ to_bool() {
   esac
 }
 
+strict_signing_readiness="$(to_bool "${STRICT_SIGNING:-0}")"
 strict_signing_execution="$(to_bool "${STRICT_SIGNING_EXECUTION:-0}")"
 strict_signing_command_hooks="$(to_bool "${STRICT_SIGNING_COMMAND_HOOKS:-0}")"
 strict_signing_placeholders="$(to_bool "${STRICT_SIGNING_PLACEHOLDERS:-0}")"
@@ -58,12 +59,20 @@ if [[ "$strict_signing_execution" -eq 1 && "$strict_signing_command_hooks" -eq 0
   add_required "STRICT_SIGNING_EXECUTION requires STRICT_SIGNING_COMMAND_HOOKS=1."
 fi
 
+if [[ "$strict_signing_execution" -eq 1 && "$strict_signing_readiness" -eq 0 ]]; then
+  add_required "STRICT_SIGNING_EXECUTION requires STRICT_SIGNING=1."
+fi
+
 if [[ "$strict_signing_execution" -eq 1 && "$strict_signing_placeholders" -eq 0 ]]; then
   add_required "STRICT_SIGNING_EXECUTION requires STRICT_SIGNING_PLACEHOLDERS=1."
 fi
 
 if [[ "$strict_signing_provenance" -eq 1 && "$strict_signing_execution" -eq 0 ]]; then
   add_required "STRICT_SIGNING_PROVENANCE requires STRICT_SIGNING_EXECUTION=1."
+fi
+
+if [[ "$strict_signing_provenance" -eq 1 && "$strict_signing_readiness" -eq 0 ]]; then
+  add_required "STRICT_SIGNING_PROVENANCE requires STRICT_SIGNING=1."
 fi
 
 if [[ "$strict_signing_provenance" -eq 1 && "$strict_signing_command_hooks" -eq 0 ]]; then
@@ -153,6 +162,7 @@ fi
   echo "- Status: $status"
   echo
   echo "## Effective gate toggles"
+  echo "- STRICT_SIGNING: $strict_signing_readiness"
   echo "- STRICT_SIGNING_EXECUTION: $strict_signing_execution"
   echo "- STRICT_SIGNING_COMMAND_HOOKS: $strict_signing_command_hooks"
   echo "- STRICT_SIGNING_PLACEHOLDERS: $strict_signing_placeholders"

@@ -131,6 +131,7 @@ jobs:
       - name: Run release smoke gate policy check
         working-directory: ./desktop
         env:
+          STRICT_SIGNING: ${{ inputs.enforce_signing_readiness }}
           STRICT_SIGNING_EXECUTION: ${{ inputs.enforce_signing_execution }}
           STRICT_SIGNING_COMMAND_HOOKS: ${{ inputs.enforce_signing_command_hooks }}
           STRICT_SIGNING_PLACEHOLDERS: ${{ inputs.enforce_signing_placeholder_hygiene }}
