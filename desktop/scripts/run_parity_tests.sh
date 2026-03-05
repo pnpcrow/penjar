@@ -18,4 +18,5 @@ flutter test \
   test/parity/collaboration_context_parity_test.dart \
   test/parity/inspect_handoff_parity_test.dart \
   test/parity/export_workflow_parity_test.dart \
-  test/parity/diagnostics_recovery_parity_test.dart
+  test/parity/diagnostics_recovery_parity_test.dart \
+  test/parity/remote_stub_mode_parity_test.dart

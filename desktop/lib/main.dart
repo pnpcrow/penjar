@@ -7,7 +7,9 @@ void main() {
 }
 
 class PenjarDesktopApp extends StatelessWidget {
-  const PenjarDesktopApp({super.key});
+  const PenjarDesktopApp({super.key, this.contracts});
+
+  final DesktopContractBundle? contracts;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +23,7 @@ class PenjarDesktopApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const DesktopShellPage(),
+      home: DesktopShellPage(contracts: contracts),
     );
   }
 }
@@ -128,15 +130,17 @@ const List<WorkflowSection> kSections = <WorkflowSection>[
 ];
 
 class DesktopShellPage extends StatefulWidget {
-  const DesktopShellPage({super.key});
+  const DesktopShellPage({super.key, this.contracts});
+
+  final DesktopContractBundle? contracts;
 
   @override
   State<DesktopShellPage> createState() => _DesktopShellPageState();
 }
 
 class _DesktopShellPageState extends State<DesktopShellPage> {
-  final DesktopContractBundle _contracts =
-      DesktopContractBundle.fromEnvironment();
+  late final DesktopContractBundle _contracts =
+      widget.contracts ?? DesktopContractBundle.fromEnvironment();
   int _selectedIndex = 0;
 
   @override

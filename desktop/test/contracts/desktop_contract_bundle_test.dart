@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:penjar_desktop/contracts/desktop_contract_bundle.dart';
+import 'package:penjar_desktop/contracts/remote_stub_contracts.dart';
 import 'package:penjar_desktop/contracts/workflow_contracts.dart';
 
 void main() {
@@ -43,5 +44,49 @@ void main() {
       DesktopContractMode.inMemory,
     );
     expect(DesktopContractMode.fromEnv(null), DesktopContractMode.inMemory);
+  });
+
+  test('remote-stub bundle uses dedicated adapters with prefixed statuses', () {
+    final DesktopContractBundle bundle = DesktopContractBundle.remoteStub();
+
+    expect(bundle.mode, DesktopContractMode.remoteStub);
+    expect(bundle.authSession, isA<RemoteStubAuthSessionContract>());
+    expect(bundle.projectLifecycle, isA<RemoteStubProjectLifecycleContract>());
+    expect(bundle.canvasEditing, isA<RemoteStubCanvasEditingContract>());
+    expect(bundle.assetManagement, isA<RemoteStubAssetManagementContract>());
+    expect(
+      bundle.collaborationContext,
+      isA<RemoteStubCollaborationContextContract>(),
+    );
+    expect(bundle.inspectHandoff, isA<RemoteStubInspectHandoffContract>());
+    expect(bundle.exportWorkflow, isA<RemoteStubExportWorkflowContract>());
+    expect(
+      bundle.diagnosticsRecovery,
+      isA<RemoteStubDiagnosticsRecoveryContract>(),
+    );
+    expect(bundle.authSession.state.status, '[remote-stub] Idle');
+
+    bundle.authSession.signIn(
+      const AuthSignInRequest(
+        email: 'designer@penjar.app',
+        password: 'desktop-pass',
+      ),
+    );
+    expect(
+      bundle.authSession.state.status,
+      '[remote-stub] Signed in (simulated).',
+    );
+  });
+
+  test('fromMode routes mode to matching bundle factory', () {
+    final DesktopContractBundle inMemoryBundle = DesktopContractBundle.fromMode(
+      DesktopContractMode.inMemory,
+    );
+    final DesktopContractBundle remoteStubBundle =
+        DesktopContractBundle.fromMode(DesktopContractMode.remoteStub);
+
+    expect(inMemoryBundle.mode, DesktopContractMode.inMemory);
+    expect(remoteStubBundle.mode, DesktopContractMode.remoteStub);
+    expect(remoteStubBundle.authSession.state.status, '[remote-stub] Idle');
   });
 }

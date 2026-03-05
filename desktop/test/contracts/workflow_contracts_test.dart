@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:penjar_desktop/contracts/remote_stub_contracts.dart';
 import 'package:penjar_desktop/contracts/workflow_contracts.dart';
 
 void main() {
@@ -346,6 +347,99 @@ void main() {
       expect(
         contract.state.status,
         'Reconnect skipped: session is already healthy.',
+      );
+    });
+  });
+
+  group('RemoteStubContracts', () {
+    test('preserve payloads while prefixing status text', () {
+      final RemoteStubAuthSessionContract authContract =
+          RemoteStubAuthSessionContract();
+      final RemoteStubProjectLifecycleContract projectContract =
+          RemoteStubProjectLifecycleContract();
+      final RemoteStubCanvasEditingContract canvasContract =
+          RemoteStubCanvasEditingContract();
+      final RemoteStubAssetManagementContract assetContract =
+          RemoteStubAssetManagementContract();
+      final RemoteStubCollaborationContextContract collaborationContract =
+          RemoteStubCollaborationContextContract();
+      final RemoteStubInspectHandoffContract inspectContract =
+          RemoteStubInspectHandoffContract();
+      final RemoteStubExportWorkflowContract exportContract =
+          RemoteStubExportWorkflowContract();
+      final RemoteStubDiagnosticsRecoveryContract diagnosticsContract =
+          RemoteStubDiagnosticsRecoveryContract();
+
+      expect(authContract.state.status, '[remote-stub] Idle');
+      authContract.signIn(
+        const AuthSignInRequest(
+          email: 'designer@penjar.app',
+          password: 'desktop-pass',
+        ),
+      );
+      expect(authContract.state.signedIn, isTrue);
+      expect(authContract.state.status, '[remote-stub] Signed in (simulated).');
+
+      projectContract.createProject('Remote Workspace');
+      expect(projectContract.state.selectedProject.name, 'Remote Workspace');
+      expect(
+        projectContract.state.status,
+        '[remote-stub] Project created: Remote Workspace.',
+      );
+
+      canvasContract.createRectangle();
+      expect(canvasContract.state.selectedShape?.id, 'rect-1');
+      expect(
+        canvasContract.state.status,
+        '[remote-stub] Rectangle created: rect-1.',
+      );
+
+      assetContract.importAsset('hero.png', 'image');
+      expect(assetContract.state.selectedAsset?.name, 'hero.png');
+      expect(
+        assetContract.state.status,
+        '[remote-stub] Asset imported: hero.png (image).',
+      );
+
+      collaborationContract.createThread('Remote review');
+      expect(
+        collaborationContract.state.selectedThread?.title,
+        'Remote review',
+      );
+      expect(
+        collaborationContract.state.status,
+        '[remote-stub] Thread created: Remote review.',
+      );
+
+      inspectContract.generateSnippet('button/primary');
+      expect(inspectContract.state.snippet, isNotEmpty);
+      expect(
+        inspectContract.state.status,
+        '[remote-stub] Snippet generated for button/primary (flutter).',
+      );
+
+      exportContract.runExport(
+        const ExportRequest(
+          fileName: 'landing',
+          format: 'png',
+          scale: '2x',
+          includeBackground: true,
+        ),
+      );
+      expect(
+        exportContract.state.latestArtifact?.outputPath,
+        '/exports/landing.png',
+      );
+      expect(
+        exportContract.state.status,
+        '[remote-stub] Export completed: /exports/landing.png.',
+      );
+
+      diagnosticsContract.simulateDisconnect();
+      expect(diagnosticsContract.state.websocketHealthy, isFalse);
+      expect(
+        diagnosticsContract.state.status,
+        '[remote-stub] WebSocket disconnected; MCP stream unavailable.',
       );
     });
   });

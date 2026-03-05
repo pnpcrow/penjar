@@ -1180,8 +1180,54 @@ Improve runtime observability by surfacing active contract mode directly in diag
   - Full verification chain remains green with diagnostics summary extension.
   - Contract mode is visible in both shell metadata chips and diagnostics summary.
 
+## Unit WS-D-30: Remote-stub adapter boundary implementation
+
+### Planned objective
+
+Replace placeholder remote-mode mapping with dedicated remote-stub contract adapters so runtime mode switching has real behavioral separation and parity coverage before backend transport wiring.
+
+### Implemented changes
+
+1. Added dedicated remote-stub adapter module:
+   - `desktop/lib/contracts/remote_stub_contracts.dart`.
+2. Implemented remote-stub wrappers for all workflow contracts:
+   - auth/project/file-canvas/assets/collaboration/inspect/export/diagnostics wrappers now preserve payloads while prefixing status surface with `[remote-stub]`.
+3. Updated contract bundle routing:
+   - `desktop/lib/contracts/desktop_contract_bundle.dart` now maps `DesktopContractBundle.remoteStub()` to remote-stub adapters (not in-memory direct mapping),
+   - added `DesktopContractBundle.fromMode(...)` for explicit mode-based construction.
+4. Improved app-level testability for mode-specific parity:
+   - `desktop/lib/main.dart` now accepts optional injected `DesktopContractBundle` in `PenjarDesktopApp` and `DesktopShellPage`,
+   - `desktop/test/parity/parity_test_utils.dart` now supports bundle injection in `pumpDesktopApp(...)`.
+5. Expanded contract and parity coverage:
+   - `desktop/test/contracts/desktop_contract_bundle_test.dart` now verifies remote-stub adapter wiring and mode routing,
+   - `desktop/test/contracts/workflow_contracts_test.dart` now validates remote-stub status-prefix behavior across all workflow domains,
+   - added `desktop/test/parity/remote_stub_mode_parity_test.dart` for end-to-end runtime mode and status-surface verification.
+6. Updated canonical parity runner:
+   - `desktop/scripts/run_parity_tests.sh` now includes `remote_stub_mode_parity_test.dart`.
+7. Updated Phase C tracker artifacts for continuity:
+   - `desktop-flutter-parity-checklist.md` notes now reflect runtime-switchable in-memory/remote-stub contract boundaries,
+   - `desktop-flutter-migration-inventory.md` now records runtime mode routing + parity gate in desktop shell/runtime row and runtime-switchable boundary notes across workflow rows,
+   - `desktop-flutter-parity-acceptance-baseline.md` now includes a cross-cutting contract runtime mode gate row and CI anchor note.
+8. Re-ran consolidated full verification:
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of remote-stub adapter separation from in-memory baseline,
+  - regression risk from app-root bundle injection changes,
+  - parity runner stability after adding remote mode gate.
+- **Issues found during review**
+  1. `remote_stub_mode_parity_test.dart` initially failed because `auth-sign-in` tap target could be off-screen under test viewport constraints, causing missed tap and downstream expectation failure.
+- **Fix applied**
+  1. Added `tester.ensureVisible(...)` before tapping `auth-sign-in` and diagnostics action buttons in remote mode parity test.
+- **Post-fix validation criteria**
+  - Remote-stub contract bundle tests validate dedicated adapter wiring and prefixed status semantics.
+  - Remote mode parity test passes inside canonical parity runner.
+  - Full verification chain remains green (`desktop:test`, parity runner, `desktop:analyze`, macOS debug build).
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, contract-boundary pilots, shared contract-bundle injection, and runtime mode routing baseline, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
+- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, shared contract-bundle injection, and runtime mode parity gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
 - Desktop parity CI baseline is now configured on Linux with consolidated verification scripts, but macOS/Windows build-matrix coverage and release-grade installer/update validation are not yet configured.

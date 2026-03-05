@@ -1,3 +1,4 @@
+import 'package:penjar_desktop/contracts/remote_stub_contracts.dart';
 import 'package:penjar_desktop/contracts/workflow_contracts.dart';
 
 enum DesktopContractMode {
@@ -38,7 +39,10 @@ class DesktopContractBundle {
     final DesktopContractMode mode = DesktopContractMode.fromEnv(
       const String.fromEnvironment('PENJAR_DESKTOP_CONTRACT_MODE'),
     );
+    return DesktopContractBundle.fromMode(mode);
+  }
 
+  factory DesktopContractBundle.fromMode(DesktopContractMode mode) {
     return switch (mode) {
       DesktopContractMode.inMemory => DesktopContractBundle.inMemory(),
       DesktopContractMode.remoteStub => DesktopContractBundle.remoteStub(),
@@ -59,19 +63,17 @@ class DesktopContractBundle {
     );
   }
 
-  // Remote-stub mode keeps contracts fully local for now, while exposing
-  // a runtime switch for upcoming backend adapter wiring.
   factory DesktopContractBundle.remoteStub() {
     return DesktopContractBundle(
       mode: DesktopContractMode.remoteStub,
-      authSession: InMemoryAuthSessionContract(),
-      projectLifecycle: InMemoryProjectLifecycleContract(),
-      canvasEditing: InMemoryCanvasEditingContract(),
-      assetManagement: InMemoryAssetManagementContract(),
-      collaborationContext: InMemoryCollaborationContextContract(),
-      inspectHandoff: InMemoryInspectHandoffContract(),
-      exportWorkflow: InMemoryExportWorkflowContract(),
-      diagnosticsRecovery: InMemoryDiagnosticsRecoveryContract(),
+      authSession: RemoteStubAuthSessionContract(),
+      projectLifecycle: RemoteStubProjectLifecycleContract(),
+      canvasEditing: RemoteStubCanvasEditingContract(),
+      assetManagement: RemoteStubAssetManagementContract(),
+      collaborationContext: RemoteStubCollaborationContextContract(),
+      inspectHandoff: RemoteStubInspectHandoffContract(),
+      exportWorkflow: RemoteStubExportWorkflowContract(),
+      diagnosticsRecovery: RemoteStubDiagnosticsRecoveryContract(),
     );
   }
 

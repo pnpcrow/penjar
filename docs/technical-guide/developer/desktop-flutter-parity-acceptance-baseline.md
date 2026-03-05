@@ -39,6 +39,7 @@ the [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-pha
 | Inspect/code handoff | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) (`Inspect/code handoff`) | Inspect metadata/code handoff parity integration test | `desktop/test/parity/inspect_handoff_parity_test.dart` via `flutter test` | In progress | Inspect/Handoff | [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/) |
 | Export workflows | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) (`Export UX`) | Export option/output/save parity integration test | `desktop/test/parity/export_workflow_parity_test.dart` via `flutter test` | In progress | Export Pipeline | [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/) |
 | Diagnostics/recovery | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) (`Diagnostics/recovery UX`) | Runtime health/reconnect/remediation parity test | `desktop/test/parity/diagnostics_recovery_parity_test.dart` via `flutter test` | In progress | Platform Reliability | [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/) |
+| Contract runtime mode | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) (`Desktop shell/runtime`) | Runtime mode switch parity test (`in-memory` vs `remote-stub`) with status-surface verification | `desktop/test/parity/remote_stub_mode_parity_test.dart` via `flutter test` | In progress | Desktop Flutter Program | [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/) |
 
 ## Baseline execution protocol
 
@@ -53,3 +54,4 @@ the [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-pha
 - Canonical desktop verification chain script: `desktop/scripts/verify_desktop.sh`.
 - Canonical parity test-file list is managed in `desktop/scripts/run_parity_tests.sh` and consumed by root `desktop:test:parity` script + CI workflow.
 - Canonical parity list includes cross-cutting navigation persistence gate: `desktop/test/parity/shell_contract_persistence_parity_test.dart`.
+- Canonical parity list includes cross-cutting runtime mode gate: `desktop/test/parity/remote_stub_mode_parity_test.dart`.
