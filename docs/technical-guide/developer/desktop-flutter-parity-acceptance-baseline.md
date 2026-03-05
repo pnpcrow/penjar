@@ -72,5 +72,6 @@ the [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-pha
 - Backend response parser now supports nested success envelopes (`result`, `data`) and status aliases (`message`, `detail`) for response-driven state transitions.
 - Desktop shell route/state bridge now supports initial section-route seeding via `PENJAR_DESKTOP_INITIAL_SECTION` and selected-section restoration across restart (`shell_contract_persistence_parity_test.dart`).
 - Remote-stub auth flow now includes auth snapshot store/seed seam, including startup auth-state seed parsing via `PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_JSON`.
+- Remote-stub auth flow now supports file-backed snapshot persistence path via `PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_PATH` (contract store seam).
 - Environment-driven blocked-operation lists are filtered against `RemoteStubOperationIds` catalog in `desktop/lib/contracts/remote_stub_contracts.dart` to avoid unsupported operation keys.
 - Diagnostics parity surface now includes runtime remote profile summary text (`Remote profile: ...`) for remote-stub mode visibility during degraded-path validation.

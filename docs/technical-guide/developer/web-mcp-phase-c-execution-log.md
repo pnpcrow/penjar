@@ -5127,8 +5127,57 @@ Reduce auth/session continuity risk by introducing an explicit remote-stub auth 
   - bundle-mode wiring can seed remote-stub auth state without breaking existing mode behavior.
   - full verification gate (`desktop:verify:full`) remains green after auth snapshot seam integration.
 
+## Unit WS-D-117: Remote-stub file-backed auth snapshot persistence path
+
+### Planned objective
+
+Advance auth/session continuity from seam-only to executable persistence by adding a file-backed auth snapshot store path for remote-stub mode, while keeping secure-store migration open as a follow-up.
+
+### Implemented changes
+
+1. Added file-backed auth store in `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - introduced `RemoteStubFileAuthStateStore(path)` implementing `RemoteStubAuthStateStore`,
+   - `load()` now reads/parses snapshot JSON safely (missing/invalid file falls back to null),
+   - `save()` now writes normalized auth snapshot JSON with recursive parent-directory creation.
+2. Added environment wiring in `desktop/lib/contracts/desktop_contract_bundle.dart`:
+   - introduced `PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_PATH`,
+   - added `_buildRemoteStubAuthStateStoreFromEnvironment()` to resolve noop vs file store,
+   - extended `DesktopContractBundle.fromMode(...)` / `.remoteStub(...)` signatures to pass configurable `RemoteStubAuthStateStore`.
+3. Expanded regression coverage:
+   - `desktop/test/contracts/workflow_contracts_test.dart`:
+     - added `file auth state store loads and saves snapshots`,
+   - `desktop/test/contracts/desktop_contract_bundle_test.dart`:
+     - added `remote-stub bundle forwards auth state store persistence seam`.
+4. Synced continuity docs:
+   - `desktop-flutter-development-runbook.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+5. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/contracts/desktop_contract_bundle_test.dart`,
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - file-backed auth snapshot store correctness (read/write safety + invalid-input handling),
+  - bundle wiring precedence and compatibility with existing auth seed/state-store seam,
+  - non-regression of contract/parity/verification chain after persistence-path extension.
+- **Issues found during review**
+  1. Auth snapshot seam lacked an executable persistence implementation path, limiting restart continuity to injected in-memory fixtures.
+  2. File I/O error paths (missing file, malformed JSON, directory absence) needed explicit graceful handling to avoid startup failures.
+  3. Bundle factory wiring had no auth-state-store parameter path, so environment-driven file store could not be injected into remote-stub auth contract.
+- **Fix applied**
+  1. Implemented `RemoteStubFileAuthStateStore` with defensive load/save behavior and path normalization.
+  2. Added from-environment auth-state-store resolver and threaded store dependency through bundle mode/factory paths.
+  3. Added contract-level regression tests for direct file store behavior and bundle-level store wiring.
+- **Post-fix validation criteria**
+  - file-backed auth snapshot path reads/writes deterministic state without destabilizing startup on invalid/missing file.
+  - remote-stub bundle can inject auth-state-store dependency and persist auth transitions through the configured seam.
+  - full verification gate (`desktop:verify:full`) remains green after file-backed path integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata, shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline, backend envelope/schema compatibility normalization, auth snapshot store/seed seam, and runtime mode parity/matrix gates, but native deep-link/window-route interoperability and OS-backed secure durable session persistence integration are still pending.
+- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata, shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline, backend envelope/schema compatibility normalization, auth snapshot store/seed seam, file-backed auth snapshot persistence path, and runtime mode parity/matrix gates, but native deep-link/window-route interoperability and OS-backed secure credential-store persistence integration are still pending.
 - Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard plus coverage-contract regression guard (set-diff optimized uncovered/missing detection), desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks with in-memory duplicate-key tracking + base-check markdown report emission) plus evidence-index contract regression guard (including dedicated missing-base-check-report attachment, missing-index-file, invalid-decision, and promoted-placeholder cases, dedicated tests workflow release-evidence guard base+contract enforcement/upload, and parity matrix base-check artifact retention), update-manifest guard automation with validation + contract report artifacts (including dedicated tests workflow update-manifest guard job contract enforcement/upload), on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

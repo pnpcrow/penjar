@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:penjar_desktop/contracts/remote_stub_contracts.dart';
 import 'package:penjar_desktop/contracts/workflow_contracts.dart';
@@ -1333,6 +1335,67 @@ void main() {
         authContract.state.status,
         '[remote-stub] Backend auth persisted.',
       );
+    });
+
+    test('file auth state store loads and saves snapshots', () {
+      final Directory tempDir = Directory.systemTemp.createTempSync(
+        'penjar-auth-store-',
+      );
+      addTearDown(() {
+        if (tempDir.existsSync()) {
+          tempDir.deleteSync(recursive: true);
+        }
+      });
+
+      final String snapshotPath = '${tempDir.path}/remote_stub_auth_state.json';
+      final RemoteStubFileAuthStateStore store = RemoteStubFileAuthStateStore(
+        snapshotPath,
+      );
+
+      expect(store.load(), isNull);
+      store.save(
+        const AuthSessionState(
+          rememberSession: true,
+          signedIn: false,
+          status: 'Saved snapshot.',
+        ),
+      );
+      final AuthSessionState? loaded = store.load();
+      expect(loaded, isNotNull);
+      expect(loaded?.rememberSession, isTrue);
+      expect(loaded?.signedIn, isFalse);
+      expect(loaded?.status, 'Saved snapshot.');
+
+      final _BackendResponseTransportClient transportClient =
+          _BackendResponseTransportClient(<String, Map<String, Object?>>{
+            RemoteStubOperationIds.signIn: <String, Object?>{
+              'status': 'Backend file snapshot persisted.',
+              'state': <String, Object?>{
+                'rememberSession': false,
+                'signedIn': true,
+              },
+            },
+          });
+      final RemoteStubAuthSessionContract authContract =
+          RemoteStubAuthSessionContract(
+            authStateStore: store,
+            transportClient: transportClient,
+          );
+
+      authContract.signIn(
+        const AuthSignInRequest(
+          email: 'designer@penjar.app',
+          password: 'desktop-pass',
+        ),
+      );
+
+      final AuthSessionState? persisted = RemoteStubFileAuthStateStore(
+        snapshotPath,
+      ).load();
+      expect(persisted, isNotNull);
+      expect(persisted?.rememberSession, isFalse);
+      expect(persisted?.signedIn, isTrue);
+      expect(persisted?.status, 'Backend file snapshot persisted.');
     });
   });
 }

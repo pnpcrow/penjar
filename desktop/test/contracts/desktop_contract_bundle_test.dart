@@ -134,6 +134,25 @@ void main() {
     );
   });
 
+  test('remote-stub bundle forwards auth state store persistence seam', () {
+    final RemoteStubMemoryAuthStateStore authStateStore =
+        RemoteStubMemoryAuthStateStore();
+    final DesktopContractBundle remoteStubBundle =
+        DesktopContractBundle.remoteStub(authStateStore: authStateStore);
+
+    remoteStubBundle.authSession.signIn(
+      const AuthSignInRequest(
+        email: 'designer@penjar.app',
+        password: 'desktop-pass',
+      ),
+    );
+
+    final AuthSessionState? persistedState = authStateStore.load();
+    expect(persistedState, isNotNull);
+    expect(persistedState?.signedIn, isTrue);
+    expect(persistedState?.status, 'Signed in (simulated).');
+  });
+
   test('remote-stub unavailable profile blocks mutating operations', () {
     final DesktopContractBundle bundle = DesktopContractBundle.remoteStub(
       faultProfile: const RemoteStubFaultProfile(unavailable: true),

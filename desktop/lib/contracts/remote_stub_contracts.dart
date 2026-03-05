@@ -1649,6 +1649,65 @@ class RemoteStubMemoryAuthStateStore extends RemoteStubAuthStateStore {
   }
 }
 
+class RemoteStubFileAuthStateStore extends RemoteStubAuthStateStore {
+  RemoteStubFileAuthStateStore(this.path);
+
+  final String path;
+
+  String get _normalizedPath => path.trim();
+
+  @override
+  AuthSessionState? load() {
+    if (_normalizedPath.isEmpty) {
+      return null;
+    }
+
+    final File snapshotFile = File(_normalizedPath);
+    if (!snapshotFile.existsSync()) {
+      return null;
+    }
+
+    try {
+      final Object? decoded = jsonDecode(snapshotFile.readAsStringSync());
+      final Map<String, Object?> payload = _coerceStringKeyedMap(decoded);
+      if (payload.isEmpty) {
+        return null;
+      }
+      return AuthSessionState(
+        rememberSession: _coerceBool(payload['rememberSession']) ?? false,
+        signedIn: _coerceBool(payload['signedIn']) ?? false,
+        status: _coerceNonEmptyString(payload['status']) ?? 'Idle',
+      );
+    } on FileSystemException {
+      return null;
+    } on FormatException {
+      return null;
+    }
+  }
+
+  @override
+  void save(AuthSessionState state) {
+    if (_normalizedPath.isEmpty) {
+      return;
+    }
+
+    final File snapshotFile = File(_normalizedPath);
+    try {
+      snapshotFile.parent.createSync(recursive: true);
+      snapshotFile.writeAsStringSync(
+        jsonEncode(<String, Object?>{
+          'rememberSession': state.rememberSession,
+          'signedIn': state.signedIn,
+          'status': state.status,
+        }),
+        flush: true,
+      );
+    } on FileSystemException {
+      return;
+    }
+  }
+}
+
 class RemoteStubAuthSessionContract implements AuthSessionContract {
   RemoteStubAuthSessionContract({
     AuthSessionContract? delegate,

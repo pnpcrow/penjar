@@ -228,6 +228,16 @@ RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
   );
 }
 
+RemoteStubAuthStateStore _buildRemoteStubAuthStateStoreFromEnvironment() {
+  final String authStatePath = const String.fromEnvironment(
+    'PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_PATH',
+  ).trim();
+  if (authStatePath.isEmpty) {
+    return const RemoteStubNoopAuthStateStore();
+  }
+  return RemoteStubFileAuthStateStore(authStatePath);
+}
+
 enum DesktopContractMode {
   inMemory,
   remoteStub;
@@ -323,6 +333,8 @@ class DesktopContractBundle {
     );
     final RemoteStubTransportClient transportClient =
         _buildRemoteStubTransportClientFromEnvironment();
+    final RemoteStubAuthStateStore remoteStubAuthStateStore =
+        _buildRemoteStubAuthStateStoreFromEnvironment();
     final AuthSessionState? remoteStubAuthInitialState =
         _parseRemoteStubAuthInitialState(
           const String.fromEnvironment(
@@ -337,6 +349,7 @@ class DesktopContractBundle {
         blockedOperations: blockedOperations,
       ),
       remoteStubTransportClient: transportClient,
+      remoteStubAuthStateStore: remoteStubAuthStateStore,
       remoteStubAuthInitialState: remoteStubAuthInitialState,
     );
   }
@@ -347,6 +360,8 @@ class DesktopContractBundle {
         const RemoteStubFaultProfile(),
     RemoteStubTransportClient remoteStubTransportClient =
         const RemoteStubNoopTransportClient(),
+    RemoteStubAuthStateStore remoteStubAuthStateStore =
+        const RemoteStubNoopAuthStateStore(),
     AuthSessionState? remoteStubAuthInitialState,
     DesktopRemoteStubProfile? remoteStubProfile,
   }) {
@@ -355,6 +370,7 @@ class DesktopContractBundle {
       DesktopContractMode.remoteStub => DesktopContractBundle.remoteStub(
         faultProfile: remoteStubFaultProfile,
         transportClient: remoteStubTransportClient,
+        authStateStore: remoteStubAuthStateStore,
         authInitialState: remoteStubAuthInitialState,
         remoteStubProfile:
             remoteStubProfile ??
@@ -384,6 +400,8 @@ class DesktopContractBundle {
     RemoteStubFaultProfile faultProfile = const RemoteStubFaultProfile(),
     RemoteStubTransportClient transportClient =
         const RemoteStubNoopTransportClient(),
+    RemoteStubAuthStateStore authStateStore =
+        const RemoteStubNoopAuthStateStore(),
     AuthSessionState? authInitialState,
     DesktopRemoteStubProfile? remoteStubProfile,
   }) {
@@ -392,6 +410,7 @@ class DesktopContractBundle {
       authSession: RemoteStubAuthSessionContract(
         faultProfile: faultProfile,
         transportClient: transportClient,
+        authStateStore: authStateStore,
         initialState: authInitialState,
       ),
       projectLifecycle: RemoteStubProjectLifecycleContract(
