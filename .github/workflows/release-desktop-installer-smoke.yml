@@ -352,6 +352,8 @@ jobs:
 
       - name: Generate appcast preview
         working-directory: ./desktop
+        env:
+          APPCAST_REQUIRE_BOTH_PLATFORMS: 1
         run: ./scripts/generate_appcast_from_reports.sh
 
       - name: Check appcast preview

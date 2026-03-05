@@ -2901,8 +2901,47 @@ Harden release evidence index validation so malformed rows and duplicated RC/pla
   - Malformed table rows fail the evidence check.
   - Full-fast desktop verification remains green with stricter evidence checks.
 
+## Unit WS-D-68: Strict appcast platform coverage guard
+
+### Planned objective
+
+Prevent appcast preview generation from succeeding with partial platform evidence by enforcing both macOS and Windows smoke report presence in strict mode.
+
+### Implemented changes
+
+1. Extended appcast generator strict mode:
+   - `desktop/scripts/generate_appcast_from_reports.sh` now supports `APPCAST_REQUIRE_BOTH_PLATFORMS` (`1/true/yes/on`) to require both `macos` and `windows` reports.
+2. Added strict command surface:
+   - `desktop:release:appcast:generate:strict` (`APPCAST_REQUIRE_BOTH_PLATFORMS=1`).
+3. Hardened smoke workflow appcast generation:
+   - `.github/workflows/release-desktop-installer-smoke.yml` `appcast-preview` generation step now sets `APPCAST_REQUIRE_BOTH_PLATFORMS=1`.
+4. Updated runbook/release baseline docs:
+   - `desktop-flutter-development-runbook.md` command inventory now includes strict appcast generate command,
+   - `desktop-flutter-release-validation-baseline.md` now documents strict appcast generation protocol and CI strict coverage behavior.
+5. Re-ran validation commands:
+   - `pnpm run desktop:release:appcast:generate`,
+   - `pnpm run desktop:release:appcast:generate:strict` (expected failure with only macOS smoke report),
+   - strict-pass synthetic scenario using temporary dual-platform report set (`APPCAST_REQUIRE_BOTH_PLATFORMS=1 ./scripts/generate_appcast_from_reports.sh ...`),
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict mode failure semantics for partial platform reports,
+  - smoke workflow enforcement placement for appcast generation,
+  - command and documentation discoverability for strict mode operations.
+- **Issues found during review**
+  1. Appcast generation previously accepted single-platform report sets, allowing partial release metadata to pass.
+- **Fix applied**
+  1. Added strict both-platform requirement and enforced it in smoke workflow appcast generation step.
+- **Post-fix validation criteria**
+  - Strict appcast generation fails when either macOS or Windows report is missing.
+  - Strict appcast generation passes with valid dual-platform report set.
+  - Full-fast desktop verification remains green after strict appcast coverage integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, de-duplicated contract/parity/mode-matrix verification chain, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation, on-demand installer/update smoke build-report workflow with preflight syntax/coverage readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, de-duplicated contract/parity/mode-matrix verification chain, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation, on-demand installer/update smoke build-report workflow with preflight syntax/coverage readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

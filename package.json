@@ -41,6 +41,7 @@
     "desktop:release:evidence:index:apply:macos": "cd desktop && ./scripts/update_release_evidence_index.sh release/reports/release_evidence_row_macos.md ../docs/technical-guide/developer/desktop-flutter-release-evidence-index.md",
     "desktop:release:evidence:index:apply:windows": "cd desktop && ./scripts/update_release_evidence_index.sh release/reports/release_evidence_row_windows.md ../docs/technical-guide/developer/desktop-flutter-release-evidence-index.md",
     "desktop:release:appcast:generate": "cd desktop && ./scripts/generate_appcast_from_reports.sh",
+    "desktop:release:appcast:generate:strict": "cd desktop && APPCAST_REQUIRE_BOTH_PLATFORMS=1 ./scripts/generate_appcast_from_reports.sh",
     "desktop:release:appcast:check": "cd desktop && ./scripts/check_appcast.sh",
     "desktop:release:appcast:publish:dry-run": "cd desktop && ./scripts/publish_appcast.sh",
     "desktop:release:appcast:bundle:generate": "cd desktop && ./scripts/generate_appcast_publication_bundle.sh",

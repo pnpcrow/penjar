@@ -28,12 +28,19 @@ fi
 "$python_bin" - "$manifest_file" "$reports_dir" "$output_file" <<'PY'
 import datetime
 import json
+import os
 import pathlib
 import sys
 
 manifest_path = pathlib.Path(sys.argv[1])
 reports_dir = pathlib.Path(sys.argv[2])
 output_path = pathlib.Path(sys.argv[3])
+require_both_platforms = os.environ.get("APPCAST_REQUIRE_BOTH_PLATFORMS", "0").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
 
 with manifest_path.open("r", encoding="utf-8") as fh:
     manifest = json.load(fh)
@@ -99,6 +106,14 @@ for report_file in report_files:
 
 if not platform_artifacts:
     raise SystemExit("[appcast-generate] no valid platform reports found for macOS/Windows")
+
+if require_both_platforms:
+    missing_platforms = [platform for platform in ("macos", "windows") if platform not in platform_artifacts]
+    if missing_platforms:
+        raise SystemExit(
+            "[appcast-generate] strict platform coverage is enabled; missing platform report(s): "
+            + ", ".join(missing_platforms)
+        )
 
 ordered_artifacts = []
 for platform in ("macos", "windows"):

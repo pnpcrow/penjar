@@ -47,6 +47,7 @@ This runbook defines the repeatable execution loop for the Flutter desktop full-
    - `pnpm run desktop:release:evidence:index:apply:macos`
    - `pnpm run desktop:release:evidence:index:apply:windows`
    - `pnpm run desktop:release:appcast:generate`
+   - `pnpm run desktop:release:appcast:generate:strict`
    - `pnpm run desktop:release:appcast:check`
    - `pnpm run desktop:release:appcast:publish:dry-run`
    - `pnpm run desktop:release:appcast:bundle:generate`

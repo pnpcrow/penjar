@@ -121,6 +121,7 @@ This baseline defines minimum release validation requirements for desktop distri
    - `pnpm run desktop:release:evidence:index:preview:windows`
 9. Generate and validate appcast preview:
    - `pnpm run desktop:release:appcast:generate`
+   - strict platform coverage mode: `pnpm run desktop:release:appcast:generate:strict` (requires both macOS + Windows smoke reports).
    - `pnpm run desktop:release:appcast:check`
 10. Publish appcast dry-run targets:
    - `pnpm run desktop:release:appcast:publish:dry-run`
@@ -165,6 +166,7 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` also uploads platform release-evidence bundle summary artifacts generated from smoke reports.
 - `.github/workflows/release-desktop-installer-smoke.yml` also uploads release-evidence index preview artifacts generated from row snippets.
 - `.github/workflows/release-desktop-installer-smoke.yml` runs an `appcast-preview` job that generates/checks/uploads appcast preview JSON from smoke reports.
+- `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview generation step enforces strict platform coverage (`APPCAST_REQUIRE_BOTH_PLATFORMS=1`) so both macOS and Windows smoke reports must be present.
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job also produces channel/version appcast publish dry-run targets.
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job also produces and validates appcast publication bundle artifacts.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports explicit non-dry-run external publication consent via `allow_appcast_external_production` input.
