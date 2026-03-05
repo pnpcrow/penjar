@@ -118,6 +118,12 @@ This baseline defines minimum release validation requirements for desktop distri
 7. Generate and review evidence bundle summaries:
    - `pnpm run desktop:release:evidence:bundle:macos`
    - `pnpm run desktop:release:evidence:bundle:windows`
+   - check bundle status summaries:
+     - `pnpm run desktop:release:evidence:bundle:check:macos`
+     - `pnpm run desktop:release:evidence:bundle:check:windows`
+   - strict bundle check mode (fails on risky summary statuses):
+     - `pnpm run desktop:release:evidence:bundle:check:macos:strict`
+     - `pnpm run desktop:release:evidence:bundle:check:windows:strict`
 8. Generate evidence-index previews before applying table updates:
    - `pnpm run desktop:release:evidence:index:preview:macos`
    - `pnpm run desktop:release:evidence:index:preview:windows`
@@ -168,12 +174,14 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer naming enforcement via `enforce_windows_installer_naming` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer provenance enforcement via `enforce_windows_installer_provenance` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer execution enforcement via `enforce_windows_installer_execution` input.
+- `.github/workflows/release-desktop-installer-smoke.yml` supports strict release evidence bundle enforcement via `enforce_release_evidence_bundle` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` builds macOS/Windows release artifacts on demand and uploads installer/update smoke archives + JSON reports.
 - `.github/workflows/release-desktop-installer-smoke.yml` uploads per-platform signing pipeline reports generated during smoke execution.
 - `.github/workflows/release-desktop-installer-smoke.yml` uploads per-platform signing provenance reports generated during smoke execution.
 - `.github/workflows/release-desktop-installer-smoke.yml` uploads Windows installer packaging/pipeline/provenance report artifacts only on `windows` matrix runs.
 - `.github/workflows/release-desktop-installer-smoke.yml` also uploads platform release-evidence row snippet artifacts generated from smoke reports.
 - `.github/workflows/release-desktop-installer-smoke.yml` also uploads platform release-evidence bundle summary artifacts generated from smoke reports.
+- `.github/workflows/release-desktop-installer-smoke.yml` also checks and uploads platform release-evidence bundle check reports (`desktop-release-evidence-bundle-check-*`).
 - `.github/workflows/release-desktop-installer-smoke.yml` also uploads release-evidence index preview artifacts generated from row snippets.
 - `.github/workflows/release-desktop-installer-smoke.yml` runs an `appcast-preview` job that generates/checks/uploads appcast preview JSON from smoke reports.
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview generation step enforces strict platform coverage (`APPCAST_REQUIRE_BOTH_PLATFORMS=1`) so both macOS and Windows smoke reports must be present.
@@ -196,6 +204,7 @@ CI baseline note:
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
+- Release evidence bundle checker: `desktop/scripts/check_release_evidence_bundle.sh`.
 - Release evidence index updater: `desktop/scripts/update_release_evidence_index.sh`.
 - Appcast preview generator/checker: `desktop/scripts/generate_appcast_from_reports.sh`, `desktop/scripts/check_appcast.sh`.
 - Appcast publish dry-run script: `desktop/scripts/publish_appcast.sh`.
