@@ -3351,8 +3351,55 @@ Prevent non-dry-run external publication from bypassing readiness enforcement by
   - Gate-policy report includes provider value for audit traceability.
   - Full-fast desktop verification remains green after policy hardening.
 
+## Unit WS-D-78: Windows installer command-hygiene strict enforcement
+
+### Planned objective
+
+Reduce false-positive Windows release readiness by blocking placeholder installer/provenance command hooks in strict execution and strict provenance paths.
+
+### Implemented changes
+
+1. Hardened Windows installer pipeline command checks:
+   - `desktop/scripts/run_windows_installer_pipeline.sh` now detects placeholder command patterns in `PENJAR_WINDOWS_INSTALLER_COMMAND`,
+   - strict execution mode now fails when placeholder commands are detected,
+   - non-strict mode now marks placeholder command execution as skipped simulation with explicit report diagnostics.
+2. Hardened Windows installer provenance command checks:
+   - `desktop/scripts/check_windows_installer_provenance.sh` now detects placeholder command patterns in `PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND`,
+   - strict provenance mode now fails when placeholder commands are detected,
+   - provenance report now records placeholder status alongside command execution status.
+3. Extended report observability:
+   - pipeline report now includes `Installer command placeholder status`,
+   - provenance report now includes `Provenance command placeholder status`.
+4. Updated release baseline docs:
+   - `desktop-flutter-release-validation-baseline.md` now documents strict Windows execution/provenance placeholder-hygiene enforcement.
+5. Re-ran validation commands:
+   - strict expected-fail Windows installer pipeline scenario with placeholder installer command,
+   - strict pass Windows installer pipeline scenario with non-placeholder installer command,
+   - strict expected-fail Windows installer provenance scenario with placeholder provenance command,
+   - strict pass Windows installer provenance scenario with non-placeholder provenance command,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict Windows installer execution/provenance placeholder command bypass risk,
+  - report-level transparency for placeholder command findings,
+  - compatibility with existing strict/non-strict execution semantics.
+- **Issues found during review**
+  1. Strict Windows installer execution previously accepted placeholder command hooks if commands returned success, allowing simulated command wiring to look production-ready.
+  2. Strict Windows installer provenance previously accepted placeholder provenance command hooks under the same condition.
+- **Fix applied**
+  1. Added shared placeholder-pattern detection logic in Windows installer pipeline/provenance scripts and gated strict modes accordingly.
+  2. Added explicit placeholder status fields in generated reports for audit traceability.
+- **Post-fix validation criteria**
+  - Strict Windows installer pipeline fails when installer command hooks are placeholders.
+  - Strict Windows installer provenance fails when provenance command hooks are placeholders.
+  - Strict pass cases remain green with non-placeholder hooks.
+  - Full-fast desktop verification remains green after hardening.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode plus placeholder hygiene strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode plus placeholder hygiene strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

@@ -30,6 +30,22 @@ mkdir -p "$(dirname "$report_file")"
 
 execution_status="simulated"
 error_message=""
+command_placeholder_status="not-configured"
+
+is_placeholder_command() {
+  local command_value
+  command_value="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+  if [[ "$command_value" =~ ^[[:space:]]*echo([[:space:]]|$) ]]; then
+    return 0
+  fi
+  if printf '%s' "$command_value" | grep -Eq '<[^>]+>'; then
+    return 0
+  fi
+  if [[ "$command_value" =~ (^|[^a-z0-9_])(todo|tbd|placeholder|changeme|change_me|replace_me|example|dummy|sample|fixme)([^a-z0-9_]|$) ]]; then
+    return 0
+  fi
+  return 1
+}
 
 if [[ ! -d "$runner_dir" ]]; then
   if [[ "$strict_mode" -eq 1 ]]; then
@@ -42,9 +58,20 @@ if [[ ! -d "$runner_dir" ]]; then
 elif [[ -n "$installer_command" ]]; then
   export PENJAR_WINDOWS_RUNNER_DIR="$runner_dir"
   export PENJAR_WINDOWS_INSTALLER_OUTPUT_PATH="$installer_output_path"
-  if bash -lc "$installer_command"; then
+  if is_placeholder_command "$installer_command"; then
+    command_placeholder_status="detected"
+    if [[ "$strict_mode" -eq 1 ]]; then
+      execution_status="failed"
+      error_message="installer command appears to be a placeholder in strict mode"
+    else
+      execution_status="simulated"
+      error_message="installer command appears to be a placeholder; execution skipped"
+    fi
+  elif bash -lc "$installer_command"; then
+    command_placeholder_status="clear"
     execution_status="executed"
   else
+    command_placeholder_status="clear"
     execution_status="failed"
     error_message="installer command failed"
   fi
@@ -62,6 +89,7 @@ fi
   echo "- Runner directory: $runner_dir"
   echo "- Installer output path: $installer_output_path"
   echo "- Installer command configured: $([[ -n "$installer_command" ]] && echo yes || echo no)"
+  echo "- Installer command placeholder status: $command_placeholder_status"
   echo "- Execution status: $execution_status"
   if [[ -n "$error_message" ]]; then
     echo "- Error: $error_message"
@@ -80,6 +108,11 @@ fi
 
 if [[ "$execution_status" == "skipped" ]]; then
   echo "[windows-installer-pipeline] warning: pipeline skipped. report: $report_file"
+  exit 0
+fi
+
+if [[ "$command_placeholder_status" == "detected" ]]; then
+  echo "[windows-installer-pipeline] warning: placeholder installer command detected. report: $report_file"
   exit 0
 fi
 

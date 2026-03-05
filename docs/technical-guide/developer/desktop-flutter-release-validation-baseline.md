@@ -98,6 +98,7 @@ This baseline defines minimum release validation requirements for desktop distri
      - set `STRICT_WINDOWS_INSTALLER_PROVENANCE=1` (or workflow input `enforce_windows_installer_provenance=true`) to enforce installer provenance verification and command evidence.
    - windows installer execution strict mode:
      - set `STRICT_WINDOWS_INSTALLER_EXECUTION=1` (or workflow input `enforce_windows_installer_execution=true`) to enforce installer command execution.
+   - strict Windows installer execution/provenance modes reject placeholder command hooks (for example `echo ...`, `<...>`, `todo`/`tbd` markers).
    - standalone Windows installer generation command check:
      - `pnpm run desktop:release:windows-installer:run`.
    - standalone Windows installer artifact check:
@@ -175,6 +176,7 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer naming enforcement via `enforce_windows_installer_naming` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer provenance enforcement via `enforce_windows_installer_provenance` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer execution enforcement via `enforce_windows_installer_execution` input.
+- `.github/workflows/release-desktop-installer-smoke.yml` strict Windows installer execution/provenance checks now include placeholder-hygiene enforcement for command hooks.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict release evidence bundle enforcement via `enforce_release_evidence_bundle` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now models `STRICT_RELEASE_EVIDENCE_BUNDLE` dependencies (`STRICT_SIGNING_PROVENANCE=1` and `STRICT_WINDOWS_INSTALLER_PROVENANCE=1`).
 - `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now requires configured external provider when `publish_appcast_external=true`, and requires `enforce_appcast_external_readiness=true` for non-dry-run external publication.

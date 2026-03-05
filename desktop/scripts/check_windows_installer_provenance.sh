@@ -33,6 +33,22 @@ provenance_status="missing"
 overall_status="warning"
 sha256_value=""
 error_message=""
+provenance_command_placeholder_status="not-configured"
+
+is_placeholder_command() {
+  local command_value
+  command_value="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+  if [[ "$command_value" =~ ^[[:space:]]*echo([[:space:]]|$) ]]; then
+    return 0
+  fi
+  if printf '%s' "$command_value" | grep -Eq '<[^>]+>'; then
+    return 0
+  fi
+  if [[ "$command_value" =~ (^|[^a-z0-9_])(todo|tbd|placeholder|changeme|change_me|replace_me|example|dummy|sample|fixme)([^a-z0-9_]|$) ]]; then
+    return 0
+  fi
+  return 1
+}
 
 if [[ -f "$installer_path" ]]; then
   artifact_status="present"
@@ -62,15 +78,26 @@ if [[ -f "$installer_path" ]]; then
   fi
 
   if [[ -n "$provenance_command" ]]; then
-    export PENJAR_WINDOWS_INSTALLER_PATH="$installer_path"
-    if bash -lc "$provenance_command"; then
-      provenance_status="executed"
-    else
+    if is_placeholder_command "$provenance_command"; then
+      provenance_command_placeholder_status="detected"
       provenance_status="failed"
       if [[ -z "$error_message" ]]; then
-        error_message="provenance command failed"
+        error_message="provenance command appears to be a placeholder"
+      fi
+    else
+      provenance_command_placeholder_status="clear"
+      export PENJAR_WINDOWS_INSTALLER_PATH="$installer_path"
+      if bash -lc "$provenance_command"; then
+        provenance_status="executed"
+      else
+        provenance_status="failed"
+        if [[ -z "$error_message" ]]; then
+          error_message="provenance command failed"
+        fi
       fi
     fi
+  else
+    provenance_command_placeholder_status="not-configured"
   fi
 fi
 
@@ -81,6 +108,11 @@ if [[ "$artifact_status" == "present" && "$hash_status" == "computed" ]]; then
     overall_status="warning"
     if [[ -z "$error_message" ]]; then
       error_message="provenance command is not configured"
+    fi
+  elif [[ "$provenance_status" == "failed" ]]; then
+    overall_status="warning"
+    if [[ -z "$error_message" ]]; then
+      error_message="provenance command validation failed"
     fi
   fi
 fi
@@ -101,6 +133,9 @@ if [[ "$strict_mode" -eq 1 ]]; then
     fi
   elif [[ "$provenance_status" == "failed" ]]; then
     overall_status="failed"
+    if [[ "$provenance_command_placeholder_status" == "detected" && -z "$error_message" ]]; then
+      error_message="provenance command appears to be a placeholder in strict mode"
+    fi
   fi
 fi
 
@@ -115,6 +150,7 @@ fi
   echo "- SHA256 status: $hash_status"
   echo "- SHA256: ${sha256_value:-n/a}"
   echo "- Provenance command configured: $([[ -n "$provenance_command" ]] && echo yes || echo no)"
+  echo "- Provenance command placeholder status: $provenance_command_placeholder_status"
   echo "- Provenance command status: $provenance_status"
   echo "- Overall status: $overall_status"
   if [[ -n "$error_message" ]]; then
