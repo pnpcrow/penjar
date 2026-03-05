@@ -44,6 +44,7 @@
     "desktop:release:signing:readiness:strict": "cd desktop && ./scripts/check_signing_readiness.sh 1",
     "desktop:release:signing:run:macos": "cd desktop && SKIP_PUB_GET=1 ./scripts/run_signing_with_build.sh macos 0 release",
     "desktop:release:signing:run:windows": "cd desktop && SKIP_PUB_GET=1 ./scripts/run_signing_with_build.sh windows 0 release",
+    "desktop:release:windows-installer:run": "cd desktop && ./scripts/run_windows_installer_pipeline.sh",
     "desktop:release:windows-installer:check": "cd desktop && ./scripts/check_windows_installer_packaging.sh"
   },
   "devDependencies": {

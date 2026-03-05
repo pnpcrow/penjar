@@ -2157,8 +2157,58 @@ Reduce Windows release artifact ambiguity by adding explicit `.msi/.exe` packagi
   - Strict mode path is available for release gate enforcement.
   - Full-fast desktop verification remains green after Windows packaging verification integration.
 
+## Unit WS-D-52: Windows installer command pipeline baseline
+
+### Planned objective
+
+Establish explicit command-hooked Windows installer generation pipeline with strict execution control, separated from artifact presence verification.
+
+### Implemented changes
+
+1. Added Windows installer pipeline runner:
+   - `desktop/scripts/run_windows_installer_pipeline.sh`.
+2. Implemented pipeline semantics:
+   - validates build mode and runner directory context,
+   - supports strict/non-strict execution mode (`STRICT_WINDOWS_INSTALLER_EXECUTION`),
+   - consumes installer generation command hook (`PENJAR_WINDOWS_INSTALLER_COMMAND`),
+   - exports standardized command context (`PENJAR_WINDOWS_RUNNER_DIR`, `PENJAR_WINDOWS_INSTALLER_OUTPUT_PATH`),
+   - emits execution report (`release/reports/windows_installer_pipeline_report.md`).
+3. Integrated pipeline into smoke orchestrator:
+   - `desktop/scripts/release_installer_update_smoke.sh` now runs Windows installer pipeline before installer artifact check.
+4. Added root command surface:
+   - `desktop:release:windows-installer:run`.
+5. Extended manual smoke workflow dispatch contract:
+   - added `enforce_windows_installer_execution` input.
+6. Extended installer-smoke workflow env/artifacts:
+   - passes `STRICT_WINDOWS_INSTALLER_EXECUTION` and `PENJAR_WINDOWS_INSTALLER_COMMAND`,
+   - uploads Windows installer pipeline report artifacts.
+7. Updated release/runbook/index docs:
+   - `desktop-flutter-release-validation-baseline.md` now includes strict execution guidance and pipeline runner reference,
+   - `desktop-flutter-development-runbook.md` command inventory now includes Windows installer pipeline run command,
+   - `desktop-flutter-release-evidence-index.md` maintenance rules now include pipeline report attachment.
+8. Re-ran validation commands:
+   - `pnpm run desktop:release:windows-installer:run`,
+   - `pnpm run desktop:release:windows-installer:check`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict/non-strict execution semantics for Windows installer command hook,
+  - workflow input/env wiring and artifact upload continuity,
+  - coordination between installer pipeline execution and packaging verification stages.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Windows installer pipeline command emits execution report and warns in non-strict mode when context is unavailable.
+  - Strict execution gate is configurable in workflow dispatch.
+  - Full-fast desktop verification remains green after Windows installer pipeline integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, signing readiness gating, command-hooked signing execution baseline, optional external publication dry-run stage, and Windows installer packaging verification baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication execution (non-dry-run credentials/invalidation) are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, signing readiness gating, command-hooked signing execution baseline, optional external publication dry-run stage, Windows installer packaging verification baseline, and command-hooked Windows installer pipeline baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication execution (non-dry-run credentials/invalidation) are not yet configured.

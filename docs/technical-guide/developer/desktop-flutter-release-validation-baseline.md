@@ -80,6 +80,10 @@ This baseline defines minimum release validation requirements for desktop distri
      - set `STRICT_SIGNING_EXECUTION=1` when invoking smoke pipeline to enforce command-backed signing/notarization.
    - windows installer strict mode:
      - set `STRICT_WINDOWS_INSTALLER_PACKAGING=1` (or workflow input `enforce_windows_installer_packaging=true`) to enforce `.msi/.exe` artifact presence.
+   - windows installer execution strict mode:
+     - set `STRICT_WINDOWS_INSTALLER_EXECUTION=1` (or workflow input `enforce_windows_installer_execution=true`) to enforce installer command execution.
+   - standalone Windows installer generation command check:
+     - `pnpm run desktop:release:windows-installer:run`.
    - standalone Windows installer artifact check:
      - `pnpm run desktop:release:windows-installer:check`.
    - CI workflow entrypoint:
@@ -110,9 +114,11 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` includes `signing-readiness` job with optional strict enforcement via workflow input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing execution enforcement via `enforce_signing_execution` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer artifact enforcement via `enforce_windows_installer_packaging` input.
+- `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer execution enforcement via `enforce_windows_installer_execution` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` builds macOS/Windows release artifacts on demand and uploads installer/update smoke archives + JSON reports.
 - `.github/workflows/release-desktop-installer-smoke.yml` uploads per-platform signing pipeline reports generated during smoke execution.
 - `.github/workflows/release-desktop-installer-smoke.yml` uploads Windows installer packaging report artifacts.
+- `.github/workflows/release-desktop-installer-smoke.yml` uploads Windows installer pipeline execution report artifacts.
 - `.github/workflows/release-desktop-installer-smoke.yml` also uploads platform release-evidence row snippet artifacts generated from smoke reports.
 - `.github/workflows/release-desktop-installer-smoke.yml` also uploads release-evidence index preview artifacts generated from row snippets.
 - `.github/workflows/release-desktop-installer-smoke.yml` runs an `appcast-preview` job that generates/checks/uploads appcast preview JSON from smoke reports.
@@ -129,11 +135,12 @@ CI baseline note:
 - Appcast external publication runner: `desktop/scripts/publish_appcast_external.sh`.
 - Signing readiness checker: `desktop/scripts/check_signing_readiness.sh`.
 - Signing execution pipeline runners: `desktop/scripts/run_signing_pipeline.sh`, `desktop/scripts/run_signing_with_build.sh`.
+- Windows installer pipeline runner: `desktop/scripts/run_windows_installer_pipeline.sh`.
 - Windows installer packaging checker: `desktop/scripts/check_windows_installer_packaging.sh`.
 
 ## 5) Implementation backlog seeds
 
 1. Wire actual platform signing/notarization commands into `PENJAR_*_SIGN_COMMAND` / `PENJAR_MACOS_NOTARIZE_COMMAND` secrets and harden failure diagnostics.
-2. Replace Windows installer packaging placeholder path with actual signed installer generation (`.msi`/`exe`) command chain.
+2. Wire actual Windows installer generation command into `PENJAR_WINDOWS_INSTALLER_COMMAND` and validate generated artifact naming policy.
 3. Promote external publication stage from dry-run to production mode with guarded rollout and verified invalidation commands.
 4. Promote evidence index preview automation into governed auto-apply (PR/comment gate) workflow.

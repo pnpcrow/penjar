@@ -49,3 +49,4 @@ Each release candidate record should include:
 14. Attach platform signing pipeline reports (`release/reports/signing_report_macos.md`, `release/reports/signing_report_windows.md`) before promotion decision.
 15. Attach external publication report (`release/reports/appcast_external_publication_report.md`) when external publication stage is executed.
 16. Attach Windows installer packaging report (`release/reports/windows_installer_packaging_report.md`) before promotion decision.
+17. Attach Windows installer pipeline report (`release/reports/windows_installer_pipeline_report.md`) before promotion decision.
