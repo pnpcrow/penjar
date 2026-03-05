@@ -1764,6 +1764,42 @@ void main() {
       },
     );
 
+    test(
+      'auth backend cyclic error containers do not recurse indefinitely',
+      () {
+        final Map<String, Object?> cyclicError = <String, Object?>{};
+        final List<Object?> cyclicFailures = <Object?>[];
+        cyclicError['error'] = cyclicError;
+        cyclicError['failures'] = cyclicFailures;
+        cyclicFailures.add(cyclicError);
+        cyclicFailures.add(cyclicFailures);
+
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'message': 'Backend cyclic payload handled.',
+                'error': cyclicError,
+                'failures': cyclicFailures,
+                'state': <String, Object?>{
+                  'signedIn': true,
+                  'rememberSession': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend cyclic payload handled.',
+        );
+      },
+    );
+
     final List<_AuthBackendFixtureCase>
     authBackendContractFixtures = <_AuthBackendFixtureCase>[
       const _AuthBackendFixtureCase(

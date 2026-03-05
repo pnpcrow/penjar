@@ -88,6 +88,7 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
    - backend code normalization regex allocation is now cached as a shared helper constant to reduce repeated runtime compile overhead in auth code-classification paths,
    - signed-out/session-expired backend code classification is now resolved once per payload and reused across signed-in inference + fallback-status mapping paths to reduce duplicate marker scans,
    - auth state/failure alias collections are now centralized as shared parser constants to reduce alias-drift risk and repeated literal-set/list declaration overhead across detection/value-resolution paths,
+   - recursive failure/status/code container traversal now applies identity-based cycle guards to avoid unbounded recursion on malformed cyclic payload graphs while preserving nested extraction behavior,
    - explicit signed-in aliases remain precedence over signed-out code/failure-flag variants, with regression coverage now including `SESSION_TIMEOUT` / `EXPIRED_TOKEN` code variants and snake-case/isOk failure-flag variants,
    - explicit backend status/message/detail still takes precedence over fallback mapping.
 15. Backend auth endpoint override readiness for transport binding:
@@ -124,7 +125,7 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
 1. Freeze expected backend auth response envelopes for sign-in/restore/refresh flows.
 2. Add contract fixtures covering success, signed-out, token-expiry, and unauthorized variants.
 3. Add strict parser assertions for required auth fields/aliases per flow.
-4. Status: in progress (fixture matrix baseline + `result/data/payload` envelope-chain and `authState` alias fixture coverage added in `workflow_contracts_test.dart`, including explicit signed-out envelope alias variants (`signedOut`, `is_signed_out`), logged-style signed-out envelope fixtures (`loggedOut`, `isLoggedOut`, `is_logged_out`), logged-style signed-in envelope fixtures (`data.authState.loggedIn`, `result.authState.isLoggedIn`), plus contract/parity logged-style signed-out alias regression coverage (`loggedOut`, `isLoggedOut`, `logged_out`, `is_logged_out`) and dedicated logged-style signed-in parity locks (`logged_in`, `is_logged_in`, `loggedIn`, `isLoggedIn`); broader schema fixture expansion remains).
+4. Status: in progress (fixture matrix baseline + `result/data/payload` envelope-chain and `authState` alias fixture coverage added in `workflow_contracts_test.dart`, including explicit signed-out envelope alias variants (`signedOut`, `is_signed_out`), logged-style signed-out envelope fixtures (`loggedOut`, `isLoggedOut`, `is_logged_out`), logged-style signed-in envelope fixtures (`data.authState.loggedIn`, `result.authState.isLoggedIn`), cycle-safe recursive container traversal guard coverage for malformed cyclic payloads, plus contract/parity logged-style signed-out alias regression coverage (`loggedOut`, `isLoggedOut`, `logged_out`, `is_logged_out`) and dedicated logged-style signed-in parity locks (`logged_in`, `is_logged_in`, `loggedIn`, `isLoggedIn`); broader schema fixture expansion remains).
 
 ### ABI-02: Real auth transport binding and state persistence continuity
 

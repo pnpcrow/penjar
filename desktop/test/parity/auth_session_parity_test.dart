@@ -320,6 +320,31 @@ class _AuthBackendSessionTimeoutParityTransportClient
   }
 }
 
+class _AuthBackendCyclicErrorContainerParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendCyclicErrorContainerParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      final Map<String, Object?> cyclicError = <String, Object?>{};
+      final List<Object?> cyclicFailures = <Object?>[];
+      cyclicError['error'] = cyclicError;
+      cyclicError['failures'] = cyclicFailures;
+      cyclicFailures.add(cyclicError);
+      cyclicFailures.add(cyclicFailures);
+
+      return RemoteStubTransportResult.allowedWithPayload(<String, Object?>{
+        'message': 'Backend cyclic payload handled.',
+        'error': cyclicError,
+        'failures': cyclicFailures,
+        'state': <String, Object?>{'signedIn': true, 'rememberSession': true},
+      });
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 class _AuthBackendPayloadEnvelopeParityTransportClient
     extends RemoteStubTransportClient {
   const _AuthBackendPayloadEnvelopeParityTransportClient();
@@ -863,6 +888,43 @@ void main() {
     expect(
       find.textContaining(
         'Status: [remote-stub] Backend isLoggedIn sign-in snapshot applied.',
+      ),
+      findsOneWidget,
+    );
+    final CheckboxListTile rememberSessionTile = tester.widget(
+      find.byKey(const ValueKey<String>('auth-remember')),
+    );
+    expect(rememberSessionTile.value, isTrue);
+
+    expect(find.textContaining('Signed in (simulated).'), findsNothing);
+  });
+
+  testWidgets('auth/session parity tolerates cyclic error containers', (
+    WidgetTester tester,
+  ) async {
+    await pumpDesktopApp(
+      tester,
+      contracts: DesktopContractBundle.fromMode(
+        DesktopContractMode.remoteStub,
+        remoteStubTransportClient:
+            const _AuthBackendCyclicErrorContainerParityTransportClient(),
+      ),
+    );
+    await openWorkflowSection(tester, 'auth');
+
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('auth-password')),
+      'desktop-pass',
+    );
+    await tester.ensureVisible(
+      find.byKey(const ValueKey<String>('auth-sign-in')),
+    );
+    await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining(
+        'Status: [remote-stub] Backend cyclic payload handled.',
       ),
       findsOneWidget,
     );

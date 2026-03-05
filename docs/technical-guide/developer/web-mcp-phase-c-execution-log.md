@@ -8210,6 +8210,57 @@ coverage and expanding ABI-01 `authState` envelope fixtures with camelCase
     envelope behavior.
   - targeted tests and full desktop verification remain green after parity/fixture expansion.
 
+## Unit WS-D-181: Cycle-safe backend-auth container traversal hardening
+
+### Planned objective
+
+Prevent recursive auth parser paths from looping indefinitely on malformed cyclic payload graphs
+while preserving existing nested error/status/code extraction semantics and alias precedence.
+
+### Implemented changes
+
+1. Hardened recursive auth parser helpers in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_containsExplicitFalseInContainer(...)`,
+   - `_resolveBackendStatusFromContainer(...)`,
+   - `_resolveBackendCodeFromContainer(...)`,
+   with identity-based visited-set guards (`Set<Object>.identity()`) to avoid cycle re-entry.
+2. Added contract regression in `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend cyclic error containers do not recurse indefinitely`.
+3. Added parity regression in `desktop/test/parity/auth_session_parity_test.dart`:
+   - `_AuthBackendCyclicErrorContainerParityTransportClient`,
+   - `auth/session parity tolerates cyclic error containers`.
+4. Synced continuity docs for parser-hardening evidence:
+   - `desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `desktop-flutter-development-runbook.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+5. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - malformed backend payload safety in recursive failure/status/code traversal paths,
+  - regression impact on existing nested error-detail/status-code extraction behavior,
+  - parity-level UI stability when cyclic payloads are received.
+- **Issues found during review**
+  1. Recursive container traversal helpers had no cycle guard; malformed payloads containing
+     self-referential map/list structures could trigger unbounded recursion.
+  2. Initial visited-set patch over-constrained nested traversal by double-marking payload maps,
+     causing nested status/code extraction regressions.
+- **Fix applied**
+  1. Added identity-based visited-set guards at container-entry points to block cycle re-entry.
+  2. Removed payload-level double-marking in status/code payload resolvers so legitimate nested
+     extraction paths continue to work while cycle protection remains active.
+  3. Added contract + parity regressions using cyclic map/list payloads to lock parser safety.
+- **Post-fix validation criteria**
+  - cyclic backend payload containers do not cause recursion failures in auth parser paths.
+  - nested error/status/code extraction semantics remain unchanged for non-cyclic payloads.
+  - targeted tests and full desktop verification remain green after parser hardening.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

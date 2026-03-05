@@ -984,7 +984,17 @@ bool _containsExplicitFalseInSources(
   return false;
 }
 
-bool _containsExplicitFalseInContainer(Object? value, List<String> aliases) {
+bool _containsExplicitFalseInContainer(
+  Object? value,
+  List<String> aliases, [
+  Set<Object>? visited,
+]) {
+  final Set<Object> visitedValues = visited ?? Set<Object>.identity();
+  if (value is Map || value is List) {
+    if (!visitedValues.add(value!)) {
+      return false;
+    }
+  }
   final Map<String, Object?> payload = _coerceStringKeyedMap(value);
   if (payload.isNotEmpty) {
     final Object? rawValue = _firstPresentValue(payload, aliases);
@@ -1009,14 +1019,18 @@ bool _containsExplicitFalseInContainer(Object? value, List<String> aliases) {
       'session',
       'tokens',
     ]) {
-      if (_containsExplicitFalseInContainer(payload[alias], aliases)) {
+      if (_containsExplicitFalseInContainer(
+        payload[alias],
+        aliases,
+        visitedValues,
+      )) {
         return true;
       }
     }
   }
   if (value is List) {
     for (final Object? item in value) {
-      if (_containsExplicitFalseInContainer(item, aliases)) {
+      if (_containsExplicitFalseInContainer(item, aliases, visitedValues)) {
         return true;
       }
     }
@@ -1138,7 +1152,11 @@ String? _tryResolveBackendStatusValue({
   return null;
 }
 
-String? _resolveBackendStatusFromPayload(Map<String, Object?> payload) {
+String? _resolveBackendStatusFromPayload(
+  Map<String, Object?> payload, {
+  Set<Object>? visited,
+}) {
+  final Set<Object> visitedValues = visited ?? Set<Object>.identity();
   for (final String alias in const <String>[
     'status',
     'message',
@@ -1159,7 +1177,10 @@ String? _resolveBackendStatusFromPayload(Map<String, Object?> payload) {
     'failure',
     'failures',
   ]) {
-    final String? nested = _resolveBackendStatusFromContainer(payload[alias]);
+    final String? nested = _resolveBackendStatusFromContainer(
+      payload[alias],
+      visitedValues,
+    );
     if (nested != null) {
       return nested;
     }
@@ -1167,18 +1188,30 @@ String? _resolveBackendStatusFromPayload(Map<String, Object?> payload) {
   return null;
 }
 
-String? _resolveBackendStatusFromContainer(Object? value) {
+String? _resolveBackendStatusFromContainer(
+  Object? value, [
+  Set<Object>? visited,
+]) {
+  final Set<Object> visitedValues = visited ?? Set<Object>.identity();
+  if (value is Map || value is List) {
+    if (!visitedValues.add(value!)) {
+      return null;
+    }
+  }
   final String? direct = _coerceNonEmptyString(value);
   if (direct != null) {
     return direct;
   }
   final Map<String, Object?> payload = _coerceStringKeyedMap(value);
   if (payload.isNotEmpty) {
-    return _resolveBackendStatusFromPayload(payload);
+    return _resolveBackendStatusFromPayload(payload, visited: visitedValues);
   }
   if (value is List) {
     for (final Object? item in value) {
-      final String? nested = _resolveBackendStatusFromContainer(item);
+      final String? nested = _resolveBackendStatusFromContainer(
+        item,
+        visitedValues,
+      );
       if (nested != null) {
         return nested;
       }
@@ -1208,7 +1241,11 @@ String? _resolveBackendCodeValue({
   return null;
 }
 
-String? _resolveBackendCodeFromPayload(Map<String, Object?> payload) {
+String? _resolveBackendCodeFromPayload(
+  Map<String, Object?> payload, {
+  Set<Object>? visited,
+}) {
+  final Set<Object> visitedValues = visited ?? Set<Object>.identity();
   final String? directCode =
       _coerceBackendCodeString(payload['code']) ??
       _coerceBackendCodeString(payload['errorCode']) ??
@@ -1226,7 +1263,10 @@ String? _resolveBackendCodeFromPayload(Map<String, Object?> payload) {
     'failure',
     'failures',
   ]) {
-    final String? nestedCode = _resolveBackendCodeFromContainer(payload[alias]);
+    final String? nestedCode = _resolveBackendCodeFromContainer(
+      payload[alias],
+      visitedValues,
+    );
     if (nestedCode != null) {
       return nestedCode;
     }
@@ -1234,18 +1274,30 @@ String? _resolveBackendCodeFromPayload(Map<String, Object?> payload) {
   return null;
 }
 
-String? _resolveBackendCodeFromContainer(Object? value) {
+String? _resolveBackendCodeFromContainer(
+  Object? value, [
+  Set<Object>? visited,
+]) {
+  final Set<Object> visitedValues = visited ?? Set<Object>.identity();
+  if (value is Map || value is List) {
+    if (!visitedValues.add(value!)) {
+      return null;
+    }
+  }
   final String? stringCode = _coerceBackendCodeString(value);
   if (stringCode != null) {
     return stringCode;
   }
   final Map<String, Object?> payload = _coerceStringKeyedMap(value);
   if (payload.isNotEmpty) {
-    return _resolveBackendCodeFromPayload(payload);
+    return _resolveBackendCodeFromPayload(payload, visited: visitedValues);
   }
   if (value is List) {
     for (final Object? item in value) {
-      final String? nestedCode = _resolveBackendCodeFromContainer(item);
+      final String? nestedCode = _resolveBackendCodeFromContainer(
+        item,
+        visitedValues,
+      );
       if (nestedCode != null) {
         return nestedCode;
       }
