@@ -145,10 +145,24 @@ class RemoteStubTransportResult {
   final String? status;
 }
 
+class RemoteStubTransportProfile {
+  const RemoteStubTransportProfile({
+    this.blockedOperations = const <String>{},
+    this.blockedReason = 'Remote transport unavailable',
+  });
+
+  final Set<String> blockedOperations;
+  final String blockedReason;
+
+  bool get isEmpty => blockedOperations.isEmpty;
+}
+
 abstract class RemoteStubTransportClient {
   const RemoteStubTransportClient();
 
   RemoteStubTransportResult execute(RemoteStubTransportRequest request);
+
+  RemoteStubTransportProfile get profile => const RemoteStubTransportProfile();
 }
 
 class RemoteStubNoopTransportClient extends RemoteStubTransportClient {
@@ -174,6 +188,12 @@ class RemoteStubScriptedTransportClient extends RemoteStubTransportClient {
       blockedOperations,
     ).contains(_normalizeOperation(operation));
   }
+
+  @override
+  RemoteStubTransportProfile get profile => RemoteStubTransportProfile(
+    blockedOperations: _normalizedOperationSet(blockedOperations),
+    blockedReason: blockedReason,
+  );
 
   @override
   RemoteStubTransportResult execute(RemoteStubTransportRequest request) {

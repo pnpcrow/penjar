@@ -45,21 +45,15 @@ DesktopRemoteStubProfile _buildRemoteStubProfile({
   required RemoteStubFaultProfile faultProfile,
   required RemoteStubTransportClient transportClient,
 }) {
-  Set<String> transportBlockedOperations = const <String>{};
-  String transportBlockedReason = 'Remote transport unavailable';
-
-  if (transportClient is RemoteStubScriptedTransportClient) {
-    transportBlockedOperations = _normalizeOperationSet(
-      transportClient.blockedOperations,
-    );
-    transportBlockedReason = transportClient.blockedReason;
-  }
+  final RemoteStubTransportProfile transportProfile = transportClient.profile;
 
   return DesktopRemoteStubProfile(
     unavailable: faultProfile.unavailable,
     blockedOperations: _normalizeOperationSet(faultProfile.blockedOperations),
-    transportBlockedOperations: transportBlockedOperations,
-    transportBlockedReason: transportBlockedReason,
+    transportBlockedOperations: _normalizeOperationSet(
+      transportProfile.blockedOperations,
+    ),
+    transportBlockedReason: transportProfile.blockedReason,
   );
 }
 

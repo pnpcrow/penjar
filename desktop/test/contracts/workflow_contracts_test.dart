@@ -584,6 +584,14 @@ void main() {
             blockedOperations: <String>{'SIGN-IN'},
             blockedReason: 'Transport bridge unavailable',
           );
+      expect(
+        transportClient.profile.blockedOperations,
+        contains(RemoteStubOperationIds.signIn),
+      );
+      expect(
+        transportClient.profile.blockedReason,
+        'Transport bridge unavailable',
+      );
       final RemoteStubAuthSessionContract authContract =
           RemoteStubAuthSessionContract(transportClient: transportClient);
       final RemoteStubProjectLifecycleContract projectContract =
