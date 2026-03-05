@@ -3304,8 +3304,55 @@ Reduce external publication false-readiness risk by enforcing placeholder comman
   - External publication report contains invalidation execution status for both success and failure paths.
   - Full-fast desktop verification remains green after hardening.
 
+## Unit WS-D-77: External publication gate-policy provider/readiness hardening
+
+### Planned objective
+
+Prevent non-dry-run external publication from bypassing readiness enforcement by hardening gate-policy preflight relationships around provider configuration and strict readiness requirements.
+
+### Implemented changes
+
+1. Extended gate-policy provider model:
+   - `desktop/scripts/check_release_smoke_gate_policy.sh` now reads normalized `APPCAST_PUBLISH_PROVIDER`.
+2. Added required external publication policy checks:
+   - `PUBLISH_APPCAST_EXTERNAL=1` now requires provider configuration (`APPCAST_PUBLISH_PROVIDER != none`),
+   - unsupported provider values are blocked at preflight,
+   - non-dry-run external publication now requires `STRICT_APPCAST_EXTERNAL_READINESS=1`.
+3. Added advisory policy check:
+   - warns when provider is configured while external publication stage is disabled.
+4. Extended gate-policy report transparency:
+   - report now includes effective `APPCAST_PUBLISH_PROVIDER` value.
+5. Wired workflow env propagation:
+   - `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight step now passes `APPCAST_PUBLISH_PROVIDER: ${{ inputs.appcast_external_provider }}`.
+6. Updated release baseline docs:
+   - `desktop-flutter-release-validation-baseline.md` now documents provider/readiness dependency checks in gate-policy preflight.
+7. Re-ran validation commands:
+   - `cd desktop && PUBLISH_APPCAST_EXTERNAL=1 APPCAST_PUBLISH_PROVIDER=none ./scripts/check_release_smoke_gate_policy.sh` (expected failure),
+   - `cd desktop && PUBLISH_APPCAST_EXTERNAL=1 APPCAST_PUBLISH_PROVIDER=s3 APPCAST_PUBLISH_DRY_RUN=0 ALLOW_APPCAST_EXTERNAL_PRODUCTION=1 STRICT_APPCAST_EXTERNAL_READINESS=0 ./scripts/check_release_smoke_gate_policy.sh` (expected failure),
+   - `cd desktop && PUBLISH_APPCAST_EXTERNAL=1 APPCAST_PUBLISH_PROVIDER=s3 APPCAST_PUBLISH_DRY_RUN=0 ALLOW_APPCAST_EXTERNAL_PRODUCTION=1 STRICT_APPCAST_EXTERNAL_READINESS=1 ./scripts/check_release_smoke_gate_policy.sh`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - external publication provider/preflight wiring consistency,
+  - non-dry-run readiness-enforcement bypass risk,
+  - report observability for provider-level toggles.
+- **Issues found during review**
+  1. Gate policy previously allowed `publish_appcast_external=true` with provider unset (`none`), resulting in inert external publication stage despite enabled publish toggle.
+  2. Gate policy previously allowed non-dry-run external publication without strict readiness enforcement, enabling readiness-check warnings to be ignored.
+- **Fix applied**
+  1. Added provider configuration/validity requirements for external publication.
+  2. Added mandatory strict-readiness dependency for non-dry-run external publication.
+- **Post-fix validation criteria**
+  - Provider-missing/unsupported configurations fail in gate-policy preflight.
+  - Non-dry-run external publication fails in preflight unless strict readiness is enabled.
+  - Gate-policy report includes provider value for audit traceability.
+  - Full-fast desktop verification remains green after policy hardening.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode plus placeholder hygiene strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks and strict placeholder-hygiene enforcement with resilient publication invalidation-status reporting, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode plus placeholder hygiene strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
