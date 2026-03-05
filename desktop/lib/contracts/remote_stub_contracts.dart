@@ -838,6 +838,23 @@ bool _containsAnyNonEmptyStringInSources(
   return false;
 }
 
+bool _containsExplicitFalseInSources(
+  List<Map<String, Object?>> sources,
+  List<String> aliases,
+) {
+  for (final Map<String, Object?> source in sources) {
+    final Object? rawValue = _firstPresentValue(source, aliases);
+    if (rawValue == null) {
+      continue;
+    }
+    final bool? resolved = _coerceBool(rawValue);
+    if (resolved == false) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool _hasBackendStatus({
   required Map<String, Object?> responsePayload,
   required Map<String, Object?> envelopePayload,
@@ -1114,6 +1131,14 @@ AuthSessionState? _authStateFromBackendPayload(
       const <String>['user', 'profile', 'account'],
     ),
   ).isNotEmpty;
+  final bool hasExplicitFailureFlag = _containsExplicitFalseInSources(
+    <Map<String, Object?>>[
+      responsePayload,
+      envelopePayload,
+      ...authSources,
+    ],
+    const <String>['success', 'ok', 'isSuccess'],
+  );
   final bool hasFields =
       hasRememberSessionFields ||
       hasSignedInFields ||
@@ -1158,7 +1183,9 @@ AuthSessionState? _authStateFromBackendPayload(
     final bool signedOutByCode =
         backendCode != null && _backendCodeIndicatesSignedOut(backendCode);
     inferredSignedIn =
-        !signedOutByCode && (hasCredentialFields || hasUserPayload);
+        !signedOutByCode &&
+        !hasExplicitFailureFlag &&
+        (hasCredentialFields || hasUserPayload);
   }
 
   return AuthSessionState(
