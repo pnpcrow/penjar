@@ -5328,6 +5328,42 @@ Advance deep-link/window-route interoperability beyond launch-argument parsing b
   - startup and runtime shell section updates preserve existing route-validation safeguards.
   - full verification gate (`desktop:verify:full`) remains green after macOS runner/channel integration.
 
+## Unit WS-D-121: Host-pushed route event regression coverage and route-apply no-op guard
+
+### Planned objective
+
+Harden the newly added host launch-route channel path by adding explicit runtime `onLaunchRoute` event regression coverage and reducing unnecessary rebuild churn when host-pushed routes resolve to the currently selected section.
+
+### Implemented changes
+
+1. Added route-apply performance guard in `desktop/lib/main.dart`:
+   - `_applyLaunchRoute(...)` now computes target section index once and exits early when current index already matches target.
+2. Expanded host-channel runtime coverage in `desktop/test/widget_test.dart`:
+   - added `desktop shell applies host-pushed launch route events`,
+   - test injects `onLaunchRoute` platform message on `penjar/desktop/launch_route` and verifies live section switch.
+3. Preserved existing host launch-route path coverage:
+   - pending route pull (`consumeLaunchRoute`) test remains in place.
+4. Re-ran validation commands:
+   - `cd desktop && flutter test test/widget_test.dart`,
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - host channel runtime push path correctness (`onLaunchRoute` platform message handling),
+  - route-apply behavior under repeated/same-section events,
+  - non-regression of desktop shell and full verification chain.
+- **Issues found during review**
+  1. Existing tests covered pending-route consumption but did not assert live host-push event handling path.
+  2. Route application always triggered `setState` even when target route matched current section, causing avoidable rebuild work.
+- **Fix applied**
+  1. Added explicit runtime host-push event widget regression test.
+  2. Added same-index short-circuit in `_applyLaunchRoute(...)`.
+- **Post-fix validation criteria**
+  - host-pushed `onLaunchRoute` events are validated in automated tests.
+  - repeated/same-section route events no longer trigger unnecessary state updates.
+  - full verification gate remains green after route-event hardening.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

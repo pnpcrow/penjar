@@ -352,8 +352,12 @@ class _DesktopShellPageState extends State<DesktopShellPage>
     if (sectionId == null) {
       return;
     }
+    final int nextIndex = _sectionIndexFromId(sectionId);
+    if (_selectedIndex.value == nextIndex) {
+      return;
+    }
     setState(() {
-      _selectedIndex.value = _sectionIndexFromId(sectionId);
+      _selectedIndex.value = nextIndex;
     });
   }
 

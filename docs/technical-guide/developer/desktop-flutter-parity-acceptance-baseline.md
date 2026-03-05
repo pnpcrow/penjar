@@ -72,7 +72,7 @@ the [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-pha
 - Backend response parser now supports nested success envelopes (`result`, `data`) and status aliases (`message`, `detail`) for response-driven state transitions.
 - Desktop shell route/state bridge now supports initial section-route seeding via `PENJAR_DESKTOP_INITIAL_SECTION` and selected-section restoration across restart (`shell_contract_persistence_parity_test.dart`).
 - Desktop shell launch routing now supports deep-link/route argument parsing via `--penjar-section=...`, `--penjar-route=...`, and `penjar://...` section-route payloads.
-- Desktop shell now includes host launch-route channel bridge (`penjar/desktop/launch_route`: `consumeLaunchRoute` + `onLaunchRoute`) and macOS URL-scheme registration baseline for `penjar://` dispatch.
+- Desktop shell now includes host launch-route channel bridge (`penjar/desktop/launch_route`: `consumeLaunchRoute` + `onLaunchRoute`) with runtime host-pushed route event handling coverage, plus macOS URL-scheme registration baseline for `penjar://` dispatch.
 - Remote-stub auth flow now includes auth snapshot store/seed seam, including startup auth-state seed parsing via `PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_JSON`.
 - Remote-stub auth flow now supports file-backed snapshot persistence path via `PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_PATH` (contract store seam).
 - Remote-stub auth flow now supports command-hook secure-store bridge controls via `PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_LOAD_COMMAND` and `PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_SAVE_COMMAND`.

@@ -129,4 +129,24 @@ void main() {
     );
     expect(find.text('Authentication & Session'), findsAtLeastNWidgets(1));
   });
+
+  testWidgets('desktop shell applies host-pushed launch route events', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const PenjarDesktopApp(initialSectionId: 'shell'));
+    await tester.pumpAndSettle();
+
+    final ByteData message = const StandardMethodCodec().encodeMethodCall(
+      const MethodCall('onLaunchRoute', 'penjar://section/inspect'),
+    );
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      kDesktopLaunchRouteChannelName,
+      message,
+      (_) {},
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey<String>('inspect-panel')), findsOneWidget);
+    expect(find.text('Inspect & Code Handoff'), findsAtLeastNWidgets(1));
+  });
 }
