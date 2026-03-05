@@ -34,6 +34,8 @@ This runbook defines the repeatable execution loop for the Flutter desktop full-
    - `pnpm run desktop:test:coverage:contract:check`
    - `pnpm run desktop:auth-store:legacy-decommission:check`
    - `pnpm run desktop:auth-store:legacy-decommission:contract:check`
+   - `pnpm run desktop:auth-store:runtime-decommission:check`
+   - `pnpm run desktop:auth-store:runtime-decommission:contract:check`
    - `pnpm run desktop:docs:command-inventory:check`
    - `pnpm run desktop:docs:command-inventory:contract:check`
    - `pnpm run desktop:test:parity`
