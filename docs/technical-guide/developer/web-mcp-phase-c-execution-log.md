@@ -1765,8 +1765,54 @@ Eliminate manual release-evidence table row drafting by generating per-platform 
   - Installer smoke workflow uploads report/archive/row triplet artifacts per matrix platform.
   - Full-fast desktop verification remains green after row-generation automation integration.
 
+## Unit WS-D-44: Release evidence index update automation baseline
+
+### Planned objective
+
+Automate release-evidence index preview/apply updates from generated row snippets so release audit documentation can be updated without manual table editing errors.
+
+### Implemented changes
+
+1. Added release evidence index update script:
+   - `desktop/scripts/update_release_evidence_index.sh`.
+2. Implemented index-update semantics:
+   - validates row snippet and evidence-index file existence,
+   - parses row key (`RC + Platform`) and upserts table row,
+   - inserts updated row at top of evidence table while preserving document body,
+   - supports in-place apply mode and detached preview output mode.
+3. Added root command surfaces:
+   - `desktop:release:evidence:index:preview:macos`,
+   - `desktop:release:evidence:index:preview:windows`,
+   - `desktop:release:evidence:index:apply:macos`,
+   - `desktop:release:evidence:index:apply:windows`.
+4. Extended manual installer smoke workflow:
+   - `.github/workflows/release-desktop-installer-smoke.yml` now generates and uploads release-evidence index preview artifacts per platform.
+5. Updated release/runbook/index docs:
+   - `desktop-flutter-release-validation-baseline.md` now includes index-preview review steps and updater script reference,
+   - `desktop-flutter-release-evidence-index.md` maintenance rules now include preview/apply command protocol,
+   - `desktop-flutter-development-runbook.md` command inventory now includes index preview/apply commands.
+6. Re-ran validation commands:
+   - `pnpm run desktop:release:evidence:index:preview:macos`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of markdown-table upsert targeting (RC+Platform uniqueness),
+  - preview mode behavior versus in-place apply path safety,
+  - CI artifact continuity for evidence-index preview outputs.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Preview command generates evidence-index markdown preview containing upserted row at table top.
+  - Installer smoke workflow uploads index preview artifacts for both matrix platforms.
+  - Full-fast desktop verification remains green after index-update automation integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, and automated release-evidence row snippet generation, but signed installer packaging/notarization and automated production update-promotion/appcast publication pipelines are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, and evidence-index preview/apply automation, but signed installer packaging/notarization and automated production update-promotion/appcast publication pipelines are not yet configured.

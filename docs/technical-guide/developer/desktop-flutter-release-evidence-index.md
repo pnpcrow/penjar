@@ -41,3 +41,4 @@ Each release candidate record should include:
 6. Run `pnpm run desktop:release:update-manifest:check` before release promotion.
 7. Attach installer/update smoke report artifact links from `.github/workflows/release-desktop-installer-smoke.yml` before promotion review.
 8. Generate platform row snippets from smoke reports with `pnpm run desktop:release:evidence:row:macos` and `pnpm run desktop:release:evidence:row:windows`, then review before table update.
+9. Generate evidence-index previews with `pnpm run desktop:release:evidence:index:preview:macos` and `pnpm run desktop:release:evidence:index:preview:windows`, then apply updates via `desktop:release:evidence:index:apply:macos` and `desktop:release:evidence:index:apply:windows` only after reviewer sign-off.

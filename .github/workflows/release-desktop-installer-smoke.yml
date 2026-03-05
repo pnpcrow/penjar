@@ -84,3 +84,18 @@ jobs:
         with:
           name: desktop-release-evidence-row-${{ matrix.label }}
           path: desktop/release/reports/release_evidence_row_${{ matrix.label }}.md
+
+      - name: Generate release evidence index preview
+        working-directory: ./desktop
+        run: |
+          set -eo pipefail
+          ./scripts/update_release_evidence_index.sh \
+            "release/reports/release_evidence_row_${{ matrix.label }}.md" \
+            "../docs/technical-guide/developer/desktop-flutter-release-evidence-index.md" \
+            "release/reports/release_evidence_index_preview_${{ matrix.label }}.md"
+
+      - name: Upload release evidence index preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-release-evidence-index-preview-${{ matrix.label }}
+          path: desktop/release/reports/release_evidence_index_preview_${{ matrix.label }}.md
