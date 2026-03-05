@@ -73,6 +73,47 @@ class _TrackingAuthSessionContract implements AuthSessionContract {
   }
 }
 
+class _AuthBackendFixtureCase {
+  const _AuthBackendFixtureCase({
+    required this.name,
+    required this.operationId,
+    required this.responsePayload,
+    required this.expectedSignedIn,
+    this.expectedRememberSession,
+    this.expectedStatus,
+  });
+
+  final String name;
+  final String operationId;
+  final Map<String, Object?> responsePayload;
+  final bool expectedSignedIn;
+  final bool? expectedRememberSession;
+  final String? expectedStatus;
+}
+
+void _invokeAuthBackendFixtureOperation(
+  RemoteStubAuthSessionContract authContract,
+  String operationId,
+) {
+  switch (operationId) {
+    case RemoteStubOperationIds.restoreSession:
+      authContract.restoreSession();
+      return;
+    case RemoteStubOperationIds.refreshToken:
+      authContract.refreshToken();
+      return;
+    case RemoteStubOperationIds.signIn:
+      authContract.signIn(
+        const AuthSignInRequest(
+          email: 'fixture@penjar.app',
+          password: 'fixture-password',
+        ),
+      );
+      return;
+  }
+  fail('Unsupported auth fixture operation: $operationId');
+}
+
 void main() {
   group('InMemoryAuthSessionContract', () {
     test('requires email and password to sign in', () {
@@ -1382,6 +1423,113 @@ void main() {
         );
       },
     );
+
+    final List<_AuthBackendFixtureCase> authBackendContractFixtures =
+        <_AuthBackendFixtureCase>[
+          const _AuthBackendFixtureCase(
+            name: 'nested auth/session alias normalization',
+            operationId: RemoteStubOperationIds.restoreSession,
+            responsePayload: <String, Object?>{
+              'state': <String, Object?>{
+                'authentication': <String, Object?>{
+                  'persistSession': true,
+                  'authenticated': true,
+                },
+                'tokens': <String, Object?>{
+                  'accessToken': 'fixture-access-token',
+                },
+              },
+            },
+            expectedSignedIn: true,
+            expectedRememberSession: true,
+          ),
+          const _AuthBackendFixtureCase(
+            name: 'numeric unauthorized code overrides token inference',
+            operationId: RemoteStubOperationIds.refreshToken,
+            responsePayload: <String, Object?>{
+              'code': 401,
+              'state': <String, Object?>{
+                'sessionToken': 'fixture-session-token',
+                'user': <String, Object?>{'id': 'fixture-user'},
+              },
+            },
+            expectedSignedIn: false,
+          ),
+          const _AuthBackendFixtureCase(
+            name: 'error container code override respects explicit signed-in',
+            operationId: RemoteStubOperationIds.restoreSession,
+            responsePayload: <String, Object?>{
+              'state': <String, Object?>{
+                'authentication': <String, Object?>{
+                  'errors': <Object?>[
+                    <String, Object?>{'reasonCode': 'TOKEN_EXPIRED'},
+                  ],
+                  'authenticated': true,
+                },
+              },
+            },
+            expectedSignedIn: true,
+          ),
+          const _AuthBackendFixtureCase(
+            name: 'nested error detail status fallback',
+            operationId: RemoteStubOperationIds.restoreSession,
+            responsePayload: <String, Object?>{
+              'state': <String, Object?>{
+                'authentication': <String, Object?>{
+                  'errors': <Object?>[
+                    <String, Object?>{
+                      'detail': 'Fixture nested auth detail.',
+                    },
+                  ],
+                },
+              },
+            },
+            expectedSignedIn: false,
+            expectedStatus: '[remote-stub] Fixture nested auth detail.',
+          ),
+          const _AuthBackendFixtureCase(
+            name: 'top-level status precedence over nested detail',
+            operationId: RemoteStubOperationIds.restoreSession,
+            responsePayload: <String, Object?>{
+              'message': 'Fixture top-level auth message.',
+              'state': <String, Object?>{
+                'authentication': <String, Object?>{
+                  'errors': <Object?>[
+                    <String, Object?>{
+                      'detail': 'Fixture nested detail ignored by precedence.',
+                    },
+                  ],
+                },
+              },
+            },
+            expectedSignedIn: false,
+            expectedStatus: '[remote-stub] Fixture top-level auth message.',
+          ),
+        ];
+
+    for (final _AuthBackendFixtureCase fixture in authBackendContractFixtures) {
+      test('auth backend contract fixture: ${fixture.name}', () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              fixture.operationId: fixture.responsePayload,
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        _invokeAuthBackendFixtureOperation(authContract, fixture.operationId);
+
+        expect(authContract.state.signedIn, fixture.expectedSignedIn);
+        if (fixture.expectedRememberSession != null) {
+          expect(
+            authContract.state.rememberSession,
+            fixture.expectedRememberSession,
+          );
+        }
+        if (fixture.expectedStatus != null) {
+          expect(authContract.state.status, fixture.expectedStatus);
+        }
+      });
+    }
 
     test(
       'auth backend signed-out error codes override token/session inference',
