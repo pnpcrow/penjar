@@ -3475,8 +3475,55 @@ Prevent strict signing provenance validation from accepting placeholder verify c
   - Strict provenance passes when verify commands are non-placeholder and executable.
   - Full-fast desktop verification remains green after provenance hardening.
 
+## Unit WS-D-81: Signing execution placeholder command hardening
+
+### Planned objective
+
+Prevent strict signing execution from accepting placeholder sign/notarize command hooks that can return success without performing real signing operations.
+
+### Implemented changes
+
+1. Hardened signing pipeline command hygiene:
+   - `desktop/scripts/run_signing_pipeline.sh` now detects placeholder patterns in:
+     - `PENJAR_MACOS_SIGN_COMMAND`,
+     - `PENJAR_MACOS_NOTARIZE_COMMAND`,
+     - `PENJAR_WINDOWS_SIGN_COMMAND`.
+2. Added strict failure semantics:
+   - strict signing execution mode now fails when placeholder sign/notarize commands are detected.
+3. Extended execution report transparency:
+   - signing pipeline reports now include:
+     - `Sign command placeholder status`,
+     - `Notarize command placeholder status` (macOS).
+4. Added non-strict warning behavior:
+   - placeholder commands in non-strict mode now produce explicit warning outcomes rather than looking like clean execution.
+5. Updated release baseline docs:
+   - `desktop-flutter-release-validation-baseline.md` now documents strict signing execution placeholder-hygiene behavior.
+6. Re-ran validation commands:
+   - strict expected-fail Windows signing pipeline scenario with placeholder sign command,
+   - strict pass Windows signing pipeline scenario with non-placeholder sign command,
+   - strict expected-fail macOS signing pipeline scenario with placeholder notarize command,
+   - strict pass macOS signing pipeline scenario with non-placeholder sign/notarize commands,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict signing execution resilience against placeholder command hooks,
+  - report observability for placeholder findings,
+  - non-strict warning-path fidelity.
+- **Issues found during review**
+  1. Strict signing execution previously treated placeholder sign/notarize command hooks as valid when they returned success.
+- **Fix applied**
+  1. Added sign/notarize placeholder detection logic and strict failure propagation in signing pipeline execution script.
+  2. Added placeholder status fields and non-strict warning path for clearer audit signals.
+- **Post-fix validation criteria**
+  - Strict signing execution fails when sign/notarize hooks are placeholders.
+  - Strict signing execution passes with non-placeholder command hooks.
+  - Full-fast desktop verification remains green after execution hardening.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks), command-hooked signing execution baseline with signing provenance gate and strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks), command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

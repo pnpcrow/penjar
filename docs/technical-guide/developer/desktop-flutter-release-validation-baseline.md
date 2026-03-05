@@ -85,6 +85,7 @@ This baseline defines minimum release validation requirements for desktop distri
      - `pnpm run desktop:release:signing:run:windows`
    - strict execution mode:
      - set `STRICT_SIGNING_EXECUTION=1` when invoking smoke pipeline to enforce command-backed signing/notarization.
+     - strict execution checks reject placeholder sign/notarize command hooks (for example `echo ...`, `<...>`, `todo`/`tbd` markers).
    - signing provenance strict mode:
      - set `STRICT_SIGNING_PROVENANCE=1` (or workflow input `enforce_signing_provenance=true`) to enforce artifact hash + sign-verify command evidence.
      - strict provenance checks reject placeholder verify command hooks (for example `echo ...`, `<...>`, `todo`/`tbd` markers).
@@ -177,6 +178,7 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing placeholder hygiene enforcement via `enforce_signing_placeholder_hygiene` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness command-hook checks include sign-verify/provenance hooks (`PENJAR_MACOS_SIGN_VERIFY_COMMAND`, `PENJAR_WINDOWS_SIGN_VERIFY_COMMAND`, `PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND`).
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing execution enforcement via `enforce_signing_execution` input.
+- `.github/workflows/release-desktop-installer-smoke.yml` strict signing execution checks now enforce placeholder-hygiene for sign/notarize command hooks.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing provenance enforcement via `enforce_signing_provenance` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing provenance checks now enforce verify-command placeholder hygiene in strict mode.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer artifact enforcement via `enforce_windows_installer_packaging` input.

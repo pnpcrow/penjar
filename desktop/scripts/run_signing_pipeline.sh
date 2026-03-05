@@ -80,14 +80,43 @@ signing_status="simulated"
 notarization_status="not-applicable"
 signed_artifact_path="$artifact_path"
 error_message=""
+sign_command_placeholder_status="not-configured"
+notarize_command_placeholder_status="not-applicable"
+
+is_placeholder_command() {
+  local command_value
+  command_value="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+  if [[ "$command_value" =~ ^[[:space:]]*echo([[:space:]]|$) ]]; then
+    return 0
+  fi
+  if printf '%s' "$command_value" | grep -Eq '<[^>]+>'; then
+    return 0
+  fi
+  if [[ "$command_value" =~ (^|[^a-z0-9_])(todo|tbd|placeholder|changeme|change_me|replace_me|example|dummy|sample|fixme)([^a-z0-9_]|$) ]]; then
+    return 0
+  fi
+  return 1
+}
 
 if [[ -n "$sign_command" ]]; then
-  export PENJAR_SIGN_TARGET="$artifact_path"
-  if bash -lc "$sign_command"; then
-    signing_status="executed"
+  if is_placeholder_command "$sign_command"; then
+    sign_command_placeholder_status="detected"
+    if [[ "$strict_mode" -eq 1 ]]; then
+      signing_status="failed"
+      error_message="sign command appears to be a placeholder in strict mode"
+    else
+      signing_status="simulated"
+      error_message="sign command appears to be a placeholder; execution skipped"
+    fi
   else
-    signing_status="failed"
-    error_message="sign command failed"
+    sign_command_placeholder_status="clear"
+    export PENJAR_SIGN_TARGET="$artifact_path"
+    if bash -lc "$sign_command"; then
+      signing_status="executed"
+    else
+      signing_status="failed"
+      error_message="sign command failed"
+    fi
   fi
 elif [[ "$strict_mode" -eq 1 ]]; then
   signing_status="failed"
@@ -96,13 +125,29 @@ fi
 
 if [[ "$platform" == "macos" ]]; then
   if [[ -n "$notarize_command" && "$signing_status" != "failed" ]]; then
-    export PENJAR_NOTARIZE_TARGET="$signed_artifact_path"
-    if bash -lc "$notarize_command"; then
-      notarization_status="executed"
+    if is_placeholder_command "$notarize_command"; then
+      notarize_command_placeholder_status="detected"
+      if [[ "$strict_mode" -eq 1 ]]; then
+        notarization_status="failed"
+        if [[ -z "$error_message" ]]; then
+          error_message="notarize command appears to be a placeholder in strict mode"
+        fi
+      else
+        notarization_status="simulated"
+        if [[ -z "$error_message" ]]; then
+          error_message="notarize command appears to be a placeholder; execution skipped"
+        fi
+      fi
     else
-      notarization_status="failed"
-      if [[ -z "$error_message" ]]; then
-        error_message="notarize command failed"
+      notarize_command_placeholder_status="clear"
+      export PENJAR_NOTARIZE_TARGET="$signed_artifact_path"
+      if bash -lc "$notarize_command"; then
+        notarization_status="executed"
+      else
+        notarization_status="failed"
+        if [[ -z "$error_message" ]]; then
+          error_message="notarize command failed"
+        fi
       fi
     fi
   elif [[ "$strict_mode" -eq 1 ]]; then
@@ -112,6 +157,7 @@ if [[ "$platform" == "macos" ]]; then
     fi
   else
     notarization_status="simulated"
+    notarize_command_placeholder_status="not-configured"
   fi
 fi
 
@@ -136,8 +182,10 @@ fi
     echo "- Missing variables: $missing_names"
   fi
   echo "- Sign command configured: $([[ -n "$sign_command" ]] && echo yes || echo no)"
+  echo "- Sign command placeholder status: $sign_command_placeholder_status"
   if [[ "$platform" == "macos" ]]; then
     echo "- Notarize command configured: $([[ -n "$notarize_command" ]] && echo yes || echo no)"
+    echo "- Notarize command placeholder status: $notarize_command_placeholder_status"
   fi
   echo
   echo "| Stage | Status |"
@@ -161,6 +209,11 @@ fi
 
 if [[ "$signing_status" == "failed" || "$notarization_status" == "failed" ]]; then
   echo "[signing-pipeline] warning: execution not fully completed. report: $report_file"
+  exit 0
+fi
+
+if [[ "$sign_command_placeholder_status" == "detected" || "$notarize_command_placeholder_status" == "detected" ]]; then
+  echo "[signing-pipeline] warning: placeholder command detected. report: $report_file"
   exit 0
 fi
 
