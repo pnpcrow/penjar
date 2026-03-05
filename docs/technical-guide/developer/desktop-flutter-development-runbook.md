@@ -138,7 +138,7 @@ Before pausing or transferring work:
 
 ## 7) Current next-unit candidates
 
-1. Real backend transport implementation for runtime-switchable contract adapters (replace scripted remote-stub transport client while preserving remote-profile visibility surface).
+1. Workflow-specific backend payload transport integration for remote-stub adapters (map auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics operations to real backend endpoints on top of HTTP health-probe transport gating).
 2. Real command wiring for signed packaging/notarization/verification in installer smoke workflow (`PENJAR_*_SIGN_COMMAND`, `PENJAR_*_SIGN_VERIFY_COMMAND` paths).
 3. Real Windows signed installer generation (`.msi/.exe`) command chain and provenance command/secret wiring.
 4. External appcast publication production rollout with real credentials/invalidation execution.

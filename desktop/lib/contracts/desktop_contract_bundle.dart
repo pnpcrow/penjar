@@ -41,6 +41,28 @@ Set<String> _normalizeOperationSet(Set<String> operations) {
   return normalized;
 }
 
+int _parsePositiveIntOrDefault(String raw, {required int fallback}) {
+  final int? value = int.tryParse(raw.trim());
+  if (value == null || value <= 0) {
+    return fallback;
+  }
+  return value;
+}
+
+Set<int> _parseAllowedHttpStatusCodes(String raw) {
+  final Set<int> statusCodes = <int>{};
+  for (final String token in raw.split(',')) {
+    final int? code = int.tryParse(token.trim());
+    if (code == null) {
+      continue;
+    }
+    if (code >= 100 && code <= 599) {
+      statusCodes.add(code);
+    }
+  }
+  return statusCodes;
+}
+
 DesktopRemoteStubProfile _buildRemoteStubProfile({
   required RemoteStubFaultProfile faultProfile,
   required RemoteStubTransportClient transportClient,
@@ -54,24 +76,52 @@ DesktopRemoteStubProfile _buildRemoteStubProfile({
       transportProfile.blockedOperations,
     ),
     transportBlockedReason: transportProfile.blockedReason,
+    transportLabel: transportProfile.transportLabel,
   );
 }
 
 RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
+  final String healthUrl = const String.fromEnvironment(
+    'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_HEALTH_URL',
+  ).trim();
   final Set<String> blockedOperations = _parseBlockedOperations(
     const String.fromEnvironment(
       'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BLOCKED_OPERATIONS',
     ),
     allowedOperations: RemoteStubOperationIds.all,
   );
-  if (blockedOperations.isEmpty) {
-    return const RemoteStubNoopTransportClient();
-  }
-
   final String blockedReason = const String.fromEnvironment(
     'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BLOCK_REASON',
     defaultValue: 'Remote transport unavailable',
   ).trim();
+
+  if (healthUrl.isNotEmpty) {
+    final int timeoutMillis = _parsePositiveIntOrDefault(
+      const String.fromEnvironment(
+        'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_TIMEOUT_MS',
+      ),
+      fallback: 2000,
+    );
+    final Set<int> allowedStatusCodes = _parseAllowedHttpStatusCodes(
+      const String.fromEnvironment(
+        'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_ALLOWED_STATUS_CODES',
+      ),
+    );
+    return RemoteStubHttpTransportClient(
+      healthUrl: healthUrl,
+      timeout: Duration(milliseconds: timeoutMillis),
+      allowedStatusCodes: allowedStatusCodes.isEmpty
+          ? const <int>{200}
+          : allowedStatusCodes,
+      blockedReason: blockedReason.isEmpty
+          ? 'Remote transport unavailable'
+          : blockedReason,
+    );
+  }
+
+  if (blockedOperations.isEmpty) {
+    return const RemoteStubNoopTransportClient();
+  }
 
   return RemoteStubScriptedTransportClient(
     blockedOperations: blockedOperations,
@@ -108,17 +158,20 @@ class DesktopRemoteStubProfile {
     this.blockedOperations = const <String>{},
     this.transportBlockedOperations = const <String>{},
     this.transportBlockedReason = 'Remote transport unavailable',
+    this.transportLabel = '',
   });
 
   final bool unavailable;
   final Set<String> blockedOperations;
   final Set<String> transportBlockedOperations;
   final String transportBlockedReason;
+  final String transportLabel;
 
   bool get isEmpty =>
       !unavailable &&
       blockedOperations.isEmpty &&
-      transportBlockedOperations.isEmpty;
+      transportBlockedOperations.isEmpty &&
+      transportLabel.trim().isEmpty;
 
   String get summaryLabel {
     if (isEmpty) {
@@ -136,6 +189,9 @@ class DesktopRemoteStubProfile {
     if (transportBlockedOperations.isNotEmpty) {
       final List<String> values = transportBlockedOperations.toList()..sort();
       parts.add('transport blocks: ${values.join(',')}');
+    }
+    if (transportLabel.trim().isNotEmpty) {
+      parts.add('transport: $transportLabel');
     }
     return parts.join(' · ');
   }

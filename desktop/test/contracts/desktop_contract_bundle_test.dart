@@ -220,4 +220,24 @@ void main() {
       );
     },
   );
+
+  test('remote-stub profile exposes http transport label', () {
+    final DesktopContractBundle bundle = DesktopContractBundle.fromMode(
+      DesktopContractMode.remoteStub,
+      remoteStubTransportClient: RemoteStubHttpTransportClient(
+        healthUrl: 'https://api.penjar.app/desktop/health?token=secret',
+        probe: (_) => const RemoteStubHttpTransportProbeResult.allowed(),
+      ),
+    );
+
+    expect(bundle.remoteStubProfile?.isEmpty, isFalse);
+    expect(
+      bundle.remoteStubProfile?.transportLabel,
+      'http-health:https://api.penjar.app/desktop/health',
+    );
+    expect(
+      bundle.remoteStubProfile?.summaryLabel,
+      contains('transport: http-health:https://api.penjar.app/desktop/health'),
+    );
+  });
 }

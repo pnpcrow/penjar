@@ -616,5 +616,62 @@ void main() {
         '[remote-stub] Project created: Allowed Project.',
       );
     });
+
+    test('http transport client blocks operations when probe fails', () {
+      final List<String> probedOperations = <String>[];
+      final RemoteStubHttpTransportClient transportClient =
+          RemoteStubHttpTransportClient(
+            healthUrl: 'https://api.penjar.app/desktop/health?token=secret',
+            blockedReason: 'Remote HTTP transport unavailable',
+            probe: (RemoteStubHttpTransportProbeRequest request) {
+              probedOperations.add(request.operation);
+              expect(request.healthUrl, contains('/desktop/health'));
+              expect(request.allowedStatusCodes, contains(200));
+              return const RemoteStubHttpTransportProbeResult.blocked();
+            },
+          );
+      expect(
+        transportClient.profile.transportLabel,
+        'http-health:https://api.penjar.app/desktop/health',
+      );
+
+      final RemoteStubAuthSessionContract authContract =
+          RemoteStubAuthSessionContract(transportClient: transportClient);
+      authContract.signIn(
+        const AuthSignInRequest(
+          email: 'designer@penjar.app',
+          password: 'desktop-pass',
+        ),
+      );
+
+      expect(probedOperations, <String>[RemoteStubOperationIds.signIn]);
+      expect(authContract.state.signedIn, isFalse);
+      expect(
+        authContract.state.status,
+        '[remote-stub] Remote HTTP transport unavailable: sign-in.',
+      );
+    });
+
+    test('http transport client allows operations when probe succeeds', () {
+      final RemoteStubHttpTransportClient transportClient =
+          RemoteStubHttpTransportClient(
+            healthUrl: 'http://127.0.0.1:28080/health',
+            allowedStatusCodes: const <int>{200, 204},
+            probe: (RemoteStubHttpTransportProbeRequest request) {
+              expect(request.allowedStatusCodes, contains(204));
+              return const RemoteStubHttpTransportProbeResult.allowed();
+            },
+          );
+
+      final RemoteStubProjectLifecycleContract projectContract =
+          RemoteStubProjectLifecycleContract(transportClient: transportClient);
+      projectContract.createProject('HTTP Transport Ready');
+
+      expect(projectContract.state.projects, hasLength(2));
+      expect(
+        projectContract.state.status,
+        '[remote-stub] Project created: HTTP Transport Ready.',
+      );
+    });
   });
 }

@@ -4724,8 +4724,66 @@ Reduce bundle-to-transport coupling by replacing concrete transport-type checks 
   - Scripted transport continues to expose blocked-operation metadata correctly.
   - Full-fast desktop verification remains green after interface extraction.
 
+## Unit WS-D-110: HTTP health-probe transport integration for remote-stub adapters
+
+### Planned objective
+
+Introduce a real backend transport path for runtime-switchable remote-stub adapters by adding HTTP health-probe transport client wiring, while preserving sync contract signatures and remote-profile visibility surfaces.
+
+### Implemented changes
+
+1. Added HTTP transport client implementation in `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - extended `RemoteStubTransportProfile` with `transportLabel`,
+   - added `RemoteStubHttpTransportProbeRequest`, `RemoteStubHttpTransportProbeResult`, and `RemoteStubHttpTransportProbe` injection contract,
+   - implemented default synchronous curl probe (`_defaultHttpTransportProbe`) and HTTP status-code parsing helper,
+   - added `RemoteStubHttpTransportClient` with configurable `healthUrl`, timeout, allowed status codes, and blocked reason.
+2. Extended runtime environment transport selection in `desktop/lib/contracts/desktop_contract_bundle.dart`:
+   - `DesktopContractBundle.fromEnvironment()` transport path now supports:
+     - `PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_HEALTH_URL`,
+     - `PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_TIMEOUT_MS`,
+     - `PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_ALLOWED_STATUS_CODES`,
+     - existing `PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BLOCK_REASON`,
+   - when health URL is configured, bundle now builds `RemoteStubHttpTransportClient`,
+   - scripted blocked-operation transport path (`PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BLOCKED_OPERATIONS`) remains as fallback when HTTP health URL is not configured,
+   - `DesktopRemoteStubProfile` now includes `transportLabel` and renders it in `summaryLabel`.
+3. Added regression tests:
+   - `desktop/test/contracts/workflow_contracts_test.dart`:
+     - `http transport client blocks operations when probe fails`,
+     - `http transport client allows operations when probe succeeds`.
+   - `desktop/test/contracts/desktop_contract_bundle_test.dart`:
+     - `remote-stub profile exposes http transport label`.
+4. Synced continuity docs:
+   - `desktop-flutter-migration-inventory.md` desktop shell/runtime blocker now reflects HTTP health-probe transport wiring.
+   - `desktop-flutter-parity-checklist.md` diagnostics row now includes HTTP transport gating baseline.
+   - `desktop-flutter-parity-acceptance-baseline.md` now documents HTTP transport env controls and scripted fallback behavior.
+   - `desktop-flutter-development-runbook.md` next-unit candidate now targets workflow-specific backend payload transport mapping on top of health-probe gating.
+5. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/desktop_contract_bundle_test.dart test/contracts/workflow_contracts_test.dart`,
+   - `cd desktop && flutter test test/parity/remote_stub_mode_parity_test.dart test/parity/remote_stub_unavailable_parity_test.dart`,
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of sync-safe real transport gating behavior under successful/failed backend probes,
+  - runtime environment selection precedence between HTTP transport and scripted fallback transport,
+  - remote profile visibility coverage for transport path metadata.
+- **Issues found during review**
+  1. Remote-stub transport seam remained scripted-only and did not exercise a real backend reachability path.
+  2. Remote profile metadata could not expose the configured transport backend path for diagnostics/parity evidence.
+  3. Environment transport controls lacked timeout and accepted-status tuning for health checks.
+- **Fix applied**
+  1. Implemented `RemoteStubHttpTransportClient` with injectable probe contract and default curl-based health probe.
+  2. Added transport label propagation from transport profile into bundle remote profile summary surface.
+  3. Added HTTP transport env parsing (`HEALTH_URL`, `TIMEOUT_MS`, `ALLOWED_STATUS_CODES`) with scripted transport fallback and regression coverage.
+- **Post-fix validation criteria**
+  - Failed HTTP probe blocks remote-stub mutation operations with deterministic status surface.
+  - Successful HTTP probe preserves existing remote-stub delegated behavior.
+  - Remote profile summary surfaces transport label when HTTP transport is configured.
+  - Full desktop verification gate (`desktop:verify:full`) remains green after transport integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
+- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata, shared contract-bundle injection, and runtime mode parity/matrix gates, but workflow-specific real backend payload integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
 - Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard plus coverage-contract regression guard (set-diff optimized uncovered/missing detection), desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks with in-memory duplicate-key tracking + base-check markdown report emission) plus evidence-index contract regression guard (including dedicated missing-base-check-report attachment, missing-index-file, invalid-decision, and promoted-placeholder cases, dedicated tests workflow release-evidence guard base+contract enforcement/upload, and parity matrix base-check artifact retention), update-manifest guard automation with validation + contract report artifacts (including dedicated tests workflow update-manifest guard job contract enforcement/upload), on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

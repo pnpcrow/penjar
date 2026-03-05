@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:penjar_desktop/contracts/workflow_contracts.dart';
 
 const String _kRemoteStubPrefix = '[remote-stub] ';
@@ -149,12 +151,15 @@ class RemoteStubTransportProfile {
   const RemoteStubTransportProfile({
     this.blockedOperations = const <String>{},
     this.blockedReason = 'Remote transport unavailable',
+    this.transportLabel = '',
   });
 
   final Set<String> blockedOperations;
   final String blockedReason;
+  final String transportLabel;
 
-  bool get isEmpty => blockedOperations.isEmpty;
+  bool get isEmpty =>
+      blockedOperations.isEmpty && transportLabel.trim().isEmpty;
 }
 
 abstract class RemoteStubTransportClient {
@@ -198,6 +203,147 @@ class RemoteStubScriptedTransportClient extends RemoteStubTransportClient {
   @override
   RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
     if (_isBlocked(request.operation)) {
+      return RemoteStubTransportResult.blocked(
+        '$blockedReason: ${request.operation}.',
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
+class RemoteStubHttpTransportProbeRequest {
+  const RemoteStubHttpTransportProbeRequest({
+    required this.operation,
+    required this.healthUrl,
+    required this.timeout,
+    required this.allowedStatusCodes,
+  });
+
+  final String operation;
+  final String healthUrl;
+  final Duration timeout;
+  final Set<int> allowedStatusCodes;
+}
+
+class RemoteStubHttpTransportProbeResult {
+  const RemoteStubHttpTransportProbeResult({required this.allowed});
+
+  const RemoteStubHttpTransportProbeResult.allowed() : allowed = true;
+
+  const RemoteStubHttpTransportProbeResult.blocked() : allowed = false;
+
+  final bool allowed;
+}
+
+typedef RemoteStubHttpTransportProbe =
+    RemoteStubHttpTransportProbeResult Function(
+      RemoteStubHttpTransportProbeRequest request,
+    );
+
+String _buildHttpTransportLabel(String healthUrl) {
+  final String trimmed = healthUrl.trim();
+  if (trimmed.isEmpty) {
+    return '';
+  }
+  final Uri? uri = Uri.tryParse(trimmed);
+  if (uri == null || uri.host.isEmpty) {
+    return 'http-health';
+  }
+  final String scheme = uri.scheme.isEmpty ? 'http' : uri.scheme;
+  final String path = uri.path.isEmpty ? '/' : uri.path;
+  final String port = uri.hasPort ? ':${uri.port}' : '';
+  return 'http-health:$scheme://${uri.host}$port$path';
+}
+
+int? _parseCurlHttpStatusCode(String stdoutText) {
+  final List<String> lines = stdoutText.split(RegExp(r'[\r\n]+'));
+  for (int index = lines.length - 1; index >= 0; index -= 1) {
+    final String line = lines[index].trim();
+    if (line.isEmpty) {
+      continue;
+    }
+    return int.tryParse(line);
+  }
+  return null;
+}
+
+RemoteStubHttpTransportProbeResult _defaultHttpTransportProbe(
+  RemoteStubHttpTransportProbeRequest request,
+) {
+  final double timeoutSeconds = request.timeout.inMilliseconds / 1000;
+  final ProcessResult probeResult;
+  try {
+    probeResult = Process.runSync('curl', <String>[
+      '--silent',
+      '--show-error',
+      '--max-time',
+      timeoutSeconds.toStringAsFixed(3),
+      '--write-out',
+      r'\n%{http_code}',
+      request.healthUrl,
+    ]);
+  } on ProcessException {
+    return const RemoteStubHttpTransportProbeResult.blocked();
+  }
+  if (probeResult.exitCode != 0) {
+    return const RemoteStubHttpTransportProbeResult.blocked();
+  }
+
+  final int? statusCode = _parseCurlHttpStatusCode('${probeResult.stdout}');
+  if (statusCode == null) {
+    return const RemoteStubHttpTransportProbeResult.blocked();
+  }
+  if (request.allowedStatusCodes.contains(statusCode)) {
+    return const RemoteStubHttpTransportProbeResult.allowed();
+  }
+  return const RemoteStubHttpTransportProbeResult.blocked();
+}
+
+class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
+  RemoteStubHttpTransportClient({
+    required String healthUrl,
+    this.timeout = const Duration(seconds: 2),
+    this.allowedStatusCodes = const <int>{200},
+    this.blockedReason = 'Remote transport unavailable',
+    RemoteStubHttpTransportProbe? probe,
+  }) : healthUrl = healthUrl.trim(),
+       _probe = probe ?? _defaultHttpTransportProbe,
+       transportLabel = _buildHttpTransportLabel(healthUrl);
+
+  final String healthUrl;
+  final Duration timeout;
+  final Set<int> allowedStatusCodes;
+  final String blockedReason;
+  final String transportLabel;
+  final RemoteStubHttpTransportProbe _probe;
+
+  Set<int> get _effectiveAllowedStatusCodes {
+    final Set<int> normalized = allowedStatusCodes
+        .where((int code) => code >= 100 && code <= 599)
+        .toSet();
+    return normalized.isEmpty ? const <int>{200} : normalized;
+  }
+
+  @override
+  RemoteStubTransportProfile get profile => RemoteStubTransportProfile(
+    blockedReason: blockedReason,
+    transportLabel: transportLabel,
+  );
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (healthUrl.isEmpty) {
+      return RemoteStubTransportResult.allow;
+    }
+    final RemoteStubHttpTransportProbeResult probeResult = _probe(
+      RemoteStubHttpTransportProbeRequest(
+        operation: request.operation,
+        healthUrl: healthUrl,
+        timeout: timeout,
+        allowedStatusCodes: _effectiveAllowedStatusCodes,
+      ),
+    );
+    if (!probeResult.allowed) {
       return RemoteStubTransportResult.blocked(
         '$blockedReason: ${request.operation}.',
       );
