@@ -2308,8 +2308,55 @@ Add explicit Windows installer filename policy validation with strict gating, so
   - Strict naming gate fails on invalid filename/missing artifact states.
   - Full-fast desktop verification remains green after naming-gate integration.
 
+## Unit WS-D-55: Signing command-hook readiness gate baseline
+
+### Planned objective
+
+Expand signing readiness checks to cover command-hook presence, so signing execution prerequisites can be validated before installer smoke execution with explicit strict gating.
+
+### Implemented changes
+
+1. Extended signing readiness checker:
+   - `desktop/scripts/check_signing_readiness.sh`.
+2. Implemented command-hook readiness semantics:
+   - added strict command-hook mode (`STRICT_SIGNING_COMMAND_HOOKS`),
+   - added categorized readiness rows (`required`, `command-hook`),
+   - added command-hook requirement rows (`PENJAR_MACOS_SIGN_COMMAND`, `PENJAR_MACOS_NOTARIZE_COMMAND`, `PENJAR_WINDOWS_SIGN_COMMAND`, `PENJAR_WINDOWS_INSTALLER_COMMAND`),
+   - split summary counts into missing required vs missing command-hook counts.
+3. Added root command surface:
+   - `desktop:release:signing:readiness:command-hooks:strict`.
+4. Extended manual smoke workflow dispatch contract:
+   - added `enforce_signing_command_hooks` input.
+5. Extended signing-readiness workflow env contract:
+   - passes `STRICT_SIGNING_COMMAND_HOOKS` and all signing/installer command-hook secrets to readiness job.
+6. Updated release/runbook/index docs:
+   - `desktop-flutter-development-runbook.md` command inventory now includes strict signing command-hook readiness command,
+   - `desktop-flutter-release-validation-baseline.md` now includes strict command-hook readiness guidance and workflow input mapping,
+   - `desktop-flutter-release-evidence-index.md` now references command-hook strict readiness variant for report generation.
+7. Re-ran validation commands:
+   - `pnpm run desktop:release:signing:readiness`,
+   - `cd desktop && STRICT_SIGNING_COMMAND_HOOKS=1 ./scripts/check_signing_readiness.sh` (expected strict failure),
+   - `cd desktop && STRICT_SIGNING=1 STRICT_SIGNING_COMMAND_HOOKS=1 PENJAR_MACOS_SIGN_IDENTITY=mock PENJAR_MACOS_TEAM_ID=mock PENJAR_MACOS_NOTARY_PROFILE=mock PENJAR_WINDOWS_CERT_PATH=mock PENJAR_WINDOWS_CERT_PASSWORD=mock PENJAR_MACOS_SIGN_COMMAND='echo sign' PENJAR_MACOS_NOTARIZE_COMMAND='echo notarize' PENJAR_WINDOWS_SIGN_COMMAND='echo sign' PENJAR_WINDOWS_INSTALLER_COMMAND='echo installer' ./scripts/check_signing_readiness.sh`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - required-variable strict mode vs command-hook strict mode isolation,
+  - workflow input/env propagation for readiness job,
+  - report structure and summary count accuracy after category split.
+- **Issues found during review**
+  1. Initial fallback branch still failed readiness when `STRICT_SIGNING=1` and only command-hook items were missing, even with command-hook strict mode disabled.
+- **Fix applied**
+  1. Separated strict failure conditions so required-variable strict mode and command-hook strict mode fail independently according to their dedicated toggles.
+- **Post-fix validation criteria**
+  - Strict required-variable mode and strict command-hook mode operate independently.
+  - Readiness report surfaces both missing-count dimensions.
+  - Full-fast desktop verification remains green after readiness extension.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, signing readiness gating, command-hooked signing execution baseline, optional external publication dry-run stage, external publication readiness gate baseline, Windows installer packaging verification baseline with strict naming gate, and command-hooked Windows installer pipeline baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline, optional external publication dry-run stage, external publication readiness gate baseline, Windows installer packaging verification baseline with strict naming gate, and command-hooked Windows installer pipeline baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

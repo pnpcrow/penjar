@@ -18,6 +18,11 @@ on:
         type: boolean
         required: true
         default: false
+      enforce_signing_command_hooks:
+        description: "Fail workflow when signing command hooks are missing"
+        type: boolean
+        required: true
+        default: false
       publish_appcast_external:
         description: "Run external appcast publication stage"
         type: boolean
@@ -86,11 +91,16 @@ jobs:
         working-directory: ./desktop
         env:
           STRICT_SIGNING: ${{ inputs.enforce_signing_readiness }}
+          STRICT_SIGNING_COMMAND_HOOKS: ${{ inputs.enforce_signing_command_hooks }}
           PENJAR_MACOS_SIGN_IDENTITY: ${{ secrets.PENJAR_MACOS_SIGN_IDENTITY }}
           PENJAR_MACOS_TEAM_ID: ${{ secrets.PENJAR_MACOS_TEAM_ID }}
           PENJAR_MACOS_NOTARY_PROFILE: ${{ secrets.PENJAR_MACOS_NOTARY_PROFILE }}
           PENJAR_WINDOWS_CERT_PATH: ${{ secrets.PENJAR_WINDOWS_CERT_PATH }}
           PENJAR_WINDOWS_CERT_PASSWORD: ${{ secrets.PENJAR_WINDOWS_CERT_PASSWORD }}
+          PENJAR_MACOS_SIGN_COMMAND: ${{ secrets.PENJAR_MACOS_SIGN_COMMAND }}
+          PENJAR_MACOS_NOTARIZE_COMMAND: ${{ secrets.PENJAR_MACOS_NOTARIZE_COMMAND }}
+          PENJAR_WINDOWS_SIGN_COMMAND: ${{ secrets.PENJAR_WINDOWS_SIGN_COMMAND }}
+          PENJAR_WINDOWS_INSTALLER_COMMAND: ${{ secrets.PENJAR_WINDOWS_INSTALLER_COMMAND }}
         run: ./scripts/check_signing_readiness.sh
 
       - name: Upload signing readiness report

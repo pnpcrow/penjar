@@ -69,6 +69,7 @@ This baseline defines minimum release validation requirements for desktop distri
 2. Run signing readiness preflight:
    - `pnpm run desktop:release:signing:readiness`
    - use strict mode when release secrets are expected: `pnpm run desktop:release:signing:readiness:strict`.
+   - enforce command-hook presence when execution hooks are expected: `pnpm run desktop:release:signing:readiness:command-hooks:strict`.
 3. Execute platform-specific installer/update smoke automation:
    - local/manual entrypoints:
      - `pnpm run desktop:release:installer-smoke:macos`
@@ -119,6 +120,7 @@ This baseline defines minimum release validation requirements for desktop distri
 CI baseline note:
 - `.github/workflows/tests-desktop-flutter.yml` includes `release-evidence-guard` and `release-update-manifest-guard` jobs, and uploads parity/build artifacts for audit traceability.
 - `.github/workflows/release-desktop-installer-smoke.yml` includes `signing-readiness` job with optional strict enforcement via workflow input.
+- `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing command-hook enforcement via `enforce_signing_command_hooks` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing execution enforcement via `enforce_signing_execution` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer artifact enforcement via `enforce_windows_installer_packaging` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer naming enforcement via `enforce_windows_installer_naming` input.
