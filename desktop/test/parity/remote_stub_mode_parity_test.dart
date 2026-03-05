@@ -8,11 +8,15 @@ import 'parity_test_utils.dart';
 
 class _StrictSchemaMalformedAuthTransportClient
     extends RemoteStubTransportClient {
-  const _StrictSchemaMalformedAuthTransportClient();
+  const _StrictSchemaMalformedAuthTransportClient({
+    this.malformedOperations = const <String>{RemoteStubOperationIds.signIn},
+  });
+
+  final Set<String> malformedOperations;
 
   @override
   RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
-    if (request.operation == RemoteStubOperationIds.signIn) {
+    if (malformedOperations.contains(request.operation)) {
       return RemoteStubTransportResult.allowedWithPayload(
         const <String, Object?>{
           'unexpected': <String, Object?>{'shape': true},
@@ -116,4 +120,59 @@ void main() {
     );
     expect(find.textContaining('Signed in (simulated).'), findsNothing);
   });
+
+  testWidgets(
+    'strict schema mode blocks malformed restore/refresh auth fallback',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubAuthStrictBackendSchema: true,
+          remoteStubTransportClient:
+              const _StrictSchemaMalformedAuthTransportClient(
+                malformedOperations: <String>{
+                  RemoteStubOperationIds.restoreSession,
+                  RemoteStubOperationIds.refreshToken,
+                },
+              ),
+        ),
+      );
+
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-restore-session')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('auth-restore-session')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend auth schema validation failed.',
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('Session restored (simulated).'),
+        findsNothing,
+      );
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend auth schema validation failed.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
+    },
+  );
 }
