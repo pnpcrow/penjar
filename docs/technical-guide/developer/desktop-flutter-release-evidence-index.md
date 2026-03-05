@@ -46,3 +46,4 @@ Each release candidate record should include:
 11. Generate appcast publish dry-run targets (`pnpm run desktop:release:appcast:publish:dry-run`) and attach artifact links before promotion decision.
 12. Attach signing readiness report from `pnpm run desktop:release:signing:readiness` (or `pnpm run desktop:release:signing:readiness:strict`) before promotion decision.
 13. Generate/check appcast publication bundle (`pnpm run desktop:release:appcast:bundle:generate`, `pnpm run desktop:release:appcast:bundle:check`) and attach artifact link before promotion decision.
+14. Attach platform signing pipeline reports (`release/reports/signing_report_macos.md`, `release/reports/signing_report_windows.md`) before promotion decision.

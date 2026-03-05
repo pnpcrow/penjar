@@ -2007,8 +2007,60 @@ Standardize publication handoff metadata by generating and validating appcast pu
   - Bundle checker validates schema and required target coverage.
   - Full-fast desktop verification remains green after bundle automation integration.
 
+## Unit WS-D-49: Signing execution pipeline baseline integration
+
+### Planned objective
+
+Integrate executable signing/notarization pipeline baseline into installer smoke flow with strict enforcement toggle and per-platform reporting.
+
+### Implemented changes
+
+1. Added signing pipeline runners:
+   - `desktop/scripts/run_signing_pipeline.sh`,
+   - `desktop/scripts/run_signing_with_build.sh`.
+2. Implemented signing pipeline semantics:
+   - validates platform/build-mode inputs and build artifact presence,
+   - supports strict/non-strict execution modes via `STRICT_SIGNING_EXECUTION`,
+   - consumes command hooks (`PENJAR_MACOS_SIGN_COMMAND`, `PENJAR_MACOS_NOTARIZE_COMMAND`, `PENJAR_WINDOWS_SIGN_COMMAND`),
+   - emits per-platform signing report (`release/reports/signing_report_<platform>.md`).
+3. Integrated signing execution into smoke orchestrator:
+   - `desktop/scripts/release_installer_update_smoke.sh` now runs signing pipeline before installer/update report generation.
+4. Added root command surfaces:
+   - `desktop:release:signing:run:macos`,
+   - `desktop:release:signing:run:windows`.
+5. Extended manual smoke workflow:
+   - `.github/workflows/release-desktop-installer-smoke.yml` now accepts `enforce_signing_execution` input,
+   - forwards signing command/credential env variables to smoke step,
+   - uploads per-platform signing pipeline report artifacts.
+6. Updated release/runbook/index docs:
+   - `desktop-flutter-release-validation-baseline.md` now includes signing execution step details, strict mode guidance, and CI artifact notes,
+   - `desktop-flutter-development-runbook.md` command inventory now includes signing run commands,
+   - `desktop-flutter-release-evidence-index.md` maintenance rules now require signing pipeline report attachment.
+7. Re-ran validation commands:
+   - `pnpm run desktop:release:signing:run:macos`,
+   - `cd desktop && SKIP_PUB_GET=1 ./scripts/release_installer_update_smoke.sh macos debug`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - signing pipeline strict/non-strict branch behavior and command hook safety,
+  - workflow input/env propagation correctness for signing execution,
+  - artifact/report continuity across smoke and release evidence chain.
+- **Issues found during review**
+  1. Initial root signing-run commands required pre-existing release artifacts and failed on clean environments.
+  2. Artifact upload steps in installer-smoke/appcast-preview jobs were previously skipped when preceding steps failed, reducing failure triage visibility.
+- **Fix applied**
+  1. Added `run_signing_with_build.sh` wrapper and repointed signing-run root commands to build+run path.
+  2. Added `if: always()` and `if-no-files-found: warn` for workflow artifact upload steps so logs/reports remain collectible during partial failures.
+- **Post-fix validation criteria**
+  - Smoke run emits signing pipeline report for executed platform.
+  - Workflow supports strict signing execution toggle and uploads signing reports.
+  - Full-fast desktop verification remains green after signing pipeline integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, and signing readiness gating, but signed installer packaging/notarization execution and external production update/appcast publication integrations are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, signing readiness gating, and command-hooked signing execution baseline, but real signing/notarization command secret provisioning, Windows signed installer packaging (`.msi`/`exe`), and external production update/appcast publication integrations are not yet configured.

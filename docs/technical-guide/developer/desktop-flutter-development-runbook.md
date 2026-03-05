@@ -47,6 +47,8 @@ This runbook defines the repeatable execution loop for the Flutter desktop full-
    - `pnpm run desktop:release:appcast:bundle:check`
    - `pnpm run desktop:release:signing:readiness`
    - `pnpm run desktop:release:signing:readiness:strict`
+   - `pnpm run desktop:release:signing:run:macos`
+   - `pnpm run desktop:release:signing:run:windows`
 
 ## 2) Unit execution loop
 
@@ -105,5 +107,5 @@ Before pausing or transferring work:
 ## 7) Current next-unit candidates
 
 1. Backend transport wiring for runtime-switchable contract adapters.
-2. Signed packaging + notarization integration in installer smoke workflow.
+2. Real command wiring for signed packaging/notarization in installer smoke workflow (`PENJAR_*_SIGN_COMMAND` paths).
 3. Appcast publication target integration (object storage + cache invalidation + promotion gate).

@@ -13,6 +13,11 @@ on:
         type: boolean
         required: true
         default: false
+      enforce_signing_execution:
+        description: "Fail workflow when signing/notarization execution is incomplete"
+        type: boolean
+        required: true
+        default: false
       build_mode:
         description: "Build mode for smoke packaging"
         type: choice
@@ -86,21 +91,43 @@ jobs:
 
       - name: Run installer/update smoke pipeline
         working-directory: ./desktop
+        env:
+          STRICT_SIGNING_EXECUTION: ${{ inputs.enforce_signing_execution }}
+          PENJAR_MACOS_SIGN_IDENTITY: ${{ secrets.PENJAR_MACOS_SIGN_IDENTITY }}
+          PENJAR_MACOS_TEAM_ID: ${{ secrets.PENJAR_MACOS_TEAM_ID }}
+          PENJAR_MACOS_NOTARY_PROFILE: ${{ secrets.PENJAR_MACOS_NOTARY_PROFILE }}
+          PENJAR_WINDOWS_CERT_PATH: ${{ secrets.PENJAR_WINDOWS_CERT_PATH }}
+          PENJAR_WINDOWS_CERT_PASSWORD: ${{ secrets.PENJAR_WINDOWS_CERT_PASSWORD }}
+          PENJAR_MACOS_SIGN_COMMAND: ${{ secrets.PENJAR_MACOS_SIGN_COMMAND }}
+          PENJAR_MACOS_NOTARIZE_COMMAND: ${{ secrets.PENJAR_MACOS_NOTARIZE_COMMAND }}
+          PENJAR_WINDOWS_SIGN_COMMAND: ${{ secrets.PENJAR_WINDOWS_SIGN_COMMAND }}
         run: |
           set -eo pipefail
           ./scripts/release_installer_update_smoke.sh "${{ matrix.label }}" "${{ inputs.build_mode }}"
 
       - name: Upload installer smoke report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: desktop-installer-smoke-report-${{ matrix.label }}
           path: desktop/release/reports/installer_update_report_${{ matrix.label }}.json
+          if-no-files-found: warn
 
       - name: Upload installer smoke archive
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: desktop-installer-smoke-archive-${{ matrix.label }}
           path: desktop/release/reports/penjar-${{ matrix.label }}-${{ inputs.build_mode }}.zip
+          if-no-files-found: warn
+
+      - name: Upload signing pipeline report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-signing-pipeline-report-${{ matrix.label }}
+          path: desktop/release/reports/signing_report_${{ matrix.label }}.md
+          if-no-files-found: warn
 
       - name: Generate release evidence row snippet
         working-directory: ./desktop
@@ -116,10 +143,12 @@ jobs:
             "blocked (unsigned smoke baseline)"
 
       - name: Upload release evidence row snippet
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: desktop-release-evidence-row-${{ matrix.label }}
           path: desktop/release/reports/release_evidence_row_${{ matrix.label }}.md
+          if-no-files-found: warn
 
       - name: Generate release evidence index preview
         working-directory: ./desktop
@@ -131,10 +160,12 @@ jobs:
             "release/reports/release_evidence_index_preview_${{ matrix.label }}.md"
 
       - name: Upload release evidence index preview
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: desktop-release-evidence-index-preview-${{ matrix.label }}
           path: desktop/release/reports/release_evidence_index_preview_${{ matrix.label }}.md
+          if-no-files-found: warn
 
   appcast-preview:
     name: "Appcast Preview"
@@ -177,19 +208,25 @@ jobs:
         run: ./scripts/check_appcast_publication_bundle.sh
 
       - name: Upload appcast preview
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: desktop-appcast-preview
           path: desktop/release/reports/appcast_preview.json
+          if-no-files-found: warn
 
       - name: Upload appcast published dry-run targets
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: desktop-appcast-published-dry-run
           path: desktop/release/published/
+          if-no-files-found: warn
 
       - name: Upload appcast publication bundle
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: desktop-appcast-publication-bundle
           path: desktop/release/reports/appcast_publication_bundle.json
+          if-no-files-found: warn
