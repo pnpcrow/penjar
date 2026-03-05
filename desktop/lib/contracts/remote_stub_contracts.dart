@@ -769,10 +769,35 @@ bool _containsAnyKey(Map<String, Object?> payload, Set<String> keys) {
   return false;
 }
 
+bool _containsAnyKeyInSources(
+  List<Map<String, Object?>> sources,
+  Set<String> keys,
+) {
+  for (final Map<String, Object?> source in sources) {
+    if (_containsAnyKey(source, keys)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 Object? _firstPresentValue(Map<String, Object?> payload, List<String> aliases) {
   for (final String alias in aliases) {
     if (payload.containsKey(alias)) {
       return payload[alias];
+    }
+  }
+  return null;
+}
+
+Object? _firstPresentValueInSources(
+  List<Map<String, Object?>> sources,
+  List<String> aliases,
+) {
+  for (final Map<String, Object?> source in sources) {
+    final Object? value = _firstPresentValue(source, aliases);
+    if (value != null) {
+      return value;
     }
   }
   return null;
@@ -784,6 +809,18 @@ bool _containsAnyNonEmptyString(
 ) {
   for (final String alias in aliases) {
     if (_coerceNonEmptyString(payload[alias]) != null) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool _containsAnyNonEmptyStringInSources(
+  List<Map<String, Object?>> sources,
+  List<String> aliases,
+) {
+  for (final Map<String, Object?> source in sources) {
+    if (_containsAnyNonEmptyString(source, aliases)) {
       return true;
     }
   }
@@ -865,24 +902,54 @@ AuthSessionState? _authStateFromBackendPayload(
     envelopePayload: envelopePayload,
     aliases: const <String>['authState'],
   );
-  final bool hasRememberSessionFields = _containsAnyKey(
+  final Map<String, Object?> sessionPayload = _coerceStringKeyedMap(
+    _firstPresentValue(statePayload, const <String>[
+      'session',
+      'sessionState',
+      'sessionInfo',
+    ]),
+  );
+  final Map<String, Object?> tokenPayload = _coerceStringKeyedMap(
+    _firstPresentValue(statePayload, const <String>[
+      'tokens',
+      'tokenState',
+      'credentials',
+    ]),
+  );
+  final Map<String, Object?> authPayload = _coerceStringKeyedMap(
+    _firstPresentValue(statePayload, const <String>['auth', 'authentication']),
+  );
+  final List<Map<String, Object?>> authSources = <Map<String, Object?>>[
     statePayload,
+    authPayload,
+    sessionPayload,
+    tokenPayload,
+  ];
+
+  final bool hasRememberSessionFields = _containsAnyKeyInSources(
+    authSources,
     const <String>{'rememberSession', 'remember', 'persistSession'},
   );
-  final bool hasSignedInFields = _containsAnyKey(statePayload, const <String>{
-    'signedIn',
-    'isAuthenticated',
-    'authenticated',
-  });
-  final bool hasCredentialFields = _containsAnyNonEmptyString(statePayload, [
-    'accessToken',
-    'token',
-    'sessionToken',
-    'refreshToken',
-    'sessionId',
-  ]);
+  final bool hasSignedInFields = _containsAnyKeyInSources(
+    authSources,
+    const <String>{'signedIn', 'isAuthenticated', 'authenticated'},
+  );
+  final bool hasCredentialFields = _containsAnyNonEmptyStringInSources(
+    authSources,
+    const <String>[
+      'accessToken',
+      'token',
+      'sessionToken',
+      'refreshToken',
+      'sessionId',
+      'idToken',
+    ],
+  );
   final bool hasUserPayload = _coerceStringKeyedMap(
-    statePayload['user'],
+    _firstPresentValueInSources(
+      <Map<String, Object?>>[statePayload, authPayload],
+      const <String>['user', 'profile', 'account'],
+    ),
   ).isNotEmpty;
   final bool hasFields =
       hasRememberSessionFields ||
@@ -899,14 +966,14 @@ AuthSessionState? _authStateFromBackendPayload(
   }
 
   final bool? resolvedRememberSession = _coerceBool(
-    _firstPresentValue(statePayload, const <String>[
+    _firstPresentValueInSources(authSources, const <String>[
       'rememberSession',
       'remember',
       'persistSession',
     ]),
   );
   final bool? resolvedSignedIn = _coerceBool(
-    _firstPresentValue(statePayload, const <String>[
+    _firstPresentValueInSources(authSources, const <String>[
       'signedIn',
       'isAuthenticated',
       'authenticated',

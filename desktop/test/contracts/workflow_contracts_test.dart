@@ -1319,6 +1319,71 @@ void main() {
     );
 
     test(
+      'auth backend nested auth/session/token payload aliases are normalized',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'detail': 'Backend nested auth payload applied.',
+                'state': <String, Object?>{
+                  'authentication': <String, Object?>{
+                    'persistSession': true,
+                    'authenticated': true,
+                    'user': <String, Object?>{'id': 'user-1'},
+                  },
+                  'session': <String, Object?>{
+                    'sessionId': 'session-from-nested-payload',
+                  },
+                  'tokens': <String, Object?>{
+                    'accessToken': 'access-token-from-nested-payload',
+                    'refreshToken': 'refresh-token-from-nested-payload',
+                  },
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.rememberSession, isTrue);
+        expect(authContract.state.signedIn, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend nested auth payload applied.',
+        );
+      },
+    );
+
+    test(
+      'auth backend nested explicit signed-out aliases override token inference',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'status': 'Backend nested auth payload applied.',
+                'state': <String, Object?>{
+                  'authentication': <String, Object?>{'authenticated': false},
+                  'tokens': <String, Object?>{
+                    'accessToken': 'access-token-that-should-not-force-sign-in',
+                  },
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend nested auth payload applied.',
+        );
+      },
+    );
+
+    test(
       'skips auth delegate mutation when backend response snapshot is present',
       () {
         final _TrackingAuthSessionContract trackingDelegate =
