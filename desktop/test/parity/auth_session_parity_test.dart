@@ -757,6 +757,39 @@ class _AuthBackendSignedOutAliasParityTransportClient
   }
 }
 
+class _AuthBackendSignedOutAliasSignedInOverrideParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendSignedOutAliasSignedInOverrideParityTransportClient({
+    required this.signedOutAlias,
+  });
+
+  final String signedOutAlias;
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend sign-in snapshot applied.',
+          'state': <String, Object?>{'signedIn': true, 'rememberSession': true},
+        },
+      );
+    }
+    if (request.operation == RemoteStubOperationIds.refreshToken) {
+      final Map<String, Object?> statePayload = <String, Object?>{
+        'signedIn': true,
+        signedOutAlias: true,
+        'remember_session': true,
+        'sessionToken': 'override-session-token',
+      };
+      return RemoteStubTransportResult.allowedWithPayload(<String, Object?>{
+        'state': statePayload,
+      });
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 class _AuthBackendSessionTimeoutParityTransportClient
     extends RemoteStubTransportClient {
   const _AuthBackendSessionTimeoutParityTransportClient();
@@ -2565,6 +2598,68 @@ void main() {
         );
         expect(
           find.textContaining('Token refreshed (simulated).'),
+          findsNothing,
+        );
+      },
+    );
+  }
+
+  for (final String signedOutAlias in const <String>[
+    'signedOut',
+    'isSignedOut',
+    'loggedOut',
+    'isLoggedOut',
+    'signed_out',
+    'is_signed_out',
+    'logged_out',
+    'is_logged_out',
+  ]) {
+    testWidgets(
+      'auth/session parity keeps signed-in state when $signedOutAlias alias collides with explicit signedIn',
+      (WidgetTester tester) async {
+        await pumpDesktopApp(
+          tester,
+          contracts: DesktopContractBundle.fromMode(
+            DesktopContractMode.remoteStub,
+            remoteStubTransportClient:
+                _AuthBackendSignedOutAliasSignedInOverrideParityTransportClient(
+                  signedOutAlias: signedOutAlias,
+                ),
+          ),
+        );
+        await openWorkflowSection(tester, 'auth');
+
+        await tester.enterText(
+          find.byKey(const ValueKey<String>('auth-password')),
+          'desktop-pass',
+        );
+        await tester.ensureVisible(
+          find.byKey(const ValueKey<String>('auth-sign-in')),
+        );
+        await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining(
+            'Status: [remote-stub] Backend sign-in snapshot applied.',
+          ),
+          findsOneWidget,
+        );
+
+        await tester.ensureVisible(
+          find.byKey(const ValueKey<String>('auth-refresh-token')),
+        );
+        await tester.tap(
+          find.byKey(const ValueKey<String>('auth-refresh-token')),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining(
+            'Status: [remote-stub] Backend sign-in snapshot applied.',
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('Status: [remote-stub] Authentication required.'),
           findsNothing,
         );
       },

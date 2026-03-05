@@ -9444,8 +9444,57 @@ variants so parity behavior remains aligned with contract precedence across `AUT
   - `AUTH_REQUIRED` + explicit `signedIn=true` preserves signed-in precedence in parity UI.
   - `SESSION_TIMEOUT` + explicit `signedIn=true` preserves signed-in precedence in parity UI.
   - `EXPIRED_TOKEN` + explicit `signedIn=true` preserves signed-in precedence in parity UI.
-  - `Authentication required.` / `Backend session expired.` fallback statuses are not shown for those
-    explicit signed-in override cases.
+- `Authentication required.` / `Backend session expired.` fallback statuses are not shown for those
+  explicit signed-in override cases.
+- targeted auth tests and full desktop verification remain green after the new locks.
+
+## Unit WS-D-205: Auth signedOut-alias explicit signed-in parity collision locks
+
+### Planned objective
+
+Close the remaining parity gap for signedOut-state alias collisions by adding explicit signed-in
+override parity locks for all signedOut alias variants currently covered in contract tests.
+
+### Implemented changes
+
+1. Added signedOut-alias collision transport/test coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - `_AuthBackendSignedOutAliasSignedInOverrideParityTransportClient`,
+   - for-loop parity regressions covering
+     `signedOut`, `isSignedOut`, `loggedOut`, `isLoggedOut`, `signed_out`,
+     `is_signed_out`, `logged_out`, `is_logged_out`,
+   - each case asserts signed-in precedence retention when signedOut alias and explicit
+     `signedIn=true` are both present.
+2. Synced continuity docs so explicit signed-in override parity wording now explicitly includes
+   signedOut-alias collision coverage:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+3. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - parity precedence behavior under explicit `signedIn=true` + signedOut alias collisions,
+  - completeness of parity/contract signed-in override matrix for signedOut-state aliases,
+  - continuity doc accuracy for alias-collision coverage.
+- **Issues found during review**
+  1. Parity suite already covered signedOut alias fallback mapping, but did not include explicit
+     signedIn collision precedence locks for those alias variants.
+  2. Contract suite had explicit precedence coverage for all signedOut aliases, leaving a parity-only
+     regression gap.
+- **Fix applied**
+  1. Added dedicated signedOut-alias collision transport path with explicit signedIn snapshot.
+  2. Added loop-driven parity assertions for all eight signedOut alias variants.
+  3. Updated continuity docs so explicit override wording includes signedOut alias collision locks.
+- **Post-fix validation criteria**
+  - signedOut alias + explicit `signedIn=true` collisions preserve signed-in precedence for all
+    eight signedOut alias variants.
+  - `Authentication required.` fallback is not shown for those explicit signed-in collision cases.
   - targeted auth tests and full desktop verification remain green after the new locks.
 
 ## Remaining Phase C setup gaps
