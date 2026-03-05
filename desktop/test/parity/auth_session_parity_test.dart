@@ -1210,6 +1210,81 @@ class _AuthBackendNestedSignedOutErrorCodeParityTransportClient
   }
 }
 
+class _AuthBackendTokenSessionAliasParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendTokenSessionAliasParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'detail': 'Backend auth alias payload applied.',
+          'state': <String, Object?>{
+            'remember': true,
+            'accessToken': 'access-token-from-backend',
+            'sessionId': 'session-from-backend',
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
+class _AuthBackendExplicitSignedOutTokenAliasParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendExplicitSignedOutTokenAliasParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend auth alias payload applied.',
+          'state': <String, Object?>{
+            'signedIn': false,
+            'accessToken': 'ignored-for-explicit-sign-out',
+            'sessionId': 'ignored-for-explicit-sign-out',
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
+class _AuthBackendNestedAuthTokenAliasParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendNestedAuthTokenAliasParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.restoreSession) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'detail': 'Backend nested auth payload applied.',
+          'state': <String, Object?>{
+            'authentication': <String, Object?>{
+              'persistSession': true,
+              'authenticated': true,
+              'user': <String, Object?>{'id': 'user-1'},
+            },
+            'session': <String, Object?>{
+              'sessionId': 'session-from-nested-payload',
+            },
+            'tokens': <String, Object?>{
+              'accessToken': 'access-token-from-nested-payload',
+              'refreshToken': 'refresh-token-from-nested-payload',
+            },
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 void main() {
   testWidgets('auth/session parity scaffold interactions work', (
     WidgetTester tester,
@@ -1314,6 +1389,117 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'auth/session parity infers signed-in from token/session aliases',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendTokenSessionAliasParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend auth alias payload applied.',
+        ),
+        findsOneWidget,
+      );
+      final CheckboxListTile rememberSessionTile = tester.widget(
+        find.byKey(const ValueKey<String>('auth-remember')),
+      );
+      expect(rememberSessionTile.value, isTrue);
+      expect(
+        find.textContaining('Status: [remote-stub] Authentication required.'),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets(
+    'auth/session parity keeps explicit signed-out precedence over token/session aliases',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendExplicitSignedOutTokenAliasParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend auth alias payload applied.',
+        ),
+        findsOneWidget,
+      );
+      final CheckboxListTile rememberSessionTile = tester.widget(
+        find.byKey(const ValueKey<String>('auth-remember')),
+      );
+      expect(rememberSessionTile.value, isFalse);
+    },
+  );
+
+  testWidgets(
+    'auth/session parity normalizes nested auth/session/token payload aliases',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendNestedAuthTokenAliasParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-restore-session')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('auth-restore-session')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend nested auth payload applied.',
+        ),
+        findsOneWidget,
+      );
+      final CheckboxListTile rememberSessionTile = tester.widget(
+        find.byKey(const ValueKey<String>('auth-remember')),
+      );
+      expect(rememberSessionTile.value, isTrue);
+      expect(
+        find.textContaining('Status: [remote-stub] Authentication required.'),
+        findsNothing,
+      );
     },
   );
 
