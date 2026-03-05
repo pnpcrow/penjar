@@ -1542,6 +1542,66 @@ void main() {
     );
 
     test(
+      'auth backend nested error list detail updates status when top-level status is absent',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'state': <String, Object?>{
+                  'authentication': <String, Object?>{
+                    'errors': <Object?>[
+                      <String, Object?>{
+                        'detail': 'Nested auth detail from error list.',
+                      },
+                    ],
+                  },
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Nested auth detail from error list.',
+        );
+      },
+    );
+
+    test(
+      'auth backend top-level message keeps precedence over nested error detail',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'message': 'Top-level backend auth message.',
+                'state': <String, Object?>{
+                  'authentication': <String, Object?>{
+                    'errors': <Object?>[
+                      <String, Object?>{
+                        'detail': 'Nested detail should not override top-level.',
+                      },
+                    ],
+                  },
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(
+          authContract.state.status,
+          '[remote-stub] Top-level backend auth message.',
+        );
+      },
+    );
+
+    test(
       'auth backend nested signed-out error code overrides token inference',
       () {
         final _BackendResponseTransportClient transportClient =

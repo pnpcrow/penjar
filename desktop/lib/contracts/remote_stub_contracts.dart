@@ -842,16 +842,20 @@ bool _hasBackendStatus({
   required Map<String, Object?> responsePayload,
   required Map<String, Object?> envelopePayload,
   required Map<String, Object?> statePayload,
+  List<Map<String, Object?>> additionalPayloads =
+      const <Map<String, Object?>>[],
 }) {
-  return _coerceNonEmptyString(responsePayload['status']) != null ||
-      _coerceNonEmptyString(responsePayload['message']) != null ||
-      _coerceNonEmptyString(responsePayload['detail']) != null ||
-      _coerceNonEmptyString(envelopePayload['status']) != null ||
-      _coerceNonEmptyString(envelopePayload['message']) != null ||
-      _coerceNonEmptyString(envelopePayload['detail']) != null ||
-      _coerceNonEmptyString(statePayload['status']) != null ||
-      _coerceNonEmptyString(statePayload['message']) != null ||
-      _coerceNonEmptyString(statePayload['detail']) != null;
+  for (final Map<String, Object?> payload in <Map<String, Object?>>[
+    responsePayload,
+    envelopePayload,
+    statePayload,
+    ...additionalPayloads,
+  ]) {
+    if (_resolveBackendStatusFromPayload(payload) != null) {
+      return true;
+    }
+  }
+  return false;
 }
 
 String _resolveBackendStatusValue({
@@ -859,17 +863,70 @@ String _resolveBackendStatusValue({
   required Map<String, Object?> envelopePayload,
   required Map<String, Object?> statePayload,
   required String fallbackStatus,
+  List<Map<String, Object?>> additionalPayloads =
+      const <Map<String, Object?>>[],
 }) {
-  return _coerceNonEmptyString(responsePayload['status']) ??
-      _coerceNonEmptyString(responsePayload['message']) ??
-      _coerceNonEmptyString(responsePayload['detail']) ??
-      _coerceNonEmptyString(envelopePayload['status']) ??
-      _coerceNonEmptyString(envelopePayload['message']) ??
-      _coerceNonEmptyString(envelopePayload['detail']) ??
-      _coerceNonEmptyString(statePayload['status']) ??
-      _coerceNonEmptyString(statePayload['message']) ??
-      _coerceNonEmptyString(statePayload['detail']) ??
-      fallbackStatus;
+  for (final Map<String, Object?> payload in <Map<String, Object?>>[
+    responsePayload,
+    envelopePayload,
+    statePayload,
+    ...additionalPayloads,
+  ]) {
+    final String? status = _resolveBackendStatusFromPayload(payload);
+    if (status != null) {
+      return status;
+    }
+  }
+  return fallbackStatus;
+}
+
+String? _resolveBackendStatusFromPayload(Map<String, Object?> payload) {
+  for (final String alias in const <String>[
+    'status',
+    'message',
+    'detail',
+    'reason',
+    'error',
+    'errorMessage',
+    'description',
+  ]) {
+    final String? direct = _coerceNonEmptyString(payload[alias]);
+    if (direct != null) {
+      return direct;
+    }
+  }
+  for (final String alias in const <String>[
+    'error',
+    'errors',
+    'failure',
+    'failures',
+  ]) {
+    final String? nested = _resolveBackendStatusFromContainer(payload[alias]);
+    if (nested != null) {
+      return nested;
+    }
+  }
+  return null;
+}
+
+String? _resolveBackendStatusFromContainer(Object? value) {
+  final String? direct = _coerceNonEmptyString(value);
+  if (direct != null) {
+    return direct;
+  }
+  final Map<String, Object?> payload = _coerceStringKeyedMap(value);
+  if (payload.isNotEmpty) {
+    return _resolveBackendStatusFromPayload(payload);
+  }
+  if (value is List) {
+    for (final Object? item in value) {
+      final String? nested = _resolveBackendStatusFromContainer(item);
+      if (nested != null) {
+        return nested;
+      }
+    }
+  }
+  return null;
 }
 
 String? _resolveBackendCodeValue({
@@ -1066,6 +1123,7 @@ AuthSessionState? _authStateFromBackendPayload(
     responsePayload: responsePayload,
     envelopePayload: envelopePayload,
     statePayload: statePayload,
+    additionalPayloads: authSources,
   );
   if (!hasFields && !hasStatus) {
     return null;
@@ -1112,6 +1170,7 @@ AuthSessionState? _authStateFromBackendPayload(
       envelopePayload: envelopePayload,
       statePayload: statePayload,
       fallbackStatus: currentState.status,
+      additionalPayloads: authSources,
     ),
   );
 }
