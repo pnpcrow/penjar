@@ -1397,5 +1397,61 @@ void main() {
       expect(persisted?.signedIn, isTrue);
       expect(persisted?.status, 'Backend file snapshot persisted.');
     });
+
+    test('command auth state store loads and saves via command runner', () {
+      final List<RemoteStubCommandExecutionRequest> executedRequests =
+          <RemoteStubCommandExecutionRequest>[];
+      final RemoteStubCommandAuthStateStore
+      store = RemoteStubCommandAuthStateStore(
+        loadCommand: 'load-auth-snapshot',
+        saveCommand: 'save-auth-snapshot',
+        commandRunner: (RemoteStubCommandExecutionRequest request) {
+          executedRequests.add(request);
+          if (request.command == 'load-auth-snapshot') {
+            return const RemoteStubCommandExecutionResult(
+              exitCode: 0,
+              stdout:
+                  '{"rememberSession":true,"signedIn":false,"status":"Loaded from command."}',
+            );
+          }
+          return const RemoteStubCommandExecutionResult(exitCode: 0);
+        },
+      );
+
+      final AuthSessionState? loaded = store.load();
+      expect(loaded, isNotNull);
+      expect(loaded?.rememberSession, isTrue);
+      expect(loaded?.signedIn, isFalse);
+      expect(loaded?.status, 'Loaded from command.');
+
+      store.save(
+        const AuthSessionState(
+          rememberSession: false,
+          signedIn: true,
+          status: 'Saved from command.',
+        ),
+      );
+
+      expect(executedRequests, hasLength(2));
+      expect(executedRequests.first.command, 'load-auth-snapshot');
+      expect(executedRequests.last.command, 'save-auth-snapshot');
+      final String? savedJson = executedRequests
+          .last
+          .environment['PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_JSON'];
+      expect(savedJson, isNotNull);
+      expect(savedJson, contains('"signedIn":true'));
+      expect(savedJson, contains('"status":"Saved from command."'));
+    });
+
+    test('command auth state store returns null on failed load command', () {
+      final RemoteStubCommandAuthStateStore store =
+          RemoteStubCommandAuthStateStore(
+            loadCommand: 'load-auth-snapshot',
+            commandRunner: (_) =>
+                const RemoteStubCommandExecutionResult(exitCode: 1),
+          );
+
+      expect(store.load(), isNull);
+    });
   });
 }

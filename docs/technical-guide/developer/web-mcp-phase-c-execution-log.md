@@ -5176,8 +5176,63 @@ Advance auth/session continuity from seam-only to executable persistence by addi
   - remote-stub bundle can inject auth-state-store dependency and persist auth transitions through the configured seam.
   - full verification gate (`desktop:verify:full`) remains green after file-backed path integration.
 
+## Unit WS-D-118: Command-hook secure-store bridge for remote-stub auth snapshots
+
+### Planned objective
+
+Bridge remote-stub auth snapshot persistence into OS credential-store workflows by adding a command-hook auth store mode (load/save command controls), so teams can wire platform keychain/credential-manager commands before first-class native plugin integration.
+
+### Implemented changes
+
+1. Added command-hook auth store path in `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - introduced command execution model:
+     - `RemoteStubCommandExecutionRequest`,
+     - `RemoteStubCommandExecutionResult`,
+     - `RemoteStubCommandRunner` + default shell runner (`sh -c` / `cmd /C`),
+   - added `RemoteStubCommandAuthStateStore`:
+     - `load()` executes configured load command and parses JSON stdout into auth snapshot,
+     - `save()` executes configured save command with serialized snapshot in `PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_JSON` env.
+2. Extended bundle environment wiring in `desktop/lib/contracts/desktop_contract_bundle.dart`:
+   - auth-state store resolver now supports:
+     - `PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_LOAD_COMMAND`,
+     - `PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_SAVE_COMMAND`,
+   - precedence: command-hook store -> file store -> noop store.
+3. Expanded regression coverage:
+   - `desktop/test/contracts/workflow_contracts_test.dart`:
+     - `command auth state store loads and saves via command runner`,
+     - `command auth state store returns null on failed load command`,
+   - `desktop/test/contracts/desktop_contract_bundle_test.dart`:
+     - `remote-stub bundle supports command auth state store seam`.
+4. Synced continuity docs:
+   - `desktop-flutter-development-runbook.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+5. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/contracts/desktop_contract_bundle_test.dart`,
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - command-hook auth store correctness (load/save command invocation + env payload),
+  - platform-safe default command runner behavior across non-Windows/Windows shells,
+  - non-regression of existing file/noop auth store paths and full verification chain.
+- **Issues found during review**
+  1. File/env-based auth store path still required manual file plumbing and did not directly bridge to platform-secure credential workflows.
+  2. Command execution path needed deterministic, testable behavior without invoking real shell commands in unit tests.
+  3. Bundle resolver needed explicit precedence rules to avoid ambiguous store selection when multiple auth persistence controls are set.
+- **Fix applied**
+  1. Implemented command-hook store model and shell runner abstraction.
+  2. Added injectable command runner and contract tests with deterministic fake runner assertions.
+  3. Added explicit command->file->noop resolver precedence in bundle auth store builder.
+- **Post-fix validation criteria**
+  - remote-stub auth snapshot load/save can be driven by command hooks for secure-store bridge integration.
+  - command-hook path is regression-covered without depending on real shell/environment side effects.
+  - full verification gate (`desktop:verify:full`) remains green after command-hook bridge integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata, shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline, backend envelope/schema compatibility normalization, auth snapshot store/seed seam, file-backed auth snapshot persistence path, and runtime mode parity/matrix gates, but native deep-link/window-route interoperability and OS-backed secure credential-store persistence integration are still pending.
+- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata, shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline, backend envelope/schema compatibility normalization, auth snapshot store/seed seam, file-backed auth snapshot persistence path, command-hook secure-store bridge path, and runtime mode parity/matrix gates, but native deep-link/window-route interoperability and first-class OS keychain/credential-manager provider integration are still pending.
 - Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard plus coverage-contract regression guard (set-diff optimized uncovered/missing detection), desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks with in-memory duplicate-key tracking + base-check markdown report emission) plus evidence-index contract regression guard (including dedicated missing-base-check-report attachment, missing-index-file, invalid-decision, and promoted-placeholder cases, dedicated tests workflow release-evidence guard base+contract enforcement/upload, and parity matrix base-check artifact retention), update-manifest guard automation with validation + contract report artifacts (including dedicated tests workflow update-manifest guard job contract enforcement/upload), on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

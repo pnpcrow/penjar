@@ -229,6 +229,19 @@ RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
 }
 
 RemoteStubAuthStateStore _buildRemoteStubAuthStateStoreFromEnvironment() {
+  final String authStateLoadCommand = const String.fromEnvironment(
+    'PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_LOAD_COMMAND',
+  ).trim();
+  final String authStateSaveCommand = const String.fromEnvironment(
+    'PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_SAVE_COMMAND',
+  ).trim();
+  if (authStateLoadCommand.isNotEmpty || authStateSaveCommand.isNotEmpty) {
+    return RemoteStubCommandAuthStateStore(
+      loadCommand: authStateLoadCommand,
+      saveCommand: authStateSaveCommand,
+    );
+  }
+
   final String authStatePath = const String.fromEnvironment(
     'PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_PATH',
   ).trim();

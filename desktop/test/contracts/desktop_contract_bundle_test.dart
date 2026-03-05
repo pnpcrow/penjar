@@ -153,6 +153,44 @@ void main() {
     expect(persistedState?.status, 'Signed in (simulated).');
   });
 
+  test('remote-stub bundle supports command auth state store seam', () {
+    final List<RemoteStubCommandExecutionRequest> executedRequests =
+        <RemoteStubCommandExecutionRequest>[];
+    final RemoteStubCommandAuthStateStore
+    authStateStore = RemoteStubCommandAuthStateStore(
+      loadCommand: 'load-auth-snapshot',
+      saveCommand: 'save-auth-snapshot',
+      commandRunner: (RemoteStubCommandExecutionRequest request) {
+        executedRequests.add(request);
+        if (request.command == 'load-auth-snapshot') {
+          return const RemoteStubCommandExecutionResult(
+            exitCode: 0,
+            stdout:
+                '{"rememberSession":true,"signedIn":true,"status":"Loaded from command."}',
+          );
+        }
+        return const RemoteStubCommandExecutionResult(exitCode: 0);
+      },
+    );
+    final DesktopContractBundle remoteStubBundle =
+        DesktopContractBundle.remoteStub(authStateStore: authStateStore);
+
+    expect(remoteStubBundle.authSession.state.rememberSession, isTrue);
+    expect(remoteStubBundle.authSession.state.signedIn, isTrue);
+    expect(
+      remoteStubBundle.authSession.state.status,
+      '[remote-stub] Loaded from command.',
+    );
+
+    remoteStubBundle.authSession.refreshToken();
+    expect(
+      executedRequests.map(
+        (RemoteStubCommandExecutionRequest item) => item.command,
+      ),
+      containsAll(<String>['load-auth-snapshot', 'save-auth-snapshot']),
+    );
+  });
+
   test('remote-stub unavailable profile blocks mutating operations', () {
     final DesktopContractBundle bundle = DesktopContractBundle.remoteStub(
       faultProfile: const RemoteStubFaultProfile(unavailable: true),

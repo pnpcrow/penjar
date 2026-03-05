@@ -138,7 +138,7 @@ Before pausing or transferring work:
 
 ## 7) Current next-unit candidates
 
-1. Secure credential-store migration for remote-stub auth snapshots (replace file/env-based auth snapshot persistence path with OS keychain/credential manager integration).
+1. Native keychain/credential-manager provider implementation for remote-stub auth snapshots (replace command-hook bridge with first-class platform plugin/provider).
 2. Real command wiring for signed packaging/notarization/verification in installer smoke workflow (`PENJAR_*_SIGN_COMMAND`, `PENJAR_*_SIGN_VERIFY_COMMAND` paths).
 3. Real Windows signed installer generation (`.msi/.exe`) command chain and provenance command/secret wiring.
 4. External appcast publication production rollout with real credentials/invalidation execution.

@@ -1708,6 +1708,117 @@ class RemoteStubFileAuthStateStore extends RemoteStubAuthStateStore {
   }
 }
 
+class RemoteStubCommandExecutionRequest {
+  const RemoteStubCommandExecutionRequest({
+    required this.command,
+    this.environment = const <String, String>{},
+  });
+
+  final String command;
+  final Map<String, String> environment;
+}
+
+class RemoteStubCommandExecutionResult {
+  const RemoteStubCommandExecutionResult({
+    required this.exitCode,
+    this.stdout = '',
+  });
+
+  final int exitCode;
+  final String stdout;
+}
+
+typedef RemoteStubCommandRunner =
+    RemoteStubCommandExecutionResult Function(
+      RemoteStubCommandExecutionRequest request,
+    );
+
+RemoteStubCommandExecutionResult _defaultRemoteStubCommandRunner(
+  RemoteStubCommandExecutionRequest request,
+) {
+  final String command = request.command.trim();
+  if (command.isEmpty) {
+    return const RemoteStubCommandExecutionResult(exitCode: 1);
+  }
+
+  final ProcessResult result = Platform.isWindows
+      ? Process.runSync('cmd', <String>[
+          '/C',
+          command,
+        ], environment: request.environment)
+      : Process.runSync('sh', <String>[
+          '-c',
+          command,
+        ], environment: request.environment);
+  return RemoteStubCommandExecutionResult(
+    exitCode: result.exitCode,
+    stdout: '${result.stdout}',
+  );
+}
+
+class RemoteStubCommandAuthStateStore extends RemoteStubAuthStateStore {
+  RemoteStubCommandAuthStateStore({
+    this.loadCommand = '',
+    this.saveCommand = '',
+    RemoteStubCommandRunner? commandRunner,
+  }) : _commandRunner = commandRunner ?? _defaultRemoteStubCommandRunner;
+
+  final String loadCommand;
+  final String saveCommand;
+  final RemoteStubCommandRunner _commandRunner;
+
+  @override
+  AuthSessionState? load() {
+    final String command = loadCommand.trim();
+    if (command.isEmpty) {
+      return null;
+    }
+
+    final RemoteStubCommandExecutionResult result = _commandRunner(
+      RemoteStubCommandExecutionRequest(command: command),
+    );
+    if (result.exitCode != 0) {
+      return null;
+    }
+    try {
+      final Object? decoded = jsonDecode(result.stdout.trim());
+      final Map<String, Object?> payload = _coerceStringKeyedMap(decoded);
+      if (payload.isEmpty) {
+        return null;
+      }
+      return AuthSessionState(
+        rememberSession: _coerceBool(payload['rememberSession']) ?? false,
+        signedIn: _coerceBool(payload['signedIn']) ?? false,
+        status: _coerceNonEmptyString(payload['status']) ?? 'Idle',
+      );
+    } on FormatException {
+      return null;
+    }
+  }
+
+  @override
+  void save(AuthSessionState state) {
+    final String command = saveCommand.trim();
+    if (command.isEmpty) {
+      return;
+    }
+
+    _commandRunner(
+      RemoteStubCommandExecutionRequest(
+        command: command,
+        environment: <String, String>{
+          'PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_JSON':
+              jsonEncode(<String, Object?>{
+                'rememberSession': state.rememberSession,
+                'signedIn': state.signedIn,
+                'status': state.status,
+              }),
+        },
+      ),
+    );
+  }
+}
+
 class RemoteStubAuthSessionContract implements AuthSessionContract {
   RemoteStubAuthSessionContract({
     AuthSessionContract? delegate,
