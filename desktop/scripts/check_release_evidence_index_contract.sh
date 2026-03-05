@@ -48,6 +48,13 @@ setup_missing_check_report_attachment_case() {
   mv "$filtered_index" "$case_index"
 }
 
+setup_missing_index_file_case() {
+  local source_index="$1"
+  local case_index="$2"
+  cp "$source_index" "$case_index"
+  rm -f "$case_index"
+}
+
 setup_duplicate_key_case() {
   local source_index="$1"
   local case_index="$2"
@@ -139,6 +146,14 @@ run_case \
   setup_missing_check_report_attachment_case \
   "missing required attachment reference: release/reports/release_evidence_index_check_report.md" \
   "missing required attachment reference: release/reports/release_evidence_index_check_report.md"
+
+run_case \
+  "missing-index-file-fail" \
+  "fail" \
+  "Missing index file should fail while still emitting a failed check report." \
+  setup_missing_index_file_case \
+  "missing index file:" \
+  "Status: failed"
 
 run_case \
   "duplicate-rc-platform-fail" \
