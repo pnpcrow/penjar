@@ -245,7 +245,7 @@ CI baseline note:
 - Release smoke gate policy contract checker: `desktop/scripts/check_release_smoke_gate_policy_contract.sh`.
 - Release script syntax checker: `desktop/scripts/check_release_script_syntax.sh` (recursive scan across `desktop/scripts/**/*.sh`, including shared helper modules under `desktop/scripts/lib/`).
 - Release script syntax contract checker: `desktop/scripts/check_release_script_syntax_contract.sh`.
-- Verify test coverage checker: `desktop/scripts/check_verify_test_coverage.sh`.
+- Verify test coverage checker: `desktop/scripts/check_verify_test_coverage.sh` (sorted set-diff comparison for uncovered/missing references via `comm`).
 - Verify test coverage contract checker: `desktop/scripts/check_verify_test_coverage_contract.sh`.
 - Desktop command inventory checker: `desktop/scripts/check_desktop_command_inventory.sh`.
 - Desktop command inventory contract checker: `desktop/scripts/check_desktop_command_inventory_contract.sh`.

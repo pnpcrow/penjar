@@ -75,21 +75,9 @@ get_runners_for_test() {
   awk -F'\t' -v name="$test_name" '$1 == name { print $2 }' "$coverage_sources_file" | sort -u | paste -sd ',' - | sed 's/,/, /g'
 }
 
-: > "$uncovered_file"
-while IFS= read -r test_path; do
-  [[ -z "$test_path" ]] && continue
-  if ! grep -Fxq "$test_path" "$coverage_unique_file"; then
-    printf '%s\n' "$test_path" >> "$uncovered_file"
-  fi
-done < "$discovered_file"
-
-: > "$missing_refs_file"
-while IFS= read -r referenced_test; do
-  [[ -z "$referenced_test" ]] && continue
-  if ! grep -Fxq "$referenced_test" "$discovered_file"; then
-    printf '%s\n' "$referenced_test" >> "$missing_refs_file"
-  fi
-done < "$coverage_unique_file"
+# Both files are sorted; use set-diff operations instead of per-row grep checks.
+comm -23 "$discovered_file" "$coverage_unique_file" > "$uncovered_file"
+comm -13 "$discovered_file" "$coverage_unique_file" > "$missing_refs_file"
 
 : > "$allowed_duplicates_file"
 : > "$unexpected_duplicates_file"
