@@ -2,6 +2,99 @@ import 'package:penjar_desktop/contracts/workflow_contracts.dart';
 
 const String _kRemoteStubPrefix = '[remote-stub] ';
 
+String _normalizeOperation(String operation) => operation.trim().toLowerCase();
+
+final Expando<Set<String>> _normalizedOperationSetCache = Expando<Set<String>>(
+  'normalizedRemoteStubOperationSet',
+);
+
+Set<String> _normalizedOperationSet(Set<String> operations) {
+  final Set<String>? cached = _normalizedOperationSetCache[operations];
+  if (cached != null) {
+    return cached;
+  }
+  final Set<String> normalized = operations.map(_normalizeOperation).toSet();
+  _normalizedOperationSetCache[operations] = normalized;
+  return normalized;
+}
+
+class RemoteStubOperationIds {
+  const RemoteStubOperationIds._();
+
+  static const String setRememberSession = 'set-remember-session';
+  static const String signIn = 'sign-in';
+  static const String restoreSession = 'restore-session';
+  static const String refreshToken = 'refresh-token';
+
+  static const String createProject = 'create-project';
+  static const String switchProject = 'switch-project';
+  static const String createFile = 'create-file';
+  static const String deleteFile = 'delete-file';
+
+  static const String createRectangle = 'create-rectangle';
+  static const String selectShape = 'select-shape';
+  static const String moveShape = 'move-shape';
+  static const String resizeShape = 'resize-shape';
+  static const String toggleFill = 'toggle-fill';
+
+  static const String importAsset = 'import-asset';
+  static const String selectAsset = 'select-asset';
+  static const String useAsset = 'use-asset';
+  static const String removeAsset = 'remove-asset';
+
+  static const String togglePeerPresence = 'toggle-peer-presence';
+  static const String createThread = 'create-thread';
+  static const String selectThread = 'select-thread';
+  static const String resolveThread = 'resolve-thread';
+
+  static const String setInspectTarget = 'set-inspect-target';
+  static const String generateSnippet = 'generate-snippet';
+  static const String copyMetadata = 'copy-metadata';
+
+  static const String runExport = 'run-export';
+  static const String saveExport = 'save-export';
+  static const String clearExportArtifacts = 'clear-export-artifacts';
+
+  static const String runHealthCheck = 'run-health-check';
+  static const String simulateDisconnect = 'simulate-disconnect';
+  static const String attemptReconnect = 'attempt-reconnect';
+  static const String openRecoveryGuide = 'open-recovery-guide';
+
+  static const Set<String> all = <String>{
+    setRememberSession,
+    signIn,
+    restoreSession,
+    refreshToken,
+    createProject,
+    switchProject,
+    createFile,
+    deleteFile,
+    createRectangle,
+    selectShape,
+    moveShape,
+    resizeShape,
+    toggleFill,
+    importAsset,
+    selectAsset,
+    useAsset,
+    removeAsset,
+    togglePeerPresence,
+    createThread,
+    selectThread,
+    resolveThread,
+    setInspectTarget,
+    generateSnippet,
+    copyMetadata,
+    runExport,
+    saveExport,
+    clearExportArtifacts,
+    runHealthCheck,
+    simulateDisconnect,
+    attemptReconnect,
+    openRecoveryGuide,
+  };
+}
+
 String _decorateStatus(String status) {
   if (status.startsWith(_kRemoteStubPrefix)) {
     return status;
@@ -28,14 +121,9 @@ class RemoteStubFaultProfile {
     if (unavailable) {
       return true;
     }
-
-    final String normalizedOperation = operation.trim().toLowerCase();
-    for (final String blockedOperation in blockedOperations) {
-      if (blockedOperation.trim().toLowerCase() == normalizedOperation) {
-        return true;
-      }
-    }
-    return false;
+    return _normalizedOperationSet(
+      blockedOperations,
+    ).contains(_normalizeOperation(operation));
   }
 }
 
@@ -82,13 +170,9 @@ class RemoteStubScriptedTransportClient extends RemoteStubTransportClient {
   final String blockedReason;
 
   bool _isBlocked(String operation) {
-    final String normalizedOperation = operation.trim().toLowerCase();
-    for (final String blockedOperation in blockedOperations) {
-      if (blockedOperation.trim().toLowerCase() == normalizedOperation) {
-        return true;
-      }
-    }
-    return false;
+    return _normalizedOperationSet(
+      blockedOperations,
+    ).contains(_normalizeOperation(operation));
   }
 
   @override
@@ -230,7 +314,7 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
 
   @override
   AuthSessionState setRememberSession(bool enabled) {
-    if (!_allowOperation('set-remember-session')) {
+    if (!_allowOperation(RemoteStubOperationIds.setRememberSession)) {
       return state;
     }
     _clearOverride();
@@ -239,7 +323,7 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
 
   @override
   AuthSessionState signIn(AuthSignInRequest request) {
-    if (!_allowOperation('sign-in')) {
+    if (!_allowOperation(RemoteStubOperationIds.signIn)) {
       return state;
     }
     _clearOverride();
@@ -248,7 +332,7 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
 
   @override
   AuthSessionState restoreSession() {
-    if (!_allowOperation('restore-session')) {
+    if (!_allowOperation(RemoteStubOperationIds.restoreSession)) {
       return state;
     }
     _clearOverride();
@@ -257,7 +341,7 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
 
   @override
   AuthSessionState refreshToken() {
-    if (!_allowOperation('refresh-token')) {
+    if (!_allowOperation(RemoteStubOperationIds.refreshToken)) {
       return state;
     }
     _clearOverride();
@@ -298,7 +382,7 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
 
   @override
   ProjectLifecycleState createProject(String projectName) {
-    if (!_allowOperation('create-project')) {
+    if (!_allowOperation(RemoteStubOperationIds.createProject)) {
       return state;
     }
     _clearOverride();
@@ -307,7 +391,7 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
 
   @override
   ProjectLifecycleState switchProject(int index) {
-    if (!_allowOperation('switch-project')) {
+    if (!_allowOperation(RemoteStubOperationIds.switchProject)) {
       return state;
     }
     _clearOverride();
@@ -316,7 +400,7 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
 
   @override
   ProjectLifecycleState createFile(String fileName) {
-    if (!_allowOperation('create-file')) {
+    if (!_allowOperation(RemoteStubOperationIds.createFile)) {
       return state;
     }
     _clearOverride();
@@ -325,7 +409,7 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
 
   @override
   ProjectLifecycleState deleteFirstFile() {
-    if (!_allowOperation('delete-file')) {
+    if (!_allowOperation(RemoteStubOperationIds.deleteFile)) {
       return state;
     }
     _clearOverride();
@@ -366,7 +450,7 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState createRectangle() {
-    if (!_allowOperation('create-rectangle')) {
+    if (!_allowOperation(RemoteStubOperationIds.createRectangle)) {
       return state;
     }
     _clearOverride();
@@ -375,7 +459,7 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState selectShape(int index) {
-    if (!_allowOperation('select-shape')) {
+    if (!_allowOperation(RemoteStubOperationIds.selectShape)) {
       return state;
     }
     _clearOverride();
@@ -384,7 +468,7 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState moveSelected() {
-    if (!_allowOperation('move-shape')) {
+    if (!_allowOperation(RemoteStubOperationIds.moveShape)) {
       return state;
     }
     _clearOverride();
@@ -393,7 +477,7 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState resizeSelected() {
-    if (!_allowOperation('resize-shape')) {
+    if (!_allowOperation(RemoteStubOperationIds.resizeShape)) {
       return state;
     }
     _clearOverride();
@@ -402,7 +486,7 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState toggleFillSelected() {
-    if (!_allowOperation('toggle-fill')) {
+    if (!_allowOperation(RemoteStubOperationIds.toggleFill)) {
       return state;
     }
     _clearOverride();
@@ -443,7 +527,7 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
 
   @override
   AssetManagementState importAsset(String assetName, String assetType) {
-    if (!_allowOperation('import-asset')) {
+    if (!_allowOperation(RemoteStubOperationIds.importAsset)) {
       return state;
     }
     _clearOverride();
@@ -452,7 +536,7 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
 
   @override
   AssetManagementState selectAsset(int index) {
-    if (!_allowOperation('select-asset')) {
+    if (!_allowOperation(RemoteStubOperationIds.selectAsset)) {
       return state;
     }
     _clearOverride();
@@ -461,7 +545,7 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
 
   @override
   AssetManagementState useSelectedAsset() {
-    if (!_allowOperation('use-asset')) {
+    if (!_allowOperation(RemoteStubOperationIds.useAsset)) {
       return state;
     }
     _clearOverride();
@@ -470,7 +554,7 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
 
   @override
   AssetManagementState removeSelectedAsset() {
-    if (!_allowOperation('remove-asset')) {
+    if (!_allowOperation(RemoteStubOperationIds.removeAsset)) {
       return state;
     }
     _clearOverride();
@@ -512,7 +596,7 @@ class RemoteStubCollaborationContextContract
 
   @override
   CollaborationContextState togglePeerPresence() {
-    if (!_allowOperation('toggle-peer-presence')) {
+    if (!_allowOperation(RemoteStubOperationIds.togglePeerPresence)) {
       return state;
     }
     _clearOverride();
@@ -521,7 +605,7 @@ class RemoteStubCollaborationContextContract
 
   @override
   CollaborationContextState createThread(String title) {
-    if (!_allowOperation('create-thread')) {
+    if (!_allowOperation(RemoteStubOperationIds.createThread)) {
       return state;
     }
     _clearOverride();
@@ -530,7 +614,7 @@ class RemoteStubCollaborationContextContract
 
   @override
   CollaborationContextState selectThread(int index) {
-    if (!_allowOperation('select-thread')) {
+    if (!_allowOperation(RemoteStubOperationIds.selectThread)) {
       return state;
     }
     _clearOverride();
@@ -539,7 +623,7 @@ class RemoteStubCollaborationContextContract
 
   @override
   CollaborationContextState resolveSelectedThread() {
-    if (!_allowOperation('resolve-thread')) {
+    if (!_allowOperation(RemoteStubOperationIds.resolveThread)) {
       return state;
     }
     _clearOverride();
@@ -580,7 +664,7 @@ class RemoteStubInspectHandoffContract implements InspectHandoffContract {
 
   @override
   InspectHandoffState setTarget(String target) {
-    if (!_allowOperation('set-inspect-target')) {
+    if (!_allowOperation(RemoteStubOperationIds.setInspectTarget)) {
       return state;
     }
     _clearOverride();
@@ -589,7 +673,7 @@ class RemoteStubInspectHandoffContract implements InspectHandoffContract {
 
   @override
   InspectHandoffState generateSnippet(String elementId) {
-    if (!_allowOperation('generate-snippet')) {
+    if (!_allowOperation(RemoteStubOperationIds.generateSnippet)) {
       return state;
     }
     _clearOverride();
@@ -598,7 +682,7 @@ class RemoteStubInspectHandoffContract implements InspectHandoffContract {
 
   @override
   InspectHandoffState copyMetadata(String elementId) {
-    if (!_allowOperation('copy-metadata')) {
+    if (!_allowOperation(RemoteStubOperationIds.copyMetadata)) {
       return state;
     }
     _clearOverride();
@@ -639,7 +723,7 @@ class RemoteStubExportWorkflowContract implements ExportWorkflowContract {
 
   @override
   ExportWorkflowState runExport(ExportRequest request) {
-    if (!_allowOperation('run-export')) {
+    if (!_allowOperation(RemoteStubOperationIds.runExport)) {
       return state;
     }
     _clearOverride();
@@ -648,7 +732,7 @@ class RemoteStubExportWorkflowContract implements ExportWorkflowContract {
 
   @override
   ExportWorkflowState saveLatest() {
-    if (!_allowOperation('save-export')) {
+    if (!_allowOperation(RemoteStubOperationIds.saveExport)) {
       return state;
     }
     _clearOverride();
@@ -657,7 +741,7 @@ class RemoteStubExportWorkflowContract implements ExportWorkflowContract {
 
   @override
   ExportWorkflowState clearArtifacts() {
-    if (!_allowOperation('clear-export-artifacts')) {
+    if (!_allowOperation(RemoteStubOperationIds.clearExportArtifacts)) {
       return state;
     }
     _clearOverride();
@@ -699,7 +783,7 @@ class RemoteStubDiagnosticsRecoveryContract
 
   @override
   DiagnosticsRecoveryState runHealthCheck() {
-    if (!_allowOperation('run-health-check')) {
+    if (!_allowOperation(RemoteStubOperationIds.runHealthCheck)) {
       return state;
     }
     _clearOverride();
@@ -708,7 +792,7 @@ class RemoteStubDiagnosticsRecoveryContract
 
   @override
   DiagnosticsRecoveryState simulateDisconnect() {
-    if (!_allowOperation('simulate-disconnect')) {
+    if (!_allowOperation(RemoteStubOperationIds.simulateDisconnect)) {
       return state;
     }
     _clearOverride();
@@ -717,7 +801,7 @@ class RemoteStubDiagnosticsRecoveryContract
 
   @override
   DiagnosticsRecoveryState attemptReconnect() {
-    if (!_allowOperation('attempt-reconnect')) {
+    if (!_allowOperation(RemoteStubOperationIds.attemptReconnect)) {
       return state;
     }
     _clearOverride();
@@ -726,7 +810,7 @@ class RemoteStubDiagnosticsRecoveryContract
 
   @override
   DiagnosticsRecoveryState openRecoveryGuide() {
-    if (!_allowOperation('open-recovery-guide')) {
+    if (!_allowOperation(RemoteStubOperationIds.openRecoveryGuide)) {
       return state;
     }
     _clearOverride();

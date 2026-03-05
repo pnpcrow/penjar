@@ -13,11 +13,17 @@ bool _envFlagEnabled(String raw) {
   }
 }
 
-Set<String> _parseBlockedOperations(String raw) {
+Set<String> _parseBlockedOperations(
+  String raw, {
+  Set<String>? allowedOperations,
+}) {
   final Set<String> normalizedOperations = <String>{};
   for (final String token in raw.split(',')) {
     final String normalized = token.trim().toLowerCase();
-    if (normalized.isNotEmpty) {
+    if (normalized.isEmpty) {
+      continue;
+    }
+    if (allowedOperations == null || allowedOperations.contains(normalized)) {
       normalizedOperations.add(normalized);
     }
   }
@@ -29,6 +35,7 @@ RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
     const String.fromEnvironment(
       'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BLOCKED_OPERATIONS',
     ),
+    allowedOperations: RemoteStubOperationIds.all,
   );
   if (blockedOperations.isEmpty) {
     return const RemoteStubNoopTransportClient();
@@ -92,6 +99,7 @@ class DesktopContractBundle {
       const String.fromEnvironment(
         'PENJAR_DESKTOP_REMOTE_STUB_BLOCKED_OPERATIONS',
       ),
+      allowedOperations: RemoteStubOperationIds.all,
     );
     final RemoteStubTransportClient transportClient =
         _buildRemoteStubTransportClientFromEnvironment();
