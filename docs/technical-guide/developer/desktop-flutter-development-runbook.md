@@ -139,7 +139,7 @@ Before pausing or transferring work:
 ## 7) Current next-unit candidates
 
 1. Secure-store rollout hardening for remote-stub auth snapshots (default-path migration to flutter_secure_storage adapter, legacy command/file mode deprecation plan, and failure telemetry).
-2. Windows URL protocol registration + running-instance route relay wiring (complete cross-platform deep-link/window-event interoperability parity after macOS baseline).
+2. Windows URL protocol registration/installer wiring (running-instance route relay baseline is complete; protocol handler registration remains pending).
 3. Real command wiring for signed packaging/notarization/verification in installer smoke workflow (`PENJAR_*_SIGN_COMMAND`, `PENJAR_*_SIGN_VERIFY_COMMAND` paths).
 4. Real Windows signed installer generation (`.msi/.exe`) command chain and provenance command/secret wiring.
 5. External appcast publication production rollout with real credentials/invalidation execution.

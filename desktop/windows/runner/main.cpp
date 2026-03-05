@@ -2,8 +2,58 @@
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
 
+#include <cstring>
+#include <optional>
+#include <string>
+#include <vector>
+
 #include "flutter_window.h"
 #include "utils.h"
+
+namespace {
+constexpr const wchar_t kPenjarWindowTitle[] = L"Penjar Desktop";
+constexpr ULONG_PTR kDesktopLaunchRouteCopyDataId = 0x504A524C;
+
+std::optional<std::string> ExtractLaunchRoute(
+    const std::vector<std::string>& args) {
+  for (const std::string& argument : args) {
+    if (argument.rfind("--penjar-route=", 0) == 0) {
+      const std::string route = argument.substr(strlen("--penjar-route="));
+      if (!route.empty()) {
+        return route;
+      }
+      continue;
+    }
+    if (argument.rfind("--penjar-section=", 0) == 0) {
+      const std::string section = argument.substr(strlen("--penjar-section="));
+      if (!section.empty()) {
+        return "penjar://section/" + section;
+      }
+      continue;
+    }
+    if (argument.rfind("penjar://", 0) == 0) {
+      return argument;
+    }
+  }
+  return std::nullopt;
+}
+
+bool RelayLaunchRouteToRunningWindow(const std::string& launch_route) {
+  HWND existing_window = FindWindow(nullptr, kPenjarWindowTitle);
+  if (existing_window == nullptr) {
+    return false;
+  }
+
+  COPYDATASTRUCT payload{};
+  payload.dwData = kDesktopLaunchRouteCopyDataId;
+  payload.cbData = static_cast<DWORD>(launch_route.size() + 1);
+  payload.lpData = const_cast<char*>(launch_route.c_str());
+  SendMessage(existing_window, WM_COPYDATA, 0, reinterpret_cast<LPARAM>(&payload));
+  ShowWindow(existing_window, SW_RESTORE);
+  SetForegroundWindow(existing_window);
+  return true;
+}
+}  // namespace
 
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
@@ -21,6 +71,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 
   std::vector<std::string> command_line_arguments =
       GetCommandLineArguments();
+  const std::optional<std::string> launch_route =
+      ExtractLaunchRoute(command_line_arguments);
+  if (launch_route.has_value() &&
+      RelayLaunchRouteToRunningWindow(launch_route.value())) {
+    ::CoUninitialize();
+    return EXIT_SUCCESS;
+  }
 
   project.set_dart_entrypoint_arguments(std::move(command_line_arguments));
 

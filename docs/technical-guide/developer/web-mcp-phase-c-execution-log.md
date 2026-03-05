@@ -5462,8 +5462,48 @@ Improve secure-store rollout observability by exposing active auth snapshot pers
   - default noop path remains profile-empty to avoid noise in baseline in-memory/remote-stub diagnostics.
   - full verification gate remains green after profile metadata extension.
 
+## Unit WS-D-124: Windows running-instance launch-route relay baseline
+
+### Planned objective
+
+Reduce cross-platform deep-link interoperability gap by adding Windows running-instance launch-route relay handling so secondary launches with Penjar route payloads can hand off route context to an already running desktop shell instance.
+
+### Implemented changes
+
+1. Added Windows launch-route extraction/relay logic in `desktop/windows/runner/main.cpp`:
+   - extracts route payload from:
+     - `--penjar-route=...`,
+     - `--penjar-section=...` (normalized to `penjar://section/<id>`),
+     - direct `penjar://...` argument.
+   - detects existing app window (`Penjar Desktop`) and relays route via `WM_COPYDATA`.
+2. Added running-instance route ingestion in `desktop/windows/runner/flutter_window.cpp`:
+   - handles `WM_COPYDATA` payloads with route relay marker,
+   - forwards route into Flutter runtime via method channel call:
+     - channel: `penjar/desktop/launch_route`,
+     - method: `onLaunchRoute`.
+3. Kept Dart-side host event handling path unchanged but exercised through existing channel route tests/verification chain.
+4. Re-ran validation command:
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - Windows secondary-launch route extraction and relay behavior,
+  - host->Flutter route forwarding compatibility with existing launch-route channel contract,
+  - non-regression of desktop verification chain after runner updates.
+- **Issues found during review**
+  1. Windows deep-link path had no running-instance route handoff baseline after macOS protocol/channel integration.
+  2. Secondary launches with route payload risked opening disconnected new flows without explicit relay path.
+- **Fix applied**
+  1. Implemented route extraction + existing-window relay via `WM_COPYDATA` in main runner startup path.
+  2. Implemented `WM_COPYDATA` handling in Flutter window host and route-forward channel invocation (`onLaunchRoute`).
+- **Post-fix validation criteria**
+  - Windows running instance can receive relayed route payload and forward it to Flutter channel handling path.
+  - route relay baseline aligns with existing Dart launch-route parser and host-channel event contract.
+  - full verification gate remains green after Windows runner relay integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata (including auth-store mode label), shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline plus launch-argument deep-link parser bridge and macOS protocol/channel route-dispatch baseline, backend envelope/schema compatibility normalization, auth snapshot store/seed seam, file-backed auth snapshot persistence path, command-hook secure-store bridge path, flutter_secure_storage-backed native credential-store adapter path, and runtime mode parity/matrix gates, but Windows protocol registration/running-instance route relay interoperability plus secure-store rollout hardening/deprecation path for legacy file/command modes are still pending.
+- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata (including auth-store mode label), shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline plus launch-argument deep-link parser bridge, macOS protocol/channel route-dispatch baseline, and Windows running-instance route relay baseline, backend envelope/schema compatibility normalization, auth snapshot store/seed seam, file-backed auth snapshot persistence path, command-hook secure-store bridge path, flutter_secure_storage-backed native credential-store adapter path, and runtime mode parity/matrix gates, but Windows URL protocol registration/installer wiring plus secure-store rollout hardening/deprecation path for legacy file/command modes are still pending.
 - Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard plus coverage-contract regression guard (set-diff optimized uncovered/missing detection), desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks with in-memory duplicate-key tracking + base-check markdown report emission) plus evidence-index contract regression guard (including dedicated missing-base-check-report attachment, missing-index-file, invalid-decision, and promoted-placeholder cases, dedicated tests workflow release-evidence guard base+contract enforcement/upload, and parity matrix base-check artifact retention), update-manifest guard automation with validation + contract report artifacts (including dedicated tests workflow update-manifest guard job contract enforcement/upload), on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

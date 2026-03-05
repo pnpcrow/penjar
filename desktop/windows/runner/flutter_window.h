@@ -5,6 +5,7 @@
 #include <flutter/flutter_view_controller.h>
 
 #include <memory>
+#include <string>
 
 #include "win32_window.h"
 
@@ -23,6 +24,8 @@ class FlutterWindow : public Win32Window {
                          LPARAM const lparam) noexcept override;
 
  private:
+  void ForwardLaunchRoute(const std::string& launch_route);
+
   // The project to run.
   flutter::DartProject project_;
 

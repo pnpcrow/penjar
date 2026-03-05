@@ -1,8 +1,19 @@
 #include "flutter_window.h"
 
+#include <flutter/method_channel.h>
+#include <flutter/standard_method_codec.h>
+
+#include <cstring>
 #include <optional>
 
 #include "flutter/generated_plugin_registrant.h"
+
+namespace {
+constexpr const char kDesktopLaunchRouteChannelName[] =
+    "penjar/desktop/launch_route";
+constexpr const char kDesktopLaunchRouteMethodName[] = "onLaunchRoute";
+constexpr ULONG_PTR kDesktopLaunchRouteCopyDataId = 0x504A524C;
+}  // namespace
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -47,6 +58,21 @@ void FlutterWindow::OnDestroy() {
   Win32Window::OnDestroy();
 }
 
+void FlutterWindow::ForwardLaunchRoute(const std::string& launch_route) {
+  if (launch_route.empty() || !flutter_controller_ ||
+      !flutter_controller_->engine()) {
+    return;
+  }
+
+  flutter::MethodChannel<flutter::EncodableValue> channel(
+      flutter_controller_->engine()->messenger(),
+      kDesktopLaunchRouteChannelName,
+      &flutter::StandardMethodCodec::GetInstance());
+  channel.InvokeMethod(
+      kDesktopLaunchRouteMethodName,
+      std::make_unique<flutter::EncodableValue>(launch_route));
+}
+
 LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
@@ -62,6 +88,22 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
   }
 
   switch (message) {
+    case WM_COPYDATA: {
+      const COPYDATASTRUCT* payload =
+          reinterpret_cast<const COPYDATASTRUCT*>(lparam);
+      if (payload == nullptr || payload->dwData != kDesktopLaunchRouteCopyDataId ||
+          payload->lpData == nullptr || payload->cbData == 0) {
+        break;
+      }
+      const char* route =
+          static_cast<const char*>(payload->lpData);
+      const size_t route_length = strnlen_s(route, payload->cbData);
+      if (route_length == 0) {
+        return 0;
+      }
+      ForwardLaunchRoute(std::string(route, route_length));
+      return 1;
+    }
     case WM_FONTCHANGE:
       flutter_controller_->engine()->ReloadSystemFonts();
       break;
