@@ -18,6 +18,8 @@
     "desktop:test:contracts:no-pub": "cd desktop && FLUTTER_NO_PUB=1 ./scripts/run_contract_tests.sh",
     "desktop:test:coverage:check": "cd desktop && ./scripts/check_verify_test_coverage.sh",
     "desktop:test:coverage:contract:check": "cd desktop && ./scripts/check_verify_test_coverage_contract.sh",
+    "desktop:auth-store:legacy-decommission:check": "cd desktop && ./scripts/check_auth_store_legacy_decommission.sh",
+    "desktop:auth-store:legacy-decommission:contract:check": "cd desktop && ./scripts/check_auth_store_legacy_decommission_contract.sh",
     "desktop:docs:command-inventory:check": "cd desktop && ./scripts/check_desktop_command_inventory.sh",
     "desktop:docs:command-inventory:contract:check": "cd desktop && ./scripts/check_desktop_command_inventory_contract.sh",
     "desktop:test:parity": "cd desktop && ./scripts/run_parity_tests.sh",

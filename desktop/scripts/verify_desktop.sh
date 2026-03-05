@@ -85,6 +85,8 @@ run_stage "release script syntax check" ./scripts/check_release_script_syntax.sh
 run_stage "release script syntax contract check" ./scripts/check_release_script_syntax_contract.sh
 run_stage "verify test coverage check" ./scripts/check_verify_test_coverage.sh
 run_stage "verify test coverage contract check" ./scripts/check_verify_test_coverage_contract.sh
+run_stage "auth store legacy decommission check" ./scripts/check_auth_store_legacy_decommission.sh
+run_stage "auth store legacy decommission contract check" ./scripts/check_auth_store_legacy_decommission_contract.sh
 run_stage "desktop command inventory check" ./scripts/check_desktop_command_inventory.sh
 run_stage "desktop command inventory contract check" ./scripts/check_desktop_command_inventory_contract.sh
 run_stage "update manifest check" ./scripts/check_update_manifest.sh
