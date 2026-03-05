@@ -85,33 +85,6 @@ void main() {
     },
   );
 
-  test('legacy auth-store retirement mode parser supports strict toggle', () {
-    expect(
-      RemoteStubLegacyAuthStoreRetirementMode.fromEnvRaw(''),
-      RemoteStubLegacyAuthStoreRetirementMode.allowLegacy,
-    );
-    expect(
-      RemoteStubLegacyAuthStoreRetirementMode.fromEnvRaw('true'),
-      RemoteStubLegacyAuthStoreRetirementMode.enforceSecure,
-    );
-    expect(
-      RemoteStubLegacyAuthStoreRetirementMode.fromEnvRaw('on'),
-      RemoteStubLegacyAuthStoreRetirementMode.enforceSecure,
-    );
-    expect(
-      RemoteStubLegacyAuthStoreRetirementMode.fromEnvRaw('false'),
-      RemoteStubLegacyAuthStoreRetirementMode.allowLegacy,
-    );
-    expect(
-      RemoteStubLegacyAuthStoreRetirementMode.enforceSecure.enforceSecureStore,
-      isTrue,
-    );
-    expect(
-      RemoteStubLegacyAuthStoreRetirementMode.allowLegacy.enforceSecureStore,
-      isFalse,
-    );
-  });
-
   test('remote-stub bundle uses dedicated adapters with prefixed statuses', () {
     final DesktopContractBundle bundle = DesktopContractBundle.remoteStub();
 

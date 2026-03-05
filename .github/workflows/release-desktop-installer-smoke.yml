@@ -133,6 +133,16 @@ jobs:
         working-directory: ./desktop
         run: ./scripts/check_verify_test_coverage_contract.sh
 
+      - name: Run auth-store legacy decommission check
+        working-directory: ./desktop
+        env:
+          STRICT_AUTH_STORE_LEGACY_DECOMMISSION: "1"
+        run: ./scripts/check_auth_store_legacy_decommission.sh
+
+      - name: Run auth-store legacy decommission contract check
+        working-directory: ./desktop
+        run: ./scripts/check_auth_store_legacy_decommission_contract.sh
+
       - name: Run desktop command inventory check
         working-directory: ./desktop
         run: ./scripts/check_desktop_command_inventory.sh
@@ -273,6 +283,22 @@ jobs:
         with:
           name: desktop-verify-test-coverage-contract-report-smoke
           path: desktop/release/reports/verify_test_coverage_contract_report.md
+          if-no-files-found: warn
+
+      - name: Upload auth-store legacy decommission report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-auth-store-legacy-decommission-report-smoke
+          path: desktop/release/reports/auth_store_legacy_decommission_report.md
+          if-no-files-found: warn
+
+      - name: Upload auth-store legacy decommission contract report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-auth-store-legacy-decommission-contract-report-smoke
+          path: desktop/release/reports/auth_store_legacy_decommission_contract_report.md
           if-no-files-found: warn
 
       - name: Upload desktop command inventory report

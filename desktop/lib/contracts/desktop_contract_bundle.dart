@@ -41,20 +41,6 @@ enum RemoteStubSecureStorageRolloutMode {
       this == RemoteStubSecureStorageRolloutMode.defaultOn;
 }
 
-enum RemoteStubLegacyAuthStoreRetirementMode {
-  allowLegacy,
-  enforceSecure;
-
-  static RemoteStubLegacyAuthStoreRetirementMode fromEnvRaw(String raw) {
-    return _envFlagEnabled(raw)
-        ? RemoteStubLegacyAuthStoreRetirementMode.enforceSecure
-        : RemoteStubLegacyAuthStoreRetirementMode.allowLegacy;
-  }
-
-  bool get enforceSecureStore =>
-      this == RemoteStubLegacyAuthStoreRetirementMode.enforceSecure;
-}
-
 class _ResolvedRemoteStubAuthStateStore {
   const _ResolvedRemoteStubAuthStateStore({
     required this.store,
@@ -307,43 +293,11 @@ RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
   );
 }
 
-RemoteStubAuthStateStore _buildRemoteStubAuthStateStoreFromEnvironment() {
-  final String authStateLoadCommand = const String.fromEnvironment(
-    'PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_LOAD_COMMAND',
-  ).trim();
-  final String authStateSaveCommand = const String.fromEnvironment(
-    'PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_SAVE_COMMAND',
-  ).trim();
-  if (authStateLoadCommand.isNotEmpty || authStateSaveCommand.isNotEmpty) {
-    return RemoteStubCommandAuthStateStore(
-      loadCommand: authStateLoadCommand,
-      saveCommand: authStateSaveCommand,
-    );
-  }
-
-  final String authStatePath = const String.fromEnvironment(
-    'PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_PATH',
-  ).trim();
-  if (authStatePath.isEmpty) {
-    return const RemoteStubNoopAuthStateStore();
-  }
-  return RemoteStubFileAuthStateStore(authStatePath);
-}
-
 RemoteStubSecureStorageRolloutMode
 _secureStorageAuthStateRolloutModeFromEnvironment() {
   return RemoteStubSecureStorageRolloutMode.fromEnvRaw(
     const String.fromEnvironment(
       'PENJAR_DESKTOP_REMOTE_STUB_AUTH_SECURE_STORAGE_ENABLED',
-    ),
-  );
-}
-
-RemoteStubLegacyAuthStoreRetirementMode
-_legacyAuthStoreRetirementModeFromEnvironment() {
-  return RemoteStubLegacyAuthStoreRetirementMode.fromEnvRaw(
-    const String.fromEnvironment(
-      'PENJAR_DESKTOP_REMOTE_STUB_AUTH_LEGACY_RETIREMENT_STRICT',
     ),
   );
 }
@@ -363,44 +317,18 @@ bool _secureStorageAuthStateStrictModeFromEnvironment() {
   );
 }
 
-bool _secureStorageAuthStateMirrorLegacyFromEnvironment() {
-  return _envFlagEnabled(
-    const String.fromEnvironment(
-      'PENJAR_DESKTOP_REMOTE_STUB_AUTH_SECURE_STORAGE_MIRROR_LEGACY',
-    ),
-  );
-}
-
-String _legacyAuthStoreRolloutLabel(
-  RemoteStubAuthStateStore legacyStore, {
-  required String reason,
-  required RemoteStubSecureStorageRolloutMode rolloutMode,
-}) {
-  final String baseLabel = _describeAuthStateStore(legacyStore);
-  final String normalizedBase = baseLabel.isEmpty ? 'legacy' : baseLabel;
-  if (rolloutMode.isDefaultEnabled) {
-    return '$normalizedBase($reason,default-on)';
-  }
-  return '$normalizedBase($reason)';
-}
-
 _ResolvedRemoteStubAuthStateStore _resolvedRemoteStubAuthStateStore(
   RemoteStubAuthStateStore store, {
   required RemoteStubSecureStorageRolloutMode rolloutMode,
   required bool strictMode,
   String? reason,
   bool secureReadError = false,
-  bool legacyRetirementEnforced = false,
 }) {
   final String baseLabel = _describeAuthStateStore(store);
   String label = baseLabel;
 
   if (reason != null && reason.trim().isNotEmpty) {
-    label = _legacyAuthStoreRolloutLabel(
-      store,
-      reason: reason.trim(),
-      rolloutMode: rolloutMode,
-    );
+    label = reason.trim();
   } else {
     if (rolloutMode == RemoteStubSecureStorageRolloutMode.defaultOn &&
         baseLabel.isNotEmpty) {
@@ -415,9 +343,6 @@ _ResolvedRemoteStubAuthStateStore _resolvedRemoteStubAuthStateStore(
     if (secureReadError && label.isNotEmpty) {
       label = '$label+read-error';
     }
-    if (legacyRetirementEnforced && label.isNotEmpty) {
-      label = '$label+legacy-retirement';
-    }
   }
 
   return _ResolvedRemoteStubAuthStateStore(
@@ -430,30 +355,16 @@ Future<_ResolvedRemoteStubAuthStateStore>
 _resolveRemoteStubAuthStateStoreFromEnvironmentAsync({
   FlutterSecureStorage? secureStorage,
 }) async {
-  final RemoteStubAuthStateStore legacyStore =
-      _buildRemoteStubAuthStateStoreFromEnvironment();
   final RemoteStubSecureStorageRolloutMode configuredRolloutMode =
       _secureStorageAuthStateRolloutModeFromEnvironment();
-  final RemoteStubLegacyAuthStoreRetirementMode legacyRetirementMode =
-      _legacyAuthStoreRetirementModeFromEnvironment();
-  final bool enforceSecureForDisabledRollout =
-      !configuredRolloutMode.secureStorageEnabled &&
-      legacyRetirementMode.enforceSecureStore;
-
-  if (!configuredRolloutMode.secureStorageEnabled &&
-      !enforceSecureForDisabledRollout) {
+  if (!configuredRolloutMode.secureStorageEnabled) {
     return _resolvedRemoteStubAuthStateStore(
-      legacyStore,
+      const RemoteStubNoopAuthStateStore(),
       rolloutMode: configuredRolloutMode,
       strictMode: false,
       reason: 'secure-storage-disabled',
     );
   }
-
-  final RemoteStubSecureStorageRolloutMode effectiveRolloutMode =
-      enforceSecureForDisabledRollout
-      ? RemoteStubSecureStorageRolloutMode.explicitOn
-      : configuredRolloutMode;
 
   final FlutterSecureStorage storage =
       secureStorage ?? const FlutterSecureStorage();
@@ -468,22 +379,14 @@ _resolveRemoteStubAuthStateStoreFromEnvironmentAsync({
     readError = error;
   }
 
-  final bool enforceSecureForReadError =
-      readError != null &&
-      !strictMode &&
-      legacyRetirementMode.enforceSecureStore;
-
-  if (readError != null && !strictMode && !enforceSecureForReadError) {
+  if (readError != null && !strictMode) {
     return _resolvedRemoteStubAuthStateStore(
-      legacyStore,
+      const RemoteStubNoopAuthStateStore(),
       rolloutMode: configuredRolloutMode,
       strictMode: strictMode,
       reason: 'secure-read-fallback',
     );
   }
-
-  final bool legacyRetirementEnforced =
-      enforceSecureForDisabledRollout || enforceSecureForReadError;
 
   final RemoteStubSecureSnapshotAuthStateStore secureStore =
       RemoteStubSecureSnapshotAuthStateStore(
@@ -493,26 +396,11 @@ _resolveRemoteStubAuthStateStoreFromEnvironmentAsync({
         },
       );
 
-  if (_secureStorageAuthStateMirrorLegacyFromEnvironment() &&
-      legacyStore is! RemoteStubNoopAuthStateStore) {
-    return _resolvedRemoteStubAuthStateStore(
-      RemoteStubCompositeAuthStateStore(
-        primary: secureStore,
-        secondary: legacyStore,
-      ),
-      rolloutMode: effectiveRolloutMode,
-      strictMode: strictMode,
-      secureReadError: readError != null,
-      legacyRetirementEnforced: legacyRetirementEnforced,
-    );
-  }
-
   return _resolvedRemoteStubAuthStateStore(
     secureStore,
-    rolloutMode: effectiveRolloutMode,
+    rolloutMode: configuredRolloutMode,
     strictMode: strictMode,
     secureReadError: readError != null,
-    legacyRetirementEnforced: legacyRetirementEnforced,
   );
 }
 
@@ -617,8 +505,6 @@ class DesktopContractBundle {
     );
     final RemoteStubTransportClient transportClient =
         _buildRemoteStubTransportClientFromEnvironment();
-    final RemoteStubAuthStateStore remoteStubAuthStateStore =
-        _buildRemoteStubAuthStateStoreFromEnvironment();
     final AuthSessionState? remoteStubAuthInitialState =
         _parseRemoteStubAuthInitialState(
           const String.fromEnvironment(
@@ -633,7 +519,7 @@ class DesktopContractBundle {
         blockedOperations: blockedOperations,
       ),
       remoteStubTransportClient: transportClient,
-      remoteStubAuthStateStore: remoteStubAuthStateStore,
+      remoteStubAuthStateStore: const RemoteStubNoopAuthStateStore(),
       remoteStubAuthInitialState: remoteStubAuthInitialState,
     );
   }

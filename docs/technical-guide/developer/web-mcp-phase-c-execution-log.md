@@ -5923,8 +5923,65 @@ Prepare command/file auth-store hard removal execution by adding an explicit dec
   - contract checker validates strict decommission dependency semantics and key fail scenarios.
   - full desktop verification chain remains green after guard integration.
 
+## Unit WS-D-134: Legacy auth-store runtime physical decommission execution
+
+### Planned objective
+
+Execute physical runtime decommission for legacy command/file/mirror auth-store paths so remote-stub auth-store environment resolution no longer consumes those inputs, and promote decommission checks to strict verification baselines.
+
+### Implemented changes
+
+1. Updated auth-store runtime resolution in `desktop/lib/contracts/desktop_contract_bundle.dart`:
+   - removed environment-based legacy auth-store resolution paths for:
+     - `PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_PATH`,
+     - `PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_LOAD_COMMAND`,
+     - `PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_SAVE_COMMAND`,
+     - `PENJAR_DESKTOP_REMOTE_STUB_AUTH_SECURE_STORAGE_MIRROR_LEGACY`,
+     - `PENJAR_DESKTOP_REMOTE_STUB_AUTH_LEGACY_RETIREMENT_STRICT`.
+   - `loadFromEnvironment` now resolves secure-store path directly (or noop fallback for explicit secure-storage disable / non-strict read-fallback) without legacy store composition.
+2. Updated decommission guard semantics:
+   - `desktop/scripts/check_auth_store_legacy_decommission.sh` strict mode now blocks legacy command/file/mirror env usage without requiring retirement strict flag.
+   - `desktop/scripts/check_auth_store_legacy_decommission_contract.sh` now includes dedicated strict fail coverage for save-command legacy path.
+3. Promoted strict decommission checks in verification chains:
+   - `desktop/scripts/verify_desktop.sh` now runs decommission check with `STRICT_AUTH_STORE_LEGACY_DECOMMISSION=1`.
+   - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job now runs strict decommission check + contract check and uploads:
+     - `desktop-auth-store-legacy-decommission-report-smoke`,
+     - `desktop-auth-store-legacy-decommission-contract-report-smoke`.
+4. Updated contract test expectations:
+   - `desktop/test/contracts/desktop_contract_bundle_test.dart` removed legacy-retirement-mode parser assertions aligned with runtime decommission changes.
+5. Updated continuity docs:
+   - `desktop-flutter-development-runbook.md`,
+   - `desktop-flutter-release-validation-baseline.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_auth_store_legacy_decommission_contract.sh`
+   - `cd desktop && FLUTTER_NO_PUB=1 flutter test test/contracts/desktop_contract_bundle_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - runtime decommission completeness for legacy auth-store env paths,
+  - strictness consistency between local/CI verification chains and decommission guard semantics,
+  - continuity document synchronization after runtime behavior shift.
+- **Issues found during review**
+  1. Runtime auth-store resolver still consumed legacy command/file/mirror env inputs despite decommission guard baseline.
+  2. Strict decommission guard still depended on retirement strict flag, creating an unnecessary dependency after runtime physical decommission.
+  3. Installer smoke signing-readiness baseline lacked dedicated decommission report artifacts.
+- **Fix applied**
+  1. Removed legacy command/file/mirror + retirement-strict env resolution from runtime auth-store environment path.
+  2. Simplified strict decommission guard dependency to direct legacy-input rejection.
+  3. Enabled strict decommission checks in `verify_desktop.sh` and smoke workflow signing-readiness job with artifact upload coverage.
+  4. Updated runbook/release/parity/migration/acceptance docs for consistent runtime/verification status.
+- **Post-fix validation criteria**
+  - remote-stub auth-store runtime environment resolution no longer references legacy command/file/mirror env paths.
+  - strict decommission checks fail on legacy inputs without additional retirement-flag dependencies.
+  - local full verify and targeted auth-store contract tests remain green after decommission execution.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata (including auth-store mode label), shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline plus launch-argument deep-link parser bridge, macOS protocol/channel route-dispatch baseline, Windows running-instance route relay baseline, Windows protocol-registration command-hook baseline in installer flow with strict release gate control and helper script template, backend envelope/schema compatibility normalization, auth snapshot store/seed seam, file-backed auth snapshot persistence path, command-hook secure-store bridge path, flutter_secure_storage-backed native credential-store adapter path plus strict/fallback and legacy mirror rollout controls, secure-store default-on rollout policy, legacy retirement strict-enforcement control, legacy auth-store decommission guard automation baseline, runtime mode parity/matrix gates, and document continuity coupling matrix/release-linkage protocol baseline, but production Windows protocol-registration command provisioning with signed installer chain wiring, command/file auth-store path physical removal execution, and backend auth contract integration are still pending.
+- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata (including auth-store mode label), shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline plus launch-argument deep-link parser bridge, macOS protocol/channel route-dispatch baseline, Windows running-instance route relay baseline, Windows protocol-registration command-hook baseline in installer flow with strict release gate control and helper script template, backend envelope/schema compatibility normalization, auth snapshot store/seed seam, flutter_secure_storage-backed native credential-store adapter path with strict rollout/fallback controls, secure-store default-on rollout policy, runtime legacy auth-store command/file/mirror path physical decommission execution, legacy auth-store decommission guard automation baseline, runtime mode parity/matrix gates, and document continuity coupling matrix/release-linkage protocol baseline, but production Windows protocol-registration command provisioning with signed installer chain wiring and backend auth contract integration are still pending.
 - Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard plus coverage-contract regression guard (set-diff optimized uncovered/missing detection), desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks with in-memory duplicate-key tracking + base-check markdown report emission) plus evidence-index contract regression guard (including dedicated missing-base-check-report attachment, missing-index-file, invalid-decision, and promoted-placeholder cases, dedicated tests workflow release-evidence guard base+contract enforcement/upload, and parity matrix base-check artifact retention), update-manifest guard automation with validation + contract report artifacts (including dedicated tests workflow update-manifest guard job contract enforcement/upload), on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

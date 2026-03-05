@@ -12,7 +12,6 @@ to_bool() {
 }
 
 strict_mode="$(to_bool "$strict_input")"
-retirement_strict_mode="$(to_bool "${PENJAR_DESKTOP_REMOTE_STUB_AUTH_LEGACY_RETIREMENT_STRICT:-0}")"
 mirror_legacy_mode="$(to_bool "${PENJAR_DESKTOP_REMOTE_STUB_AUTH_SECURE_STORAGE_MIRROR_LEGACY:-0}")"
 
 legacy_path="${PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_PATH:-}"
@@ -46,11 +45,6 @@ append_note() {
     fi
   fi
 }
-
-if [[ "$strict_mode" -eq 1 && "$retirement_strict_mode" -eq 0 ]]; then
-  append_note "required" \
-    "STRICT_AUTH_STORE_LEGACY_DECOMMISSION=1 requires PENJAR_DESKTOP_REMOTE_STUB_AUTH_LEGACY_RETIREMENT_STRICT=1."
-fi
 
 if [[ "$strict_mode" -eq 1 && "$mirror_legacy_mode" -eq 1 ]]; then
   append_note "required" \
@@ -97,7 +91,6 @@ fi
   echo "- Status: $status"
   echo
   echo "## Effective inputs"
-  echo "- PENJAR_DESKTOP_REMOTE_STUB_AUTH_LEGACY_RETIREMENT_STRICT: $retirement_strict_mode"
   echo "- PENJAR_DESKTOP_REMOTE_STUB_AUTH_SECURE_STORAGE_MIRROR_LEGACY: $mirror_legacy_mode"
   echo "- PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_PATH configured: $([[ -n "$legacy_path" ]] && echo yes || echo no)"
   echo "- PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_LOAD_COMMAND configured: $([[ -n "$legacy_load_command" ]] && echo yes || echo no)"

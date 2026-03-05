@@ -71,7 +71,7 @@ This baseline defines minimum release validation requirements for desktop distri
    - run release script syntax contract check: `pnpm run desktop:release:scripts:syntax:contract:check`.
    - run verify test coverage check: `pnpm run desktop:test:coverage:check`.
    - run verify test coverage contract check: `pnpm run desktop:test:coverage:contract:check`.
-   - run auth-store legacy decommission check: `pnpm run desktop:auth-store:legacy-decommission:check`.
+   - run auth-store legacy decommission check (strict): `STRICT_AUTH_STORE_LEGACY_DECOMMISSION=1 pnpm run desktop:auth-store:legacy-decommission:check`.
    - run auth-store legacy decommission contract check: `pnpm run desktop:auth-store:legacy-decommission:contract:check`.
    - run desktop command inventory check: `pnpm run desktop:docs:command-inventory:check`.
    - run desktop command inventory contract check: `pnpm run desktop:docs:command-inventory:contract:check`.
@@ -198,6 +198,8 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` includes `signing-readiness` job with optional strict enforcement via workflow input.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job runs release script syntax and verify test coverage checks, and uploads `desktop-release-script-syntax-report-smoke` + `desktop-verify-test-coverage-report-smoke` artifacts.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs verify test coverage contract checks and uploads `desktop-verify-test-coverage-contract-report-smoke` artifact.
+- `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs auth-store legacy decommission checks in strict mode and uploads `desktop-auth-store-legacy-decommission-report-smoke` artifact.
+- `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs auth-store legacy decommission contract checks and uploads `desktop-auth-store-legacy-decommission-contract-report-smoke` artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs release script syntax contract checks and uploads `desktop-release-script-syntax-contract-report-smoke` artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs desktop command inventory checks and uploads `desktop-command-inventory-report-smoke` artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs desktop command inventory contract checks and uploads `desktop-command-inventory-contract-report-smoke` artifact.
@@ -205,7 +207,7 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs update manifest contract checks and uploads `desktop-update-manifest-contract-report-smoke` artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs release smoke gate policy contract checks and uploads `desktop-release-smoke-gate-policy-contract-report` artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job now runs release evidence index base + contract checks and uploads `desktop-release-evidence-index-check-report-smoke` and `desktop-release-evidence-index-contract-report-smoke` artifacts.
-- `desktop/scripts/verify_desktop.sh` now runs release script syntax checks, release script syntax contract checks, verify test coverage checks, verify test coverage contract checks, auth-store legacy decommission checks, auth-store legacy decommission contract checks, desktop command inventory checks, desktop command inventory contract checks, update manifest checks, update manifest contract checks, release smoke gate policy contract checks, release evidence index base checks, and release evidence index contract checks before test/analyze/build phases, and executes contract/parity/mode-matrix tests through dedicated scripts to avoid duplicate suite execution.
+- `desktop/scripts/verify_desktop.sh` now runs release script syntax checks, release script syntax contract checks, verify test coverage checks, verify test coverage contract checks, strict auth-store legacy decommission checks (`STRICT_AUTH_STORE_LEGACY_DECOMMISSION=1`), auth-store legacy decommission contract checks, desktop command inventory checks, desktop command inventory contract checks, update manifest checks, update manifest contract checks, release smoke gate policy contract checks, release evidence index base checks, and release evidence index contract checks before test/analyze/build phases, and executes contract/parity/mode-matrix tests through dedicated scripts to avoid duplicate suite execution.
 - `desktop/scripts/verify_desktop.sh` emits verify stage timing reports (`release/reports/verify_stage_timing_report.md`) including stage-level durations and status.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job runs release smoke gate policy preflight and uploads gate policy report artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing command-hook enforcement via `enforce_signing_command_hooks` input.

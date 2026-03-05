@@ -62,16 +62,14 @@ run_case \
 run_case \
   "strict-no-legacy-pass" \
   "pass" \
-  "Strict decommission should pass when retirement strict is enabled and no legacy store inputs are set." \
-  STRICT_AUTH_STORE_LEGACY_DECOMMISSION=1 \
-  PENJAR_DESKTOP_REMOTE_STUB_AUTH_LEGACY_RETIREMENT_STRICT=1
+  "Strict decommission should pass when no legacy store inputs are set." \
+  STRICT_AUTH_STORE_LEGACY_DECOMMISSION=1
 
 run_case \
   "strict-with-legacy-path-fail" \
   "fail" \
   "Strict decommission should fail when legacy file auth-store path is configured." \
   STRICT_AUTH_STORE_LEGACY_DECOMMISSION=1 \
-  PENJAR_DESKTOP_REMOTE_STUB_AUTH_LEGACY_RETIREMENT_STRICT=1 \
   PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_PATH=/tmp/legacy-auth.json
 
 run_case \
@@ -79,22 +77,21 @@ run_case \
   "fail" \
   "Strict decommission should fail when legacy command-hook auth store is configured." \
   STRICT_AUTH_STORE_LEGACY_DECOMMISSION=1 \
-  PENJAR_DESKTOP_REMOTE_STUB_AUTH_LEGACY_RETIREMENT_STRICT=1 \
   PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_LOAD_COMMAND='echo load'
+
+run_case \
+  "strict-with-legacy-save-command-fail" \
+  "fail" \
+  "Strict decommission should fail when legacy command-hook save path is configured." \
+  STRICT_AUTH_STORE_LEGACY_DECOMMISSION=1 \
+  PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_SAVE_COMMAND='echo save'
 
 run_case \
   "strict-with-mirror-fail" \
   "fail" \
   "Strict decommission should fail when legacy mirror mode is enabled." \
   STRICT_AUTH_STORE_LEGACY_DECOMMISSION=1 \
-  PENJAR_DESKTOP_REMOTE_STUB_AUTH_LEGACY_RETIREMENT_STRICT=1 \
   PENJAR_DESKTOP_REMOTE_STUB_AUTH_SECURE_STORAGE_MIRROR_LEGACY=1
-
-run_case \
-  "strict-without-retirement-flag-fail" \
-  "fail" \
-  "Strict decommission should require runtime retirement strict mode." \
-  STRICT_AUTH_STORE_LEGACY_DECOMMISSION=1
 
 status="passed"
 if [[ "$failure_count" -gt 0 ]]; then
