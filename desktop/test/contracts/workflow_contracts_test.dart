@@ -1729,6 +1729,43 @@ void main() {
     );
 
     test(
+      'diagnostics backend sibling data envelope is used when result envelope lacks diagnostics state',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.runHealthCheck: <String, Object?>{
+                'result': <String, Object?>{
+                  'meta': <String, Object?>{'requestId': 'req-diagnostics-1'},
+                },
+                'data': <String, Object?>{
+                  'detail':
+                      'Backend sibling data diagnostics snapshot applied.',
+                  'diagnosticsState': <String, Object?>{
+                    'websocketHealthy': false,
+                    'mcpHealthy': true,
+                    'reconnectAttempts': 7,
+                  },
+                },
+              },
+            });
+        final RemoteStubDiagnosticsRecoveryContract diagnosticsContract =
+            RemoteStubDiagnosticsRecoveryContract(
+              transportClient: transportClient,
+            );
+
+        diagnosticsContract.runHealthCheck();
+
+        expect(diagnosticsContract.state.websocketHealthy, isFalse);
+        expect(diagnosticsContract.state.mcpHealthy, isTrue);
+        expect(diagnosticsContract.state.reconnectAttempts, 7);
+        expect(
+          diagnosticsContract.state.status,
+          '[remote-stub] Backend sibling data diagnostics snapshot applied.',
+        );
+      },
+    );
+
+    test(
       'supports deep backend response envelope chains beyond four levels',
       () {
         final _BackendResponseTransportClient transportClient =

@@ -8763,6 +8763,57 @@ for metadata-only primary wrappers (`result.meta`) with export state in sibling 
     payloads.
   - targeted tests and full desktop verification remain green after export regression lock.
 
+## Unit WS-D-192: Diagnostics workflow sibling-envelope fallback regression lock
+
+### Planned objective
+
+Extend sibling-envelope fallback evidence to diagnostics workflows by locking contract/parity
+behavior for metadata-only primary wrappers (`result.meta`) with diagnostics state in sibling
+wrappers (`data.diagnosticsState`).
+
+### Implemented changes
+
+1. Added diagnostics contract regression in `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `diagnostics backend sibling data envelope is used when result envelope lacks diagnostics state`.
+2. Added diagnostics parity regression in `desktop/test/parity/diagnostics_recovery_parity_test.dart`:
+   - `_DiagnosticsBackendSiblingDataEnvelopeParityTransportClient`,
+   - `diagnostics parity uses sibling data envelope when result lacks diagnostics state`.
+3. Synced continuity docs for cross-workflow sibling-envelope evidence:
+   - `desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `desktop-flutter-development-runbook.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/diagnostics_recovery_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - sibling-envelope fallback correctness for diagnostics state extraction paths,
+  - parity UI status/health-summary/reconnect rendering under metadata-only primary wrapper payloads,
+  - regression impact on full verification chain.
+- **Issues found during review**
+  1. Project/file/canvas/asset/collaboration/inspect/export sibling-envelope regressions were
+     locked, but diagnostics workflow still had no dedicated regression for `result.meta` + sibling
+     `data.diagnosticsState`.
+  2. Without diagnostics-specific locks, parser changes could regress health/reconnect summary
+     extraction while other workflow sibling-fallback tests remained green.
+- **Fix applied**
+  1. Added contract regression for `runHealthCheck` backend payloads with sibling
+     `data.diagnosticsState`.
+  2. Added parity regression to assert backend-driven status text and diagnostics summary surfaces
+     (`WebSocket: down`, `MCP: up`, reconnect attempts) from sibling-envelope payloads.
+  3. Updated continuity docs so diagnostics rows and runbook/plan narrative include
+     sibling-envelope coverage evidence.
+- **Post-fix validation criteria**
+  - diagnostics snapshots resolve from sibling `data.diagnosticsState` when primary `result`
+    wrappers are metadata-only.
+  - parity UI status/health-summary surfaces reflect backend snapshots under sibling-envelope
+    payloads.
+  - targeted tests and full desktop verification remain green after diagnostics regression lock.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

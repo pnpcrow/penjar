@@ -1,7 +1,36 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:penjar_desktop/contracts/desktop_contract_bundle.dart';
+import 'package:penjar_desktop/contracts/remote_stub_contracts.dart';
 
 import 'parity_test_utils.dart';
+
+class _DiagnosticsBackendSiblingDataEnvelopeParityTransportClient
+    extends RemoteStubTransportClient {
+  const _DiagnosticsBackendSiblingDataEnvelopeParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.runHealthCheck) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'result': <String, Object?>{
+            'meta': <String, Object?>{'requestId': 'req-diagnostics-1'},
+          },
+          'data': <String, Object?>{
+            'detail': 'Backend sibling data diagnostics snapshot applied.',
+            'diagnosticsState': <String, Object?>{
+              'websocketHealthy': false,
+              'mcpHealthy': true,
+              'reconnectAttempts': 7,
+            },
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
 
 void main() {
   testWidgets('diagnostics recovery parity scaffold interactions work', (
@@ -72,4 +101,37 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets(
+    'diagnostics parity uses sibling data envelope when result lacks diagnostics state',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _DiagnosticsBackendSiblingDataEnvelopeParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'diagnostics');
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('diagnostics-health-check')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('diagnostics-health-check')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend sibling data diagnostics snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('WebSocket: down'), findsOneWidget);
+      expect(find.textContaining('MCP: up'), findsOneWidget);
+      expect(find.textContaining('reconnect attempts: 7'), findsOneWidget);
+    },
+  );
 }
