@@ -1515,6 +1515,48 @@ void main() {
     );
 
     test(
+      'canvas backend sibling data envelope is used when result envelope lacks canvas state',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.createRectangle: <String, Object?>{
+                'result': <String, Object?>{
+                  'meta': <String, Object?>{'requestId': 'req-canvas-1'},
+                },
+                'data': <String, Object?>{
+                  'detail': 'Backend sibling data canvas snapshot applied.',
+                  'canvasState': <String, Object?>{
+                    'shapes': <Map<String, Object?>>[
+                      <String, Object?>{
+                        'id': 'rect-sibling',
+                        'x': 32.0,
+                        'y': 18.0,
+                        'width': 144.0,
+                        'height': 96.0,
+                        'fillHex': '#FF8A00',
+                      },
+                    ],
+                    'selectedIndex': 0,
+                  },
+                },
+              },
+            });
+        final RemoteStubCanvasEditingContract canvasContract =
+            RemoteStubCanvasEditingContract(transportClient: transportClient);
+
+        canvasContract.createRectangle();
+
+        expect(canvasContract.state.shapes, hasLength(1));
+        expect(canvasContract.state.selectedShape?.id, 'rect-sibling');
+        expect(canvasContract.state.selectedShape?.fillHex, '#FF8A00');
+        expect(
+          canvasContract.state.status,
+          '[remote-stub] Backend sibling data canvas snapshot applied.',
+        );
+      },
+    );
+
+    test(
       'supports deep backend response envelope chains beyond four levels',
       () {
         final _BackendResponseTransportClient transportClient =

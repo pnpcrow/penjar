@@ -8515,6 +8515,54 @@ locks for metadata-only primary wrappers (`result.meta`) with file state in sibl
   - parity UI status/file list reflect backend snapshots under sibling-envelope payloads.
   - targeted tests and full desktop verification remain green after file regression lock.
 
+## Unit WS-D-187: Canvas workflow sibling-envelope fallback regression lock
+
+### Planned objective
+
+Extend sibling-envelope fallback evidence to canvas workflows by locking contract/parity behavior for
+metadata-only primary wrappers (`result.meta`) with canvas state in sibling wrappers
+(`data.canvasState`).
+
+### Implemented changes
+
+1. Added canvas contract regression in `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `canvas backend sibling data envelope is used when result envelope lacks canvas state`.
+2. Added canvas parity regression in `desktop/test/parity/canvas_editing_parity_test.dart`:
+   - `_CanvasBackendSiblingDataEnvelopeParityTransportClient`,
+   - `canvas editing parity uses sibling data envelope when result lacks canvas state`.
+3. Synced continuity docs for cross-workflow sibling-envelope evidence:
+   - `desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `desktop-flutter-development-runbook.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/canvas_editing_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - sibling-envelope fallback correctness for canvas state extraction paths,
+  - parity UI status/shape rendering under metadata-only primary wrapper payloads,
+  - regression impact on full verification chain.
+- **Issues found during review**
+  1. Project/file sibling-envelope regressions were locked, but canvas workflow still had no
+     dedicated regression for `result.meta` + sibling `data.canvasState`.
+  2. Without canvas-specific locks, parser changes could regress shape/status extraction in canvas
+     paths while leaving project/file coverage green.
+- **Fix applied**
+  1. Added contract regression for `createRectangle` payloads with sibling `data.canvasState`.
+  2. Added parity regression to assert backend-driven status, shape row, and fill rendering from the
+     sibling-envelope shape.
+  3. Updated continuity docs so canvas rows and runbook/plan narrative include sibling-envelope
+     coverage evidence.
+- **Post-fix validation criteria**
+  - canvas snapshots resolve from sibling `data.canvasState` when primary `result` wrappers are
+    metadata-only.
+  - parity UI status/shape/fill surfaces reflect backend snapshots under sibling-envelope payloads.
+  - targeted tests and full desktop verification remain green after canvas regression lock.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
