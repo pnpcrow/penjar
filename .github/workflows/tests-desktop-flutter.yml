@@ -41,6 +41,9 @@ jobs:
           - label: macos
             os: macos-latest
             include_build: 1
+          - label: windows
+            os: windows-latest
+            include_build: 0
     runs-on: ${{ matrix.os }}
 
     defaults:

@@ -1344,8 +1344,41 @@ Strengthen long-running desktop migration continuity by adding a desktop-specifi
   - Phase C parity/inventory/acceptance artifacts all link back to runbook.
   - Desktop verification chain remains green after docs continuity update.
 
+## Unit WS-D-34: Desktop CI Windows parity matrix coverage
+
+### Planned objective
+
+Close the remaining CI matrix coverage gap by extending the desktop verification workflow to include a Windows runner for parity/analyze coverage while preserving canonical script execution.
+
+### Implemented changes
+
+1. Expanded desktop CI workflow matrix:
+   - `.github/workflows/tests-desktop-flutter.yml` now includes:
+     - `windows` (`windows-latest`, `INCLUDE_BUILD=0`) in addition to Linux/macOS entries.
+2. Preserved canonical verification flow:
+   - Windows job also runs `desktop/scripts/verify_desktop.sh` through matrix variable injection.
+3. Updated acceptance baseline CI anchor:
+   - `desktop-flutter-parity-acceptance-baseline.md` now documents Linux + macOS + Windows matrix baseline semantics.
+4. Re-ran local verification chain before unit closure:
+   - `pnpm run desktop:verify`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of matrix expansion syntax and runner mapping,
+  - risk of script-path divergence on Windows runner,
+  - consistency between CI workflow and acceptance-baseline documentation.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Desktop CI workflow now includes a Windows parity chain path.
+  - Linux/macOS entries remain unchanged and still use canonical verification script.
+  - Acceptance baseline reflects three-platform matrix status.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS with consolidated verification scripts and macOS build validation, but Windows matrix coverage and release-grade installer/update validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts and macOS build validation, but release-grade installer/update validation is not yet configured.

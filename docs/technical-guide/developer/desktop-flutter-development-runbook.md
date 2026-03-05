@@ -82,6 +82,6 @@ Before pausing or transferring work:
 
 ## 7) Current next-unit candidates
 
-1. Windows CI matrix path for desktop parity chain.
+1. Release-grade installer/update validation baseline for desktop distribution.
 2. Backend transport wiring for runtime-switchable contract adapters.
-3. Release-grade installer/update validation baseline for desktop distribution.
+3. Windows/macOS build artifact and signing pipeline validation policy.
