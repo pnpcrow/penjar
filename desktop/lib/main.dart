@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:penjar_desktop/contracts/desktop_contract_bundle.dart';
 import 'package:penjar_desktop/contracts/workflow_contracts.dart';
 
 const String kDefaultInitialSectionId = String.fromEnvironment(
   'PENJAR_DESKTOP_INITIAL_SECTION',
 );
+const String kDesktopLaunchRouteChannelName = 'penjar/desktop/launch_route';
 
 void main(List<String> args) {
   runApp(
@@ -291,6 +293,9 @@ class DesktopShellPage extends StatefulWidget {
 
 class _DesktopShellPageState extends State<DesktopShellPage>
     with RestorationMixin {
+  static const MethodChannel _launchRouteChannel = MethodChannel(
+    kDesktopLaunchRouteChannelName,
+  );
   late final DesktopContractBundle _contracts =
       widget.contracts ?? DesktopContractBundle.fromEnvironment();
   final RestorableInt _selectedIndex = RestorableInt(0);
@@ -306,6 +311,53 @@ class _DesktopShellPageState extends State<DesktopShellPage>
   String get restorationId => 'desktop-shell';
 
   @override
+  void initState() {
+    super.initState();
+    _initializeLaunchRouteBridge();
+  }
+
+  void _initializeLaunchRouteBridge() {
+    _launchRouteChannel.setMethodCallHandler(_handleLaunchRouteCall);
+    _consumePendingLaunchRoute();
+  }
+
+  Future<void> _consumePendingLaunchRoute() async {
+    try {
+      final String? launchRoute = await _launchRouteChannel
+          .invokeMethod<String>('consumeLaunchRoute');
+      _applyLaunchRoute(launchRoute);
+    } on MissingPluginException {
+      // Host launch-route channel is optional in tests/non-native contexts.
+    } on PlatformException {
+      // Ignore host bridge errors and continue with existing shell state.
+    }
+  }
+
+  Future<Object?> _handleLaunchRouteCall(MethodCall call) async {
+    if (call.method != 'onLaunchRoute') {
+      return null;
+    }
+    final Object? arguments = call.arguments;
+    _applyLaunchRoute(arguments is String ? arguments : null);
+    return null;
+  }
+
+  void _applyLaunchRoute(String? launchRoute) {
+    if (!mounted) {
+      return;
+    }
+    final String? sectionId = _parseSectionIdFromRouteExpression(
+      launchRoute ?? '',
+    );
+    if (sectionId == null) {
+      return;
+    }
+    setState(() {
+      _selectedIndex.value = _sectionIndexFromId(sectionId);
+    });
+  }
+
+  @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     final bool hasSerializedSelection =
         bucket?.contains('selected_section_index') ?? false;
@@ -317,6 +369,7 @@ class _DesktopShellPageState extends State<DesktopShellPage>
 
   @override
   void dispose() {
+    _launchRouteChannel.setMethodCallHandler(null);
     _selectedIndex.dispose();
     super.dispose();
   }

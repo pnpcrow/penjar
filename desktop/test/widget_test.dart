@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -99,5 +100,33 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Diagnostics & Recovery'), findsAtLeastNWidgets(1));
+  });
+
+  testWidgets('desktop shell consumes pending launch route from host channel', (
+    WidgetTester tester,
+  ) async {
+    const MethodChannel launchRouteChannel = MethodChannel(
+      kDesktopLaunchRouteChannelName,
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(launchRouteChannel, (MethodCall call) async {
+          if (call.method == 'consumeLaunchRoute') {
+            return 'penjar://section/auth';
+          }
+          return null;
+        });
+    addTearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(launchRouteChannel, null);
+    });
+
+    await tester.pumpWidget(const PenjarDesktopApp(initialSectionId: 'shell'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('auth-session-panel')),
+      findsOneWidget,
+    );
+    expect(find.text('Authentication & Session'), findsAtLeastNWidgets(1));
   });
 }
