@@ -1532,53 +1532,62 @@ void main() {
       },
     );
 
-    test(
-      'auth backend signed_out alias without explicit status maps authentication-required fallback status',
-      () {
-        final _BackendResponseTransportClient transportClient =
-            _BackendResponseTransportClient(<String, Map<String, Object?>>{
-              RemoteStubOperationIds.refreshToken: <String, Object?>{
-                'state': <String, Object?>{
-                  'signed_out': true,
-                  'sessionToken': 'stale-session-token',
+    for (final String signedOutAlias in const <String>[
+      'signedOut',
+      'isSignedOut',
+      'signed_out',
+      'is_signed_out',
+    ]) {
+      test(
+        'auth backend $signedOutAlias alias without explicit status maps authentication-required fallback status',
+        () {
+          final Map<String, Object?> statePayload = <String, Object?>{
+            signedOutAlias: true,
+            'sessionToken': 'stale-session-token',
+          };
+          final _BackendResponseTransportClient transportClient =
+              _BackendResponseTransportClient(<String, Map<String, Object?>>{
+                RemoteStubOperationIds.refreshToken: <String, Object?>{
+                  'state': statePayload,
                 },
-              },
-            });
-        final RemoteStubAuthSessionContract authContract =
-            RemoteStubAuthSessionContract(transportClient: transportClient);
+              });
+          final RemoteStubAuthSessionContract authContract =
+              RemoteStubAuthSessionContract(transportClient: transportClient);
 
-        authContract.refreshToken();
+          authContract.refreshToken();
 
-        expect(authContract.state.signedIn, isFalse);
-        expect(
-          authContract.state.status,
-          '[remote-stub] Authentication required.',
-        );
-      },
-    );
+          expect(authContract.state.signedIn, isFalse);
+          expect(
+            authContract.state.status,
+            '[remote-stub] Authentication required.',
+          );
+        },
+      );
 
-    test(
-      'auth backend explicit signedIn alias overrides signed_out alias',
-      () {
-        final _BackendResponseTransportClient transportClient =
-            _BackendResponseTransportClient(<String, Map<String, Object?>>{
-              RemoteStubOperationIds.restoreSession: <String, Object?>{
-                'state': <String, Object?>{
-                  'signedIn': true,
-                  'signed_out': true,
-                  'remember_session': true,
+      test(
+        'auth backend explicit signedIn alias overrides $signedOutAlias alias',
+        () {
+          final Map<String, Object?> statePayload = <String, Object?>{
+            'signedIn': true,
+            signedOutAlias: true,
+            'remember_session': true,
+          };
+          final _BackendResponseTransportClient transportClient =
+              _BackendResponseTransportClient(<String, Map<String, Object?>>{
+                RemoteStubOperationIds.restoreSession: <String, Object?>{
+                  'state': statePayload,
                 },
-              },
-            });
-        final RemoteStubAuthSessionContract authContract =
-            RemoteStubAuthSessionContract(transportClient: transportClient);
+              });
+          final RemoteStubAuthSessionContract authContract =
+              RemoteStubAuthSessionContract(transportClient: transportClient);
 
-        authContract.restoreSession();
+          authContract.restoreSession();
 
-        expect(authContract.state.signedIn, isTrue);
-        expect(authContract.state.rememberSession, isTrue);
-      },
-    );
+          expect(authContract.state.signedIn, isTrue);
+          expect(authContract.state.rememberSession, isTrue);
+        },
+      );
+    }
 
     test(
       'auth backend nested explicit signed-out aliases override token inference',
@@ -1644,6 +1653,36 @@ void main() {
         expectedRememberSession: true,
         expectedStatus:
             '[remote-stub] Fixture sign-in result envelope applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'refresh-token result envelope authState signedOut alias maps fallback status',
+        operationId: RemoteStubOperationIds.refreshToken,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'authState': <String, Object?>{
+              'signedOut': true,
+              'sessionToken': 'fixture-signed-out-result-token',
+            },
+          },
+        },
+        expectedSignedIn: false,
+        expectedStatus: '[remote-stub] Authentication required.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session data envelope authState is_signed_out alias maps fallback status',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'data': <String, Object?>{
+            'authState': <String, Object?>{
+              'is_signed_out': true,
+              'sessionToken': 'fixture-signed-out-data-token',
+            },
+          },
+        },
+        expectedSignedIn: false,
+        expectedStatus: '[remote-stub] Authentication required.',
       ),
       const _AuthBackendFixtureCase(
         name:

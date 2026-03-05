@@ -782,6 +782,76 @@ Map<String, Object?> _extractBackendStatePayload(
   return responsePayload;
 }
 
+const Set<String> _authRememberSessionAliasKeys = <String>{
+  'rememberSession',
+  'remember',
+  'persistSession',
+  'remember_session',
+  'persist_session',
+};
+
+const List<String> _authRememberSessionAliases = <String>[
+  'rememberSession',
+  'remember',
+  'persistSession',
+  'remember_session',
+  'persist_session',
+];
+
+const Set<String> _authSignedInAliasKeys = <String>{
+  'signedIn',
+  'isAuthenticated',
+  'authenticated',
+  'signed_in',
+  'is_authenticated',
+};
+
+const List<String> _authSignedInAliases = <String>[
+  'signedIn',
+  'isAuthenticated',
+  'authenticated',
+  'signed_in',
+  'is_authenticated',
+];
+
+const Set<String> _authSignedOutAliasKeys = <String>{
+  'signedOut',
+  'isSignedOut',
+  'signed_out',
+  'is_signed_out',
+};
+
+const List<String> _authSignedOutAliases = <String>[
+  'signedOut',
+  'isSignedOut',
+  'signed_out',
+  'is_signed_out',
+];
+
+const List<String> _authCredentialAliases = <String>[
+  'accessToken',
+  'token',
+  'sessionToken',
+  'refreshToken',
+  'sessionId',
+  'idToken',
+];
+
+const List<String> _authUserPayloadAliases = <String>[
+  'user',
+  'profile',
+  'account',
+];
+
+const List<String> _authFailureFlagAliases = <String>[
+  'success',
+  'ok',
+  'isSuccess',
+  'isOk',
+  'is_success',
+  'is_ok',
+];
+
 bool _containsAnyKey(Map<String, Object?> payload, Set<String> keys) {
   for (final String key in keys) {
     if (payload.containsKey(key)) {
@@ -1268,48 +1338,29 @@ AuthSessionState? _authStateFromBackendPayload(
 
   final bool hasRememberSessionFields = _containsAnyKeyInSources(
     authSources,
-    const <String>{
-      'rememberSession',
-      'remember',
-      'persistSession',
-      'remember_session',
-      'persist_session',
-    },
+    _authRememberSessionAliasKeys,
   );
   final bool hasSignedInFields = _containsAnyKeyInSources(
     authSources,
-    const <String>{
-      'signedIn',
-      'isAuthenticated',
-      'authenticated',
-      'signed_in',
-      'is_authenticated',
-    },
+    _authSignedInAliasKeys,
   );
   final bool hasSignedOutFields = _containsAnyKeyInSources(
     authSources,
-    const <String>{'signedOut', 'isSignedOut', 'signed_out', 'is_signed_out'},
+    _authSignedOutAliasKeys,
   );
   final bool hasCredentialFields = _containsAnyNonEmptyStringInSources(
     authSources,
-    const <String>[
-      'accessToken',
-      'token',
-      'sessionToken',
-      'refreshToken',
-      'sessionId',
-      'idToken',
-    ],
+    _authCredentialAliases,
   );
   final bool hasUserPayload = _coerceStringKeyedMap(
     _firstPresentValueInSources(
       <Map<String, Object?>>[statePayload, authPayload],
-      const <String>['user', 'profile', 'account'],
+      _authUserPayloadAliases,
     ),
   ).isNotEmpty;
   final bool hasExplicitFailureFlag = _containsExplicitFalseInSources(
     <Map<String, Object?>>[responsePayload, envelopePayload, ...authSources],
-    const <String>['success', 'ok', 'isSuccess', 'isOk', 'is_success', 'is_ok'],
+    _authFailureFlagAliases,
   );
   final bool hasFields =
       hasRememberSessionFields ||
@@ -1328,30 +1379,13 @@ AuthSessionState? _authStateFromBackendPayload(
   }
 
   final bool? resolvedRememberSession = _coerceBool(
-    _firstPresentValueInSources(authSources, const <String>[
-      'rememberSession',
-      'remember',
-      'persistSession',
-      'remember_session',
-      'persist_session',
-    ]),
+    _firstPresentValueInSources(authSources, _authRememberSessionAliases),
   );
   final bool? resolvedSignedIn = _coerceBool(
-    _firstPresentValueInSources(authSources, const <String>[
-      'signedIn',
-      'isAuthenticated',
-      'authenticated',
-      'signed_in',
-      'is_authenticated',
-    ]),
+    _firstPresentValueInSources(authSources, _authSignedInAliases),
   );
   final bool? resolvedSignedOut = _coerceBool(
-    _firstPresentValueInSources(authSources, const <String>[
-      'signedOut',
-      'isSignedOut',
-      'signed_out',
-      'is_signed_out',
-    ]),
+    _firstPresentValueInSources(authSources, _authSignedOutAliases),
   );
   final String? backendCode = _resolveBackendCodeValue(
     responsePayload: responsePayload,
