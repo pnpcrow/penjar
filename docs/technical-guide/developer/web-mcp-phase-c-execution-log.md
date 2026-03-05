@@ -696,8 +696,50 @@ Start stabilizing desktop contract boundaries (WS-D objective) by extracting exp
   - Existing parity tests pass with UI delegating to contract adapters.
   - Desktop test/analyze/build chain remains green after extraction.
 
+## Unit WS-D-18: Auth/session contract boundary extraction
+
+### Planned objective
+
+Continue WS-D contract-boundary hardening by extracting auth/session interaction rules out of UI widget state into an explicit in-memory contract with unit-test coverage.
+
+### Implemented changes
+
+1. Extended contract module:
+   - `desktop/lib/contracts/workflow_contracts.dart`.
+2. Implemented auth contract baseline:
+   - `AuthSessionContract` interface,
+   - `InMemoryAuthSessionContract` adapter,
+   - request/state models for remember-session, sign-in, restore-session, and token-refresh transitions.
+3. Refactored `AuthSessionPanel` to use contract adapter:
+   - sign-in/restore/refresh/remember flows now delegate to auth contract,
+   - UI now renders status and remember toggle state from contract snapshot.
+4. Added auth contract unit tests:
+   - expanded `desktop/test/contracts/workflow_contracts_test.dart` with auth validation and lifecycle coverage.
+5. Re-ran desktop verification chain:
+   - `pnpm run desktop:test`,
+   - `pnpm run desktop:test:parity`,
+   - `pnpm run desktop:analyze`,
+   - `pnpm run desktop:build:macos:debug`.
+6. Updated migration/parity trackers:
+   - auth notes now explicitly reference in-memory contract boundary baseline.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of auth state transitions after contract extraction,
+  - parity regression risk on existing auth widget interactions,
+  - consistency between tracker notes and implementation state.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Auth parity test remains green with contract-driven state.
+  - Auth contract unit tests pass for validation and lifecycle transitions.
+  - Desktop test/analyze/build chain remains green after extraction.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, and export/diagnostics include contract-boundary pilots, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
+- All workflow domains now have Flutter parity scaffolds/harnesses, and auth/export/diagnostics include contract-boundary pilots, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
 - Desktop parity CI baseline is now configured on Linux, but macOS/Windows build-matrix coverage and release-grade installer/update validation are not yet configured.

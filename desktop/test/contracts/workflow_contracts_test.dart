@@ -2,6 +2,50 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:penjar_desktop/contracts/workflow_contracts.dart';
 
 void main() {
+  group('InMemoryAuthSessionContract', () {
+    test('requires email and password to sign in', () {
+      final InMemoryAuthSessionContract contract =
+          InMemoryAuthSessionContract();
+
+      contract.signIn(const AuthSignInRequest(email: '', password: 'secret'));
+      expect(
+        contract.state.status,
+        'Validation failed: email and password are required.',
+      );
+      expect(contract.state.signedIn, isFalse);
+    });
+
+    test('supports remember/restore and refresh token lifecycle', () {
+      final InMemoryAuthSessionContract contract =
+          InMemoryAuthSessionContract();
+
+      contract.restoreSession();
+      expect(
+        contract.state.status,
+        'Session restore blocked: enable Remember Session first.',
+      );
+
+      contract.setRememberSession(true);
+      contract.restoreSession();
+      expect(contract.state.status, 'Session restored (simulated).');
+
+      contract.refreshToken();
+      expect(contract.state.status, 'Token refresh blocked: sign in first.');
+
+      contract.signIn(
+        const AuthSignInRequest(
+          email: 'designer@penjar.app',
+          password: 'desktop-pass',
+        ),
+      );
+      expect(contract.state.status, 'Signed in (simulated).');
+      expect(contract.state.signedIn, isTrue);
+
+      contract.refreshToken();
+      expect(contract.state.status, 'Token refreshed (simulated).');
+    });
+  });
+
   group('InMemoryExportWorkflowContract', () {
     test('returns validation failure for empty file name', () {
       final InMemoryExportWorkflowContract contract =

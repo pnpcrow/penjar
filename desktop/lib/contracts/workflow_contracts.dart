@@ -1,3 +1,82 @@
+class AuthSignInRequest {
+  const AuthSignInRequest({required this.email, required this.password});
+
+  final String email;
+  final String password;
+}
+
+class AuthSessionState {
+  const AuthSessionState({
+    required this.rememberSession,
+    required this.signedIn,
+    required this.status,
+  });
+
+  final bool rememberSession;
+  final bool signedIn;
+  final String status;
+}
+
+abstract class AuthSessionContract {
+  AuthSessionState get state;
+  AuthSessionState setRememberSession(bool enabled);
+  AuthSessionState signIn(AuthSignInRequest request);
+  AuthSessionState restoreSession();
+  AuthSessionState refreshToken();
+}
+
+class InMemoryAuthSessionContract implements AuthSessionContract {
+  bool _rememberSession = false;
+  bool _signedIn = false;
+  String _status = 'Idle';
+
+  @override
+  AuthSessionState get state => AuthSessionState(
+    rememberSession: _rememberSession,
+    signedIn: _signedIn,
+    status: _status,
+  );
+
+  @override
+  AuthSessionState setRememberSession(bool enabled) {
+    _rememberSession = enabled;
+    return state;
+  }
+
+  @override
+  AuthSessionState signIn(AuthSignInRequest request) {
+    final String email = request.email.trim();
+    if (email.isEmpty || request.password.isEmpty) {
+      _status = 'Validation failed: email and password are required.';
+      return state;
+    }
+
+    _signedIn = true;
+    _status = 'Signed in (simulated).';
+    return state;
+  }
+
+  @override
+  AuthSessionState restoreSession() {
+    if (!_rememberSession) {
+      _status = 'Session restore blocked: enable Remember Session first.';
+      return state;
+    }
+    _status = 'Session restored (simulated).';
+    return state;
+  }
+
+  @override
+  AuthSessionState refreshToken() {
+    if (!_signedIn) {
+      _status = 'Token refresh blocked: sign in first.';
+      return state;
+    }
+    _status = 'Token refreshed (simulated).';
+    return state;
+  }
+}
+
 class ExportRequest {
   const ExportRequest({
     required this.fileName,

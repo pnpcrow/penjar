@@ -251,11 +251,9 @@ class AuthSessionPanel extends StatefulWidget {
 }
 
 class _AuthSessionPanelState extends State<AuthSessionPanel> {
+  final AuthSessionContract _contract = InMemoryAuthSessionContract();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _rememberSession = false;
-  bool _signedIn = false;
-  String _status = 'Idle';
 
   @override
   void initState() {
@@ -270,44 +268,32 @@ class _AuthSessionPanelState extends State<AuthSessionPanel> {
     super.dispose();
   }
 
-  void _setStatus(String status) {
-    setState(() {
-      _status = status;
-    });
-  }
-
   void _signIn() {
-    final String email = _emailController.text.trim();
-    final String password = _passwordController.text;
-    if (email.isEmpty || password.isEmpty) {
-      _setStatus('Validation failed: email and password are required.');
-      return;
-    }
-
     setState(() {
-      _signedIn = true;
-      _status = 'Signed in (simulated).';
+      _contract.signIn(
+        AuthSignInRequest(
+          email: _emailController.text,
+          password: _passwordController.text,
+        ),
+      );
     });
   }
 
   void _restoreSession() {
-    if (!_rememberSession) {
-      _setStatus('Session restore blocked: enable Remember Session first.');
-      return;
-    }
-    _setStatus('Session restored (simulated).');
+    setState(() {
+      _contract.restoreSession();
+    });
   }
 
   void _refreshToken() {
-    if (!_signedIn) {
-      _setStatus('Token refresh blocked: sign in first.');
-      return;
-    }
-    _setStatus('Token refreshed (simulated).');
+    setState(() {
+      _contract.refreshToken();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final AuthSessionState authState = _contract.state;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Column(
@@ -341,11 +327,11 @@ class _AuthSessionPanelState extends State<AuthSessionPanel> {
         CheckboxListTile(
           key: const ValueKey<String>('auth-remember'),
           title: const Text('Remember Session'),
-          value: _rememberSession,
+          value: authState.rememberSession,
           contentPadding: EdgeInsets.zero,
           onChanged: (bool? value) {
             setState(() {
-              _rememberSession = value ?? false;
+              _contract.setRememberSession(value ?? false);
             });
           },
           controlAffinity: ListTileControlAffinity.leading,
@@ -374,7 +360,7 @@ class _AuthSessionPanelState extends State<AuthSessionPanel> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Status: $_status',
+          'Status: ${authState.status}',
           key: const ValueKey<String>('auth-status'),
           style: textTheme.bodyMedium,
         ),
