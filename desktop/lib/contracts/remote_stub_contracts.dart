@@ -843,13 +843,47 @@ bool _containsExplicitFalseInSources(
   List<String> aliases,
 ) {
   for (final Map<String, Object?> source in sources) {
-    final Object? rawValue = _firstPresentValue(source, aliases);
-    if (rawValue == null) {
-      continue;
-    }
-    final bool? resolved = _coerceBool(rawValue);
-    if (resolved == false) {
+    if (_containsExplicitFalseInContainer(source, aliases)) {
       return true;
+    }
+  }
+  return false;
+}
+
+bool _containsExplicitFalseInContainer(Object? value, List<String> aliases) {
+  final Map<String, Object?> payload = _coerceStringKeyedMap(value);
+  if (payload.isNotEmpty) {
+    final Object? rawValue = _firstPresentValue(payload, aliases);
+    if (rawValue != null) {
+      final bool? resolved = _coerceBool(rawValue);
+      if (resolved == false) {
+        return true;
+      }
+    }
+    for (final String alias in const <String>[
+      'error',
+      'errors',
+      'failure',
+      'failures',
+      'meta',
+      'result',
+      'data',
+      'state',
+      'auth',
+      'authentication',
+      'session',
+      'tokens',
+    ]) {
+      if (_containsExplicitFalseInContainer(payload[alias], aliases)) {
+        return true;
+      }
+    }
+  }
+  if (value is List) {
+    for (final Object? item in value) {
+      if (_containsExplicitFalseInContainer(item, aliases)) {
+        return true;
+      }
     }
   }
   return false;
