@@ -8,6 +8,11 @@ on:
         type: string
         required: true
         default: RC-DRAFT
+      enforce_signing_readiness:
+        description: "Fail workflow when signing prerequisites are missing"
+        type: boolean
+        required: true
+        default: false
       build_mode:
         description: "Build mode for smoke packaging"
         type: choice
@@ -22,8 +27,39 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  signing-readiness:
+    name: "Signing Readiness"
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run signing readiness check
+        working-directory: ./desktop
+        env:
+          STRICT_SIGNING: ${{ inputs.enforce_signing_readiness }}
+          PENJAR_MACOS_SIGN_IDENTITY: ${{ secrets.PENJAR_MACOS_SIGN_IDENTITY }}
+          PENJAR_MACOS_TEAM_ID: ${{ secrets.PENJAR_MACOS_TEAM_ID }}
+          PENJAR_MACOS_NOTARY_PROFILE: ${{ secrets.PENJAR_MACOS_NOTARY_PROFILE }}
+          PENJAR_WINDOWS_CERT_PATH: ${{ secrets.PENJAR_WINDOWS_CERT_PATH }}
+          PENJAR_WINDOWS_CERT_PASSWORD: ${{ secrets.PENJAR_WINDOWS_CERT_PASSWORD }}
+        run: ./scripts/check_signing_readiness.sh
+
+      - name: Upload signing readiness report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-signing-readiness-report
+          path: desktop/release/reports/signing_readiness_report.md
+
   installer-smoke:
     name: "Installer Smoke (${{ matrix.label }})"
+    needs: signing-readiness
     strategy:
       fail-fast: false
       matrix:

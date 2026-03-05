@@ -36,7 +36,9 @@
     "desktop:release:evidence:index:apply:windows": "cd desktop && ./scripts/update_release_evidence_index.sh release/reports/release_evidence_row_windows.md ../docs/technical-guide/developer/desktop-flutter-release-evidence-index.md",
     "desktop:release:appcast:generate": "cd desktop && ./scripts/generate_appcast_from_reports.sh",
     "desktop:release:appcast:check": "cd desktop && ./scripts/check_appcast.sh",
-    "desktop:release:appcast:publish:dry-run": "cd desktop && ./scripts/publish_appcast.sh"
+    "desktop:release:appcast:publish:dry-run": "cd desktop && ./scripts/publish_appcast.sh",
+    "desktop:release:signing:readiness": "cd desktop && ./scripts/check_signing_readiness.sh",
+    "desktop:release:signing:readiness:strict": "cd desktop && ./scripts/check_signing_readiness.sh 1"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",

@@ -66,30 +66,34 @@ This baseline defines minimum release validation requirements for desktop distri
 ## 4) Operating protocol
 
 1. Before RC cut, confirm Flutter parity verification chain is green.
-2. Execute platform-specific installer/update smoke automation:
+2. Run signing readiness preflight:
+   - `pnpm run desktop:release:signing:readiness`
+   - use strict mode when release secrets are expected: `pnpm run desktop:release:signing:readiness:strict`.
+3. Execute platform-specific installer/update smoke automation:
    - local/manual entrypoints:
      - `pnpm run desktop:release:installer-smoke:macos`
      - `pnpm run desktop:release:installer-smoke:windows`
    - CI workflow entrypoint:
      - `.github/workflows/release-desktop-installer-smoke.yml` (`workflow_dispatch`).
-3. Run release evidence index guard: `pnpm run desktop:release:evidence:check`.
-4. Run update manifest guard: `pnpm run desktop:release:update-manifest:check`.
-5. Generate and review evidence row snippets:
+4. Run release evidence index guard: `pnpm run desktop:release:evidence:check`.
+5. Run update manifest guard: `pnpm run desktop:release:update-manifest:check`.
+6. Generate and review evidence row snippets:
    - `pnpm run desktop:release:evidence:row:macos`
    - `pnpm run desktop:release:evidence:row:windows`
-6. Generate evidence-index previews before applying table updates:
+7. Generate evidence-index previews before applying table updates:
    - `pnpm run desktop:release:evidence:index:preview:macos`
    - `pnpm run desktop:release:evidence:index:preview:windows`
-7. Generate and validate appcast preview:
+8. Generate and validate appcast preview:
    - `pnpm run desktop:release:appcast:generate`
    - `pnpm run desktop:release:appcast:check`
-8. Publish appcast dry-run targets:
+9. Publish appcast dry-run targets:
    - `pnpm run desktop:release:appcast:publish:dry-run`
-9. Record evidence in release checklist ticket and Phase C execution log.
-10. Block release promotion if any required gate is missing or only manually asserted without evidence.
+10. Record evidence in release checklist ticket and Phase C execution log.
+11. Block release promotion if any required gate is missing or only manually asserted without evidence.
 
 CI baseline note:
 - `.github/workflows/tests-desktop-flutter.yml` includes `release-evidence-guard` and `release-update-manifest-guard` jobs, and uploads parity/build artifacts for audit traceability.
+- `.github/workflows/release-desktop-installer-smoke.yml` includes `signing-readiness` job with optional strict enforcement via workflow input.
 - `.github/workflows/release-desktop-installer-smoke.yml` builds macOS/Windows release artifacts on demand and uploads installer/update smoke archives + JSON reports.
 - `.github/workflows/release-desktop-installer-smoke.yml` also uploads platform release-evidence row snippet artifacts generated from smoke reports.
 - `.github/workflows/release-desktop-installer-smoke.yml` also uploads release-evidence index preview artifacts generated from row snippets.
@@ -101,6 +105,7 @@ CI baseline note:
 - Release evidence index updater: `desktop/scripts/update_release_evidence_index.sh`.
 - Appcast preview generator/checker: `desktop/scripts/generate_appcast_from_reports.sh`, `desktop/scripts/check_appcast.sh`.
 - Appcast publish dry-run script: `desktop/scripts/publish_appcast.sh`.
+- Signing readiness checker: `desktop/scripts/check_signing_readiness.sh`.
 
 ## 5) Implementation backlog seeds
 

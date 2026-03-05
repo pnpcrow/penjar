@@ -1908,8 +1908,58 @@ Add executable appcast publication dry-run automation so channel/version publica
   - Appcast-preview workflow uploads dry-run publication artifacts.
   - Full-fast desktop verification remains green after publish dry-run automation integration.
 
+## Unit WS-D-47: Signing readiness guard and CI gate baseline
+
+### Planned objective
+
+Introduce explicit signing/notarization readiness preflight so missing release secrets are detected early, with optional strict workflow enforcement.
+
+### Implemented changes
+
+1. Added signing readiness check script:
+   - `desktop/scripts/check_signing_readiness.sh`.
+2. Implemented readiness report semantics:
+   - validates presence of macOS/Windows signing-related environment variables,
+   - emits markdown report (`release/reports/signing_readiness_report.md`),
+   - supports non-strict warning mode and strict fail mode.
+3. Added root command surfaces:
+   - `desktop:release:signing:readiness`,
+   - `desktop:release:signing:readiness:strict`.
+4. Extended installer smoke workflow dispatch contract:
+   - `.github/workflows/release-desktop-installer-smoke.yml` now accepts `enforce_signing_readiness` boolean input.
+5. Added CI signing-readiness job:
+   - new `signing-readiness` job executes readiness check with secrets wiring,
+   - uploads signing readiness report artifact,
+   - installer smoke matrix now depends on signing-readiness completion.
+6. Updated release/runbook/index docs:
+   - `desktop-flutter-release-validation-baseline.md` now includes signing readiness preflight protocol and CI baseline note,
+   - `desktop-flutter-development-runbook.md` command inventory now includes signing readiness commands,
+   - `desktop-flutter-release-evidence-index.md` maintenance rules now require signing readiness report attachment.
+7. Re-ran validation commands:
+   - `pnpm run desktop:release:appcast:generate`,
+   - `pnpm run desktop:release:appcast:check`,
+   - `pnpm run desktop:release:signing:readiness`,
+   - `pnpm run desktop:release:appcast:publish:dry-run`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of strict/non-strict readiness mode behavior,
+  - CI workflow gating behavior between signing-readiness and installer-smoke jobs,
+  - report artifact continuity for release audit trail.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Non-strict readiness command emits report and warns without failing when secrets are absent.
+  - Strict readiness mode is available for release-enforcement scenarios.
+  - Full-fast desktop verification remains green after signing readiness gate integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, and appcast publish dry-run automation, but signed installer packaging/notarization and external production update/appcast publication integrations are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, and signing readiness gating, but signed installer packaging/notarization execution and external production update/appcast publication integrations are not yet configured.
