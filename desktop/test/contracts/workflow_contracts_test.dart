@@ -3258,25 +3258,28 @@ void main() {
       },
     );
 
-    test('auth backend explicit signed-in state overrides success failure flag', () {
-      final _BackendResponseTransportClient transportClient =
-          _BackendResponseTransportClient(<String, Map<String, Object?>>{
-            RemoteStubOperationIds.restoreSession: <String, Object?>{
-              'success': false,
-              'state': <String, Object?>{
-                'signedIn': true,
-                'rememberSession': true,
+    test(
+      'auth backend explicit signed-in state overrides success failure flag',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'success': false,
+                'state': <String, Object?>{
+                  'signedIn': true,
+                  'rememberSession': true,
+                },
               },
-            },
-          });
-      final RemoteStubAuthSessionContract authContract =
-          RemoteStubAuthSessionContract(transportClient: transportClient);
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
 
-      authContract.restoreSession();
+        authContract.restoreSession();
 
-      expect(authContract.state.signedIn, isTrue);
-      expect(authContract.state.rememberSession, isTrue);
-    });
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
 
     test('auth backend explicit signed-in state overrides ok failure flag', () {
       final _BackendResponseTransportClient transportClient =
@@ -3468,6 +3471,75 @@ void main() {
             _BackendResponseTransportClient(<String, Map<String, Object?>>{
               RemoteStubOperationIds.restoreSession: <String, Object?>{
                 'status_code': 401,
+                'state': <String, Object?>{
+                  'signedIn': true,
+                  'rememberSession': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
+
+    test(
+      'auth backend explicit signed-in state overrides token-expired errorCode variant',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'errorCode': 'TOKEN_EXPIRED',
+                'state': <String, Object?>{
+                  'signedIn': true,
+                  'rememberSession': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
+
+    test(
+      'auth backend explicit signed-in state overrides httpStatus session-expired variant',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'httpStatus': '440',
+                'state': <String, Object?>{
+                  'signedIn': true,
+                  'rememberSession': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
+
+    test(
+      'auth backend explicit signed-in state overrides http_status session-expired variant',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'http_status': 419,
                 'state': <String, Object?>{
                   'signedIn': true,
                   'rememberSession': true,
