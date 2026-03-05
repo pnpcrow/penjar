@@ -1824,6 +1824,31 @@ void main() {
     );
 
     test(
+      'auth backend status_code unauthorized payload maps authentication-required fallback status',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'status_code': 403,
+                'state': <String, Object?>{
+                  'sessionToken': 'status-code-snake-unauthorized-token',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Authentication required.',
+        );
+      },
+    );
+
+    test(
       'auth backend code-only token-expired payload maps session-expired fallback status',
       () {
         final _BackendResponseTransportClient transportClient =
@@ -1857,6 +1882,31 @@ void main() {
                 'httpStatus': '440',
                 'state': <String, Object?>{
                   'sessionToken': 'http-status-expired-token',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend session expired.',
+        );
+      },
+    );
+
+    test(
+      'auth backend http_status session-expired payload maps session-expired fallback status',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'http_status': 419,
+                'state': <String, Object?>{
+                  'sessionToken': 'http-status-snake-expired-token',
                 },
               },
             });
@@ -2165,6 +2215,29 @@ void main() {
             _BackendResponseTransportClient(<String, Map<String, Object?>>{
               RemoteStubOperationIds.restoreSession: <String, Object?>{
                 'statusCode': 401,
+                'state': <String, Object?>{
+                  'signedIn': true,
+                  'rememberSession': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
+
+    test(
+      'auth backend explicit signed-in state overrides status_code unauthorized variant',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'status_code': 401,
                 'state': <String, Object?>{
                   'signedIn': true,
                   'rememberSession': true,

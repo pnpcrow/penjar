@@ -1125,6 +1125,8 @@ String? _resolveBackendCodeFromContainer(Object? value) {
   return null;
 }
 
+final RegExp _backendCodeCompactPattern = RegExp(r'[^a-z0-9]');
+
 bool _backendCodeIndicatesSignedOut(String rawCode) {
   final String trimmed = rawCode.trim();
   if (trimmed == '401' ||
@@ -1187,7 +1189,10 @@ bool _backendCodeIndicatesSessionExpired(String rawCode) {
 }
 
 String _compactBackendCode(String rawCode) {
-  return rawCode.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+  return rawCode.trim().toLowerCase().replaceAll(
+    _backendCodeCompactPattern,
+    '',
+  );
 }
 
 int _clampIndex(int index, {required int itemCount}) {
