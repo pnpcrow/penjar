@@ -18,6 +18,29 @@ on:
         type: boolean
         required: true
         default: false
+      publish_appcast_external:
+        description: "Run external appcast publication stage"
+        type: boolean
+        required: true
+        default: false
+      appcast_external_provider:
+        description: "External publication provider"
+        type: choice
+        required: true
+        default: none
+        options:
+          - none
+          - s3
+      appcast_external_dry_run:
+        description: "Execute external publication in dry-run mode"
+        type: boolean
+        required: true
+        default: true
+      enforce_windows_installer_packaging:
+        description: "Fail workflow when Windows installer (.msi/.exe) artifact check fails"
+        type: boolean
+        required: true
+        default: false
       build_mode:
         description: "Build mode for smoke packaging"
         type: choice
@@ -93,6 +116,7 @@ jobs:
         working-directory: ./desktop
         env:
           STRICT_SIGNING_EXECUTION: ${{ inputs.enforce_signing_execution }}
+          STRICT_WINDOWS_INSTALLER_PACKAGING: ${{ inputs.enforce_windows_installer_packaging }}
           PENJAR_MACOS_SIGN_IDENTITY: ${{ secrets.PENJAR_MACOS_SIGN_IDENTITY }}
           PENJAR_MACOS_TEAM_ID: ${{ secrets.PENJAR_MACOS_TEAM_ID }}
           PENJAR_MACOS_NOTARY_PROFILE: ${{ secrets.PENJAR_MACOS_NOTARY_PROFILE }}
@@ -127,6 +151,14 @@ jobs:
         with:
           name: desktop-signing-pipeline-report-${{ matrix.label }}
           path: desktop/release/reports/signing_report_${{ matrix.label }}.md
+          if-no-files-found: warn
+
+      - name: Upload Windows installer packaging report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-windows-installer-packaging-report-${{ matrix.label }}
+          path: desktop/release/reports/windows_installer_packaging_report.md
           if-no-files-found: warn
 
       - name: Generate release evidence row snippet
@@ -207,6 +239,17 @@ jobs:
         working-directory: ./desktop
         run: ./scripts/check_appcast_publication_bundle.sh
 
+      - name: Publish appcast to external target
+        if: ${{ inputs.publish_appcast_external }}
+        working-directory: ./desktop
+        env:
+          APPCAST_PUBLISH_PROVIDER: ${{ inputs.appcast_external_provider }}
+          APPCAST_PUBLISH_DRY_RUN: ${{ inputs.appcast_external_dry_run }}
+          APPCAST_S3_BUCKET: ${{ secrets.APPCAST_S3_BUCKET }}
+          APPCAST_S3_PREFIX: ${{ vars.APPCAST_S3_PREFIX }}
+          APPCAST_CACHE_INVALIDATION_COMMAND: ${{ secrets.APPCAST_CACHE_INVALIDATION_COMMAND }}
+        run: ./scripts/publish_appcast_external.sh
+
       - name: Upload appcast preview
         if: always()
         uses: actions/upload-artifact@v4
@@ -229,4 +272,12 @@ jobs:
         with:
           name: desktop-appcast-publication-bundle
           path: desktop/release/reports/appcast_publication_bundle.json
+          if-no-files-found: warn
+
+      - name: Upload appcast external publication report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-appcast-external-publication-report
+          path: desktop/release/reports/appcast_external_publication_report.md
           if-no-files-found: warn
