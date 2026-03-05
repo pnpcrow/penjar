@@ -2242,6 +2242,7 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
     this.faultProfile = const RemoteStubFaultProfile(),
     this.transportClient = const RemoteStubNoopTransportClient(),
     this.authStateStore = const RemoteStubNoopAuthStateStore(),
+    this.strictBackendSchema = false,
     AuthSessionState? initialState,
   }) : _delegate = delegate ?? InMemoryAuthSessionContract() {
     final AuthSessionState? restoredState =
@@ -2255,6 +2256,7 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
   final RemoteStubFaultProfile faultProfile;
   final RemoteStubTransportClient transportClient;
   final RemoteStubAuthStateStore authStateStore;
+  final bool strictBackendSchema;
   AuthSessionState? _stateSnapshot;
   String? _statusOverride;
 
@@ -2293,11 +2295,21 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
     required AuthSessionState Function() delegateFallback,
   }) {
     final AuthSessionState previousState = _currentState;
+    final Map<String, Object?> responsePayload = transportResult.responsePayload;
     final AuthSessionState? backendState = _authStateFromBackendPayload(
-      transportResult.responsePayload,
+      responsePayload,
       previousState,
     );
-    _stateSnapshot = _decorateAuthState(backendState ?? delegateFallback());
+    if (backendState != null) {
+      _stateSnapshot = _decorateAuthState(backendState);
+    } else if (strictBackendSchema && responsePayload.isNotEmpty) {
+      _stateSnapshot = _decorateAuthState(
+        previousState,
+        status: 'Backend auth schema validation failed.',
+      );
+    } else {
+      _stateSnapshot = _decorateAuthState(delegateFallback());
+    }
     authStateStore.save(_undecorateAuthState(_stateSnapshot!));
     return _stateSnapshot!;
   }

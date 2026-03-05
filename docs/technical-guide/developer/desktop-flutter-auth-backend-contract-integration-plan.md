@@ -49,6 +49,7 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
 4. Secure-store auth snapshot path and runtime legacy auth-store decommission guards.
 5. Auth backend contract fixture matrix baseline in `desktop/test/contracts/workflow_contracts_test.dart` (ABI-01 bootstrap).
 6. Full verification chain (`desktop:verify:full`) and parity harness integrated in CI.
+7. Contract-level strict backend schema fallback gate in `RemoteStubAuthSessionContract` (`strictBackendSchema`) for malformed backend auth payload handling.
 
 ## Remaining integration gaps (auth scope)
 

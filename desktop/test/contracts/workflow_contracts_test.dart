@@ -1971,6 +1971,73 @@ void main() {
     );
 
     test(
+      'auth backend malformed payload falls back to delegate by default',
+      () {
+        final _TrackingAuthSessionContract trackingDelegate =
+            _TrackingAuthSessionContract();
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.signIn: <String, Object?>{
+                'unexpected': <String, Object?>{'shape': true},
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(
+              delegate: trackingDelegate,
+              transportClient: transportClient,
+            );
+
+        authContract.signIn(
+          const AuthSignInRequest(
+            email: 'designer@penjar.app',
+            password: 'desktop-pass',
+          ),
+        );
+
+        expect(trackingDelegate.signInCallCount, 1);
+        expect(authContract.state.signedIn, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Delegate sign-in called.',
+        );
+      },
+    );
+
+    test(
+      'auth backend malformed payload blocks delegate fallback in strict schema mode',
+      () {
+        final _TrackingAuthSessionContract trackingDelegate =
+            _TrackingAuthSessionContract();
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.signIn: <String, Object?>{
+                'unexpected': <String, Object?>{'shape': true},
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(
+              delegate: trackingDelegate,
+              transportClient: transportClient,
+              strictBackendSchema: true,
+            );
+
+        authContract.signIn(
+          const AuthSignInRequest(
+            email: 'designer@penjar.app',
+            password: 'desktop-pass',
+          ),
+        );
+
+        expect(trackingDelegate.signInCallCount, 0);
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend auth schema validation failed.',
+        );
+      },
+    );
+
+    test(
       'skips auth delegate mutation when backend response snapshot is present',
       () {
         final _TrackingAuthSessionContract trackingDelegate =
