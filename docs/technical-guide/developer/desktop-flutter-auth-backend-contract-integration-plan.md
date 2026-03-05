@@ -50,6 +50,7 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
 5. Auth backend contract fixture matrix baseline in `desktop/test/contracts/workflow_contracts_test.dart` (ABI-01 bootstrap).
 6. Full verification chain (`desktop:verify:full`) and parity harness integrated in CI.
 7. Contract-level strict backend schema fallback gate in `RemoteStubAuthSessionContract` (`strictBackendSchema`) for malformed backend auth payload handling.
+   - strict-mode malformed-payload sign-in behavior is parity-covered in `desktop/test/parity/remote_stub_mode_parity_test.dart`.
 8. Runtime contract-bundle strict-mode wiring:
    - `DesktopContractBundle.fromMode(...)` forwards strict backend schema mode to remote-stub auth contract construction.
    - `DesktopContractBundle.fromEnvironment()` / `loadFromEnvironment()` can enable strict mode through `PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_SCHEMA_STRICT`.
