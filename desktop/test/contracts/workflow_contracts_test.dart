@@ -1453,5 +1453,64 @@ void main() {
 
       expect(store.load(), isNull);
     });
+
+    test(
+      'secure snapshot auth state store caches state and writes asynchronously',
+      () async {
+        final List<String> persistedSnapshots = <String>[];
+        final RemoteStubSecureSnapshotAuthStateStore store =
+            RemoteStubSecureSnapshotAuthStateStore(
+              initialSnapshot: const AuthSessionState(
+                rememberSession: true,
+                signedIn: false,
+                status: 'Loaded from secure store.',
+              ),
+              snapshotWriter: (String snapshotJson) async {
+                persistedSnapshots.add(snapshotJson);
+              },
+            );
+
+        expect(store.load(), isNotNull);
+        expect(store.load()?.rememberSession, isTrue);
+        expect(store.load()?.signedIn, isFalse);
+        expect(store.load()?.status, 'Loaded from secure store.');
+
+        store.save(
+          const AuthSessionState(
+            rememberSession: false,
+            signedIn: true,
+            status: 'Saved to secure store.',
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        expect(store.load()?.rememberSession, isFalse);
+        expect(store.load()?.signedIn, isTrue);
+        expect(store.load()?.status, 'Saved to secure store.');
+        expect(persistedSnapshots, hasLength(1));
+        expect(persistedSnapshots.single, contains('"signedIn":true'));
+      },
+    );
+
+    test('secure snapshot auth state store ignores writer failures', () async {
+      final RemoteStubSecureSnapshotAuthStateStore store =
+          RemoteStubSecureSnapshotAuthStateStore(
+            snapshotWriter: (_) async {
+              throw Exception('write failed');
+            },
+          );
+
+      store.save(
+        const AuthSessionState(
+          rememberSession: false,
+          signedIn: true,
+          status: 'Failure fallback.',
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(store.load()?.signedIn, isTrue);
+      expect(store.load()?.status, 'Failure fallback.');
+    });
   });
 }

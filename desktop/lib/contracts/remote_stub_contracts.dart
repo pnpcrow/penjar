@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -1815,6 +1816,37 @@ class RemoteStubCommandAuthStateStore extends RemoteStubAuthStateStore {
               }),
         },
       ),
+    );
+  }
+}
+
+typedef RemoteStubSnapshotWriter = Future<void> Function(String snapshotJson);
+
+class RemoteStubSecureSnapshotAuthStateStore extends RemoteStubAuthStateStore {
+  RemoteStubSecureSnapshotAuthStateStore({
+    AuthSessionState? initialSnapshot,
+    required RemoteStubSnapshotWriter snapshotWriter,
+  }) : _snapshot = initialSnapshot,
+       _snapshotWriter = snapshotWriter;
+
+  AuthSessionState? _snapshot;
+  final RemoteStubSnapshotWriter _snapshotWriter;
+
+  @override
+  AuthSessionState? load() => _snapshot;
+
+  @override
+  void save(AuthSessionState state) {
+    _snapshot = state;
+    final String snapshotJson = jsonEncode(<String, Object?>{
+      'rememberSession': state.rememberSession,
+      'signedIn': state.signedIn,
+      'status': state.status,
+    });
+    unawaited(
+      _snapshotWriter(
+        snapshotJson,
+      ).catchError((Object error, StackTrace stackTrace) {}),
     );
   }
 }

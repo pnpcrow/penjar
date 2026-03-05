@@ -191,6 +191,44 @@ void main() {
     );
   });
 
+  test('remote-stub bundle supports secure auth state store seam', () async {
+    final List<String> persistedSnapshots = <String>[];
+    final RemoteStubSecureSnapshotAuthStateStore authStateStore =
+        RemoteStubSecureSnapshotAuthStateStore(
+          initialSnapshot: const AuthSessionState(
+            rememberSession: true,
+            signedIn: true,
+            status: 'Loaded from secure store.',
+          ),
+          snapshotWriter: (String snapshotJson) async {
+            persistedSnapshots.add(snapshotJson);
+          },
+        );
+    final DesktopContractBundle remoteStubBundle =
+        DesktopContractBundle.remoteStub(authStateStore: authStateStore);
+
+    expect(remoteStubBundle.authSession.state.rememberSession, isTrue);
+    expect(remoteStubBundle.authSession.state.signedIn, isTrue);
+    expect(
+      remoteStubBundle.authSession.state.status,
+      '[remote-stub] Loaded from secure store.',
+    );
+
+    remoteStubBundle.authSession.signIn(
+      const AuthSignInRequest(
+        email: 'designer@penjar.app',
+        password: 'desktop-pass',
+      ),
+    );
+    await Future<void>.delayed(Duration.zero);
+    expect(persistedSnapshots, isNotEmpty);
+    expect(persistedSnapshots.last, contains('"signedIn":true'));
+    expect(
+      persistedSnapshots.last,
+      contains('"status":"Signed in (simulated)."'),
+    );
+  });
+
   test('remote-stub unavailable profile blocks mutating operations', () {
     final DesktopContractBundle bundle = DesktopContractBundle.remoteStub(
       faultProfile: const RemoteStubFaultProfile(unavailable: true),

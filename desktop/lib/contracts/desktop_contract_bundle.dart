@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:penjar_desktop/contracts/remote_stub_contracts.dart';
 import 'package:penjar_desktop/contracts/workflow_contracts.dart';
 
@@ -14,6 +15,9 @@ bool _envFlagEnabled(String raw) {
       return false;
   }
 }
+
+const String _kRemoteStubSecureStorageDefaultKey =
+    'penjar.desktop.remote_stub.auth_state.v1';
 
 Set<String> _parseBlockedOperations(
   String raw, {
@@ -251,6 +255,48 @@ RemoteStubAuthStateStore _buildRemoteStubAuthStateStoreFromEnvironment() {
   return RemoteStubFileAuthStateStore(authStatePath);
 }
 
+bool _secureStorageAuthStateEnabledFromEnvironment() {
+  return _envFlagEnabled(
+    const String.fromEnvironment(
+      'PENJAR_DESKTOP_REMOTE_STUB_AUTH_SECURE_STORAGE_ENABLED',
+    ),
+  );
+}
+
+String _secureStorageAuthStateKeyFromEnvironment() {
+  final String key = const String.fromEnvironment(
+    'PENJAR_DESKTOP_REMOTE_STUB_AUTH_SECURE_STORAGE_KEY',
+  ).trim();
+  return key.isEmpty ? _kRemoteStubSecureStorageDefaultKey : key;
+}
+
+Future<RemoteStubAuthStateStore>
+_buildRemoteStubAuthStateStoreFromEnvironmentAsync({
+  FlutterSecureStorage? secureStorage,
+}) async {
+  if (!_secureStorageAuthStateEnabledFromEnvironment()) {
+    return _buildRemoteStubAuthStateStoreFromEnvironment();
+  }
+
+  final FlutterSecureStorage storage =
+      secureStorage ?? const FlutterSecureStorage();
+  final String storageKey = _secureStorageAuthStateKeyFromEnvironment();
+  AuthSessionState? initialSnapshot;
+  try {
+    final String? rawSnapshot = await storage.read(key: storageKey);
+    initialSnapshot = _parseRemoteStubAuthInitialState(rawSnapshot ?? '');
+  } on Object {
+    initialSnapshot = null;
+  }
+
+  return RemoteStubSecureSnapshotAuthStateStore(
+    initialSnapshot: initialSnapshot,
+    snapshotWriter: (String snapshotJson) {
+      return storage.write(key: storageKey, value: snapshotJson);
+    },
+  );
+}
+
 enum DesktopContractMode {
   inMemory,
   remoteStub;
@@ -348,6 +394,46 @@ class DesktopContractBundle {
         _buildRemoteStubTransportClientFromEnvironment();
     final RemoteStubAuthStateStore remoteStubAuthStateStore =
         _buildRemoteStubAuthStateStoreFromEnvironment();
+    final AuthSessionState? remoteStubAuthInitialState =
+        _parseRemoteStubAuthInitialState(
+          const String.fromEnvironment(
+            'PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_JSON',
+          ),
+        );
+
+    return DesktopContractBundle.fromMode(
+      mode,
+      remoteStubFaultProfile: RemoteStubFaultProfile(
+        unavailable: remoteStubUnavailable,
+        blockedOperations: blockedOperations,
+      ),
+      remoteStubTransportClient: transportClient,
+      remoteStubAuthStateStore: remoteStubAuthStateStore,
+      remoteStubAuthInitialState: remoteStubAuthInitialState,
+    );
+  }
+
+  static Future<DesktopContractBundle> loadFromEnvironment({
+    FlutterSecureStorage? secureStorage,
+  }) async {
+    final DesktopContractMode mode = DesktopContractMode.fromEnv(
+      const String.fromEnvironment('PENJAR_DESKTOP_CONTRACT_MODE'),
+    );
+    final bool remoteStubUnavailable = _envFlagEnabled(
+      const String.fromEnvironment('PENJAR_DESKTOP_REMOTE_STUB_UNAVAILABLE'),
+    );
+    final Set<String> blockedOperations = _parseBlockedOperations(
+      const String.fromEnvironment(
+        'PENJAR_DESKTOP_REMOTE_STUB_BLOCKED_OPERATIONS',
+      ),
+      allowedOperations: RemoteStubOperationIds.all,
+    );
+    final RemoteStubTransportClient transportClient =
+        _buildRemoteStubTransportClientFromEnvironment();
+    final RemoteStubAuthStateStore remoteStubAuthStateStore =
+        await _buildRemoteStubAuthStateStoreFromEnvironmentAsync(
+          secureStorage: secureStorage,
+        );
     final AuthSessionState? remoteStubAuthInitialState =
         _parseRemoteStubAuthInitialState(
           const String.fromEnvironment(

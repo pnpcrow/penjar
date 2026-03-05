@@ -8,9 +8,13 @@ const String kDefaultInitialSectionId = String.fromEnvironment(
 );
 const String kDesktopLaunchRouteChannelName = 'penjar/desktop/launch_route';
 
-void main(List<String> args) {
+Future<void> main(List<String> args) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final DesktopContractBundle contracts =
+      await DesktopContractBundle.loadFromEnvironment();
   runApp(
     PenjarDesktopApp(
+      contracts: contracts,
       initialSectionId: resolveInitialSectionId(launchArgs: args),
     ),
   );
