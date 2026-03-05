@@ -103,6 +103,25 @@ while IFS= read -r line; do
 
 done < "$index_file"
 
+required_attachment_paths=(
+  "release/reports/release_script_syntax_report.md"
+  "release/reports/release_script_syntax_contract_report.md"
+  "release/reports/verify_test_coverage_report.md"
+  "release/reports/desktop_command_inventory_report.md"
+  "release/reports/update_manifest_validation_report.md"
+  "release/reports/verify_stage_timing_report.md"
+  "release/reports/release_evidence_bundle_check_macos.md"
+  "release/reports/release_evidence_bundle_check_windows.md"
+  "release/reports/release_smoke_gate_policy_contract_report.md"
+)
+
+for attachment_path in "${required_attachment_paths[@]}"; do
+  if ! grep -Fq "$attachment_path" "$index_file"; then
+    echo "[release-evidence-check] missing required attachment reference: $attachment_path" >&2
+    errors=$((errors + 1))
+  fi
+done
+
 if [[ $errors -gt 0 ]]; then
   echo "[release-evidence-check] failed with $errors issue(s)." >&2
   exit 1
