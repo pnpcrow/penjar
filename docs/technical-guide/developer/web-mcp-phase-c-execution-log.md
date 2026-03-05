@@ -9389,9 +9389,63 @@ collisions so parity behavior matches contract precedence for `code`, `statusCod
     parity UI.
   - `statusCode` unauthorized payloads with explicit `signedIn=true` preserve signed-in precedence
     in parity UI.
-  - `status_code` unauthorized payloads with explicit `signedIn=true` preserve signed-in precedence
-    in parity UI.
-  - `Authentication required.` fallback is not shown for those explicit signed-in override cases.
+- `status_code` unauthorized payloads with explicit `signedIn=true` preserve signed-in precedence
+  in parity UI.
+- `Authentication required.` fallback is not shown for those explicit signed-in override cases.
+- targeted auth tests and full desktop verification remain green after the new locks.
+
+## Unit WS-D-204: Auth signed-out/session-expired code explicit signed-in parity locks
+
+### Planned objective
+
+Extend explicit signed-in override parity coverage to string-based signed-out/session-expired code
+variants so parity behavior remains aligned with contract precedence across `AUTH_REQUIRED`,
+`SESSION_TIMEOUT`, and `EXPIRED_TOKEN` code signals.
+
+### Implemented changes
+
+1. Added dedicated parity transport fixtures/tests in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - `_AuthBackendSignedOutErrorCodeSignedInOverrideParityTransportClient`,
+   - `_AuthBackendSessionTimeoutSignedInOverrideParityTransportClient`,
+   - `_AuthBackendExpiredTokenSignedInOverrideParityTransportClient`,
+   - `auth/session parity keeps signed-in state when signed-out error code has explicit signed-in override`,
+   - `auth/session parity keeps signed-in state when session-timeout backend failure has explicit signed-in override`,
+   - `auth/session parity keeps signed-in state when expired-token backend failure has explicit signed-in override`.
+2. Synced continuity docs so explicit signed-in override parity wording now includes string code
+   variants in addition to numeric/status aliases:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+3. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - parity precedence behavior for explicit signed-in snapshots combined with signed-out/session-expired string code variants,
+  - parity/contract alignment for signed-in override coverage under `AUTH_REQUIRED`, `SESSION_TIMEOUT`, and `EXPIRED_TOKEN`,
+  - continuity doc precision for code-variant override coverage.
+- **Issues found during review**
+  1. Parity explicit signed-in override coverage for code aliases was limited to numeric/status-code
+     cases (`code:401`, `statusCode`, `status_code`) after WS-D-203.
+  2. String code variants used by signed-out/session-expired taxonomy (`AUTH_REQUIRED`,
+     `SESSION_TIMEOUT`, `EXPIRED_TOKEN`) did not yet have dedicated parity-level explicit override
+     locks, creating a parity/contract evidence gap.
+- **Fix applied**
+  1. Added dedicated parity transport fixtures for each string code variant with explicit
+     `signedIn=true` state snapshots.
+  2. Added parity assertions confirming signed-in status retention and absence of signed-out/session-expired fallback text for those collision cases.
+  3. Updated continuity docs to include explicit override coverage for string code variants.
+- **Post-fix validation criteria**
+  - `AUTH_REQUIRED` + explicit `signedIn=true` preserves signed-in precedence in parity UI.
+  - `SESSION_TIMEOUT` + explicit `signedIn=true` preserves signed-in precedence in parity UI.
+  - `EXPIRED_TOKEN` + explicit `signedIn=true` preserves signed-in precedence in parity UI.
+  - `Authentication required.` / `Backend session expired.` fallback statuses are not shown for those
+    explicit signed-in override cases.
   - targeted auth tests and full desktop verification remain green after the new locks.
 
 ## Remaining Phase C setup gaps
