@@ -1384,6 +1384,56 @@ void main() {
     );
 
     test(
+      'auth backend signed-out error codes override token/session inference',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'errorCode': 'TOKEN_EXPIRED',
+                'message': 'Session expired in backend.',
+                'state': <String, Object?>{
+                  'sessionToken': 'stale-session-token',
+                  'user': <String, Object?>{'id': 'stale-user'},
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Session expired in backend.',
+        );
+      },
+    );
+
+    test(
+      'auth backend explicit signed-in state overrides signed-out error code',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'code': 'AUTH_REQUIRED',
+                'state': <String, Object?>{
+                  'signedIn': true,
+                  'rememberSession': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
+
+    test(
       'skips auth delegate mutation when backend response snapshot is present',
       () {
         final _TrackingAuthSessionContract trackingDelegate =

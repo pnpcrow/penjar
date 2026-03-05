@@ -861,6 +861,47 @@ String _resolveBackendStatusValue({
       fallbackStatus;
 }
 
+String? _resolveBackendCodeValue({
+  required Map<String, Object?> responsePayload,
+  required Map<String, Object?> envelopePayload,
+  required Map<String, Object?> statePayload,
+}) {
+  return _coerceNonEmptyString(responsePayload['code']) ??
+      _coerceNonEmptyString(responsePayload['errorCode']) ??
+      _coerceNonEmptyString(responsePayload['reasonCode']) ??
+      _coerceNonEmptyString(envelopePayload['code']) ??
+      _coerceNonEmptyString(envelopePayload['errorCode']) ??
+      _coerceNonEmptyString(envelopePayload['reasonCode']) ??
+      _coerceNonEmptyString(statePayload['code']) ??
+      _coerceNonEmptyString(statePayload['errorCode']) ??
+      _coerceNonEmptyString(statePayload['reasonCode']);
+}
+
+bool _backendCodeIndicatesSignedOut(String rawCode) {
+  final String compact = rawCode.trim().toLowerCase().replaceAll(
+    RegExp(r'[^a-z0-9]'),
+    '',
+  );
+  if (compact.isEmpty) {
+    return false;
+  }
+  for (final String marker in const <String>[
+    'authrequired',
+    'unauthorized',
+    'unauthenticated',
+    'tokenexpired',
+    'sessionexpired',
+    'invalidtoken',
+    'signedout',
+    'loggedout',
+  ]) {
+    if (compact.contains(marker)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 int _clampIndex(int index, {required int itemCount}) {
   if (itemCount <= 0) {
     return 0;
@@ -985,7 +1026,15 @@ AuthSessionState? _authStateFromBackendPayload(
   } else if (resolvedSignedIn == false) {
     inferredSignedIn = false;
   } else {
-    inferredSignedIn = hasCredentialFields || hasUserPayload;
+    final String? backendCode = _resolveBackendCodeValue(
+      responsePayload: responsePayload,
+      envelopePayload: envelopePayload,
+      statePayload: statePayload,
+    );
+    final bool signedOutByCode =
+        backendCode != null && _backendCodeIndicatesSignedOut(backendCode);
+    inferredSignedIn =
+        !signedOutByCode && (hasCredentialFields || hasUserPayload);
   }
 
   return AuthSessionState(

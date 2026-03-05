@@ -6120,8 +6120,52 @@ Extend backend auth compatibility beyond flat payload aliases by supporting nest
   - explicit signed-out aliases continue to override inferred signed-in state in nested payloads.
   - targeted contract tests and full desktop verification remain green after nested normalization.
 
+## Unit WS-D-138: Backend signed-out error-code normalization for auth state
+
+### Planned objective
+
+Close a backend auth integration gap where signed-out semantics are communicated through backend error codes (without explicit `signedIn=false` payload fields), ensuring auth state normalization remains accurate under token/session-expiry responses.
+
+### Implemented changes
+
+1. Extended auth parser code-signal handling in `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - added backend code extraction across payload layers:
+     - `code`, `errorCode`, `reasonCode` from response/envelope/state.
+   - added signed-out code detector normalization for common variants:
+     - `AUTH_REQUIRED`, `UNAUTHORIZED`, `UNAUTHENTICATED`,
+     - `TOKEN_EXPIRED`, `SESSION_EXPIRED`,
+     - `INVALID_TOKEN`, `SIGNED_OUT`, `LOGGED_OUT`.
+   - signed-in inference now applies signed-out error-code precedence when explicit signed-in alias is absent.
+2. Added contract tests in `desktop/test/contracts/workflow_contracts_test.dart`:
+   - signed-out error codes override token/session inference.
+   - explicit signed-in state still overrides signed-out code when backend payload explicitly declares signed-in state.
+3. Updated continuity docs:
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && FLUTTER_NO_PUB=1 flutter test test/contracts/workflow_contracts_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - auth signed-out semantics when backend responses rely on error-code signaling,
+  - precedence behavior between explicit signed-in fields and signed-out error-code hints.
+- **Issues found during review**
+  1. Signed-in inference from token/session hints could misclassify auth state when backend returned expiry/unauthorized codes without explicit `signedIn=false`.
+  2. Code-signaled signed-out semantics needed to coexist with explicit signed-in field precedence for mixed payloads.
+- **Fix applied**
+  1. Added backend code extraction + signed-out code classification.
+  2. Applied code-based signed-out precedence only when explicit signed-in alias is absent.
+  3. Added targeted contract tests for both error-code override and explicit-state precedence.
+- **Post-fix validation criteria**
+  - auth parser now normalizes backend signed-out code signals into signed-out auth state when explicit signed-in fields are missing.
+  - explicit signed-in backend fields remain authoritative over code-based fallback inference.
+  - targeted contract tests and full desktop verification remain green after code-signal integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata (including auth-store mode label), shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline plus launch-argument deep-link parser bridge, macOS protocol/channel route-dispatch baseline, Windows running-instance route relay baseline, Windows protocol-registration command-hook baseline in installer flow with strict release gate control and helper script template, backend envelope/schema compatibility normalization, auth snapshot store/seed seam, flutter_secure_storage-backed native credential-store adapter path with strict rollout/fallback controls, secure-store default-on rollout policy, runtime legacy auth-store command/file/mirror path physical decommission execution, legacy auth-store decommission guard automation baseline, runtime source-level auth-store decommission guard automation baseline, backend auth alias normalization baseline (flat+nested payloads), runtime mode parity/matrix gates, and document continuity coupling matrix/release-linkage protocol baseline, but production Windows protocol-registration command provisioning with signed installer chain wiring and full backend auth contract integration are still pending.
+- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata (including auth-store mode label), shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline plus launch-argument deep-link parser bridge, macOS protocol/channel route-dispatch baseline, Windows running-instance route relay baseline, Windows protocol-registration command-hook baseline in installer flow with strict release gate control and helper script template, backend envelope/schema compatibility normalization, auth snapshot store/seed seam, flutter_secure_storage-backed native credential-store adapter path with strict rollout/fallback controls, secure-store default-on rollout policy, runtime legacy auth-store command/file/mirror path physical decommission execution, legacy auth-store decommission guard automation baseline, runtime source-level auth-store decommission guard automation baseline, backend auth normalization baseline (flat+nested alias payloads + signed-out error-code precedence), runtime mode parity/matrix gates, and document continuity coupling matrix/release-linkage protocol baseline, but production Windows protocol-registration command provisioning with signed installer chain wiring and full backend auth contract integration are still pending.
 - Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard plus coverage-contract regression guard (set-diff optimized uncovered/missing detection), auth-store legacy decommission guard + contract regression guard, auth-store runtime decommission guard + contract regression guard, desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks with in-memory duplicate-key tracking + base-check markdown report emission) plus evidence-index contract regression guard (including dedicated missing-base-check-report attachment, missing-index-file, invalid-decision, and promoted-placeholder cases, dedicated tests workflow release-evidence guard base+contract enforcement/upload, and parity matrix base-check artifact retention), update-manifest guard automation with validation + contract report artifacts (including dedicated tests workflow update-manifest guard job contract enforcement/upload), on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
