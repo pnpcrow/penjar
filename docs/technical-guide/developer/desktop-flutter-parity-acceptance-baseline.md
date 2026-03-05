@@ -95,6 +95,7 @@ the [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-pha
 - Parity UI coverage now includes backend unauthorized refresh transition from prior signed-in status in `desktop/test/parity/remote_stub_mode_parity_test.dart`.
 - Parity UI coverage now includes required backend-auth state mode fallback blocking behavior for empty sign-in backend responses in `desktop/test/parity/remote_stub_mode_parity_test.dart`.
 - Parity UI coverage now includes auto-enabled required backend-auth state behavior for backend execution transport profiles in `desktop/test/parity/remote_stub_mode_parity_test.dart`.
+- Auth-session parity suite now includes backend integration flow coverage in `desktop/test/parity/auth_session_parity_test.dart` (backend snapshot sign-in/signed-out transition + required-state fallback blocking).
 - Auth backend contract fixture matrix baseline is now maintained in `desktop/test/contracts/workflow_contracts_test.dart` (`auth backend contract fixture: ...` cases), including `result/data` envelope + `authState` alias coverage, to lock normalized signed-in/status precedence behavior before real backend auth contract binding.
 - Environment-driven blocked-operation lists are filtered against `RemoteStubOperationIds` catalog in `desktop/lib/contracts/remote_stub_contracts.dart` to avoid unsupported operation keys.
 - Diagnostics parity surface now includes runtime remote profile summary text (`Remote profile: ...`) including `auth-store` label for active auth snapshot persistence mode visibility during degraded-path validation.
