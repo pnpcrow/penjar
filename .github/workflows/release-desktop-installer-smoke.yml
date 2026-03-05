@@ -116,6 +116,10 @@ jobs:
         working-directory: ./desktop
         run: ./scripts/check_release_script_syntax.sh
 
+      - name: Run release script syntax contract check
+        working-directory: ./desktop
+        run: ./scripts/check_release_script_syntax_contract.sh
+
       - name: Run verify test coverage check
         working-directory: ./desktop
         run: ./scripts/check_verify_test_coverage.sh
@@ -201,6 +205,14 @@ jobs:
         with:
           name: desktop-release-script-syntax-report-smoke
           path: desktop/release/reports/release_script_syntax_report.md
+          if-no-files-found: warn
+
+      - name: Upload release script syntax contract report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-release-script-syntax-contract-report-smoke
+          path: desktop/release/reports/release_script_syntax_contract_report.md
           if-no-files-found: warn
 
       - name: Upload verify test coverage report

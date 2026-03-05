@@ -95,6 +95,14 @@ jobs:
           path: desktop/release/reports/release_script_syntax_report.md
           if-no-files-found: warn
 
+      - name: Upload release script syntax contract report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-release-script-syntax-contract-report-${{ matrix.label }}
+          path: desktop/release/reports/release_script_syntax_contract_report.md
+          if-no-files-found: warn
+
       - name: Upload verify test coverage report
         if: always()
         uses: actions/upload-artifact@v4
