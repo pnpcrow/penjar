@@ -8105,6 +8105,60 @@ snake_case logged-style coverage added in WS-D-177.
   - signed-in precedence remains deterministic under unauthorized-code payloads for `isLoggedIn`.
   - targeted tests and full desktop verification remain green after camelCase coverage expansion.
 
+## Unit WS-D-179: ABI-01 authState envelope fixture and `isLoggedIn` parity expansion
+
+### Planned objective
+
+Extend ABI-01 auth backend schema fixture breadth by locking additional `authState` envelope
+variants (`data.authState.loggedIn`, `result.authState.loggedOut`, `data.authState.is_logged_out`)
+and add dedicated parity evidence for camelCase `isLoggedIn` state normalization.
+
+### Implemented changes
+
+1. Expanded auth backend contract fixture matrix in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `sign-in data envelope with authState loggedIn alias success`,
+   - `refresh-token result envelope authState loggedOut alias maps fallback status`,
+   - `restore-session data envelope authState is_logged_out alias maps fallback status`.
+2. Expanded parity regressions in `desktop/test/parity/auth_session_parity_test.dart`:
+   - added transport fixture
+     `_AuthBackendIsLoggedInCamelCaseStateAliasParityTransportClient`,
+   - added `auth/session parity normalizes isLoggedIn state aliases`.
+3. Synced continuity docs for ABI-01 matrix/parity evidence alignment:
+   - `desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `desktop-flutter-development-runbook.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - ABI-01 fixture matrix coverage for `authState` alias variants across `result`/`data` envelopes,
+  - parity-level camelCase `isLoggedIn` snapshot normalization behavior,
+  - regression impact against full desktop verification chain.
+- **Issues found during review**
+  1. Existing ABI-01 fixtures covered core envelope/alias paths but lacked explicit
+     `data.authState.loggedIn` success and logged-style signed-out fallback fixtures for
+     `result.authState.loggedOut` and `data.authState.is_logged_out`.
+  2. Parity suite had camelCase `loggedIn` coverage, but no dedicated `isLoggedIn` lock to prevent
+     backend field-shape drift from bypassing signed-in/remember-session normalization evidence.
+- **Fix applied**
+  1. Added three contract fixtures to lock signed-in and signed-out behavior for the missing
+     `authState` envelope/alias variants.
+  2. Added dedicated `isLoggedIn` parity transport/test coverage to lock status text and
+     remember-session normalization.
+  3. Updated continuity docs so ABI-01 progress statements reflect the newly covered envelope/alias
+     variants and parity evidence.
+- **Post-fix validation criteria**
+  - ABI-01 fixture matrix covers logged-style signed-in/signed-out `authState` variants in
+    `result`/`data` envelopes.
+  - parity suite explicitly locks camelCase `isLoggedIn` normalization behavior.
+  - targeted tests and full desktop verification remain green after fixture/parity expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
