@@ -4152,8 +4152,44 @@ Add executable contract tests for verify-test-coverage guard behavior so coverag
   - Verify chain executes coverage-contract stage and remains green.
   - Evidence-index guard enforces verify-test-coverage contract report attachment requirement.
 
+## Unit WS-D-96: Tests workflow update-manifest contract guard extension
+
+### Planned objective
+
+Ensure the dedicated `release-update-manifest-guard` CI job enforces contract-level update-manifest validation (not only base validation) and preserves artifact traceability for both report types.
+
+### Implemented changes
+
+1. Extended dedicated update-manifest guard workflow job:
+   - `.github/workflows/tests-desktop-flutter.yml` `release-update-manifest-guard` now runs:
+     - `./scripts/check_update_manifest.sh`,
+     - `./scripts/check_update_manifest_contract.sh`.
+2. Extended artifact traceability in the same job:
+   - uploads existing `desktop-update-manifest-validation-report`,
+   - additionally uploads `desktop-update-manifest-contract-report` (`release/reports/update_manifest_contract_report.md`).
+3. Updated continuity baseline:
+   - `desktop-flutter-release-validation-baseline.md` CI note now explicitly documents contract-check execution and artifact upload in `release-update-manifest-guard`.
+4. Re-ran validation commands:
+   - `pnpm run desktop:release:update-manifest:check`,
+   - `pnpm run desktop:release:update-manifest:contract:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - consistency between dedicated update-manifest CI guard job and canonical verify contract enforcement,
+  - artifact traceability completeness for update-manifest validation domain.
+- **Issues found during review**
+  1. The dedicated `release-update-manifest-guard` job enforced only base validation and did not execute/upload contract validation output.
+- **Fix applied**
+  1. Added update-manifest contract execution and contract report artifact upload to dedicated guard job.
+- **Post-fix validation criteria**
+  - Dedicated update-manifest guard job definition includes both base + contract validation stages.
+  - Both validation and contract report artifacts are retained for audit traceability.
+  - Full-fast desktop verification remains green after workflow extension.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard plus coverage-contract regression guard, desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks) plus evidence-index contract regression guard, update-manifest guard automation with validation + contract report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard plus coverage-contract regression guard, desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks) plus evidence-index contract regression guard, update-manifest guard automation with validation + contract report artifacts (including dedicated tests workflow update-manifest guard job contract enforcement/upload), on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

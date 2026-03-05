@@ -170,6 +170,7 @@ This baseline defines minimum release validation requirements for desktop distri
 CI baseline note:
 - `.github/workflows/tests-desktop-flutter.yml` includes `release-evidence-guard` and `release-update-manifest-guard` jobs, and uploads parity/build artifacts for audit traceability.
 - `.github/workflows/tests-desktop-flutter.yml` `release-update-manifest-guard` job uploads `desktop-update-manifest-validation-report` artifact.
+- `.github/workflows/tests-desktop-flutter.yml` `release-update-manifest-guard` job also runs update manifest contract checks and uploads `desktop-update-manifest-contract-report` artifact.
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads verify stage timing report artifacts (`desktop-verify-stage-timing-report-*`).
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads release script syntax report artifacts (`desktop-release-script-syntax-report-*`).
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads release script syntax contract report artifacts (`desktop-release-script-syntax-contract-report-*`).
