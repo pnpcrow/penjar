@@ -146,4 +146,32 @@ void main() {
       '[remote-stub] Remote bridge unavailable: run-export.',
     );
   });
+
+  test('remote-stub blocked operations profile blocks selected operations', () {
+    final DesktopContractBundle bundle = DesktopContractBundle.fromMode(
+      DesktopContractMode.remoteStub,
+      remoteStubFaultProfile: const RemoteStubFaultProfile(
+        blockedOperations: <String>{'sign-in'},
+      ),
+    );
+
+    bundle.authSession.signIn(
+      const AuthSignInRequest(
+        email: 'designer@penjar.app',
+        password: 'desktop-pass',
+      ),
+    );
+    expect(bundle.authSession.state.signedIn, isFalse);
+    expect(
+      bundle.authSession.state.status,
+      '[remote-stub] Remote bridge unavailable: sign-in.',
+    );
+
+    bundle.projectLifecycle.createProject('Allowed Project');
+    expect(bundle.projectLifecycle.state.projects, hasLength(2));
+    expect(
+      bundle.projectLifecycle.state.status,
+      '[remote-stub] Project created: Allowed Project.',
+    );
+  });
 }

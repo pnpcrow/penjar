@@ -62,3 +62,4 @@ the [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-pha
 - Canonical parity list includes cross-cutting navigation persistence gate: `desktop/test/parity/shell_contract_persistence_parity_test.dart`.
 - Canonical parity list includes cross-cutting runtime mode gate: `desktop/test/parity/remote_stub_mode_parity_test.dart`.
 - Canonical parity list includes remote-stub unavailable-profile gate: `desktop/test/parity/remote_stub_unavailable_parity_test.dart`.
+- Remote-stub degraded-path simulation now supports operation-scoped blocking via `PENJAR_DESKTOP_REMOTE_STUB_BLOCKED_OPERATIONS` (comma-separated operation IDs) in addition to global unavailable profile flag `PENJAR_DESKTOP_REMOTE_STUB_UNAVAILABLE`.

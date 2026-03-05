@@ -535,5 +535,47 @@ void main() {
         );
       },
     );
+
+    test('block only configured operations when blockedOperations is set', () {
+      const RemoteStubFaultProfile faultProfile = RemoteStubFaultProfile(
+        blockedOperations: <String>{'create-project', 'run-export'},
+      );
+      final RemoteStubAuthSessionContract authContract =
+          RemoteStubAuthSessionContract(faultProfile: faultProfile);
+      final RemoteStubProjectLifecycleContract projectContract =
+          RemoteStubProjectLifecycleContract(faultProfile: faultProfile);
+      final RemoteStubExportWorkflowContract exportContract =
+          RemoteStubExportWorkflowContract(faultProfile: faultProfile);
+
+      authContract.signIn(
+        const AuthSignInRequest(
+          email: 'designer@penjar.app',
+          password: 'desktop-pass',
+        ),
+      );
+      expect(authContract.state.signedIn, isTrue);
+      expect(authContract.state.status, '[remote-stub] Signed in (simulated).');
+
+      projectContract.createProject('Blocked Project');
+      expect(projectContract.state.projects, hasLength(1));
+      expect(
+        projectContract.state.status,
+        '[remote-stub] Remote bridge unavailable: create-project.',
+      );
+
+      exportContract.runExport(
+        const ExportRequest(
+          fileName: 'landing',
+          format: 'png',
+          scale: '2x',
+          includeBackground: true,
+        ),
+      );
+      expect(exportContract.state.artifacts, isEmpty);
+      expect(
+        exportContract.state.status,
+        '[remote-stub] Remote bridge unavailable: run-export.',
+      );
+    });
   });
 }

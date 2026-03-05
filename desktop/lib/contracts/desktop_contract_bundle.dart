@@ -13,6 +13,17 @@ bool _envFlagEnabled(String raw) {
   }
 }
 
+Set<String> _parseBlockedOperations(String raw) {
+  final Set<String> normalizedOperations = <String>{};
+  for (final String token in raw.split(',')) {
+    final String normalized = token.trim().toLowerCase();
+    if (normalized.isNotEmpty) {
+      normalizedOperations.add(normalized);
+    }
+  }
+  return normalizedOperations;
+}
+
 enum DesktopContractMode {
   inMemory,
   remoteStub;
@@ -54,11 +65,17 @@ class DesktopContractBundle {
     final bool remoteStubUnavailable = _envFlagEnabled(
       const String.fromEnvironment('PENJAR_DESKTOP_REMOTE_STUB_UNAVAILABLE'),
     );
+    final Set<String> blockedOperations = _parseBlockedOperations(
+      const String.fromEnvironment(
+        'PENJAR_DESKTOP_REMOTE_STUB_BLOCKED_OPERATIONS',
+      ),
+    );
 
     return DesktopContractBundle.fromMode(
       mode,
       remoteStubFaultProfile: RemoteStubFaultProfile(
         unavailable: remoteStubUnavailable,
+        blockedOperations: blockedOperations,
       ),
     );
   }

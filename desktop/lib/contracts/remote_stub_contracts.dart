@@ -17,10 +17,26 @@ class RemoteStubFaultProfile {
   const RemoteStubFaultProfile({
     this.unavailable = false,
     this.reason = 'Remote bridge unavailable',
+    this.blockedOperations = const <String>{},
   });
 
   final bool unavailable;
   final String reason;
+  final Set<String> blockedOperations;
+
+  bool blocksOperation(String operation) {
+    if (unavailable) {
+      return true;
+    }
+
+    final String normalizedOperation = operation.trim().toLowerCase();
+    for (final String blockedOperation in blockedOperations) {
+      if (blockedOperation.trim().toLowerCase() == normalizedOperation) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 AuthSessionState _decorateAuthState(AuthSessionState state, {String? status}) =>
@@ -119,7 +135,7 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
 
   @override
   AuthSessionState setRememberSession(bool enabled) {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('set-remember-session')) {
       return _blocked('set-remember-session');
     }
     _clearOverride();
@@ -128,7 +144,7 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
 
   @override
   AuthSessionState signIn(AuthSignInRequest request) {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('sign-in')) {
       return _blocked('sign-in');
     }
     _clearOverride();
@@ -137,7 +153,7 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
 
   @override
   AuthSessionState restoreSession() {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('restore-session')) {
       return _blocked('restore-session');
     }
     _clearOverride();
@@ -146,7 +162,7 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
 
   @override
   AuthSessionState refreshToken() {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('refresh-token')) {
       return _blocked('refresh-token');
     }
     _clearOverride();
@@ -179,7 +195,7 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
 
   @override
   ProjectLifecycleState createProject(String projectName) {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('create-project')) {
       return _blocked('create-project');
     }
     _clearOverride();
@@ -188,7 +204,7 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
 
   @override
   ProjectLifecycleState switchProject(int index) {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('switch-project')) {
       return _blocked('switch-project');
     }
     _clearOverride();
@@ -197,7 +213,7 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
 
   @override
   ProjectLifecycleState createFile(String fileName) {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('create-file')) {
       return _blocked('create-file');
     }
     _clearOverride();
@@ -206,7 +222,7 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
 
   @override
   ProjectLifecycleState deleteFirstFile() {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('delete-file')) {
       return _blocked('delete-file');
     }
     _clearOverride();
@@ -239,7 +255,7 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState createRectangle() {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('create-rectangle')) {
       return _blocked('create-rectangle');
     }
     _clearOverride();
@@ -248,7 +264,7 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState selectShape(int index) {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('select-shape')) {
       return _blocked('select-shape');
     }
     _clearOverride();
@@ -257,7 +273,7 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState moveSelected() {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('move-shape')) {
       return _blocked('move-shape');
     }
     _clearOverride();
@@ -266,7 +282,7 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState resizeSelected() {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('resize-shape')) {
       return _blocked('resize-shape');
     }
     _clearOverride();
@@ -275,7 +291,7 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState toggleFillSelected() {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('toggle-fill')) {
       return _blocked('toggle-fill');
     }
     _clearOverride();
@@ -308,7 +324,7 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
 
   @override
   AssetManagementState importAsset(String assetName, String assetType) {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('import-asset')) {
       return _blocked('import-asset');
     }
     _clearOverride();
@@ -317,7 +333,7 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
 
   @override
   AssetManagementState selectAsset(int index) {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('select-asset')) {
       return _blocked('select-asset');
     }
     _clearOverride();
@@ -326,7 +342,7 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
 
   @override
   AssetManagementState useSelectedAsset() {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('use-asset')) {
       return _blocked('use-asset');
     }
     _clearOverride();
@@ -335,7 +351,7 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
 
   @override
   AssetManagementState removeSelectedAsset() {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('remove-asset')) {
       return _blocked('remove-asset');
     }
     _clearOverride();
@@ -369,7 +385,7 @@ class RemoteStubCollaborationContextContract
 
   @override
   CollaborationContextState togglePeerPresence() {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('toggle-peer-presence')) {
       return _blocked('toggle-peer-presence');
     }
     _clearOverride();
@@ -378,7 +394,7 @@ class RemoteStubCollaborationContextContract
 
   @override
   CollaborationContextState createThread(String title) {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('create-thread')) {
       return _blocked('create-thread');
     }
     _clearOverride();
@@ -387,7 +403,7 @@ class RemoteStubCollaborationContextContract
 
   @override
   CollaborationContextState selectThread(int index) {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('select-thread')) {
       return _blocked('select-thread');
     }
     _clearOverride();
@@ -396,7 +412,7 @@ class RemoteStubCollaborationContextContract
 
   @override
   CollaborationContextState resolveSelectedThread() {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('resolve-thread')) {
       return _blocked('resolve-thread');
     }
     _clearOverride();
@@ -429,7 +445,7 @@ class RemoteStubInspectHandoffContract implements InspectHandoffContract {
 
   @override
   InspectHandoffState setTarget(String target) {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('set-inspect-target')) {
       return _blocked('set-inspect-target');
     }
     _clearOverride();
@@ -438,7 +454,7 @@ class RemoteStubInspectHandoffContract implements InspectHandoffContract {
 
   @override
   InspectHandoffState generateSnippet(String elementId) {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('generate-snippet')) {
       return _blocked('generate-snippet');
     }
     _clearOverride();
@@ -447,7 +463,7 @@ class RemoteStubInspectHandoffContract implements InspectHandoffContract {
 
   @override
   InspectHandoffState copyMetadata(String elementId) {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('copy-metadata')) {
       return _blocked('copy-metadata');
     }
     _clearOverride();
@@ -480,7 +496,7 @@ class RemoteStubExportWorkflowContract implements ExportWorkflowContract {
 
   @override
   ExportWorkflowState runExport(ExportRequest request) {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('run-export')) {
       return _blocked('run-export');
     }
     _clearOverride();
@@ -489,7 +505,7 @@ class RemoteStubExportWorkflowContract implements ExportWorkflowContract {
 
   @override
   ExportWorkflowState saveLatest() {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('save-export')) {
       return _blocked('save-export');
     }
     _clearOverride();
@@ -498,7 +514,7 @@ class RemoteStubExportWorkflowContract implements ExportWorkflowContract {
 
   @override
   ExportWorkflowState clearArtifacts() {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('clear-export-artifacts')) {
       return _blocked('clear-export-artifacts');
     }
     _clearOverride();
@@ -532,7 +548,7 @@ class RemoteStubDiagnosticsRecoveryContract
 
   @override
   DiagnosticsRecoveryState runHealthCheck() {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('run-health-check')) {
       return _blocked('run-health-check');
     }
     _clearOverride();
@@ -541,7 +557,7 @@ class RemoteStubDiagnosticsRecoveryContract
 
   @override
   DiagnosticsRecoveryState simulateDisconnect() {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('simulate-disconnect')) {
       return _blocked('simulate-disconnect');
     }
     _clearOverride();
@@ -550,7 +566,7 @@ class RemoteStubDiagnosticsRecoveryContract
 
   @override
   DiagnosticsRecoveryState attemptReconnect() {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('attempt-reconnect')) {
       return _blocked('attempt-reconnect');
     }
     _clearOverride();
@@ -559,7 +575,7 @@ class RemoteStubDiagnosticsRecoveryContract
 
   @override
   DiagnosticsRecoveryState openRecoveryGuide() {
-    if (faultProfile.unavailable) {
+    if (faultProfile.blocksOperation('open-recovery-guide')) {
       return _blocked('open-recovery-guide');
     }
     _clearOverride();
