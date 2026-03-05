@@ -2983,6 +2983,58 @@ void main() {
     );
 
     test(
+      'auth backend ok failure flag without status maps auth-request-failed fallback status',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'ok': false,
+                'state': <String, Object?>{
+                  'sessionToken': 'ok-failure-session-token',
+                  'user': <String, Object?>{'id': 'ok-failure-user'},
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend auth request failed.',
+        );
+      },
+    );
+
+    test(
+      'auth backend isSuccess failure flag without status maps auth-request-failed fallback status',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'isSuccess': false,
+                'state': <String, Object?>{
+                  'sessionToken': 'is-success-failure-session-token',
+                  'user': <String, Object?>{'id': 'is-success-failure-user'},
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend auth request failed.',
+        );
+      },
+    );
+
+    test(
       'auth backend snake-case failure flag without status maps auth-request-failed fallback status',
       () {
         final _BackendResponseTransportClient transportClient =
@@ -3206,7 +3258,7 @@ void main() {
       },
     );
 
-    test('auth backend explicit signed-in state overrides failure flag', () {
+    test('auth backend explicit signed-in state overrides ok failure flag', () {
       final _BackendResponseTransportClient transportClient =
           _BackendResponseTransportClient(<String, Map<String, Object?>>{
             RemoteStubOperationIds.restoreSession: <String, Object?>{
@@ -3225,6 +3277,29 @@ void main() {
       expect(authContract.state.signedIn, isTrue);
       expect(authContract.state.rememberSession, isTrue);
     });
+
+    test(
+      'auth backend explicit signed-in state overrides isSuccess failure flag',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'isSuccess': false,
+                'state': <String, Object?>{
+                  'signedIn': true,
+                  'rememberSession': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
 
     test(
       'auth backend explicit signed-in state overrides snake-case failure flag',
