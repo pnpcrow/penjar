@@ -233,7 +233,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload Windows installer packaging report
-        if: always()
+        if: ${{ always() && matrix.label == 'windows' }}
         uses: actions/upload-artifact@v4
         with:
           name: desktop-windows-installer-packaging-report-${{ matrix.label }}
@@ -241,7 +241,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload Windows installer pipeline report
-        if: always()
+        if: ${{ always() && matrix.label == 'windows' }}
         uses: actions/upload-artifact@v4
         with:
           name: desktop-windows-installer-pipeline-report-${{ matrix.label }}
@@ -249,7 +249,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload Windows installer provenance report
-        if: always()
+        if: ${{ always() && matrix.label == 'windows' }}
         uses: actions/upload-artifact@v4
         with:
           name: desktop-windows-installer-provenance-report-${{ matrix.label }}

@@ -2601,8 +2601,43 @@ Add signing artifact provenance verification to smoke flow, so platform signing 
   - Strict signing provenance mode fails when verify evidence is incomplete.
   - Full-fast desktop verification remains green after signing provenance integration.
 
+## Unit WS-D-61: Windows report upload scope normalization
+
+### Planned objective
+
+Reduce installer-smoke artifact noise by scoping Windows-only report uploads to Windows matrix runs.
+
+### Implemented changes
+
+1. Updated workflow artifact upload conditions:
+   - `.github/workflows/release-desktop-installer-smoke.yml`.
+2. Normalized matrix-scoped upload policy:
+   - `Upload Windows installer packaging report` now runs only when `matrix.label == 'windows'`,
+   - `Upload Windows installer pipeline report` now runs only when `matrix.label == 'windows'`,
+   - `Upload Windows installer provenance report` now runs only when `matrix.label == 'windows'`.
+3. Updated release validation baseline docs:
+   - `desktop-flutter-release-validation-baseline.md` now documents Windows-only upload scope for Windows installer report artifacts.
+4. Re-ran validation commands:
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - workflow artifact upload condition correctness in installer smoke matrix,
+  - regression risk on report artifact naming and downstream evidence expectations,
+  - documentation consistency with matrix-scoped upload behavior.
+- **Issues found during review**
+  1. Existing workflow attempted Windows-only report uploads on macOS matrix leg, generating repeated warning noise (`if-no-files-found: warn`).
+- **Fix applied**
+  1. Added matrix-scoped `if` guards (`matrix.label == 'windows'`) to all Windows-only report upload steps.
+- **Post-fix validation criteria**
+  - macOS matrix leg no longer attempts Windows-only report uploads.
+  - Windows matrix leg continues to upload all Windows installer report artifacts.
+  - Full-fast desktop verification remains green after workflow condition normalization.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, and Windows installer provenance gate baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
