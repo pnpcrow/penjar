@@ -74,3 +74,12 @@ This document is the canonical navigation map to keep development continuity wit
 - Desktop migration execution work: roadmap full-port mandate -> desktop flutter development runbook -> WS-D migration inventory/decommission plan -> acceptance baseline -> execution log evidence.
 - Desktop release-readiness work: release validation baseline -> execution log -> CI/release workflow evidence.
 - Desktop release audit/reporting work: release evidence index -> execution log references -> release decision traceability.
+
+## 6) Desktop continuity coupling matrix
+
+| Triggered document update | Required companion updates | Purpose |
+|---|---|---|
+| Desktop Phase C unit implementation (`web-mcp-phase-c-execution-log`) | `desktop-flutter-development-runbook` next-unit queue, `desktop-flutter-parity-checklist`, `desktop-flutter-migration-inventory`, `desktop-flutter-parity-acceptance-baseline` | Keep implementation evidence, parity state, and migration exceptions synchronized. |
+| Desktop release gate/protocol change (`desktop-flutter-release-validation-baseline`) | `desktop-flutter-release-evidence-index`, `web-mcp-phase-c-execution-log` | Ensure release evidence requirements and executed-unit traceability stay aligned. |
+| Release evidence schema/report requirement change (`desktop-flutter-release-evidence-index`) | `desktop-flutter-release-validation-baseline`, `web-mcp-phase-c-execution-log` | Prevent release audits from diverging from current validation protocol. |
+| Desktop roadmap/backlog priority shift (`web-mcp-parity-backlog`, roadmap/plan docs) | `desktop-flutter-development-runbook` candidates, `web-mcp-phase-c-execution-log` remaining gaps | Keep active execution queue aligned with planning priority changes. |

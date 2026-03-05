@@ -9,8 +9,12 @@ This index tracks release validation evidence for desktop release candidates.
 
 ## Related artifacts
 
+- [Web + MCP + Desktop Documentation Map](/technical-guide/developer/web-mcp-documentation-map/)
 - [Desktop Flutter Release Validation Baseline](/technical-guide/developer/desktop-flutter-release-validation-baseline/)
 - [Desktop Flutter Development Runbook](/technical-guide/developer/desktop-flutter-development-runbook/)
+- [Desktop Flutter Parity Checklist](/technical-guide/developer/desktop-flutter-parity-checklist/)
+- [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/)
+- [Desktop Flutter Parity Acceptance Baseline](/technical-guide/developer/desktop-flutter-parity-acceptance-baseline/)
 - [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/)
 
 ## Evidence record schema
@@ -69,3 +73,9 @@ Each release candidate record should include:
 34. Attach update manifest contract report (`release/reports/update_manifest_contract_report.md`) before promotion decision.
 35. Attach verify test coverage contract report (`release/reports/verify_test_coverage_contract_report.md`) before promotion decision.
 36. Attach release evidence index check report (`release/reports/release_evidence_index_check_report.md`) before promotion decision.
+
+## Continuity linkage protocol
+
+1. When adding/removing release evidence requirements in this index, update [Desktop Flutter Release Validation Baseline](/technical-guide/developer/desktop-flutter-release-validation-baseline/) in the same unit.
+2. When a release gate outcome changes status (`promoted`/`blocked`), add or update corresponding unit evidence in [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/).
+3. When release evidence changes affect parity acceptance scope, update [Desktop Flutter Parity Checklist](/technical-guide/developer/desktop-flutter-parity-checklist/), [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/), and [Desktop Flutter Parity Acceptance Baseline](/technical-guide/developer/desktop-flutter-parity-acceptance-baseline/) together.
