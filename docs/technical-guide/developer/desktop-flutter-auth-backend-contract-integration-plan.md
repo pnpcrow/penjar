@@ -105,7 +105,7 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
    - when one wrapper key resolves to an already-visited cyclic envelope, traversal now continues to alternate wrapper keys (`data` / `payload`) in the same payload scope,
    - sibling envelope candidates are now collected across wrapper scopes so metadata-only primary chains (for example `result.meta`) can still resolve state/status from sibling wrappers (for example `data.authState`),
    - status/code/failure extraction now also scans additional envelope candidates to avoid backend-snapshot drops when the primary wrapper chain lacks auth/workflow fields,
-   - workflow-level sibling-envelope fallback regression coverage now includes non-auth flow evidence (`createProject` contract + project parity path) to reduce parser drift risk outside auth-only scenarios,
+   - workflow-level sibling-envelope fallback regression coverage now includes non-auth flow evidence (`createProject`/`createFile` contract + project/file parity paths) to reduce parser drift risk outside auth-only scenarios,
    - envelope-chain extraction now covers common and deep patterns such as
      `result -> payload -> state/authState` and `result -> data -> payload -> result -> data -> authState`,
    - auth fixture matrix now includes `payload` and nested `result/payload` envelope

@@ -8466,6 +8466,55 @@ state payload in sibling wrappers (`data.workflowState`).
   - parity UI status/project selection reflects backend snapshots for the sibling-envelope shape.
   - targeted tests and full desktop verification remain green after project regression lock.
 
+## Unit WS-D-186: File workflow sibling-envelope fallback regression lock
+
+### Planned objective
+
+Extend non-auth sibling-envelope regression coverage by adding explicit file-workflow contract/parity
+locks for metadata-only primary wrappers (`result.meta`) with file state in sibling wrappers
+(`data.workflowState.projects[*].files`).
+
+### Implemented changes
+
+1. Added file contract regression in `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `file backend sibling data envelope is used when result envelope lacks workflow state`.
+2. Added file parity regression in `desktop/test/parity/file_lifecycle_parity_test.dart`:
+   - `_FileBackendSiblingDataEnvelopeParityTransportClient`,
+   - `file lifecycle parity uses sibling data envelope when result lacks workflow state`.
+3. Synced continuity docs for cross-workflow sibling-envelope evidence:
+   - `desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `desktop-flutter-development-runbook.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/file_lifecycle_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - sibling-envelope fallback correctness for file workflows under metadata-only primary wrappers,
+  - parity UI visibility of backend-driven file list/status snapshots,
+  - regression impact on end-to-end verification chain.
+- **Issues found during review**
+  1. WS-D-185 locked project-level sibling fallback, but file workflow still lacked dedicated
+     sibling-envelope regressions.
+  2. Without file-level locks, parser refactors could preserve project behavior while regressing
+     file snapshot extraction paths.
+- **Fix applied**
+  1. Added contract regression for `createFile` backend payloads shaped as `result.meta` +
+     sibling `data.workflowState`.
+  2. Added parity regression to assert file list/status rendering from sibling-envelope backend
+     payloads.
+  3. Updated continuity docs so file lifecycle rows and runbook guidance include sibling-envelope
+     fallback evidence.
+- **Post-fix validation criteria**
+  - file snapshots resolve from sibling `data.workflowState` when primary `result` wrappers are
+    metadata-only.
+  - parity UI status/file list reflect backend snapshots under sibling-envelope payloads.
+  - targeted tests and full desktop verification remain green after file regression lock.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
