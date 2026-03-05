@@ -190,6 +190,18 @@ jobs:
         working-directory: ./desktop
         run: ./scripts/check_release_evidence_index.sh
 
+      - name: Run release evidence contract guard
+        working-directory: ./desktop
+        run: ./scripts/check_release_evidence_index_contract.sh
+
+      - name: Upload release evidence index contract report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-release-evidence-index-contract-report-guard
+          path: desktop/release/reports/release_evidence_index_contract_report.md
+          if-no-files-found: warn
+
   release-update-manifest-guard:
     name: "Desktop Release Update Manifest Guard"
     runs-on: ubuntu-latest
