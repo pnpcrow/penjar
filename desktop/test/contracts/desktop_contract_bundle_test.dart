@@ -294,8 +294,16 @@ void main() {
         'required',
       );
       expect(
+        autoRequiredBundle.remoteStubProfile?.authBackendFallbackLabel,
+        'require-state',
+      );
+      expect(
         autoRequiredBundle.remoteStubProfile?.summaryLabel,
         contains('auth-backend-state: required'),
+      );
+      expect(
+        autoRequiredBundle.remoteStubProfile?.summaryLabel,
+        contains('auth-backend-fallback: require-state'),
       );
     },
   );
@@ -331,6 +339,14 @@ void main() {
       expect(
         optOutBundle.remoteStubProfile?.summaryLabel,
         isNot(contains('auth-backend-state: required')),
+      );
+      expect(
+        optOutBundle.remoteStubProfile?.authBackendFallbackLabel,
+        'delegate-enabled',
+      );
+      expect(
+        optOutBundle.remoteStubProfile?.summaryLabel,
+        contains('auth-backend-fallback: delegate-enabled'),
       );
     },
   );
@@ -421,6 +437,34 @@ void main() {
       contains('auth-sign-in-payload: forwarded'),
     );
   });
+
+  test(
+    'remote-stub profile exposes strict-schema fallback label for backend execution transport',
+    () {
+      final DesktopContractBundle bundle = DesktopContractBundle.fromMode(
+        DesktopContractMode.remoteStub,
+        remoteStubTransportClient: RemoteStubHttpTransportClient(
+          backendBaseUrl: 'https://api.penjar.app/v1',
+          executionProbe: (_) =>
+              const RemoteStubHttpBackendExecutionResult.allowed(),
+        ),
+        remoteStubAuthStrictBackendSchema: true,
+        remoteStubAuthRequireBackendState: false,
+      );
+
+      expect(bundle.remoteStubProfile?.isEmpty, isFalse);
+      expect(bundle.remoteStubProfile?.authBackendStateLabel, isEmpty);
+      expect(bundle.remoteStubProfile?.authBackendSchemaLabel, 'strict');
+      expect(
+        bundle.remoteStubProfile?.authBackendFallbackLabel,
+        'strict-schema',
+      );
+      expect(
+        bundle.remoteStubProfile?.summaryLabel,
+        contains('auth-backend-fallback: strict-schema'),
+      );
+    },
+  );
 
   test('remote-stub bundle forwards auth state store persistence seam', () {
     final RemoteStubMemoryAuthStateStore authStateStore =

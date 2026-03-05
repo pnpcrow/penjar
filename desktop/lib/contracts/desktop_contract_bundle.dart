@@ -181,6 +181,7 @@ DesktopRemoteStubProfile _buildRemoteStubProfile({
   bool authStrictBackendSchema = false,
   bool authRequireBackendState = false,
   bool authForwardSignInCredentials = false,
+  bool backendExecutionTransportEnabled = false,
   String authStoreLabelOverride = '',
 }) {
   final RemoteStubTransportProfile transportProfile = transportClient.profile;
@@ -194,6 +195,11 @@ DesktopRemoteStubProfile _buildRemoteStubProfile({
   final String authSignInPayloadLabel = authForwardSignInCredentials
       ? 'forwarded'
       : '';
+  final String authBackendFallbackLabel = _resolveAuthBackendFallbackLabel(
+    backendExecutionTransportEnabled: backendExecutionTransportEnabled,
+    authStrictBackendSchema: authStrictBackendSchema,
+    authRequireBackendState: authRequireBackendState,
+  );
 
   return DesktopRemoteStubProfile(
     unavailable: faultProfile.unavailable,
@@ -207,6 +213,7 @@ DesktopRemoteStubProfile _buildRemoteStubProfile({
     authBackendSchemaLabel: authBackendSchemaLabel,
     authBackendStateLabel: authBackendStateLabel,
     authSignInPayloadLabel: authSignInPayloadLabel,
+    authBackendFallbackLabel: authBackendFallbackLabel,
   );
 }
 
@@ -235,6 +242,23 @@ String _describeAuthStateStore(RemoteStubAuthStateStore authStateStore) {
 
 bool _isBackendExecutionTransport(RemoteStubTransportClient transportClient) {
   return transportClient.profile.transportLabel.contains('http-backend:');
+}
+
+String _resolveAuthBackendFallbackLabel({
+  required bool backendExecutionTransportEnabled,
+  required bool authStrictBackendSchema,
+  required bool authRequireBackendState,
+}) {
+  if (!backendExecutionTransportEnabled) {
+    return '';
+  }
+  if (authRequireBackendState) {
+    return 'require-state';
+  }
+  if (authStrictBackendSchema) {
+    return 'strict-schema';
+  }
+  return 'delegate-enabled';
 }
 
 Map<String, String> _remoteStubBackendEndpointOverridesFromEnvironment() {
@@ -517,6 +541,7 @@ class DesktopRemoteStubProfile {
     this.authBackendSchemaLabel = '',
     this.authBackendStateLabel = '',
     this.authSignInPayloadLabel = '',
+    this.authBackendFallbackLabel = '',
   });
 
   final bool unavailable;
@@ -528,6 +553,7 @@ class DesktopRemoteStubProfile {
   final String authBackendSchemaLabel;
   final String authBackendStateLabel;
   final String authSignInPayloadLabel;
+  final String authBackendFallbackLabel;
 
   bool get isEmpty =>
       !unavailable &&
@@ -537,7 +563,8 @@ class DesktopRemoteStubProfile {
       authStoreLabel.trim().isEmpty &&
       authBackendSchemaLabel.trim().isEmpty &&
       authBackendStateLabel.trim().isEmpty &&
-      authSignInPayloadLabel.trim().isEmpty;
+      authSignInPayloadLabel.trim().isEmpty &&
+      authBackendFallbackLabel.trim().isEmpty;
 
   String get summaryLabel {
     if (isEmpty) {
@@ -570,6 +597,9 @@ class DesktopRemoteStubProfile {
     }
     if (authSignInPayloadLabel.trim().isNotEmpty) {
       parts.add('auth-sign-in-payload: $authSignInPayloadLabel');
+    }
+    if (authBackendFallbackLabel.trim().isNotEmpty) {
+      parts.add('auth-backend-fallback: $authBackendFallbackLabel');
     }
     return parts.join(' · ');
   }
@@ -715,9 +745,11 @@ class DesktopContractBundle {
     bool remoteStubAuthForwardSignInCredentials = false,
     DesktopRemoteStubProfile? remoteStubProfile,
   }) {
+    final bool backendExecutionTransportEnabled = _isBackendExecutionTransport(
+      remoteStubTransportClient,
+    );
     final bool resolvedRemoteStubAuthRequireBackendState =
-        remoteStubAuthRequireBackendState ??
-        _isBackendExecutionTransport(remoteStubTransportClient);
+        remoteStubAuthRequireBackendState ?? backendExecutionTransportEnabled;
 
     return switch (mode) {
       DesktopContractMode.inMemory => DesktopContractBundle.inMemory(),
@@ -740,6 +772,8 @@ class DesktopContractBundle {
                   resolvedRemoteStubAuthRequireBackendState,
               authForwardSignInCredentials:
                   remoteStubAuthForwardSignInCredentials,
+              backendExecutionTransportEnabled:
+                  backendExecutionTransportEnabled,
             ),
       ),
     };
@@ -771,9 +805,11 @@ class DesktopContractBundle {
     bool authForwardSignInCredentials = false,
     DesktopRemoteStubProfile? remoteStubProfile,
   }) {
+    final bool backendExecutionTransportEnabled = _isBackendExecutionTransport(
+      transportClient,
+    );
     final bool resolvedAuthRequireBackendState =
-        authRequireBackendState ??
-        _isBackendExecutionTransport(transportClient);
+        authRequireBackendState ?? backendExecutionTransportEnabled;
 
     return DesktopContractBundle(
       mode: DesktopContractMode.remoteStub,
@@ -823,6 +859,7 @@ class DesktopContractBundle {
             authStrictBackendSchema: authStrictBackendSchema,
             authRequireBackendState: resolvedAuthRequireBackendState,
             authForwardSignInCredentials: authForwardSignInCredentials,
+            backendExecutionTransportEnabled: backendExecutionTransportEnabled,
           ),
     );
   }

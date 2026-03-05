@@ -297,6 +297,10 @@ void main() {
         diagnosticsProfileText.data,
         contains('auth-backend-state: required'),
       );
+      expect(
+        diagnosticsProfileText.data,
+        contains('auth-backend-fallback: require-state'),
+      );
 
       await openWorkflowSection(tester, 'auth');
       await tester.enterText(
@@ -316,6 +320,37 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining('Signed in (simulated).'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'backend execution transport explicit opt-out surfaces delegate fallback profile label',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient: RemoteStubHttpTransportClient(
+            backendBaseUrl: 'https://api.penjar.app',
+            executionProbe: (_) =>
+                const RemoteStubHttpBackendExecutionResult.allowed(),
+          ),
+          remoteStubAuthRequireBackendState: false,
+        ),
+      );
+
+      await openWorkflowSection(tester, 'diagnostics');
+      final Text diagnosticsProfileText = tester.widget(
+        find.byKey(const ValueKey<String>('diagnostics-remote-profile')),
+      );
+      expect(
+        diagnosticsProfileText.data,
+        contains('auth-backend-fallback: delegate-enabled'),
+      );
+      expect(
+        diagnosticsProfileText.data,
+        isNot(contains('auth-backend-state: required')),
+      );
     },
   );
 
