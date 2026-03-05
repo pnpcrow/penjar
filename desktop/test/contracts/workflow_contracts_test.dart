@@ -1013,6 +1013,48 @@ void main() {
     });
 
     test(
+      'http transport client applies auth backend error payload snapshots from execution probe',
+      () {
+        final RemoteStubHttpTransportClient transportClient =
+            RemoteStubHttpTransportClient(
+              backendBaseUrl: 'https://api.penjar.app',
+              executionProbe: (RemoteStubHttpBackendExecutionRequest request) {
+                expect(
+                  request.endpointUrl,
+                  'https://api.penjar.app/api/desktop/auth/token/refresh',
+                );
+                return RemoteStubHttpBackendExecutionResult.allowedWithPayload(
+                  <String, Object?>{
+                    'code': 401,
+                    'message': 'Backend session expired.',
+                    'state': <String, Object?>{
+                      'sessionToken': 'stale-backend-session',
+                    },
+                  },
+                );
+              },
+            );
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(
+              transportClient: transportClient,
+              initialState: const AuthSessionState(
+                rememberSession: true,
+                signedIn: true,
+                status: 'Previously signed in.',
+              ),
+            );
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend session expired.',
+        );
+      },
+    );
+
+    test(
       'http transport client executes backend request and allows operation on success',
       () {
         final List<RemoteStubHttpBackendExecutionRequest> executedRequests =
@@ -1654,6 +1696,41 @@ void main() {
     );
 
     test(
+      'auth backend signed-out error codes force signed-out from signed-in snapshot',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'errorCode': 'TOKEN_EXPIRED',
+                'message': 'Session expired in backend.',
+                'state': <String, Object?>{
+                  'sessionToken': 'stale-session-token',
+                  'user': <String, Object?>{'id': 'stale-user'},
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(
+              transportClient: transportClient,
+              initialState: const AuthSessionState(
+                rememberSession: true,
+                signedIn: true,
+                status: 'Previously signed in.',
+              ),
+            );
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(authContract.state.rememberSession, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Session expired in backend.',
+        );
+      },
+    );
+
+    test(
       'auth backend numeric unauthorized code overrides token/session inference',
       () {
         final _BackendResponseTransportClient transportClient =
@@ -1700,6 +1777,41 @@ void main() {
         authContract.refreshToken();
 
         expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend auth failure flag signaled.',
+        );
+      },
+    );
+
+    test(
+      'auth backend explicit failure flag forces signed-out from signed-in snapshot',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'success': false,
+                'message': 'Backend auth failure flag signaled.',
+                'state': <String, Object?>{
+                  'sessionToken': 'failure-flag-session-token',
+                  'user': <String, Object?>{'id': 'failure-flag-user'},
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(
+              transportClient: transportClient,
+              initialState: const AuthSessionState(
+                rememberSession: true,
+                signedIn: true,
+                status: 'Previously signed in.',
+              ),
+            );
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(authContract.state.rememberSession, isTrue);
         expect(
           authContract.state.status,
           '[remote-stub] Backend auth failure flag signaled.',

@@ -8,6 +8,17 @@ const String _kRemoteStubPrefix = '[remote-stub] ';
 
 String _normalizeOperation(String operation) => operation.trim().toLowerCase();
 
+bool _isAuthOperation(String operation) {
+  switch (_normalizeOperation(operation)) {
+    case RemoteStubOperationIds.setRememberSession:
+    case RemoteStubOperationIds.signIn:
+    case RemoteStubOperationIds.restoreSession:
+    case RemoteStubOperationIds.refreshToken:
+      return true;
+  }
+  return false;
+}
+
 final Expando<Set<String>> _normalizedOperationSetCache = Expando<Set<String>>(
   'normalizedRemoteStubOperationSet',
 );
@@ -1198,30 +1209,28 @@ AuthSessionState? _authStateFromBackendPayload(
       'authenticated',
     ]),
   );
-  final bool inferredSignedIn;
-  if (resolvedSignedIn == true) {
-    inferredSignedIn = true;
-  } else if (resolvedSignedIn == false) {
-    inferredSignedIn = false;
+  final String? backendCode = _resolveBackendCodeValue(
+    responsePayload: responsePayload,
+    envelopePayload: envelopePayload,
+    statePayload: statePayload,
+    additionalPayloads: authSources,
+  );
+  final bool signedOutByCode =
+      backendCode != null && _backendCodeIndicatesSignedOut(backendCode);
+  final bool nextSignedIn;
+  if (resolvedSignedIn != null) {
+    nextSignedIn = resolvedSignedIn;
+  } else if (signedOutByCode || hasExplicitFailureFlag) {
+    nextSignedIn = false;
+  } else if (hasCredentialFields || hasUserPayload) {
+    nextSignedIn = true;
   } else {
-    final String? backendCode = _resolveBackendCodeValue(
-      responsePayload: responsePayload,
-      envelopePayload: envelopePayload,
-      statePayload: statePayload,
-      additionalPayloads: authSources,
-    );
-    final bool signedOutByCode =
-        backendCode != null && _backendCodeIndicatesSignedOut(backendCode);
-    inferredSignedIn =
-        !signedOutByCode &&
-        !hasExplicitFailureFlag &&
-        (hasCredentialFields || hasUserPayload);
+    nextSignedIn = currentState.signedIn;
   }
 
   return AuthSessionState(
     rememberSession: resolvedRememberSession ?? currentState.rememberSession,
-    signedIn:
-        resolvedSignedIn ?? (inferredSignedIn ? true : currentState.signedIn),
+    signedIn: nextSignedIn,
     status: _resolveBackendStatusValue(
       responsePayload: responsePayload,
       envelopePayload: envelopePayload,
@@ -1762,6 +1771,16 @@ RemoteStubHttpBackendExecutionResult _defaultHttpBackendExecutionProbe(
   }
 
   final String backendMessage = _extractBackendErrorMessage(response.body);
+  if (_isAuthOperation(request.transportRequest.operation)) {
+    final Map<String, Object?> payload = <String, Object?>{
+      ..._extractBackendSuccessPayload(response.body),
+      'code': response.statusCode,
+    };
+    if (backendMessage.isNotEmpty && !payload.containsKey('message')) {
+      payload['message'] = backendMessage;
+    }
+    return RemoteStubHttpBackendExecutionResult.allowedWithPayload(payload);
+  }
   if (backendMessage.isNotEmpty) {
     return RemoteStubHttpBackendExecutionResult.blocked(
       '${request.blockedReason}: ${request.transportRequest.operation}. $backendMessage',
