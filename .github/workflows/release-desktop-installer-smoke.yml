@@ -66,6 +66,11 @@ on:
         type: boolean
         required: true
         default: false
+      enforce_windows_installer_provenance:
+        description: "Fail workflow when Windows installer provenance validation is incomplete"
+        type: boolean
+        required: true
+        default: false
       build_mode:
         description: "Build mode for smoke packaging"
         type: choice
@@ -149,6 +154,7 @@ jobs:
           STRICT_WINDOWS_INSTALLER_PACKAGING: ${{ inputs.enforce_windows_installer_packaging }}
           STRICT_WINDOWS_INSTALLER_EXECUTION: ${{ inputs.enforce_windows_installer_execution }}
           STRICT_WINDOWS_INSTALLER_NAMING: ${{ inputs.enforce_windows_installer_naming }}
+          STRICT_WINDOWS_INSTALLER_PROVENANCE: ${{ inputs.enforce_windows_installer_provenance }}
           PENJAR_MACOS_SIGN_IDENTITY: ${{ secrets.PENJAR_MACOS_SIGN_IDENTITY }}
           PENJAR_MACOS_TEAM_ID: ${{ secrets.PENJAR_MACOS_TEAM_ID }}
           PENJAR_MACOS_NOTARY_PROFILE: ${{ secrets.PENJAR_MACOS_NOTARY_PROFILE }}
@@ -158,6 +164,7 @@ jobs:
           PENJAR_MACOS_NOTARIZE_COMMAND: ${{ secrets.PENJAR_MACOS_NOTARIZE_COMMAND }}
           PENJAR_WINDOWS_SIGN_COMMAND: ${{ secrets.PENJAR_WINDOWS_SIGN_COMMAND }}
           PENJAR_WINDOWS_INSTALLER_COMMAND: ${{ secrets.PENJAR_WINDOWS_INSTALLER_COMMAND }}
+          PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND: ${{ secrets.PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND }}
         run: |
           set -eo pipefail
           ./scripts/release_installer_update_smoke.sh "${{ matrix.label }}" "${{ inputs.build_mode }}"
@@ -200,6 +207,14 @@ jobs:
         with:
           name: desktop-windows-installer-pipeline-report-${{ matrix.label }}
           path: desktop/release/reports/windows_installer_pipeline_report.md
+          if-no-files-found: warn
+
+      - name: Upload Windows installer provenance report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-windows-installer-provenance-report-${{ matrix.label }}
+          path: desktop/release/reports/windows_installer_provenance_report.md
           if-no-files-found: warn
 
       - name: Generate release evidence row snippet

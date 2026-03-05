@@ -52,3 +52,4 @@ Each release candidate record should include:
 17. Attach Windows installer pipeline report (`release/reports/windows_installer_pipeline_report.md`) before promotion decision.
 18. Attach external publication readiness report (`release/reports/appcast_external_readiness_report.md`) when external publication stage is executed.
 19. Attach external production guard report (`release/reports/appcast_external_production_guard_report.md`) when external publication stage is executed.
+20. Attach Windows installer provenance report (`release/reports/windows_installer_provenance_report.md`) before promotion decision when installer smoke is executed.

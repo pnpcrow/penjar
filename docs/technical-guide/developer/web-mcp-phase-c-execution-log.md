@@ -43,9 +43,9 @@ Create a dedicated Phase C execution log anchor to prevent desktop full-port wor
   - Document discoverability from existing roadmap/plan/map chain.
   - Phase ownership clarity (Phase A vs Phase C).
 - **Issues found during review**
-  1. None.
+  1. Initial non-strict path marked provenance as fully validated when installer hash existed but provenance command hook was missing.
 - **Fix applied**
-  1. Not required.
+  1. Updated provenance status aggregation so command-hook absence remains `warning` in non-strict mode and only becomes `validated` when provenance command executes successfully.
 - **Post-fix validation criteria**
   - Phase C work units are recorded here instead of Phase A log.
 
@@ -2405,8 +2405,60 @@ Introduce explicit production-consent gating for external appcast publication, s
   - Production guard report is generated and archived in workflow artifacts.
   - Full-fast desktop verification remains green after production guard integration.
 
+## Unit WS-D-57: Windows installer provenance gate baseline
+
+### Planned objective
+
+Introduce explicit Windows installer provenance verification and strict gating, so installer smoke evidence can include artifact hash + provenance-command execution trace.
+
+### Implemented changes
+
+1. Added Windows installer provenance checker:
+   - `desktop/scripts/check_windows_installer_provenance.sh`.
+2. Implemented provenance semantics:
+   - resolves installer target path (`PENJAR_WINDOWS_INSTALLER_PATH` fallback),
+   - computes SHA256 hash (`shasum`/`sha256sum`),
+   - supports optional provenance command hook (`PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND`),
+   - supports strict/non-strict mode (`STRICT_WINDOWS_INSTALLER_PROVENANCE`),
+   - emits provenance report (`release/reports/windows_installer_provenance_report.md`).
+3. Integrated provenance checker into smoke orchestrator:
+   - `desktop/scripts/release_installer_update_smoke.sh` now runs provenance checker for Windows after packaging checks.
+4. Added root command surface:
+   - `desktop:release:windows-installer:provenance`,
+   - `desktop:release:windows-installer:provenance:strict`.
+5. Extended manual smoke workflow dispatch contract:
+   - added `enforce_windows_installer_provenance` input.
+6. Extended installer-smoke workflow env/artifacts:
+   - passes `STRICT_WINDOWS_INSTALLER_PROVENANCE` and `PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND`,
+   - uploads Windows installer provenance report artifacts.
+7. Updated release/runbook/index docs:
+   - `desktop-flutter-development-runbook.md` command inventory now includes provenance check commands,
+   - `desktop-flutter-release-validation-baseline.md` now includes provenance strict mode guidance and workflow input mapping,
+   - `desktop-flutter-release-evidence-index.md` now includes provenance report attachment rule.
+8. Re-ran validation commands:
+   - `pnpm run desktop:release:windows-installer:provenance`,
+   - `cd desktop && PENJAR_WINDOWS_INSTALLER_PATH="build/windows/x64/runner/Release/installer/PenjarInstaller.exe" ./scripts/check_windows_installer_provenance.sh 1` (expected strict failure: missing provenance command),
+   - `cd desktop && PENJAR_WINDOWS_INSTALLER_PATH="build/windows/x64/runner/Release/installer/PenjarInstaller.exe" PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND='echo provenance-ok' ./scripts/check_windows_installer_provenance.sh 1`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict provenance gate behavior for missing artifact/command/hashing scenarios,
+  - smoke workflow env propagation and artifact upload continuity,
+  - report completeness for hash/provenance status fields.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Provenance report includes SHA256 and provenance command status fields.
+  - Strict provenance mode fails when artifact/provenance-command requirements are unmet.
+  - Full-fast desktop verification remains green after provenance gate integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline, optional external publication dry-run stage with production consent guard and readiness gate baseline, Windows installer packaging verification baseline with strict naming gate, and command-hooked Windows installer pipeline baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline, optional external publication dry-run stage with production consent guard and readiness gate baseline, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, and Windows installer provenance gate baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
