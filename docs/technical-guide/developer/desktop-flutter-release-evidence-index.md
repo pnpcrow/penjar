@@ -59,3 +59,4 @@ Each release candidate record should include:
 24. Attach release script syntax report (`release/reports/release_script_syntax_report.md`) before promotion decision.
 25. Attach verify test coverage report (`release/reports/verify_test_coverage_report.md`) before promotion decision.
 26. Attach desktop command inventory report (`release/reports/desktop_command_inventory_report.md`) before promotion decision.
+27. Attach update manifest validation report (`release/reports/update_manifest_validation_report.md`) before promotion decision.

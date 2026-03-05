@@ -2987,8 +2987,56 @@ Prevent command-surface drift between desktop release docs and executable packag
   - Inventory reports are generated in local verify, desktop CI, and smoke preflight runs.
   - Full-fast desktop verification remains green after inventory-guard integration.
 
+## Unit WS-D-70: Update manifest validation report hardening
+
+### Planned objective
+
+Improve update-manifest validation robustness and traceability by replacing text parsing with JSON validation and publishing explicit validation reports in CI/smoke preflight.
+
+### Implemented changes
+
+1. Hardened update manifest checker implementation:
+   - `desktop/scripts/check_update_manifest.sh` now uses JSON parsing (`python`) instead of `sed` extraction.
+2. Implemented validation report semantics:
+   - supports optional report output path argument (`default: release/reports/update_manifest_validation_report.md`),
+   - emits field-level and check-level status report,
+   - validates required fields, semver-like version, channel, timestamp, https URLs, platform URL suffixes, and macOS/Windows URL distinctness.
+3. Extended desktop CI update-manifest guard artifacts:
+   - `.github/workflows/tests-desktop-flutter.yml` `release-update-manifest-guard` job now uploads `desktop-update-manifest-validation-report`.
+4. Extended smoke signing-readiness preflight:
+   - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job now runs `check_update_manifest.sh`,
+   - uploads `desktop-update-manifest-validation-report-smoke`.
+5. Updated release/index docs:
+   - `desktop-flutter-release-validation-baseline.md` now documents update-manifest validation report artifacts and checker output path,
+   - `desktop-flutter-release-evidence-index.md` now includes update manifest validation report attachment rule.
+6. Applied Python compatibility hardening:
+   - removed runtime-evaluated builtin generic annotations from python snippets in
+     `check_update_manifest.sh` and `check_desktop_command_inventory.sh` to preserve compatibility on runners with Python < 3.9.
+7. Re-ran validation commands:
+   - `pnpm run desktop:release:update-manifest:check`,
+   - `cd desktop && ./scripts/check_update_manifest.sh <temp-invalid-manifest> release/reports/update_manifest_validation_report_test.md` (expected failure: invalid channel),
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - parser robustness against JSON formatting changes,
+  - report generation on pass/fail paths,
+  - CI/smoke workflow artifact continuity for update-manifest validation evidence.
+- **Issues found during review**
+  1. Previous `sed`-based parsing was brittle for JSON structure/format variation and produced no explicit validation report artifact.
+  2. Builtin-generic type annotations in inline python snippets could reduce compatibility on runners using older Python versions.
+- **Fix applied**
+  1. Replaced parsing with JSON validation and added report generation plus artifact uploads in both CI update-manifest guard and smoke preflight.
+  2. Removed runtime-evaluated builtin generic annotations from inline python snippets.
+- **Post-fix validation criteria**
+  - Invalid manifest values fail with explicit report output.
+  - Update manifest validation reports are published in CI and smoke preflight workflows.
+  - Full-fast desktop verification remains green after checker hardening.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

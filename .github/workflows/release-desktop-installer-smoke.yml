@@ -114,6 +114,10 @@ jobs:
         working-directory: ./desktop
         run: ./scripts/check_desktop_command_inventory.sh
 
+      - name: Run update manifest check
+        working-directory: ./desktop
+        run: ./scripts/check_update_manifest.sh
+
       - name: Run release smoke gate policy check
         working-directory: ./desktop
         env:
@@ -182,6 +186,14 @@ jobs:
         with:
           name: desktop-command-inventory-report-smoke
           path: desktop/release/reports/desktop_command_inventory_report.md
+          if-no-files-found: warn
+
+      - name: Upload update manifest validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-update-manifest-validation-report-smoke
+          path: desktop/release/reports/update_manifest_validation_report.md
           if-no-files-found: warn
 
   installer-smoke:

@@ -57,7 +57,7 @@ if not isinstance(scripts, dict):
     raise SystemExit(f"[desktop-command-inventory] invalid scripts map in {package_path}")
 
 pattern = re.compile(r"pnpm run ([A-Za-z0-9:_-]+)")
-command_sources: dict[str, list[str]] = {}
+command_sources = {}
 
 for doc_path in doc_paths:
     with doc_path.open("r", encoding="utf-8") as fh:
