@@ -32,4 +32,15 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('desktop shell honors initial section route id', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const PenjarDesktopApp(initialSectionId: 'inspect'),
+    );
+
+    expect(find.text('Inspect & Code Handoff'), findsAtLeastNWidgets(1));
+    expect(find.byKey(const ValueKey<String>('inspect-panel')), findsOneWidget);
+  });
 }

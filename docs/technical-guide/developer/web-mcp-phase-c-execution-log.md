@@ -4973,8 +4973,60 @@ Replace in-memory delegate-first mutation behavior in remote-stub adapters with 
   - blocked/unavailable transport behavior and decorated status surfaces remain intact.
   - full verification gate (`desktop:verify:full`) passes after response-driven integration.
 
+## Unit WS-D-114: Desktop shell section-route/state restoration bridge baseline
+
+### Planned objective
+
+Establish a concrete Flutter shell route/state bridge baseline by wiring section-route initialization and restart restoration semantics into the desktop shell runtime, so navigation state can be carried through route seed + restoration without reintroducing contract-state regressions.
+
+### Implemented changes
+
+1. Extended shell app bootstrap in `desktop/lib/main.dart`:
+   - `PenjarDesktopApp` now accepts `initialSectionId` (default from `PENJAR_DESKTOP_INITIAL_SECTION`),
+   - `MaterialApp` now enables restoration scope (`restorationScopeId: 'penjar-desktop'`),
+   - `DesktopShellPage` now receives route-seed section ID from app bootstrap.
+2. Added section-route mapping + restoration state bridge in desktop shell state:
+   - introduced `_sectionIndexFromId(...)` mapper from section ID to navigation index,
+   - migrated shell selected-section state to `RestorableInt`,
+   - added `RestorationMixin` with `restorationId` and `selected_section_index` registration,
+   - initialization now applies route-seed only when serialized restoration data is absent (`bucket?.contains(...)` guard),
+   - preserved existing contract-bundle/state wiring and nav interaction flow.
+3. Expanded route/state regression coverage:
+   - `desktop/test/widget_test.dart`:
+     - added `desktop shell honors initial section route id`,
+   - `desktop/test/parity/parity_test_utils.dart`:
+     - `pumpDesktopApp(...)` now accepts `initialSectionId`,
+   - `desktop/test/parity/shell_contract_persistence_parity_test.dart`:
+     - added `selected workflow section is restored after app restart` (uses `tester.restartAndRestore()`).
+4. Synced continuity docs:
+   - `desktop-flutter-development-runbook.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+5. Re-ran validation commands:
+   - `cd desktop && flutter test test/widget_test.dart test/parity/shell_contract_persistence_parity_test.dart`,
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - route-seed section ID mapping correctness + fallback behavior,
+  - restoration lifecycle correctness under first launch vs restart restore,
+  - non-regression of shell workflow contract persistence behavior.
+- **Issues found during review**
+  1. Initial implementation attempted to set `RestorableInt.value` in `initState` before registration, causing restoration assertion failure (`isRegistered`).
+  2. Initial route-seed application logic used `oldBucket == null`, which could clobber restored selection data on restart.
+  3. Route-state parity assertion initially relied on section title text, which can produce false positives because nav labels also include section names.
+- **Fix applied**
+  1. Moved route-seed initialization into `restoreState` after `registerForRestoration(...)`.
+  2. Added serialized-state presence guard (`bucket?.contains('selected_section_index')`) to prevent overriding restored selection.
+  3. Tightened parity assertion to panel key-level validation (`inspect-panel`) before and after restart restore.
+- **Post-fix validation criteria**
+  - initial section-route seeding honors valid section IDs and safely defaults to shell route for unknown IDs.
+  - selected section survives `restartAndRestore()` in parity coverage.
+  - full verification gate (`desktop:verify:full`) remains green after restoration bridge integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata, shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, and runtime mode parity/matrix gates, but live backend schema alignment/session persistence integration and route/state runtime bridge integration are still pending.
+- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata, shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline, and runtime mode parity/matrix gates, but native deep-link/window-route interoperability and live backend schema alignment/session persistence integration are still pending.
 - Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard plus coverage-contract regression guard (set-diff optimized uncovered/missing detection), desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks with in-memory duplicate-key tracking + base-check markdown report emission) plus evidence-index contract regression guard (including dedicated missing-base-check-report attachment, missing-index-file, invalid-decision, and promoted-placeholder cases, dedicated tests workflow release-evidence guard base+contract enforcement/upload, and parity matrix base-check artifact retention), update-manifest guard automation with validation + contract report artifacts (including dedicated tests workflow update-manifest guard job contract enforcement/upload), on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

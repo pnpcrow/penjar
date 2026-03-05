@@ -7,15 +7,23 @@ void main() {
 }
 
 class PenjarDesktopApp extends StatelessWidget {
-  const PenjarDesktopApp({super.key, this.contracts});
+  const PenjarDesktopApp({
+    super.key,
+    this.contracts,
+    this.initialSectionId = const String.fromEnvironment(
+      'PENJAR_DESKTOP_INITIAL_SECTION',
+    ),
+  });
 
   final DesktopContractBundle? contracts;
+  final String initialSectionId;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Penjar Desktop',
       debugShowCheckedModeBanner: false,
+      restorationScopeId: 'penjar-desktop',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF007A61),
@@ -23,7 +31,10 @@ class PenjarDesktopApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: DesktopShellPage(contracts: contracts),
+      home: DesktopShellPage(
+        contracts: contracts,
+        initialSectionId: initialSectionId,
+      ),
     );
   }
 }
@@ -129,23 +140,66 @@ const List<WorkflowSection> kSections = <WorkflowSection>[
   ),
 ];
 
+int _sectionIndexFromId(String sectionId) {
+  final String normalized = sectionId.trim().toLowerCase();
+  if (normalized.isEmpty) {
+    return 0;
+  }
+  final int matchedIndex = kSections.indexWhere(
+    (WorkflowSection section) => section.id == normalized,
+  );
+  return matchedIndex < 0 ? 0 : matchedIndex;
+}
+
 class DesktopShellPage extends StatefulWidget {
-  const DesktopShellPage({super.key, this.contracts});
+  const DesktopShellPage({
+    super.key,
+    this.contracts,
+    this.initialSectionId = '',
+  });
 
   final DesktopContractBundle? contracts;
+  final String initialSectionId;
 
   @override
   State<DesktopShellPage> createState() => _DesktopShellPageState();
 }
 
-class _DesktopShellPageState extends State<DesktopShellPage> {
+class _DesktopShellPageState extends State<DesktopShellPage>
+    with RestorationMixin {
   late final DesktopContractBundle _contracts =
       widget.contracts ?? DesktopContractBundle.fromEnvironment();
-  int _selectedIndex = 0;
+  final RestorableInt _selectedIndex = RestorableInt(0);
+
+  int get _effectiveSelectedIndex {
+    if (_selectedIndex.value < 0 || _selectedIndex.value >= kSections.length) {
+      return 0;
+    }
+    return _selectedIndex.value;
+  }
+
+  @override
+  String get restorationId => 'desktop-shell';
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    final bool hasSerializedSelection =
+        bucket?.contains('selected_section_index') ?? false;
+    registerForRestoration(_selectedIndex, 'selected_section_index');
+    if (!hasSerializedSelection) {
+      _selectedIndex.value = _sectionIndexFromId(widget.initialSectionId);
+    }
+  }
+
+  @override
+  void dispose() {
+    _selectedIndex.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final WorkflowSection section = kSections[_selectedIndex];
+    final WorkflowSection section = kSections[_effectiveSelectedIndex];
     final TextTheme textTheme = Theme.of(context).textTheme;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
@@ -154,11 +208,11 @@ class _DesktopShellPageState extends State<DesktopShellPage> {
       body: Row(
         children: <Widget>[
           NavigationRail(
-            selectedIndex: _selectedIndex,
+            selectedIndex: _effectiveSelectedIndex,
             scrollable: true,
             onDestinationSelected: (int index) {
               setState(() {
-                _selectedIndex = index;
+                _selectedIndex.value = index;
               });
             },
             labelType: NavigationRailLabelType.all,

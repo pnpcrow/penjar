@@ -27,4 +27,18 @@ void main() {
       expect(find.textContaining('Signed in (simulated).'), findsOneWidget);
     },
   );
+
+  testWidgets('selected workflow section is restored after app restart', (
+    WidgetTester tester,
+  ) async {
+    await pumpDesktopApp(tester, initialSectionId: 'auth');
+    await openWorkflowSection(tester, 'inspect');
+
+    expect(find.byKey(const ValueKey<String>('inspect-panel')), findsOneWidget);
+
+    await tester.restartAndRestore();
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey<String>('inspect-panel')), findsOneWidget);
+  });
 }
