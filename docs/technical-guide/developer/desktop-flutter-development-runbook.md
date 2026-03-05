@@ -138,7 +138,7 @@ Before pausing or transferring work:
 
 ## 7) Current next-unit candidates
 
-1. Remote-stub backend execution integration for runtime contract adapters (execute operation-level endpoint requests and map backend success/error payloads into workflow contract states on top of health-probe transport gating).
+1. Workflow-level backend response-to-state integration for remote-stub adapters (replace in-memory delegate mutation fallback with backend response-driven state transitions while preserving diagnostics/profile visibility).
 2. Real command wiring for signed packaging/notarization/verification in installer smoke workflow (`PENJAR_*_SIGN_COMMAND`, `PENJAR_*_SIGN_VERIFY_COMMAND` paths).
 3. Real Windows signed installer generation (`.msi/.exe`) command chain and provenance command/secret wiring.
 4. External appcast publication production rollout with real credentials/invalidation execution.

@@ -240,4 +240,25 @@ void main() {
       contains('transport: http-health:https://api.penjar.app/desktop/health'),
     );
   });
+
+  test('remote-stub profile exposes backend execution transport label', () {
+    final DesktopContractBundle bundle = DesktopContractBundle.fromMode(
+      DesktopContractMode.remoteStub,
+      remoteStubTransportClient: RemoteStubHttpTransportClient(
+        backendBaseUrl: 'https://api.penjar.app/v1',
+        executionProbe: (_) =>
+            const RemoteStubHttpBackendExecutionResult.allowed(),
+      ),
+    );
+
+    expect(bundle.remoteStubProfile?.isEmpty, isFalse);
+    expect(
+      bundle.remoteStubProfile?.transportLabel,
+      'http-backend:https://api.penjar.app/v1',
+    );
+    expect(
+      bundle.remoteStubProfile?.summaryLabel,
+      contains('transport: http-backend:https://api.penjar.app/v1'),
+    );
+  });
 }

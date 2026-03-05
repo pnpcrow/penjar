@@ -827,5 +827,78 @@ void main() {
         '[remote-stub] Project created: HTTP Transport Ready.',
       );
     });
+
+    test('http transport client blocks operation on backend execution error', () {
+      final List<RemoteStubHttpBackendExecutionRequest> executedRequests =
+          <RemoteStubHttpBackendExecutionRequest>[];
+      final RemoteStubHttpTransportClient transportClient =
+          RemoteStubHttpTransportClient(
+            healthUrl: 'http://127.0.0.1:28080/health',
+            backendBaseUrl: 'https://api.penjar.app',
+            backendBlockedReason: 'Remote backend execution failed',
+            probe: (_) => const RemoteStubHttpTransportProbeResult.allowed(),
+            executionProbe: (RemoteStubHttpBackendExecutionRequest request) {
+              executedRequests.add(request);
+              expect(
+                request.endpointUrl,
+                'https://api.penjar.app/api/desktop/auth/sign-in',
+              );
+              expect(request.transportRequest.payload['passwordLength'], 12);
+              return const RemoteStubHttpBackendExecutionResult.blocked(
+                'Remote backend execution failed: sign-in. upstream timeout',
+              );
+            },
+          );
+
+      final RemoteStubAuthSessionContract authContract =
+          RemoteStubAuthSessionContract(transportClient: transportClient);
+      authContract.signIn(
+        const AuthSignInRequest(
+          email: 'designer@penjar.app',
+          password: 'desktop-pass',
+        ),
+      );
+
+      expect(executedRequests, hasLength(1));
+      expect(authContract.state.signedIn, isFalse);
+      expect(
+        authContract.state.status,
+        '[remote-stub] Remote backend execution failed: sign-in. upstream timeout',
+      );
+    });
+
+    test(
+      'http transport client executes backend request and allows operation on success',
+      () {
+        final List<RemoteStubHttpBackendExecutionRequest> executedRequests =
+            <RemoteStubHttpBackendExecutionRequest>[];
+        final RemoteStubHttpTransportClient transportClient =
+            RemoteStubHttpTransportClient(
+              backendBaseUrl: 'https://api.penjar.app/v1',
+              executionProbe: (RemoteStubHttpBackendExecutionRequest request) {
+                executedRequests.add(request);
+                expect(request.transportRequest.workflow, 'projects');
+                expect(
+                  request.endpointUrl,
+                  'https://api.penjar.app/v1/api/desktop/projects',
+                );
+                return const RemoteStubHttpBackendExecutionResult.allowed();
+              },
+            );
+
+        final RemoteStubProjectLifecycleContract projectContract =
+            RemoteStubProjectLifecycleContract(
+              transportClient: transportClient,
+            );
+        projectContract.createProject('Backend Execution Ready');
+
+        expect(executedRequests, hasLength(1));
+        expect(projectContract.state.projects, hasLength(2));
+        expect(
+          projectContract.state.status,
+          '[remote-stub] Project created: Backend Execution Ready.',
+        );
+      },
+    );
   });
 }

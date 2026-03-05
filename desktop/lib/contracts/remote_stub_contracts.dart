@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:penjar_desktop/contracts/workflow_contracts.dart';
@@ -456,36 +457,146 @@ class RemoteStubHttpTransportProbeResult {
   final bool allowed;
 }
 
+class RemoteStubHttpBackendExecutionRequest {
+  const RemoteStubHttpBackendExecutionRequest({
+    required this.transportRequest,
+    required this.baseUrl,
+    required this.timeout,
+    required this.blockedReason,
+    this.authToken,
+  });
+
+  final RemoteStubTransportRequest transportRequest;
+  final String baseUrl;
+  final Duration timeout;
+  final String blockedReason;
+  final String? authToken;
+
+  String get endpointUrl =>
+      _resolveBackendEndpointUrl(baseUrl, transportRequest.endpoint);
+}
+
+class RemoteStubHttpBackendExecutionResult {
+  const RemoteStubHttpBackendExecutionResult({
+    required this.allowed,
+    this.status,
+  });
+
+  const RemoteStubHttpBackendExecutionResult.allowed()
+    : allowed = true,
+      status = null;
+
+  const RemoteStubHttpBackendExecutionResult.blocked([this.status])
+    : allowed = false;
+
+  final bool allowed;
+  final String? status;
+}
+
 typedef RemoteStubHttpTransportProbe =
     RemoteStubHttpTransportProbeResult Function(
       RemoteStubHttpTransportProbeRequest request,
     );
 
-String _buildHttpTransportLabel(String healthUrl) {
-  final String trimmed = healthUrl.trim();
+typedef RemoteStubHttpBackendExecutionProbe =
+    RemoteStubHttpBackendExecutionResult Function(
+      RemoteStubHttpBackendExecutionRequest request,
+    );
+
+String _buildHttpUrlLabel(String url, {required String prefix}) {
+  final String trimmed = url.trim();
   if (trimmed.isEmpty) {
     return '';
   }
   final Uri? uri = Uri.tryParse(trimmed);
   if (uri == null || uri.host.isEmpty) {
-    return 'http-health';
+    return prefix;
   }
   final String scheme = uri.scheme.isEmpty ? 'http' : uri.scheme;
   final String path = uri.path.isEmpty ? '/' : uri.path;
   final String port = uri.hasPort ? ':${uri.port}' : '';
-  return 'http-health:$scheme://${uri.host}$port$path';
+  return '$prefix:$scheme://${uri.host}$port$path';
 }
 
-int? _parseCurlHttpStatusCode(String stdoutText) {
+String _buildCompositeHttpTransportLabel({
+  required String healthUrl,
+  required String backendBaseUrl,
+}) {
+  final List<String> parts = <String>[
+    _buildHttpUrlLabel(healthUrl, prefix: 'http-health'),
+    _buildHttpUrlLabel(backendBaseUrl, prefix: 'http-backend'),
+  ].where((String value) => value.isNotEmpty).toList(growable: false);
+  return parts.join(' · ');
+}
+
+String _resolveBackendEndpointUrl(String baseUrl, String endpoint) {
+  final String trimmedEndpoint = endpoint.trim();
+  if (trimmedEndpoint.startsWith('http://') ||
+      trimmedEndpoint.startsWith('https://')) {
+    return trimmedEndpoint;
+  }
+  final String normalizedBase = baseUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+  if (normalizedBase.isEmpty) {
+    return trimmedEndpoint;
+  }
+  if (trimmedEndpoint.isEmpty) {
+    return normalizedBase;
+  }
+  final String normalizedEndpoint = trimmedEndpoint.startsWith('/')
+      ? trimmedEndpoint
+      : '/$trimmedEndpoint';
+  return '$normalizedBase$normalizedEndpoint';
+}
+
+class _CurlHttpResponse {
+  const _CurlHttpResponse({required this.statusCode, required this.body});
+
+  final int statusCode;
+  final String body;
+}
+
+_CurlHttpResponse? _parseCurlHttpResponse(String stdoutText) {
   final List<String> lines = stdoutText.split(RegExp(r'[\r\n]+'));
   for (int index = lines.length - 1; index >= 0; index -= 1) {
     final String line = lines[index].trim();
     if (line.isEmpty) {
       continue;
     }
-    return int.tryParse(line);
+    final int? statusCode = int.tryParse(line);
+    if (statusCode == null) {
+      continue;
+    }
+    final String body = lines.take(index).join('\n').trim();
+    return _CurlHttpResponse(statusCode: statusCode, body: body);
   }
   return null;
+}
+
+int? _parseCurlHttpStatusCode(String stdoutText) {
+  return _parseCurlHttpResponse(stdoutText)?.statusCode;
+}
+
+String _extractBackendErrorMessage(String rawBody) {
+  final String trimmed = rawBody.trim();
+  if (trimmed.isEmpty) {
+    return '';
+  }
+  try {
+    final Object? decoded = jsonDecode(trimmed);
+    if (decoded is Map<String, Object?>) {
+      final Object? message = decoded['message'] ?? decoded['error'];
+      if (message is String && message.trim().isNotEmpty) {
+        return message.trim();
+      }
+      final Object? detail = decoded['detail'] ?? decoded['reason'];
+      if (detail is String && detail.trim().isNotEmpty) {
+        return detail.trim();
+      }
+    }
+  } on FormatException {
+    return trimmed;
+  }
+  return trimmed;
 }
 
 RemoteStubHttpTransportProbeResult _defaultHttpTransportProbe(
@@ -520,23 +631,117 @@ RemoteStubHttpTransportProbeResult _defaultHttpTransportProbe(
   return const RemoteStubHttpTransportProbeResult.blocked();
 }
 
+RemoteStubHttpBackendExecutionResult _defaultHttpBackendExecutionProbe(
+  RemoteStubHttpBackendExecutionRequest request,
+) {
+  final String endpointUrl = request.endpointUrl;
+  if (endpointUrl.isEmpty) {
+    return RemoteStubHttpBackendExecutionResult.blocked(
+      '${request.blockedReason}: ${request.transportRequest.operation}.',
+    );
+  }
+
+  final double timeoutSeconds = request.timeout.inMilliseconds / 1000;
+  final Map<String, Object?> requestBody = <String, Object?>{
+    'operation': request.transportRequest.operation,
+    'workflow': request.transportRequest.workflow,
+    'payload': request.transportRequest.payload,
+  };
+
+  final List<String> args = <String>[
+    '--silent',
+    '--show-error',
+    '--max-time',
+    timeoutSeconds.toStringAsFixed(3),
+    '--request',
+    request.transportRequest.method,
+    '--header',
+    'Content-Type: application/json',
+    '--write-out',
+    r'\n%{http_code}',
+    '--data',
+    jsonEncode(requestBody),
+    endpointUrl,
+  ];
+
+  final String authToken = request.authToken?.trim() ?? '';
+  if (authToken.isNotEmpty) {
+    args.insertAll(args.length - 3, <String>[
+      '--header',
+      'Authorization: Bearer $authToken',
+    ]);
+  }
+
+  final ProcessResult executionResult;
+  try {
+    executionResult = Process.runSync('curl', args);
+  } on ProcessException {
+    return RemoteStubHttpBackendExecutionResult.blocked(
+      '${request.blockedReason}: ${request.transportRequest.operation}.',
+    );
+  }
+
+  if (executionResult.exitCode != 0) {
+    return RemoteStubHttpBackendExecutionResult.blocked(
+      '${request.blockedReason}: ${request.transportRequest.operation}.',
+    );
+  }
+
+  final _CurlHttpResponse? response = _parseCurlHttpResponse(
+    '${executionResult.stdout}',
+  );
+  if (response == null) {
+    return RemoteStubHttpBackendExecutionResult.blocked(
+      '${request.blockedReason}: ${request.transportRequest.operation}.',
+    );
+  }
+  if (response.statusCode >= 200 && response.statusCode < 300) {
+    return const RemoteStubHttpBackendExecutionResult.allowed();
+  }
+
+  final String backendMessage = _extractBackendErrorMessage(response.body);
+  if (backendMessage.isNotEmpty) {
+    return RemoteStubHttpBackendExecutionResult.blocked(
+      '${request.blockedReason}: ${request.transportRequest.operation}. $backendMessage',
+    );
+  }
+  return RemoteStubHttpBackendExecutionResult.blocked(
+    '${request.blockedReason}: ${request.transportRequest.operation}. HTTP ${response.statusCode}.',
+  );
+}
+
 class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
   RemoteStubHttpTransportClient({
-    required String healthUrl,
+    String healthUrl = '',
     this.timeout = const Duration(seconds: 2),
     this.allowedStatusCodes = const <int>{200},
     this.blockedReason = 'Remote transport unavailable',
+    String backendBaseUrl = '',
+    this.backendTimeout = const Duration(seconds: 3),
+    this.backendBlockedReason = 'Remote backend execution failed',
+    this.backendAuthToken,
     RemoteStubHttpTransportProbe? probe,
+    RemoteStubHttpBackendExecutionProbe? executionProbe,
   }) : healthUrl = healthUrl.trim(),
+       backendBaseUrl = backendBaseUrl.trim(),
        _probe = probe ?? _defaultHttpTransportProbe,
-       transportLabel = _buildHttpTransportLabel(healthUrl);
+       _executionProbe = executionProbe ?? _defaultHttpBackendExecutionProbe,
+       transportLabel = _buildCompositeHttpTransportLabel(
+         healthUrl: healthUrl,
+         backendBaseUrl: backendBaseUrl,
+       );
 
   final String healthUrl;
   final Duration timeout;
   final Set<int> allowedStatusCodes;
   final String blockedReason;
+  final String backendBaseUrl;
+  final Duration backendTimeout;
+  final String backendBlockedReason;
+  final String? backendAuthToken;
   final String transportLabel;
   final RemoteStubHttpTransportProbe _probe;
+  final RemoteStubHttpBackendExecutionProbe _executionProbe;
 
   Set<int> get _effectiveAllowedStatusCodes {
     final Set<int> normalized = allowedStatusCodes
@@ -547,28 +752,53 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
 
   @override
   RemoteStubTransportProfile get profile => RemoteStubTransportProfile(
-    blockedReason: blockedReason,
+    blockedReason: backendBaseUrl.isNotEmpty
+        ? backendBlockedReason
+        : blockedReason,
     transportLabel: transportLabel,
   );
 
   @override
   RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
-    if (healthUrl.isEmpty) {
+    if (healthUrl.isNotEmpty) {
+      final RemoteStubHttpTransportProbeResult probeResult = _probe(
+        RemoteStubHttpTransportProbeRequest(
+          transportRequest: request,
+          healthUrl: healthUrl,
+          timeout: timeout,
+          allowedStatusCodes: _effectiveAllowedStatusCodes,
+        ),
+      );
+      if (!probeResult.allowed) {
+        return RemoteStubTransportResult.blocked(
+          '$blockedReason: ${request.operation}.',
+        );
+      }
+    }
+
+    if (backendBaseUrl.isNotEmpty) {
+      final RemoteStubHttpBackendExecutionResult executionResult =
+          _executionProbe(
+            RemoteStubHttpBackendExecutionRequest(
+              transportRequest: request,
+              baseUrl: backendBaseUrl,
+              timeout: backendTimeout,
+              blockedReason: backendBlockedReason,
+              authToken: backendAuthToken,
+            ),
+          );
+      if (!executionResult.allowed) {
+        return RemoteStubTransportResult.blocked(
+          executionResult.status ??
+              '$backendBlockedReason: ${request.operation}.',
+        );
+      }
+    }
+
+    if (healthUrl.isEmpty && backendBaseUrl.isEmpty) {
       return RemoteStubTransportResult.allow;
     }
-    final RemoteStubHttpTransportProbeResult probeResult = _probe(
-      RemoteStubHttpTransportProbeRequest(
-        transportRequest: request,
-        healthUrl: healthUrl,
-        timeout: timeout,
-        allowedStatusCodes: _effectiveAllowedStatusCodes,
-      ),
-    );
-    if (!probeResult.allowed) {
-      return RemoteStubTransportResult.blocked(
-        '$blockedReason: ${request.operation}.',
-      );
-    }
+
     return RemoteStubTransportResult.allow;
   }
 }

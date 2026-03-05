@@ -84,6 +84,9 @@ RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
   final String healthUrl = const String.fromEnvironment(
     'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_HEALTH_URL',
   ).trim();
+  final String backendBaseUrl = const String.fromEnvironment(
+    'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BACKEND_BASE_URL',
+  ).trim();
   final Set<String> blockedOperations = _parseBlockedOperations(
     const String.fromEnvironment(
       'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BLOCKED_OPERATIONS',
@@ -94,8 +97,15 @@ RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
     'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BLOCK_REASON',
     defaultValue: 'Remote transport unavailable',
   ).trim();
+  final String backendBlockedReason = const String.fromEnvironment(
+    'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BACKEND_BLOCK_REASON',
+    defaultValue: 'Remote backend execution failed',
+  ).trim();
+  final String backendAuthToken = const String.fromEnvironment(
+    'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BACKEND_AUTH_TOKEN',
+  ).trim();
 
-  if (healthUrl.isNotEmpty) {
+  if (healthUrl.isNotEmpty || backendBaseUrl.isNotEmpty) {
     final int timeoutMillis = _parsePositiveIntOrDefault(
       const String.fromEnvironment(
         'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_TIMEOUT_MS',
@@ -107,6 +117,12 @@ RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
         'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_ALLOWED_STATUS_CODES',
       ),
     );
+    final int backendTimeoutMillis = _parsePositiveIntOrDefault(
+      const String.fromEnvironment(
+        'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BACKEND_TIMEOUT_MS',
+      ),
+      fallback: 3000,
+    );
     return RemoteStubHttpTransportClient(
       healthUrl: healthUrl,
       timeout: Duration(milliseconds: timeoutMillis),
@@ -116,6 +132,12 @@ RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
       blockedReason: blockedReason.isEmpty
           ? 'Remote transport unavailable'
           : blockedReason,
+      backendBaseUrl: backendBaseUrl,
+      backendTimeout: Duration(milliseconds: backendTimeoutMillis),
+      backendBlockedReason: backendBlockedReason.isEmpty
+          ? 'Remote backend execution failed'
+          : backendBlockedReason,
+      backendAuthToken: backendAuthToken.isEmpty ? null : backendAuthToken,
     );
   }
 
