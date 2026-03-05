@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:penjar_desktop/contracts/desktop_contract_bundle.dart';
 import 'package:penjar_desktop/contracts/workflow_contracts.dart';
 
 void main() {
@@ -134,6 +135,7 @@ class DesktopShellPage extends StatefulWidget {
 }
 
 class _DesktopShellPageState extends State<DesktopShellPage> {
+  final DesktopContractBundle _contracts = DesktopContractBundle.inMemory();
   int _selectedIndex = 0;
 
   @override
@@ -204,21 +206,37 @@ class _DesktopShellPageState extends State<DesktopShellPage> {
                               ),
                               const SizedBox(height: 20),
                               if (section.id == 'auth')
-                                const AuthSessionPanel()
+                                AuthSessionPanel(
+                                  contract: _contracts.authSession,
+                                )
                               else if (section.id == 'project')
-                                const ProjectLifecyclePanel()
+                                ProjectLifecyclePanel(
+                                  contract: _contracts.projectLifecycle,
+                                )
                               else if (section.id == 'canvas')
-                                const CanvasEditingPanel()
+                                CanvasEditingPanel(
+                                  contract: _contracts.canvasEditing,
+                                )
                               else if (section.id == 'assets')
-                                const AssetManagementPanel()
+                                AssetManagementPanel(
+                                  contract: _contracts.assetManagement,
+                                )
                               else if (section.id == 'collaboration')
-                                const CollaborationContextPanel()
+                                CollaborationContextPanel(
+                                  contract: _contracts.collaborationContext,
+                                )
                               else if (section.id == 'inspect')
-                                const InspectHandoffPanel()
+                                InspectHandoffPanel(
+                                  contract: _contracts.inspectHandoff,
+                                )
                               else if (section.id == 'export')
-                                const ExportWorkflowPanel()
+                                ExportWorkflowPanel(
+                                  contract: _contracts.exportWorkflow,
+                                )
                               else if (section.id == 'diagnostics')
-                                const DiagnosticsRecoveryPanel()
+                                DiagnosticsRecoveryPanel(
+                                  contract: _contracts.diagnosticsRecovery,
+                                )
                               else
                                 Text(
                                   section.description,
@@ -244,14 +262,17 @@ class _DesktopShellPageState extends State<DesktopShellPage> {
 }
 
 class AuthSessionPanel extends StatefulWidget {
-  const AuthSessionPanel({super.key});
+  const AuthSessionPanel({super.key, this.contract});
+
+  final AuthSessionContract? contract;
 
   @override
   State<AuthSessionPanel> createState() => _AuthSessionPanelState();
 }
 
 class _AuthSessionPanelState extends State<AuthSessionPanel> {
-  final AuthSessionContract _contract = InMemoryAuthSessionContract();
+  late final AuthSessionContract _contract =
+      widget.contract ?? InMemoryAuthSessionContract();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -370,14 +391,17 @@ class _AuthSessionPanelState extends State<AuthSessionPanel> {
 }
 
 class ProjectLifecyclePanel extends StatefulWidget {
-  const ProjectLifecyclePanel({super.key});
+  const ProjectLifecyclePanel({super.key, this.contract});
+
+  final ProjectLifecycleContract? contract;
 
   @override
   State<ProjectLifecyclePanel> createState() => _ProjectLifecyclePanelState();
 }
 
 class _ProjectLifecyclePanelState extends State<ProjectLifecyclePanel> {
-  final ProjectLifecycleContract _contract = InMemoryProjectLifecycleContract();
+  late final ProjectLifecycleContract _contract =
+      widget.contract ?? InMemoryProjectLifecycleContract();
   final TextEditingController _projectNameController = TextEditingController();
   final TextEditingController _fileNameController = TextEditingController();
 
@@ -536,14 +560,17 @@ class _ProjectLifecyclePanelState extends State<ProjectLifecyclePanel> {
 }
 
 class CanvasEditingPanel extends StatefulWidget {
-  const CanvasEditingPanel({super.key});
+  const CanvasEditingPanel({super.key, this.contract});
+
+  final CanvasEditingContract? contract;
 
   @override
   State<CanvasEditingPanel> createState() => _CanvasEditingPanelState();
 }
 
 class _CanvasEditingPanelState extends State<CanvasEditingPanel> {
-  final CanvasEditingContract _contract = InMemoryCanvasEditingContract();
+  late final CanvasEditingContract _contract =
+      widget.contract ?? InMemoryCanvasEditingContract();
 
   void _createRectangle() {
     setState(() {
@@ -655,14 +682,17 @@ class _CanvasEditingPanelState extends State<CanvasEditingPanel> {
 }
 
 class AssetManagementPanel extends StatefulWidget {
-  const AssetManagementPanel({super.key});
+  const AssetManagementPanel({super.key, this.contract});
+
+  final AssetManagementContract? contract;
 
   @override
   State<AssetManagementPanel> createState() => _AssetManagementPanelState();
 }
 
 class _AssetManagementPanelState extends State<AssetManagementPanel> {
-  final AssetManagementContract _contract = InMemoryAssetManagementContract();
+  late final AssetManagementContract _contract =
+      widget.contract ?? InMemoryAssetManagementContract();
   final TextEditingController _assetNameController = TextEditingController();
   final List<String> _assetTypes = <String>['image', 'icon', 'vector'];
   String _selectedAssetType = 'image';
@@ -820,7 +850,9 @@ class _AssetManagementPanelState extends State<AssetManagementPanel> {
 }
 
 class CollaborationContextPanel extends StatefulWidget {
-  const CollaborationContextPanel({super.key});
+  const CollaborationContextPanel({super.key, this.contract});
+
+  final CollaborationContextContract? contract;
 
   @override
   State<CollaborationContextPanel> createState() =>
@@ -828,8 +860,8 @@ class CollaborationContextPanel extends StatefulWidget {
 }
 
 class _CollaborationContextPanelState extends State<CollaborationContextPanel> {
-  final CollaborationContextContract _contract =
-      InMemoryCollaborationContextContract();
+  late final CollaborationContextContract _contract =
+      widget.contract ?? InMemoryCollaborationContextContract();
   final TextEditingController _threadTitleController = TextEditingController();
 
   @override
@@ -962,14 +994,17 @@ class _CollaborationContextPanelState extends State<CollaborationContextPanel> {
 }
 
 class InspectHandoffPanel extends StatefulWidget {
-  const InspectHandoffPanel({super.key});
+  const InspectHandoffPanel({super.key, this.contract});
+
+  final InspectHandoffContract? contract;
 
   @override
   State<InspectHandoffPanel> createState() => _InspectHandoffPanelState();
 }
 
 class _InspectHandoffPanelState extends State<InspectHandoffPanel> {
-  final InspectHandoffContract _contract = InMemoryInspectHandoffContract();
+  late final InspectHandoffContract _contract =
+      widget.contract ?? InMemoryInspectHandoffContract();
   final TextEditingController _elementIdController = TextEditingController();
   final List<String> _targets = <String>['css', 'flutter', 'swiftui'];
 
@@ -1087,14 +1122,17 @@ class _InspectHandoffPanelState extends State<InspectHandoffPanel> {
 }
 
 class ExportWorkflowPanel extends StatefulWidget {
-  const ExportWorkflowPanel({super.key});
+  const ExportWorkflowPanel({super.key, this.contract});
+
+  final ExportWorkflowContract? contract;
 
   @override
   State<ExportWorkflowPanel> createState() => _ExportWorkflowPanelState();
 }
 
 class _ExportWorkflowPanelState extends State<ExportWorkflowPanel> {
-  final ExportWorkflowContract _contract = InMemoryExportWorkflowContract();
+  late final ExportWorkflowContract _contract =
+      widget.contract ?? InMemoryExportWorkflowContract();
   final TextEditingController _fileNameController = TextEditingController();
   final List<String> _formats = <String>['png', 'svg', 'pdf'];
   final List<String> _scales = <String>['1x', '2x', '3x'];
@@ -1288,7 +1326,9 @@ class _ExportWorkflowPanelState extends State<ExportWorkflowPanel> {
 }
 
 class DiagnosticsRecoveryPanel extends StatefulWidget {
-  const DiagnosticsRecoveryPanel({super.key});
+  const DiagnosticsRecoveryPanel({super.key, this.contract});
+
+  final DiagnosticsRecoveryContract? contract;
 
   @override
   State<DiagnosticsRecoveryPanel> createState() =>
@@ -1296,8 +1336,8 @@ class DiagnosticsRecoveryPanel extends StatefulWidget {
 }
 
 class _DiagnosticsRecoveryPanelState extends State<DiagnosticsRecoveryPanel> {
-  final DiagnosticsRecoveryContract _contract =
-      InMemoryDiagnosticsRecoveryContract();
+  late final DiagnosticsRecoveryContract _contract =
+      widget.contract ?? InMemoryDiagnosticsRecoveryContract();
 
   void _runHealthCheck() {
     setState(() {

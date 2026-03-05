@@ -989,8 +989,51 @@ Continue WS-D contract-boundary extraction by moving inspect metadata/snippet ha
   - Inspect contract unit tests pass for lifecycle and guard paths.
   - Desktop test/analyze/build chain remains green after extraction.
 
+## Unit WS-D-25: Shared contract-bundle injection and navigation persistence
+
+### Planned objective
+
+Eliminate per-panel contract re-instantiation and strengthen migration readiness by introducing a shared desktop contract bundle that is injected from shell scope, so workflow state can persist across section navigation and future backend adapters can be wired in one place.
+
+### Implemented changes
+
+1. Added contract bundle module:
+   - `desktop/lib/contracts/desktop_contract_bundle.dart`.
+2. Implemented in-memory bundle factory:
+   - `DesktopContractBundle.inMemory()` creates all workflow contract adapters once at shell scope.
+3. Refactored shell composition to dependency injection:
+   - `DesktopShellPage` now owns one `DesktopContractBundle`,
+   - workflow panels receive contracts via constructor injection instead of constructing local defaults.
+4. Updated workflow panels for injectable contracts:
+   - auth/project/canvas/asset/collaboration/inspect/export/diagnostics panels now accept optional contract inputs and bind state to injected instances.
+5. Added regression tests for bundle/persistence behavior:
+   - `desktop/test/contracts/desktop_contract_bundle_test.dart`,
+   - `desktop/test/parity/shell_contract_persistence_parity_test.dart`.
+6. Updated canonical parity runner:
+   - `desktop/scripts/run_parity_tests.sh` now includes shell persistence parity test.
+7. Re-ran desktop verification chain:
+   - `pnpm run desktop:test`,
+   - `pnpm run desktop:test:parity`,
+   - `pnpm run desktop:analyze`,
+   - `pnpm run desktop:build:macos:debug`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of shared contract lifetime across navigation,
+  - regression risk from panel constructor/injection changes,
+  - parity coverage for persistence expectations.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Contract bundle unit test passes and verifies reusable contract wiring.
+  - Shell persistence parity test passes and confirms status continuity across section switches.
+  - Desktop test/analyze/build chain remains green after injection refactor.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, and auth/project/file/canvas/asset/collaboration/inspect/export/diagnostics include contract-boundary pilots, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
+- All workflow domains now have Flutter parity scaffolds/harnesses, contract-boundary pilots, and shared contract-bundle injection, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
 - Desktop parity CI baseline is now configured on Linux with consolidated parity runner, but macOS/Windows build-matrix coverage and release-grade installer/update validation are not yet configured.

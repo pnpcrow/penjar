@@ -10,6 +10,7 @@ fi
 flutter test \
   "${extra_args[@]}" \
   test/parity/auth_session_parity_test.dart \
+  test/parity/shell_contract_persistence_parity_test.dart \
   test/parity/project_lifecycle_parity_test.dart \
   test/parity/file_lifecycle_parity_test.dart \
   test/parity/canvas_editing_parity_test.dart \
