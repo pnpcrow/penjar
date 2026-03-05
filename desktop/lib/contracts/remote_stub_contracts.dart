@@ -874,12 +874,51 @@ String? _resolveBackendCodeValue({
     statePayload,
     ...additionalPayloads,
   ]) {
-    final String? code =
-        _coerceNonEmptyString(payload['code']) ??
-        _coerceNonEmptyString(payload['errorCode']) ??
-        _coerceNonEmptyString(payload['reasonCode']);
+    final String? code = _resolveBackendCodeFromPayload(payload);
     if (code != null) {
       return code;
+    }
+  }
+  return null;
+}
+
+String? _resolveBackendCodeFromPayload(Map<String, Object?> payload) {
+  final String? directCode =
+      _coerceNonEmptyString(payload['code']) ??
+      _coerceNonEmptyString(payload['errorCode']) ??
+      _coerceNonEmptyString(payload['reasonCode']);
+  if (directCode != null) {
+    return directCode;
+  }
+  for (final String alias in const <String>[
+    'error',
+    'errors',
+    'failure',
+    'failures',
+  ]) {
+    final String? nestedCode = _resolveBackendCodeFromContainer(payload[alias]);
+    if (nestedCode != null) {
+      return nestedCode;
+    }
+  }
+  return null;
+}
+
+String? _resolveBackendCodeFromContainer(Object? value) {
+  final String? stringCode = _coerceNonEmptyString(value);
+  if (stringCode != null) {
+    return stringCode;
+  }
+  final Map<String, Object?> payload = _coerceStringKeyedMap(value);
+  if (payload.isNotEmpty) {
+    return _resolveBackendCodeFromPayload(payload);
+  }
+  if (value is List) {
+    for (final Object? item in value) {
+      final String? nestedCode = _resolveBackendCodeFromContainer(item);
+      if (nestedCode != null) {
+        return nestedCode;
+      }
     }
   }
   return null;

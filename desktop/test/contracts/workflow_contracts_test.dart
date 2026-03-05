@@ -1434,6 +1434,64 @@ void main() {
     );
 
     test(
+      'auth backend error object code overrides token/session inference',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'error': <String, Object?>{
+                  'code': 'UNAUTHENTICATED',
+                },
+                'message': 'Backend rejected stale credentials.',
+                'state': <String, Object?>{
+                  'sessionToken': 'stale-session-token',
+                  'user': <String, Object?>{'id': 'stale-user'},
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend rejected stale credentials.',
+        );
+      },
+    );
+
+    test(
+      'auth backend nested error list code respects explicit signed-in alias',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'state': <String, Object?>{
+                  'authentication': <String, Object?>{
+                    'errors': <Object?>[
+                      <String, Object?>{
+                        'reasonCode': 'TOKEN_EXPIRED',
+                      },
+                    ],
+                    'authenticated': true,
+                    'rememberSession': true,
+                  },
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
+
+    test(
       'auth backend nested signed-out error code overrides token inference',
       () {
         final _BackendResponseTransportClient transportClient =
