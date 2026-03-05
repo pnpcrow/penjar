@@ -37,3 +37,4 @@ Each release candidate record should include:
 2. Keep one row per `RC + platform` pair.
 3. Add latest entry at top for quick audit visibility.
 4. Keep artifact/report links immutable after promotion.
+5. Run `pnpm run desktop:release:evidence:check` before release promotion.

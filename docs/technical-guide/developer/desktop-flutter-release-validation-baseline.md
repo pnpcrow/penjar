@@ -67,8 +67,9 @@ This baseline defines minimum release validation requirements for desktop distri
 
 1. Before RC cut, confirm Flutter parity verification chain is green.
 2. Execute platform-specific installer/signing/update validation.
-3. Record evidence in release checklist ticket and Phase C execution log.
-4. Block release promotion if any required gate is missing or only manually asserted without evidence.
+3. Run release evidence index guard: `pnpm run desktop:release:evidence:check`.
+4. Record evidence in release checklist ticket and Phase C execution log.
+5. Block release promotion if any required gate is missing or only manually asserted without evidence.
 
 ## 5) Implementation backlog seeds
 

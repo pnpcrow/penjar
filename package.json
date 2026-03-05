@@ -23,7 +23,8 @@
     "desktop:verify": "cd desktop && ./scripts/verify_desktop.sh",
     "desktop:verify:fast": "cd desktop && SKIP_PUB_GET=1 ./scripts/verify_desktop.sh",
     "desktop:verify:full": "cd desktop && INCLUDE_BUILD=1 ./scripts/verify_desktop.sh",
-    "desktop:verify:full:fast": "cd desktop && SKIP_PUB_GET=1 INCLUDE_BUILD=1 ./scripts/verify_desktop.sh"
+    "desktop:verify:full:fast": "cd desktop && SKIP_PUB_GET=1 INCLUDE_BUILD=1 ./scripts/verify_desktop.sh",
+    "desktop:release:evidence:check": "cd desktop && ./scripts/check_release_evidence_index.sh"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",

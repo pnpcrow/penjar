@@ -30,6 +30,7 @@ This runbook defines the repeatable execution loop for the Flutter desktop full-
    - `pnpm run desktop:verify:full:fast`
    - `pnpm run desktop:test:parity`
    - `pnpm run desktop:test:mode-matrix`
+   - `pnpm run desktop:release:evidence:check`
 
 ## 2) Unit execution loop
 

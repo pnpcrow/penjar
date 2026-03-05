@@ -1546,8 +1546,47 @@ Close release-audit traceability gaps by introducing a canonical release evidenc
   - Release baseline backlog now targets automation instead of baseline creation.
   - Fast verification chain remains green after documentation expansion.
 
+## Unit WS-D-39: Release evidence guard automation (baseline)
+
+### Planned objective
+
+Add executable guardrails for release evidence quality so accidental promotion records with placeholder/TBD fields are blocked before release decisions.
+
+### Implemented changes
+
+1. Added release evidence check script:
+   - `desktop/scripts/check_release_evidence_index.sh`.
+2. Implemented baseline validations:
+   - ensures release evidence index file exists,
+   - enforces decision column contains `promoted` or `blocked`,
+   - blocks `promoted` rows containing `TBD` or `placeholder` values.
+3. Added root command surface:
+   - `desktop:release:evidence:check`.
+4. Updated release docs and runbook:
+   - `desktop-flutter-release-evidence-index.md` maintenance rules now include the check command,
+   - `desktop-flutter-release-validation-baseline.md` operating protocol now includes evidence-guard execution,
+   - `desktop-flutter-development-runbook.md` canonical command list now includes evidence-guard check.
+5. Re-ran verification and guard commands:
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of evidence-index row parsing and decision validation,
+  - false-positive risk on placeholder blocked rows,
+  - consistency between automation command and release documentation protocol.
+- **Issues found during review**
+  1. Initial implementation used bash lowercase expansion (`${var,,}`), which is unsupported on macOS default bash (3.x), causing script failure.
+- **Fix applied**
+  1. Replaced lowercase conversion with POSIX-compatible `tr '[:upper:]' '[:lower:]'` pipeline.
+- **Post-fix validation criteria**
+  - Evidence guard passes on current baseline placeholder entries (`blocked` rows).
+  - Guard fails when invalid promoted rows contain placeholder/TBD data.
+  - Fast verification chain remains green after release guard integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts and macOS build validation, and release-validation/evidence-index baselines are published, but automated installer/update validation execution pipelines and evidence artifact automation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts and macOS build validation, and release-validation/evidence-index baselines plus baseline evidence guard automation are published, but automated installer/update validation execution pipelines and CI artifact upload automation are not yet configured.
