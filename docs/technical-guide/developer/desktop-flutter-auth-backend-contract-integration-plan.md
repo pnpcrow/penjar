@@ -50,6 +50,9 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
 5. Auth backend contract fixture matrix baseline in `desktop/test/contracts/workflow_contracts_test.dart` (ABI-01 bootstrap).
 6. Full verification chain (`desktop:verify:full`) and parity harness integrated in CI.
 7. Contract-level strict backend schema fallback gate in `RemoteStubAuthSessionContract` (`strictBackendSchema`) for malformed backend auth payload handling.
+8. Runtime contract-bundle strict-mode wiring:
+   - `DesktopContractBundle.fromMode(...)` forwards strict backend schema mode to remote-stub auth contract construction.
+   - `DesktopContractBundle.fromEnvironment()` / `loadFromEnvironment()` can enable strict mode through `PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_SCHEMA_STRICT`.
 
 ## Remaining integration gaps (auth scope)
 
@@ -58,7 +61,7 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
 | Real backend auth request/response contract handshake | Remote-stub backend transport supports request metadata and response normalization, but auth flow remains simulated fallback-oriented | Auth contract methods bind to production backend auth envelope/schema and error semantics | `desktop/test/contracts/workflow_contracts_test.dart` + auth backend integration tests in `desktop/test/parity/auth_session_parity_test.dart` |
 | Session/token persistence continuity under real backend lifecycle | Secure store path exists, but rotation/expiry behavior is still validated mainly through simulated payloads | Real backend token/session rotation and expiry handling validated with persisted secure-store state | `desktop:verify:full` with backend-auth integration fixtures/evidence |
 | Backend auth error-to-UX mapping policy | Signed-out/state/status normalization is broad, but real backend contract mapping table is not yet fixed | Explicit backend auth failure taxonomy mapped to status text + signed-in state transitions | Execution-log unit evidence + parity gate updates |
-| Rollout and fallback policy for backend auth path | Runtime mode gate exists, but backend-auth rollout stage/decommission criteria are not codified | Staged rollout criteria + decommission checklist for simulated-path assumptions | Inventory/checklist/acceptance baseline sync + runbook next-unit updates |
+| Rollout and fallback policy for backend auth path | Runtime mode gate and strict malformed-schema toggle wiring (`PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_SCHEMA_STRICT`) exist, but backend-auth rollout stage/decommission criteria are not codified | Staged rollout criteria + decommission checklist for simulated-path assumptions | Inventory/checklist/acceptance baseline sync + runbook next-unit updates |
 
 ## Execution unit sequence
 

@@ -317,6 +317,14 @@ bool _secureStorageAuthStateStrictModeFromEnvironment() {
   );
 }
 
+bool _remoteStubAuthBackendSchemaStrictModeFromEnvironment() {
+  return _envFlagEnabled(
+    const String.fromEnvironment(
+      'PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_SCHEMA_STRICT',
+    ),
+  );
+}
+
 _ResolvedRemoteStubAuthStateStore _resolvedRemoteStubAuthStateStore(
   RemoteStubAuthStateStore store, {
   required RemoteStubSecureStorageRolloutMode rolloutMode,
@@ -511,6 +519,8 @@ class DesktopContractBundle {
             'PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_JSON',
           ),
         );
+    final bool remoteStubAuthStrictBackendSchema =
+        _remoteStubAuthBackendSchemaStrictModeFromEnvironment();
 
     return DesktopContractBundle.fromMode(
       mode,
@@ -521,6 +531,7 @@ class DesktopContractBundle {
       remoteStubTransportClient: transportClient,
       remoteStubAuthStateStore: const RemoteStubNoopAuthStateStore(),
       remoteStubAuthInitialState: remoteStubAuthInitialState,
+      remoteStubAuthStrictBackendSchema: remoteStubAuthStrictBackendSchema,
     );
   }
 
@@ -553,6 +564,8 @@ class DesktopContractBundle {
             'PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_JSON',
           ),
         );
+    final bool remoteStubAuthStrictBackendSchema =
+        _remoteStubAuthBackendSchemaStrictModeFromEnvironment();
 
     return DesktopContractBundle.fromMode(
       mode,
@@ -563,6 +576,7 @@ class DesktopContractBundle {
       remoteStubTransportClient: transportClient,
       remoteStubAuthStateStore: remoteStubAuthStateStore,
       remoteStubAuthInitialState: remoteStubAuthInitialState,
+      remoteStubAuthStrictBackendSchema: remoteStubAuthStrictBackendSchema,
       remoteStubProfile: _buildRemoteStubProfile(
         faultProfile: RemoteStubFaultProfile(
           unavailable: remoteStubUnavailable,
@@ -585,6 +599,7 @@ class DesktopContractBundle {
     RemoteStubAuthStateStore remoteStubAuthStateStore =
         const RemoteStubNoopAuthStateStore(),
     AuthSessionState? remoteStubAuthInitialState,
+    bool remoteStubAuthStrictBackendSchema = false,
     DesktopRemoteStubProfile? remoteStubProfile,
   }) {
     return switch (mode) {
@@ -594,6 +609,7 @@ class DesktopContractBundle {
         transportClient: remoteStubTransportClient,
         authStateStore: remoteStubAuthStateStore,
         authInitialState: remoteStubAuthInitialState,
+        authStrictBackendSchema: remoteStubAuthStrictBackendSchema,
         remoteStubProfile:
             remoteStubProfile ??
             _buildRemoteStubProfile(
@@ -626,6 +642,7 @@ class DesktopContractBundle {
     RemoteStubAuthStateStore authStateStore =
         const RemoteStubNoopAuthStateStore(),
     AuthSessionState? authInitialState,
+    bool authStrictBackendSchema = false,
     DesktopRemoteStubProfile? remoteStubProfile,
   }) {
     return DesktopContractBundle(
@@ -634,6 +651,7 @@ class DesktopContractBundle {
         faultProfile: faultProfile,
         transportClient: transportClient,
         authStateStore: authStateStore,
+        strictBackendSchema: authStrictBackendSchema,
         initialState: authInitialState,
       ),
       projectLifecycle: RemoteStubProjectLifecycleContract(

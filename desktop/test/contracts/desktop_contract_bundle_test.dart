@@ -3,6 +3,22 @@ import 'package:penjar_desktop/contracts/desktop_contract_bundle.dart';
 import 'package:penjar_desktop/contracts/remote_stub_contracts.dart';
 import 'package:penjar_desktop/contracts/workflow_contracts.dart';
 
+class _BundleBackendResponseTransportClient extends RemoteStubTransportClient {
+  _BundleBackendResponseTransportClient(this.responsesByOperation);
+
+  final Map<String, Map<String, Object?>> responsesByOperation;
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    final Map<String, Object?>? response =
+        responsesByOperation[request.operation];
+    if (response == null || response.isEmpty) {
+      return RemoteStubTransportResult.allow;
+    }
+    return RemoteStubTransportResult.allowedWithPayload(response);
+  }
+}
+
 void main() {
   test('in-memory bundle exposes reusable workflow contracts', () {
     final DesktopContractBundle bundle = DesktopContractBundle.inMemory();
@@ -169,6 +185,49 @@ void main() {
     expect(
       remoteStubBundle.authSession.state.status,
       '[remote-stub] Restored from bundle seed.',
+    );
+  });
+
+  test('fromMode forwards strict backend auth schema mode', () {
+    final _BundleBackendResponseTransportClient transportClient =
+        _BundleBackendResponseTransportClient(<String, Map<String, Object?>>{
+          RemoteStubOperationIds.signIn: <String, Object?>{
+            'unexpected': <String, Object?>{'shape': true},
+          },
+        });
+    final DesktopContractBundle nonStrictBundle =
+        DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient: transportClient,
+        );
+    final DesktopContractBundle strictBundle = DesktopContractBundle.fromMode(
+      DesktopContractMode.remoteStub,
+      remoteStubTransportClient: transportClient,
+      remoteStubAuthStrictBackendSchema: true,
+    );
+
+    nonStrictBundle.authSession.signIn(
+      const AuthSignInRequest(
+        email: 'designer@penjar.app',
+        password: 'desktop-pass',
+      ),
+    );
+    expect(nonStrictBundle.authSession.state.signedIn, isTrue);
+    expect(
+      nonStrictBundle.authSession.state.status,
+      '[remote-stub] Signed in (simulated).',
+    );
+
+    strictBundle.authSession.signIn(
+      const AuthSignInRequest(
+        email: 'designer@penjar.app',
+        password: 'desktop-pass',
+      ),
+    );
+    expect(strictBundle.authSession.state.signedIn, isFalse);
+    expect(
+      strictBundle.authSession.state.status,
+      '[remote-stub] Backend auth schema validation failed.',
     );
   });
 
