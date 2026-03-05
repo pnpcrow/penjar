@@ -145,6 +145,7 @@ AuthSessionState? _parseRemoteStubAuthInitialState(String rawJson) {
 DesktopRemoteStubProfile _buildRemoteStubProfile({
   required RemoteStubFaultProfile faultProfile,
   required RemoteStubTransportClient transportClient,
+  required RemoteStubAuthStateStore authStateStore,
 }) {
   final RemoteStubTransportProfile transportProfile = transportClient.profile;
 
@@ -156,7 +157,24 @@ DesktopRemoteStubProfile _buildRemoteStubProfile({
     ),
     transportBlockedReason: transportProfile.blockedReason,
     transportLabel: transportProfile.transportLabel,
+    authStoreLabel: _describeAuthStateStore(authStateStore),
   );
+}
+
+String _describeAuthStateStore(RemoteStubAuthStateStore authStateStore) {
+  if (authStateStore is RemoteStubSecureSnapshotAuthStateStore) {
+    return 'secure-storage';
+  }
+  if (authStateStore is RemoteStubCommandAuthStateStore) {
+    return 'command-hook';
+  }
+  if (authStateStore is RemoteStubFileAuthStateStore) {
+    final String normalizedPath = authStateStore.path.trim();
+    if (normalizedPath.isNotEmpty) {
+      return 'file';
+    }
+  }
+  return '';
 }
 
 RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
@@ -325,6 +343,7 @@ class DesktopRemoteStubProfile {
     this.transportBlockedOperations = const <String>{},
     this.transportBlockedReason = 'Remote transport unavailable',
     this.transportLabel = '',
+    this.authStoreLabel = '',
   });
 
   final bool unavailable;
@@ -332,12 +351,14 @@ class DesktopRemoteStubProfile {
   final Set<String> transportBlockedOperations;
   final String transportBlockedReason;
   final String transportLabel;
+  final String authStoreLabel;
 
   bool get isEmpty =>
       !unavailable &&
       blockedOperations.isEmpty &&
       transportBlockedOperations.isEmpty &&
-      transportLabel.trim().isEmpty;
+      transportLabel.trim().isEmpty &&
+      authStoreLabel.trim().isEmpty;
 
   String get summaryLabel {
     if (isEmpty) {
@@ -358,6 +379,9 @@ class DesktopRemoteStubProfile {
     }
     if (transportLabel.trim().isNotEmpty) {
       parts.add('transport: $transportLabel');
+    }
+    if (authStoreLabel.trim().isNotEmpty) {
+      parts.add('auth-store: $authStoreLabel');
     }
     return parts.join(' · ');
   }
@@ -476,6 +500,7 @@ class DesktopContractBundle {
             _buildRemoteStubProfile(
               faultProfile: remoteStubFaultProfile,
               transportClient: remoteStubTransportClient,
+              authStateStore: remoteStubAuthStateStore,
             ),
       ),
     };
@@ -545,6 +570,7 @@ class DesktopContractBundle {
           _buildRemoteStubProfile(
             faultProfile: faultProfile,
             transportClient: transportClient,
+            authStateStore: authStateStore,
           ),
     );
   }

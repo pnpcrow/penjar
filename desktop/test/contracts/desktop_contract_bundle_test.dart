@@ -229,6 +229,20 @@ void main() {
     );
   });
 
+  test('remote-stub profile exposes auth store label for secure store', () {
+    final DesktopContractBundle bundle = DesktopContractBundle.remoteStub(
+      authStateStore: RemoteStubSecureSnapshotAuthStateStore(
+        snapshotWriter: (_) async {},
+      ),
+    );
+
+    expect(bundle.remoteStubProfile?.authStoreLabel, 'secure-storage');
+    expect(
+      bundle.remoteStubProfile?.summaryLabel,
+      contains('auth-store: secure-storage'),
+    );
+  });
+
   test('remote-stub unavailable profile blocks mutating operations', () {
     final DesktopContractBundle bundle = DesktopContractBundle.remoteStub(
       faultProfile: const RemoteStubFaultProfile(unavailable: true),

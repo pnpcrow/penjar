@@ -78,4 +78,4 @@ the [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-pha
 - Remote-stub auth flow now supports command-hook secure-store bridge controls via `PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_LOAD_COMMAND` and `PENJAR_DESKTOP_REMOTE_STUB_AUTH_STATE_SAVE_COMMAND`.
 - Remote-stub auth flow now supports flutter_secure_storage-backed native credential-store adapter path via `PENJAR_DESKTOP_REMOTE_STUB_AUTH_SECURE_STORAGE_ENABLED` with optional key override `PENJAR_DESKTOP_REMOTE_STUB_AUTH_SECURE_STORAGE_KEY`.
 - Environment-driven blocked-operation lists are filtered against `RemoteStubOperationIds` catalog in `desktop/lib/contracts/remote_stub_contracts.dart` to avoid unsupported operation keys.
-- Diagnostics parity surface now includes runtime remote profile summary text (`Remote profile: ...`) for remote-stub mode visibility during degraded-path validation.
+- Diagnostics parity surface now includes runtime remote profile summary text (`Remote profile: ...`) including `auth-store` label for active auth snapshot persistence mode visibility during degraded-path validation.
