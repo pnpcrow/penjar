@@ -2940,8 +2940,55 @@ Prevent appcast preview generation from succeeding with partial platform evidenc
   - Strict appcast generation passes with valid dual-platform report set.
   - Full-fast desktop verification remains green after strict appcast coverage integration.
 
+## Unit WS-D-69: Desktop command inventory guard baseline
+
+### Planned objective
+
+Prevent command-surface drift between desktop release docs and executable package scripts by enforcing command inventory consistency.
+
+### Implemented changes
+
+1. Added desktop command inventory checker:
+   - `desktop/scripts/check_desktop_command_inventory.sh`.
+2. Implemented inventory-guard semantics:
+   - scans desktop runbook + release validation baseline docs for `pnpm run <command>` entries,
+   - validates each detected command exists in `package.json` `scripts`,
+   - fails when missing commands are detected (or when no commands are discovered),
+   - emits inventory report (`release/reports/desktop_command_inventory_report.md`) with source references.
+3. Integrated inventory guard into canonical verification:
+   - `desktop/scripts/verify_desktop.sh` now runs command inventory checks before test/analyze/build phases.
+4. Added root command surface:
+   - `desktop:docs:command-inventory:check`.
+5. Extended CI/smoke artifact chains:
+   - `.github/workflows/tests-desktop-flutter.yml` now uploads `desktop-command-inventory-report-*` artifacts,
+   - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness preflight now runs command inventory checks and uploads `desktop-command-inventory-report-smoke`.
+6. Updated release/runbook/index docs:
+   - `desktop-flutter-development-runbook.md` command inventory now includes desktop command inventory check command,
+   - `desktop-flutter-release-validation-baseline.md` now documents inventory protocol, CI notes, and script index reference,
+   - `desktop-flutter-release-evidence-index.md` now includes desktop command inventory report attachment rule.
+7. Re-ran validation commands:
+   - `pnpm run desktop:docs:command-inventory:check`,
+   - `cd desktop && ./scripts/check_desktop_command_inventory.sh <tmp-report> ../package.json <tmp-doc-with-fake-command>` (expected failure: missing command),
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - document command extraction correctness across runbook/baseline docs,
+  - missing-command failure semantics and report traceability,
+  - verify-chain and workflow preflight integration stability.
+- **Issues found during review**
+  1. Docs and package command surfaces could drift without a machine-enforced check, causing runbook commands to break silently.
+- **Fix applied**
+  1. Added automated inventory guard and wired it into verify + CI + smoke preflight.
+- **Post-fix validation criteria**
+  - Missing doc-referenced commands fail inventory checks.
+  - Inventory reports are generated in local verify, desktop CI, and smoke preflight runs.
+  - Full-fast desktop verification remains green after inventory-guard integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, de-duplicated contract/parity/mode-matrix verification chain, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation, on-demand installer/update smoke build-report workflow with preflight syntax/coverage readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

@@ -95,6 +95,14 @@ jobs:
           path: desktop/release/reports/verify_test_coverage_report.md
           if-no-files-found: warn
 
+      - name: Upload desktop command inventory report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-command-inventory-report-${{ matrix.label }}
+          path: desktop/release/reports/desktop_command_inventory_report.md
+          if-no-files-found: warn
+
       - name: Upload macOS debug app artifact
         if: matrix.label == 'macos'
         uses: actions/upload-artifact@v4

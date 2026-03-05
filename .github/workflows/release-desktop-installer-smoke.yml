@@ -110,6 +110,10 @@ jobs:
         working-directory: ./desktop
         run: ./scripts/check_verify_test_coverage.sh
 
+      - name: Run desktop command inventory check
+        working-directory: ./desktop
+        run: ./scripts/check_desktop_command_inventory.sh
+
       - name: Run release smoke gate policy check
         working-directory: ./desktop
         env:
@@ -170,6 +174,14 @@ jobs:
         with:
           name: desktop-verify-test-coverage-report-smoke
           path: desktop/release/reports/verify_test_coverage_report.md
+          if-no-files-found: warn
+
+      - name: Upload desktop command inventory report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-command-inventory-report-smoke
+          path: desktop/release/reports/desktop_command_inventory_report.md
           if-no-files-found: warn
 
   installer-smoke:

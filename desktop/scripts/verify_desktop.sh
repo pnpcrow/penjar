@@ -7,6 +7,7 @@ fi
 
 ./scripts/check_release_script_syntax.sh
 ./scripts/check_verify_test_coverage.sh
+./scripts/check_desktop_command_inventory.sh
 
 FLUTTER_NO_PUB=1 ./scripts/run_contract_tests.sh
 FLUTTER_NO_PUB=1 ./scripts/run_parity_tests.sh
