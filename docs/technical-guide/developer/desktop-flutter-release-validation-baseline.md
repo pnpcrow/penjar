@@ -110,6 +110,9 @@ This baseline defines minimum release validation requirements for desktop distri
    - strict Windows installer execution/provenance modes reject placeholder command hooks (for example `echo ...`, `<...>`, `todo`/`tbd` markers).
    - standalone Windows installer generation command check:
      - `pnpm run desktop:release:windows-installer:run`.
+   - optional Windows protocol registration command hook:
+     - `PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND` (installer/pipeline-time URL protocol registration command),
+     - optional overrides: `PENJAR_WINDOWS_PROTOCOL_SCHEME`, `PENJAR_WINDOWS_PROTOCOL_TARGET_PATH`.
    - standalone Windows installer artifact check:
      - `pnpm run desktop:release:windows-installer:check`.
    - standalone Windows installer artifact check (strict packaging+naming):
@@ -274,6 +277,6 @@ CI baseline note:
 ## 5) Implementation backlog seeds
 
 1. Wire actual platform signing/notarization/verify commands into `PENJAR_*_SIGN_COMMAND`, `PENJAR_MACOS_NOTARIZE_COMMAND`, and `PENJAR_*_SIGN_VERIFY_COMMAND` secrets with hardened diagnostics.
-2. Wire actual Windows installer generation/provenance commands into `PENJAR_WINDOWS_INSTALLER_COMMAND` and `PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND`.
+2. Wire actual Windows installer generation/provenance/protocol-registration commands into `PENJAR_WINDOWS_INSTALLER_COMMAND`, `PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND`, and `PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND`.
 3. Provision production external publication credentials/role wiring and validate non-dry-run invalidation command execution against target environment.
 4. Promote evidence index preview automation into governed auto-apply (PR/comment gate) workflow.

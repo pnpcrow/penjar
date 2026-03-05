@@ -39,6 +39,10 @@ This checklist tracks user-facing workflow parity for the Flutter desktop full-p
 | Export workflows | PNG/SVG export and save | In progress | Export Pipeline | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) | Flutter export-workflow parity scaffold, parity harness, runtime-switchable in-memory/remote-stub contract boundary, and backend response-driven state mutation wiring are added; backend export pipeline/native save integration is pending. |
 | Diagnostics/recovery | Runtime health, reconnect, remediation | In progress | Platform Reliability | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) | Flutter diagnostics/recovery parity scaffold, parity harness, runtime-switchable in-memory/remote-stub contract boundary, HTTP health-probe remote transport gating, operation-level backend request metadata mapping, backend execution-path status propagation, and backend response-driven state mutation wiring are added; live telemetry/reconnect policy integration is pending. |
 
+## Cross-cutting shell/release routing note
+
+- Windows deep-link runtime handoff is covered by running-instance relay (`WM_COPYDATA` -> `onLaunchRoute`) and installer-pipeline protocol registration command-hook baseline (`PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND` with scheme/target overrides), while production registry/installer command provisioning remains tracked as pending.
+
 ## Completion criteria per row
 
 1. User-facing workflow path is implemented in Flutter desktop surface.
