@@ -816,6 +816,88 @@ class _AuthBackendSessionTimeoutParityTransportClient
   }
 }
 
+class _AuthBackendTokenExpiredParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendTokenExpiredParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend sign-in snapshot applied.',
+          'state': <String, Object?>{'signedIn': true, 'rememberSession': true},
+        },
+      );
+    }
+    if (request.operation == RemoteStubOperationIds.refreshToken) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'errorCode': 'TOKEN_EXPIRED',
+          'state': <String, Object?>{'sessionToken': 'token-expired-session'},
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
+class _AuthBackendHttpStatusSessionExpiredParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendHttpStatusSessionExpiredParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend sign-in snapshot applied.',
+          'state': <String, Object?>{'signedIn': true, 'rememberSession': true},
+        },
+      );
+    }
+    if (request.operation == RemoteStubOperationIds.refreshToken) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'state': <String, Object?>{
+            'httpStatus': '440',
+            'sessionToken': 'http-status-expired-session',
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
+class _AuthBackendHttpStatusSnakeCaseSessionExpiredParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendHttpStatusSnakeCaseSessionExpiredParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend sign-in snapshot applied.',
+          'state': <String, Object?>{'signedIn': true, 'rememberSession': true},
+        },
+      );
+    }
+    if (request.operation == RemoteStubOperationIds.refreshToken) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'state': <String, Object?>{
+            'http_status': 419,
+            'sessionToken': 'http-status-snake-expired-session',
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 class _AuthBackendSignedOutErrorCodeSignedInOverrideParityTransportClient
     extends RemoteStubTransportClient {
   const _AuthBackendSignedOutErrorCodeSignedInOverrideParityTransportClient();
@@ -899,6 +981,32 @@ class _AuthBackendExpiredTokenSignedInOverrideParityTransportClient
             'rememberSession': true,
             'sessionToken': 'override-session-token',
           },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
+class _AuthBackendExpiredTokenParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendExpiredTokenParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend sign-in snapshot applied.',
+          'state': <String, Object?>{'signedIn': true, 'rememberSession': true},
+        },
+      );
+    }
+    if (request.operation == RemoteStubOperationIds.refreshToken) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'code': 'EXPIRED_TOKEN',
+          'state': <String, Object?>{'sessionToken': 'expired-token-session'},
         },
       );
     }
@@ -3352,6 +3460,182 @@ void main() {
           DesktopContractMode.remoteStub,
           remoteStubTransportClient:
               const _AuthBackendSessionTimeoutParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend sign-in snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Status: [remote-stub] Backend session expired.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'auth/session parity maps token-expired backend failure to deterministic session-expired status',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendTokenExpiredParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend sign-in snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Status: [remote-stub] Backend session expired.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'auth/session parity maps httpStatus backend failure to deterministic session-expired status',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendHttpStatusSessionExpiredParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend sign-in snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Status: [remote-stub] Backend session expired.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'auth/session parity maps http_status backend failure to deterministic session-expired status',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendHttpStatusSnakeCaseSessionExpiredParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend sign-in snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Status: [remote-stub] Backend session expired.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'auth/session parity maps expired-token backend failure to deterministic session-expired status',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendExpiredTokenParityTransportClient(),
         ),
       );
       await openWorkflowSection(tester, 'auth');
