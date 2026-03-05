@@ -2261,8 +2261,55 @@ Introduce explicit external appcast publication readiness checks with strict/non
   - Strict readiness path can be enabled through workflow dispatch input.
   - Full-fast desktop verification remains green after readiness gate integration.
 
+## Unit WS-D-54: Windows installer naming policy gate baseline
+
+### Planned objective
+
+Add explicit Windows installer filename policy validation with strict gating, so packaging evidence can assert not only artifact presence but also naming-policy compliance.
+
+### Implemented changes
+
+1. Extended Windows installer packaging checker:
+   - `desktop/scripts/check_windows_installer_packaging.sh`.
+2. Implemented naming-policy semantics:
+   - added filename policy regex support (`PENJAR_WINDOWS_INSTALLER_NAME_PATTERN`, default `^PenjarInstaller\.(msi|exe)$`),
+   - added strict naming mode (`STRICT_WINDOWS_INSTALLER_NAMING`),
+   - added naming policy report fields (`Installer name`, `Naming policy pattern`, `Naming policy status`),
+   - strict naming mode now fails when naming-policy status is not `passed`.
+3. Added root command surface:
+   - `desktop:release:windows-installer:check:strict` (strict packaging + strict naming).
+4. Extended manual smoke workflow dispatch contract:
+   - added `enforce_windows_installer_naming` input.
+5. Extended installer-smoke workflow env contract:
+   - passes `STRICT_WINDOWS_INSTALLER_NAMING` into smoke execution stage.
+6. Updated release/runbook/index docs:
+   - `desktop-flutter-development-runbook.md` command inventory now includes strict Windows installer check command,
+   - `desktop-flutter-release-validation-baseline.md` now includes strict naming mode guidance and workflow input mapping,
+   - `desktop-flutter-release-evidence-index.md` now requires naming policy `passed` status when strict naming mode is enabled.
+7. Re-ran validation commands:
+   - `pnpm run desktop:release:windows-installer:check`,
+   - `cd desktop && PENJAR_WINDOWS_INSTALLER_PATH="build/windows/x64/runner/Release/installer/BadInstaller.exe" STRICT_WINDOWS_INSTALLER_NAMING=1 ./scripts/check_windows_installer_packaging.sh` (expected strict failure),
+   - `PENJAR_WINDOWS_INSTALLER_PATH="build/windows/x64/runner/Release/installer/PenjarInstaller.exe" pnpm run desktop:release:windows-installer:check:strict`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict naming mode correctness and interaction with existing strict artifact-presence mode,
+  - workflow input/env propagation for naming gate,
+  - evidence/report semantics for naming-policy traceability.
+- **Issues found during review**
+  1. Initial strict naming implementation assigned strict-mode error context after report emission, causing report/error mismatch for strict naming failure.
+- **Fix applied**
+  1. Moved strict naming failure determination before report generation and persisted strict-naming failure reason in report fields.
+- **Post-fix validation criteria**
+  - Naming policy status is always emitted in packaging report.
+  - Strict naming gate fails on invalid filename/missing artifact states.
+  - Full-fast desktop verification remains green after naming-gate integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, signing readiness gating, command-hooked signing execution baseline, optional external publication dry-run stage, external publication readiness gate baseline, Windows installer packaging verification baseline, and command-hooked Windows installer pipeline baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, signing readiness gating, command-hooked signing execution baseline, optional external publication dry-run stage, external publication readiness gate baseline, Windows installer packaging verification baseline with strict naming gate, and command-hooked Windows installer pipeline baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

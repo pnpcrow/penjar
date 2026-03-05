@@ -48,6 +48,6 @@ Each release candidate record should include:
 13. Generate/check appcast publication bundle (`pnpm run desktop:release:appcast:bundle:generate`, `pnpm run desktop:release:appcast:bundle:check`) and attach artifact link before promotion decision.
 14. Attach platform signing pipeline reports (`release/reports/signing_report_macos.md`, `release/reports/signing_report_windows.md`) before promotion decision.
 15. Attach external publication report (`release/reports/appcast_external_publication_report.md`) when external publication stage is executed.
-16. Attach Windows installer packaging report (`release/reports/windows_installer_packaging_report.md`) before promotion decision.
+16. Attach Windows installer packaging report (`release/reports/windows_installer_packaging_report.md`) before promotion decision, and require naming policy status to be `passed` when strict naming mode is enabled.
 17. Attach Windows installer pipeline report (`release/reports/windows_installer_pipeline_report.md`) before promotion decision.
 18. Attach external publication readiness report (`release/reports/appcast_external_readiness_report.md`) when external publication stage is executed.
