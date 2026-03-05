@@ -231,6 +231,20 @@ void main() {
     );
   });
 
+  test('remote-stub profile exposes strict backend auth schema label', () {
+    final DesktopContractBundle bundle = DesktopContractBundle.fromMode(
+      DesktopContractMode.remoteStub,
+      remoteStubAuthStrictBackendSchema: true,
+    );
+
+    expect(bundle.remoteStubProfile?.isEmpty, isFalse);
+    expect(bundle.remoteStubProfile?.authBackendSchemaLabel, 'strict');
+    expect(
+      bundle.remoteStubProfile?.summaryLabel,
+      contains('auth-backend-schema: strict'),
+    );
+  });
+
   test('remote-stub bundle forwards auth state store persistence seam', () {
     final RemoteStubMemoryAuthStateStore authStateStore =
         RemoteStubMemoryAuthStateStore();

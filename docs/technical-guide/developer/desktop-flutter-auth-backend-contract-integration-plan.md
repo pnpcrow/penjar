@@ -53,6 +53,8 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
 8. Runtime contract-bundle strict-mode wiring:
    - `DesktopContractBundle.fromMode(...)` forwards strict backend schema mode to remote-stub auth contract construction.
    - `DesktopContractBundle.fromEnvironment()` / `loadFromEnvironment()` can enable strict mode through `PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_SCHEMA_STRICT`.
+9. Diagnostics-visible strict-mode profile labeling:
+   - remote profile summary now surfaces `auth-backend-schema: strict` when strict backend auth schema mode is enabled.
 
 ## Remaining integration gaps (auth scope)
 

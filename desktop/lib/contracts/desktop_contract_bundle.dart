@@ -178,12 +178,14 @@ DesktopRemoteStubProfile _buildRemoteStubProfile({
   required RemoteStubFaultProfile faultProfile,
   required RemoteStubTransportClient transportClient,
   required RemoteStubAuthStateStore authStateStore,
+  bool authStrictBackendSchema = false,
   String authStoreLabelOverride = '',
 }) {
   final RemoteStubTransportProfile transportProfile = transportClient.profile;
   final String authStoreLabel = authStoreLabelOverride.trim().isNotEmpty
       ? authStoreLabelOverride.trim()
       : _describeAuthStateStore(authStateStore);
+  final String authBackendSchemaLabel = authStrictBackendSchema ? 'strict' : '';
 
   return DesktopRemoteStubProfile(
     unavailable: faultProfile.unavailable,
@@ -194,6 +196,7 @@ DesktopRemoteStubProfile _buildRemoteStubProfile({
     transportBlockedReason: transportProfile.blockedReason,
     transportLabel: transportProfile.transportLabel,
     authStoreLabel: authStoreLabel,
+    authBackendSchemaLabel: authBackendSchemaLabel,
   );
 }
 
@@ -441,6 +444,7 @@ class DesktopRemoteStubProfile {
     this.transportBlockedReason = 'Remote transport unavailable',
     this.transportLabel = '',
     this.authStoreLabel = '',
+    this.authBackendSchemaLabel = '',
   });
 
   final bool unavailable;
@@ -449,13 +453,15 @@ class DesktopRemoteStubProfile {
   final String transportBlockedReason;
   final String transportLabel;
   final String authStoreLabel;
+  final String authBackendSchemaLabel;
 
   bool get isEmpty =>
       !unavailable &&
       blockedOperations.isEmpty &&
       transportBlockedOperations.isEmpty &&
       transportLabel.trim().isEmpty &&
-      authStoreLabel.trim().isEmpty;
+      authStoreLabel.trim().isEmpty &&
+      authBackendSchemaLabel.trim().isEmpty;
 
   String get summaryLabel {
     if (isEmpty) {
@@ -479,6 +485,9 @@ class DesktopRemoteStubProfile {
     }
     if (authStoreLabel.trim().isNotEmpty) {
       parts.add('auth-store: $authStoreLabel');
+    }
+    if (authBackendSchemaLabel.trim().isNotEmpty) {
+      parts.add('auth-backend-schema: $authBackendSchemaLabel');
     }
     return parts.join(' · ');
   }
@@ -584,6 +593,7 @@ class DesktopContractBundle {
         ),
         transportClient: transportClient,
         authStateStore: remoteStubAuthStateStore,
+        authStrictBackendSchema: remoteStubAuthStrictBackendSchema,
         authStoreLabelOverride:
             remoteStubAuthStateStoreResolution.profileAuthStoreLabel,
       ),
@@ -616,6 +626,7 @@ class DesktopContractBundle {
               faultProfile: remoteStubFaultProfile,
               transportClient: remoteStubTransportClient,
               authStateStore: remoteStubAuthStateStore,
+              authStrictBackendSchema: remoteStubAuthStrictBackendSchema,
             ),
       ),
     };
@@ -688,6 +699,7 @@ class DesktopContractBundle {
             faultProfile: faultProfile,
             transportClient: transportClient,
             authStateStore: authStateStore,
+            authStrictBackendSchema: authStrictBackendSchema,
           ),
     );
   }
