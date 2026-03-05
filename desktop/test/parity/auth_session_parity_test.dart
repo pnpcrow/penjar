@@ -203,6 +203,27 @@ class _AuthBackendLoggedInStateAliasParityTransportClient
   }
 }
 
+class _AuthBackendIsLoggedInStateAliasParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendIsLoggedInStateAliasParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend is_logged_in sign-in snapshot applied.',
+          'state': <String, Object?>{
+            'is_logged_in': true,
+            'persist_session': true,
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 class _AuthBackendLoggedInCamelCaseStateAliasParityTransportClient
     extends RemoteStubTransportClient {
   const _AuthBackendLoggedInCamelCaseStateAliasParityTransportClient();
@@ -768,6 +789,43 @@ void main() {
     expect(
       find.textContaining(
         'Status: [remote-stub] Backend loggedIn sign-in snapshot applied.',
+      ),
+      findsOneWidget,
+    );
+    final CheckboxListTile rememberSessionTile = tester.widget(
+      find.byKey(const ValueKey<String>('auth-remember')),
+    );
+    expect(rememberSessionTile.value, isTrue);
+
+    expect(find.textContaining('Signed in (simulated).'), findsNothing);
+  });
+
+  testWidgets('auth/session parity normalizes is_logged_in state aliases', (
+    WidgetTester tester,
+  ) async {
+    await pumpDesktopApp(
+      tester,
+      contracts: DesktopContractBundle.fromMode(
+        DesktopContractMode.remoteStub,
+        remoteStubTransportClient:
+            const _AuthBackendIsLoggedInStateAliasParityTransportClient(),
+      ),
+    );
+    await openWorkflowSection(tester, 'auth');
+
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('auth-password')),
+      'desktop-pass',
+    );
+    await tester.ensureVisible(
+      find.byKey(const ValueKey<String>('auth-sign-in')),
+    );
+    await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining(
+        'Status: [remote-stub] Backend is_logged_in sign-in snapshot applied.',
       ),
       findsOneWidget,
     );

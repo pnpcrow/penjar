@@ -77,7 +77,7 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      transport fallback-policy label visibility (`require-state`, `delegate-enabled`,
      `strict-schema`).
 13. Auth-session parity backend integration coverage expansion:
-   - `desktop/test/parity/auth_session_parity_test.dart` now includes backend snapshot sign-in/signed-out transition coverage, required-state fallback-block coverage, snake-case/isOk failure-flag status mapping coverage, snake_case + logged-style camelCase signed-in/remember alias normalization coverage (including dedicated `loggedIn` + `isLoggedIn` parity locks), signed-out alias variant fallback-status coverage (`signedOut` / `isSignedOut` / `loggedOut` / `isLoggedOut` / `signed_out` / `is_signed_out` / `logged_out` / `is_logged_out`), and payload-envelope parity coverage for top-level/nested wrapper paths (`payload`, `result -> payload`).
+   - `desktop/test/parity/auth_session_parity_test.dart` now includes backend snapshot sign-in/signed-out transition coverage, required-state fallback-block coverage, snake-case/isOk failure-flag status mapping coverage, snake_case + logged-style camelCase signed-in/remember alias normalization coverage (including dedicated `logged_in` + `is_logged_in` + `loggedIn` + `isLoggedIn` parity locks), signed-out alias variant fallback-status coverage (`signedOut` / `isSignedOut` / `loggedOut` / `isLoggedOut` / `signed_out` / `is_signed_out` / `logged_out` / `is_logged_out`), and payload-envelope parity coverage for top-level/nested wrapper paths (`payload`, `result -> payload`).
 14. Auth backend failure-taxonomy fallback status mapping baseline:
    - when backend auth payloads signal signed-out/failure without explicit status/message, deterministic fallback status text is now applied (`Authentication required.`, `Backend session expired.`, `Backend auth request failed.`),
    - session-expiry taxonomy coverage now includes additional backend code variants (for example `SESSION_TIMEOUT`, `EXPIRED_TOKEN`) in both signed-out detection and session-expired fallback classification,
@@ -104,8 +104,9 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      `result -> payload -> state/authState`,
    - auth fixture matrix now includes `payload` and nested `result/payload` envelope
      coverage for sign-in and refresh-token flows, plus explicit ABI-01 authState variants:
-     `data.authState.loggedIn` signed-in success and `result/data.authState`
-     logged-style signed-out fallback variants (`loggedOut`, `is_logged_out`).
+     `data.authState.loggedIn` signed-in success, `result.authState.isLoggedIn`
+     signed-in success, and `result/data.authState` logged-style signed-out fallback variants
+     (`loggedOut`, `isLoggedOut`, `is_logged_out`).
 
 ## Remaining integration gaps (auth scope)
 
@@ -123,7 +124,7 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
 1. Freeze expected backend auth response envelopes for sign-in/restore/refresh flows.
 2. Add contract fixtures covering success, signed-out, token-expiry, and unauthorized variants.
 3. Add strict parser assertions for required auth fields/aliases per flow.
-4. Status: in progress (fixture matrix baseline + `result/data/payload` envelope-chain and `authState` alias fixture coverage added in `workflow_contracts_test.dart`, including explicit signed-out envelope alias variants (`signedOut`, `is_signed_out`), logged-style signed-out envelope fixtures (`loggedOut`, `is_logged_out`), logged-style signed-in `data.authState.loggedIn` fixture coverage, plus contract/parity logged-style signed-out alias regression coverage (`loggedOut`, `isLoggedOut`, `logged_out`, `is_logged_out`) and dedicated camelCase `isLoggedIn` parity lock; broader schema fixture expansion remains).
+4. Status: in progress (fixture matrix baseline + `result/data/payload` envelope-chain and `authState` alias fixture coverage added in `workflow_contracts_test.dart`, including explicit signed-out envelope alias variants (`signedOut`, `is_signed_out`), logged-style signed-out envelope fixtures (`loggedOut`, `isLoggedOut`, `is_logged_out`), logged-style signed-in envelope fixtures (`data.authState.loggedIn`, `result.authState.isLoggedIn`), plus contract/parity logged-style signed-out alias regression coverage (`loggedOut`, `isLoggedOut`, `logged_out`, `is_logged_out`) and dedicated logged-style signed-in parity locks (`logged_in`, `is_logged_in`, `loggedIn`, `isLoggedIn`); broader schema fixture expansion remains).
 
 ### ABI-02: Real auth transport binding and state persistence continuity
 
