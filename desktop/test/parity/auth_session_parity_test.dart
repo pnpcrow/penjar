@@ -4561,7 +4561,7 @@ void main() {
           },
           refreshTokenPayload: null,
           actionKey: const ValueKey<String>('auth-restore-session'),
-          expectedStatus: 'Backend sign-in snapshot applied.',
+          expectedStatus: 'Authentication required.',
           absentSuccessText: 'Session restored (simulated).',
         ),
       ];

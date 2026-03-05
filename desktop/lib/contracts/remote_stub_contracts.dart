@@ -1570,6 +1570,8 @@ AuthSessionState? _authStateFromBackendPayload(
   final bool? resolvedSignedOut = _coerceBool(
     _firstPresentValueInSources(authSources, _authSignedOutAliases),
   );
+  final bool signedOutByStateSignal =
+      resolvedSignedOut == true || resolvedSignedIn == false;
   final String? backendCode = _resolveBackendCodeValue(
     responsePayload: responsePayload,
     envelopePayload: envelopePayload,
@@ -1606,7 +1608,7 @@ AuthSessionState? _authStateFromBackendPayload(
       signedIn: nextSignedIn,
       signedOutByCode: signedOutByCode,
       sessionExpiredByCode: sessionExpiredByCode,
-      signedOutByStateAlias: resolvedSignedOut == true,
+      signedOutByStateAlias: signedOutByStateSignal,
       hasExplicitFailureFlag: hasExplicitFailureFlag,
       additionalPayloads: statusDetectionSources,
     ),

@@ -2492,6 +2492,7 @@ void main() {
           },
         },
         expectedSignedIn: false,
+        expectedStatus: '[remote-stub] Authentication required.',
       ),
       const _AuthBackendFixtureCase(
         name: 'numeric unauthorized code overrides token inference',
