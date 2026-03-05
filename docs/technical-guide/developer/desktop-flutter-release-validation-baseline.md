@@ -116,6 +116,7 @@ This baseline defines minimum release validation requirements for desktop distri
    - optional Windows protocol registration command hook:
      - `PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND` (installer/pipeline-time URL protocol registration command),
      - optional overrides: `PENJAR_WINDOWS_PROTOCOL_SCHEME`, `PENJAR_WINDOWS_PROTOCOL_TARGET_PATH`.
+     - helper script baseline: `desktop/scripts/register_windows_protocol.ps1` (HKCU protocol registration template for `penjar://`).
    - standalone Windows installer artifact check:
      - `pnpm run desktop:release:windows-installer:check`.
    - standalone Windows installer artifact check (strict packaging+naming):
