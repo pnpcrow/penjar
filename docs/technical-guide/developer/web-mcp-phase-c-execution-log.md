@@ -1148,6 +1148,38 @@ Prepare backend-adapter rollout path by introducing runtime-selectable contract 
   - Full verification chain remains green with runtime-mode changes applied.
   - Contract mode switch path exists for upcoming remote adapter integration.
 
+## Unit WS-D-29: Diagnostics contract-mode observability
+
+### Planned objective
+
+Improve runtime observability by surfacing active contract mode directly in diagnostics workflow output so mode-related behavior can be verified during manual and automated validation.
+
+### Implemented changes
+
+1. Extended diagnostics panel wiring:
+   - `DesktopShellPage` now passes active `contractModeLabel` to `DiagnosticsRecoveryPanel`.
+2. Updated diagnostics summary rendering:
+   - diagnostics summary now includes `Contract mode: ...` prefix before connectivity metrics.
+3. Expanded diagnostics parity coverage:
+   - `desktop/test/parity/diagnostics_recovery_parity_test.dart` now asserts contract-mode label visibility.
+4. Re-ran consolidated full verification:
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of diagnostics mode label propagation from shell bundle,
+  - regression risk on diagnostics parity assertions after summary-text change,
+  - compatibility with consolidated verification script flow.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Diagnostics parity test validates contract-mode visibility.
+  - Full verification chain remains green with diagnostics summary extension.
+  - Contract mode is visible in both shell metadata chips and diagnostics summary.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

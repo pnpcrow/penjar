@@ -242,6 +242,7 @@ class _DesktopShellPageState extends State<DesktopShellPage> {
                               else if (section.id == 'diagnostics')
                                 DiagnosticsRecoveryPanel(
                                   contract: _contracts.diagnosticsRecovery,
+                                  contractModeLabel: _contracts.mode.label,
                                 )
                               else
                                 Text(
@@ -1332,9 +1333,14 @@ class _ExportWorkflowPanelState extends State<ExportWorkflowPanel> {
 }
 
 class DiagnosticsRecoveryPanel extends StatefulWidget {
-  const DiagnosticsRecoveryPanel({super.key, this.contract});
+  const DiagnosticsRecoveryPanel({
+    super.key,
+    this.contract,
+    this.contractModeLabel = 'in-memory',
+  });
 
   final DiagnosticsRecoveryContract? contract;
+  final String contractModeLabel;
 
   @override
   State<DiagnosticsRecoveryPanel> createState() =>
@@ -1388,7 +1394,7 @@ class _DiagnosticsRecoveryPanelState extends State<DiagnosticsRecoveryPanel> {
         ),
         const SizedBox(height: 16),
         Text(
-          'WebSocket: $websocketLabel · MCP: $mcpLabel · reconnect attempts: ${diagnosticsState.reconnectAttempts}',
+          'Contract mode: ${widget.contractModeLabel} · WebSocket: $websocketLabel · MCP: $mcpLabel · reconnect attempts: ${diagnosticsState.reconnectAttempts}',
           key: const ValueKey<String>('diagnostics-summary'),
           style: textTheme.bodyMedium,
         ),

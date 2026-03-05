@@ -18,6 +18,7 @@ void main() {
       find.byKey(const ValueKey<String>('diagnostics-summary')),
       findsOneWidget,
     );
+    expect(find.textContaining('Contract mode: in-memory'), findsOneWidget);
 
     await tester.ensureVisible(
       find.byKey(const ValueKey<String>('diagnostics-health-check')),
