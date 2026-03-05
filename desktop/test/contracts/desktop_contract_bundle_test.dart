@@ -19,6 +19,17 @@ class _BundleBackendResponseTransportClient extends RemoteStubTransportClient {
   }
 }
 
+class _BundleCaptureTransportClient extends RemoteStubTransportClient {
+  final List<RemoteStubTransportRequest> executed =
+      <RemoteStubTransportRequest>[];
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    executed.add(request);
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 void main() {
   test('in-memory bundle exposes reusable workflow contracts', () {
     final DesktopContractBundle bundle = DesktopContractBundle.inMemory();
@@ -229,6 +240,51 @@ void main() {
       strictBundle.authSession.state.status,
       '[remote-stub] Backend auth schema validation failed.',
     );
+  });
+
+  test('fromMode forwards auth sign-in credential payload mode', () {
+    final _BundleCaptureTransportClient sanitizedTransportClient =
+        _BundleCaptureTransportClient();
+    final DesktopContractBundle sanitizedBundle =
+        DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient: sanitizedTransportClient,
+        );
+    sanitizedBundle.authSession.signIn(
+      const AuthSignInRequest(
+        email: 'designer@penjar.app',
+        password: 'desktop-pass',
+      ),
+    );
+
+    expect(sanitizedTransportClient.executed, hasLength(1));
+    final RemoteStubTransportRequest sanitizedRequest =
+        sanitizedTransportClient.executed.single;
+    expect(sanitizedRequest.operation, RemoteStubOperationIds.signIn);
+    expect(sanitizedRequest.payload['passwordLength'], 12);
+    expect(sanitizedRequest.payload.containsKey('password'), isFalse);
+
+    final _BundleCaptureTransportClient forwardedTransportClient =
+        _BundleCaptureTransportClient();
+    final DesktopContractBundle forwardedBundle =
+        DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient: forwardedTransportClient,
+          remoteStubAuthForwardSignInCredentials: true,
+        );
+    forwardedBundle.authSession.signIn(
+      const AuthSignInRequest(
+        email: 'designer@penjar.app',
+        password: 'desktop-pass',
+      ),
+    );
+
+    expect(forwardedTransportClient.executed, hasLength(1));
+    final RemoteStubTransportRequest forwardedRequest =
+        forwardedTransportClient.executed.single;
+    expect(forwardedRequest.operation, RemoteStubOperationIds.signIn);
+    expect(forwardedRequest.payload['passwordLength'], 12);
+    expect(forwardedRequest.payload['password'], 'desktop-pass');
   });
 
   test('remote-stub profile exposes strict backend auth schema label', () {

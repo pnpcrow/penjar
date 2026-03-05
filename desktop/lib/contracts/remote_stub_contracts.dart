@@ -1166,11 +1166,7 @@ AuthSessionState? _authStateFromBackendPayload(
     ),
   ).isNotEmpty;
   final bool hasExplicitFailureFlag = _containsExplicitFalseInSources(
-    <Map<String, Object?>>[
-      responsePayload,
-      envelopePayload,
-      ...authSources,
-    ],
+    <Map<String, Object?>>[responsePayload, envelopePayload, ...authSources],
     const <String>['success', 'ok', 'isSuccess'],
   );
   final bool hasFields =
@@ -2243,6 +2239,7 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
     this.transportClient = const RemoteStubNoopTransportClient(),
     this.authStateStore = const RemoteStubNoopAuthStateStore(),
     this.strictBackendSchema = false,
+    this.forwardSignInCredentials = false,
     AuthSessionState? initialState,
   }) : _delegate = delegate ?? InMemoryAuthSessionContract() {
     final AuthSessionState? restoredState =
@@ -2257,6 +2254,7 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
   final RemoteStubTransportClient transportClient;
   final RemoteStubAuthStateStore authStateStore;
   final bool strictBackendSchema;
+  final bool forwardSignInCredentials;
   AuthSessionState? _stateSnapshot;
   String? _statusOverride;
 
@@ -2290,12 +2288,24 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
     _statusOverride = null;
   }
 
+  Map<String, Object?> _signInTransportPayload(AuthSignInRequest request) {
+    final Map<String, Object?> payload = <String, Object?>{
+      'email': request.email.trim(),
+      'passwordLength': request.password.length,
+    };
+    if (forwardSignInCredentials) {
+      payload['password'] = request.password;
+    }
+    return payload;
+  }
+
   AuthSessionState _resolveNextState({
     required RemoteStubTransportResult transportResult,
     required AuthSessionState Function() delegateFallback,
   }) {
     final AuthSessionState previousState = _currentState;
-    final Map<String, Object?> responsePayload = transportResult.responsePayload;
+    final Map<String, Object?> responsePayload =
+        transportResult.responsePayload;
     final AuthSessionState? backendState = _authStateFromBackendPayload(
       responsePayload,
       previousState,
@@ -2334,10 +2344,7 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
   AuthSessionState signIn(AuthSignInRequest request) {
     final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.signIn,
-      payload: <String, Object?>{
-        'email': request.email.trim(),
-        'passwordLength': request.password.length,
-      },
+      payload: _signInTransportPayload(request),
     );
     if (transportResult == null) {
       return state;
