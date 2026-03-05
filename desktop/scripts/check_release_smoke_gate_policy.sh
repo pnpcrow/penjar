@@ -101,6 +101,10 @@ if [[ "$publish_appcast_external" -eq 1 && "$appcast_publish_dry_run" -eq 0 && "
   add_required "Non-dry-run external publication requires STRICT_APPCAST_EXTERNAL_READINESS=1."
 fi
 
+if [[ "$publish_appcast_external" -eq 1 && "$appcast_publish_dry_run" -eq 0 && "$strict_release_evidence_bundle" -eq 0 ]]; then
+  add_required "Non-dry-run external publication requires STRICT_RELEASE_EVIDENCE_BUNDLE=1."
+fi
+
 # Advisory policy relationships.
 if [[ "$publish_appcast_external" -eq 0 && "$strict_appcast_external_readiness" -eq 1 ]]; then
   add_warning "STRICT_APPCAST_EXTERNAL_READINESS is enabled while PUBLISH_APPCAST_EXTERNAL is disabled."
