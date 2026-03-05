@@ -2355,8 +2355,58 @@ Expand signing readiness checks to cover command-hook presence, so signing execu
   - Readiness report surfaces both missing-count dimensions.
   - Full-fast desktop verification remains green after readiness extension.
 
+## Unit WS-D-56: External publication production consent guard baseline
+
+### Planned objective
+
+Introduce explicit production-consent gating for external appcast publication, so non-dry-run publication cannot execute without deliberate opt-in.
+
+### Implemented changes
+
+1. Added external production guard script:
+   - `desktop/scripts/guard_appcast_external_production.sh`.
+2. Implemented production-guard semantics:
+   - reports provider/dry-run/production-consent state,
+   - blocks unsupported providers for external publication stage,
+   - blocks non-dry-run execution unless `ALLOW_APPCAST_EXTERNAL_PRODUCTION=1`,
+   - emits guard report (`release/reports/appcast_external_production_guard_report.md`).
+3. Added root command surface:
+   - `desktop:release:appcast:external:production:guard`.
+4. Extended manual smoke workflow dispatch contract:
+   - added `allow_appcast_external_production` input.
+5. Extended appcast-preview workflow stage:
+   - runs production guard before readiness and external publication steps,
+   - passes production-consent input to guard/readiness/publication stage env.
+6. Extended artifact evidence chain:
+   - uploads `desktop/release/reports/appcast_external_production_guard_report.md` artifact.
+7. Updated release/runbook/index docs:
+   - `desktop-flutter-development-runbook.md` command inventory now includes production guard command,
+   - `desktop-flutter-release-validation-baseline.md` now includes production guard protocol and workflow input references,
+   - `desktop-flutter-release-evidence-index.md` now includes production guard report attachment rule.
+8. Re-ran validation commands:
+   - `pnpm run desktop:release:appcast:external:production:guard`,
+   - `cd desktop && APPCAST_PUBLISH_PROVIDER=s3 APPCAST_PUBLISH_DRY_RUN=0 ./scripts/guard_appcast_external_production.sh` (expected block),
+   - `cd desktop && APPCAST_PUBLISH_PROVIDER=s3 APPCAST_PUBLISH_DRY_RUN=0 ALLOW_APPCAST_EXTERNAL_PRODUCTION=1 ./scripts/guard_appcast_external_production.sh`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - production-consent gate correctness for dry-run vs non-dry-run paths,
+  - appcast-preview stage ordering (guard before readiness/publication),
+  - report and artifact continuity for release evidence.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Non-dry-run external publication is blocked without explicit consent toggle.
+  - Production guard report is generated and archived in workflow artifacts.
+  - Full-fast desktop verification remains green after production guard integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline, optional external publication dry-run stage, external publication readiness gate baseline, Windows installer packaging verification baseline with strict naming gate, and command-hooked Windows installer pipeline baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline, optional external publication dry-run stage with production consent guard and readiness gate baseline, Windows installer packaging verification baseline with strict naming gate, and command-hooked Windows installer pipeline baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

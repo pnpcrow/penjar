@@ -109,13 +109,16 @@ This baseline defines minimum release validation requirements for desktop distri
 10. Generate/check appcast publication bundle:
    - `pnpm run desktop:release:appcast:bundle:generate`
    - `pnpm run desktop:release:appcast:bundle:check`
-11. Run external publication readiness checks:
+11. Run external production guard:
+   - `pnpm run desktop:release:appcast:external:production:guard`
+   - non-dry-run publication requires explicit workflow input `allow_appcast_external_production=true`.
+12. Run external publication readiness checks:
    - `pnpm run desktop:release:appcast:external:readiness`
    - use strict mode when production credentials/execution are expected: `pnpm run desktop:release:appcast:external:readiness:strict`.
-12. Run external publication dry-run report:
+13. Run external publication dry-run report:
    - `pnpm run desktop:release:appcast:publish:external:dry-run`
-13. Record evidence in release checklist ticket and Phase C execution log.
-14. Block release promotion if any required gate is missing or only manually asserted without evidence.
+14. Record evidence in release checklist ticket and Phase C execution log.
+15. Block release promotion if any required gate is missing or only manually asserted without evidence.
 
 CI baseline note:
 - `.github/workflows/tests-desktop-flutter.yml` includes `release-evidence-guard` and `release-update-manifest-guard` jobs, and uploads parity/build artifacts for audit traceability.
@@ -134,6 +137,8 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` runs an `appcast-preview` job that generates/checks/uploads appcast preview JSON from smoke reports.
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job also produces channel/version appcast publish dry-run targets.
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job also produces and validates appcast publication bundle artifacts.
+- `.github/workflows/release-desktop-installer-smoke.yml` supports explicit non-dry-run external publication consent via `allow_appcast_external_production` input.
+- `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job runs external production guard checks and uploads production guard report artifacts.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict external publication readiness enforcement via `enforce_appcast_external_readiness` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job runs external publication readiness checks and uploads readiness report artifacts.
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job optionally runs external publication stage and uploads publication report artifact.
@@ -144,6 +149,7 @@ CI baseline note:
 - Appcast preview generator/checker: `desktop/scripts/generate_appcast_from_reports.sh`, `desktop/scripts/check_appcast.sh`.
 - Appcast publish dry-run script: `desktop/scripts/publish_appcast.sh`.
 - Appcast publication bundle generator/checker: `desktop/scripts/generate_appcast_publication_bundle.sh`, `desktop/scripts/check_appcast_publication_bundle.sh`.
+- Appcast external production guard: `desktop/scripts/guard_appcast_external_production.sh`.
 - Appcast external publication readiness checker: `desktop/scripts/check_appcast_external_readiness.sh`.
 - Appcast external publication runner: `desktop/scripts/publish_appcast_external.sh`.
 - Signing readiness checker: `desktop/scripts/check_signing_readiness.sh`.

@@ -46,6 +46,11 @@ on:
         type: boolean
         required: true
         default: true
+      allow_appcast_external_production:
+        description: "Allow non-dry-run external appcast publication"
+        type: boolean
+        required: true
+        default: false
       enforce_windows_installer_packaging:
         description: "Fail workflow when Windows installer (.msi/.exe) artifact check fails"
         type: boolean
@@ -275,6 +280,15 @@ jobs:
         working-directory: ./desktop
         run: ./scripts/check_appcast_publication_bundle.sh
 
+      - name: Run appcast external production guard
+        if: ${{ inputs.publish_appcast_external }}
+        working-directory: ./desktop
+        env:
+          APPCAST_PUBLISH_PROVIDER: ${{ inputs.appcast_external_provider }}
+          APPCAST_PUBLISH_DRY_RUN: ${{ inputs.appcast_external_dry_run }}
+          ALLOW_APPCAST_EXTERNAL_PRODUCTION: ${{ inputs.allow_appcast_external_production }}
+        run: ./scripts/guard_appcast_external_production.sh
+
       - name: Run appcast external readiness check
         if: ${{ inputs.publish_appcast_external }}
         working-directory: ./desktop
@@ -282,6 +296,7 @@ jobs:
           STRICT_APPCAST_EXTERNAL_READINESS: ${{ inputs.enforce_appcast_external_readiness }}
           APPCAST_PUBLISH_PROVIDER: ${{ inputs.appcast_external_provider }}
           APPCAST_PUBLISH_DRY_RUN: ${{ inputs.appcast_external_dry_run }}
+          ALLOW_APPCAST_EXTERNAL_PRODUCTION: ${{ inputs.allow_appcast_external_production }}
           APPCAST_S3_BUCKET: ${{ secrets.APPCAST_S3_BUCKET }}
           APPCAST_S3_PREFIX: ${{ vars.APPCAST_S3_PREFIX }}
           APPCAST_CACHE_INVALIDATION_COMMAND: ${{ secrets.APPCAST_CACHE_INVALIDATION_COMMAND }}
@@ -299,6 +314,7 @@ jobs:
         env:
           APPCAST_PUBLISH_PROVIDER: ${{ inputs.appcast_external_provider }}
           APPCAST_PUBLISH_DRY_RUN: ${{ inputs.appcast_external_dry_run }}
+          ALLOW_APPCAST_EXTERNAL_PRODUCTION: ${{ inputs.allow_appcast_external_production }}
           APPCAST_S3_BUCKET: ${{ secrets.APPCAST_S3_BUCKET }}
           APPCAST_S3_PREFIX: ${{ vars.APPCAST_S3_PREFIX }}
           APPCAST_CACHE_INVALIDATION_COMMAND: ${{ secrets.APPCAST_CACHE_INVALIDATION_COMMAND }}
@@ -332,6 +348,14 @@ jobs:
         with:
           name: desktop-appcast-publication-bundle
           path: desktop/release/reports/appcast_publication_bundle.json
+          if-no-files-found: warn
+
+      - name: Upload appcast external production guard report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-appcast-external-production-guard-report
+          path: desktop/release/reports/appcast_external_production_guard_report.md
           if-no-files-found: warn
 
       - name: Upload appcast external readiness report
