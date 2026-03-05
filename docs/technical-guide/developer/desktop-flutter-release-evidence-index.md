@@ -62,3 +62,4 @@ Each release candidate record should include:
 27. Attach update manifest validation report (`release/reports/update_manifest_validation_report.md`) before promotion decision.
 28. Attach verify stage timing report (`release/reports/verify_stage_timing_report.md`) before promotion decision.
 29. Attach release evidence bundle check reports (`release/reports/release_evidence_bundle_check_macos.md`, `release/reports/release_evidence_bundle_check_windows.md`) before promotion decision.
+30. Attach release smoke gate policy contract report (`release/reports/release_smoke_gate_policy_contract_report.md`) before promotion decision.

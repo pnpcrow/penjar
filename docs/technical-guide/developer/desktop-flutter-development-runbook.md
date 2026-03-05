@@ -58,6 +58,7 @@ This runbook defines the repeatable execution loop for the Flutter desktop full-
    - `pnpm run desktop:release:appcast:bundle:generate`
    - `pnpm run desktop:release:appcast:bundle:check`
    - `pnpm run desktop:release:smoke:gate-policy:check`
+   - `pnpm run desktop:release:smoke:gate-policy:contract:check`
    - `pnpm run desktop:release:appcast:external:production:guard`
    - `pnpm run desktop:release:appcast:external:readiness`
    - `pnpm run desktop:release:appcast:external:readiness:strict`

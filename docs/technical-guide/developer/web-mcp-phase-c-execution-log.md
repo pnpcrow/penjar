@@ -3757,8 +3757,57 @@ Reduce duplicated placeholder command-detection logic across release/signing/win
   - Syntax checks pass for helper and all migrated scripts.
   - Full-fast desktop verification remains green after helper refactor.
 
+## Unit WS-D-88: Release smoke gate-policy contract automation baseline
+
+### Planned objective
+
+Protect increasingly complex gate-policy dependency rules from silent regressions by adding an executable contract check with expected fail/pass profiles and wiring it into canonical verify + CI artifact chains.
+
+### Implemented changes
+
+1. Added gate-policy contract checker:
+   - new `desktop/scripts/check_release_smoke_gate_policy_contract.sh`,
+   - executes deterministic expected fail/pass profiles against `check_release_smoke_gate_policy.sh`,
+   - emits `release/reports/release_smoke_gate_policy_contract_report.md`.
+2. Integrated into canonical verify chain:
+   - `desktop/scripts/verify_desktop.sh` now runs `release smoke gate policy contract check` stage before test/analyze/build phases.
+3. Added root command surface:
+   - `desktop:release:smoke:gate-policy:contract:check`.
+4. Extended CI/workflow artifact chain:
+   - `.github/workflows/tests-desktop-flutter.yml` verify matrix now uploads `desktop-release-smoke-gate-policy-contract-report-*` artifacts.
+   - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job now runs gate-policy contract checker and uploads `desktop-release-smoke-gate-policy-contract-report`.
+5. Updated continuity docs:
+   - `desktop-flutter-development-runbook.md` command inventory now includes gate-policy contract command.
+   - `desktop-flutter-release-validation-baseline.md` protocol/CI/script-index notes now include contract checker stage + artifacts.
+   - `desktop-flutter-release-evidence-index.md` now includes gate-policy contract report attachment requirement.
+6. Re-ran validation commands:
+   - syntax checks (`bash -n`) for contract checker + helper + refactored scripts,
+   - expected fail/pass scenarios for appcast/signing/windows placeholder-hygiene paths after helper sourcing refactor,
+   - re-ran contract checker after baseline-case execution-path correction to confirm non-noop baseline behavior,
+   - `pnpm run desktop:release:smoke:gate-policy:contract:check`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - gate-policy dependency regression detectability,
+  - verify-chain and CI artifact integration completeness for contract report,
+  - continuity document linkage across runbook/baseline/evidence index/execution log.
+- **Issues found during review**
+  1. Gate-policy dependency complexity had grown significantly, but no deterministic contract automation existed to detect accidental rule regressions.
+  2. Initial contract-checker baseline case passed a `true` token into `env`, which could bypass actual gate-policy checker execution and produce false-green baseline status.
+- **Fix applied**
+  1. Added contract checker with explicit expected fail/pass policy profiles and integrated it into canonical verify + CI artifact paths.
+  2. Corrected baseline-case execution path in `check_release_smoke_gate_policy_contract.sh` to run `check_release_smoke_gate_policy.sh` directly when no env overrides are supplied.
+- **Post-fix validation criteria**
+  - Contract checker fails on dependency regressions and passes on coherent strict profile.
+  - Baseline-default contract case executes the real gate-policy checker path (no no-op command substitution).
+  - Verify chain includes contract checker stage and remains green.
+  - CI/workflow artifact chain retains gate-policy contract report outputs.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

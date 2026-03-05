@@ -148,6 +148,10 @@ jobs:
           STRICT_APPCAST_EXTERNAL_READINESS: ${{ inputs.enforce_appcast_external_readiness }}
         run: ./scripts/check_release_smoke_gate_policy.sh
 
+      - name: Run release smoke gate policy contract check
+        working-directory: ./desktop
+        run: ./scripts/check_release_smoke_gate_policy_contract.sh
+
       - name: Run signing readiness check
         working-directory: ./desktop
         env:
@@ -181,6 +185,14 @@ jobs:
         with:
           name: desktop-release-smoke-gate-policy-report
           path: desktop/release/reports/release_smoke_gate_policy_report.md
+          if-no-files-found: warn
+
+      - name: Upload release smoke gate policy contract report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-release-smoke-gate-policy-contract-report
+          path: desktop/release/reports/release_smoke_gate_policy_contract_report.md
           if-no-files-found: warn
 
       - name: Upload release script syntax report

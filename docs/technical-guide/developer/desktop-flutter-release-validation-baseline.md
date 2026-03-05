@@ -119,10 +119,11 @@ This baseline defines minimum release validation requirements for desktop distri
      - `.github/workflows/release-desktop-installer-smoke.yml` (`workflow_dispatch`).
 4. Run release evidence index guard: `pnpm run desktop:release:evidence:check`.
 5. Run update manifest guard: `pnpm run desktop:release:update-manifest:check`.
-6. Generate and review evidence row snippets:
+6. Run release smoke gate policy contract guard: `pnpm run desktop:release:smoke:gate-policy:contract:check`.
+7. Generate and review evidence row snippets:
    - `pnpm run desktop:release:evidence:row:macos`
    - `pnpm run desktop:release:evidence:row:windows`
-7. Generate and review evidence bundle summaries:
+8. Generate and review evidence bundle summaries:
    - `pnpm run desktop:release:evidence:bundle:macos`
    - `pnpm run desktop:release:evidence:bundle:windows`
    - check bundle status summaries:
@@ -131,22 +132,22 @@ This baseline defines minimum release validation requirements for desktop distri
    - strict bundle check mode (fails on risky summary statuses):
      - `pnpm run desktop:release:evidence:bundle:check:macos:strict`
      - `pnpm run desktop:release:evidence:bundle:check:windows:strict`
-8. Generate evidence-index previews before applying table updates:
+9. Generate evidence-index previews before applying table updates:
    - `pnpm run desktop:release:evidence:index:preview:macos`
    - `pnpm run desktop:release:evidence:index:preview:windows`
-9. Generate and validate appcast preview:
+10. Generate and validate appcast preview:
    - `pnpm run desktop:release:appcast:generate`
    - strict platform coverage mode: `pnpm run desktop:release:appcast:generate:strict` (requires both macOS + Windows smoke reports).
    - `pnpm run desktop:release:appcast:check`
-10. Publish appcast dry-run targets:
+11. Publish appcast dry-run targets:
    - `pnpm run desktop:release:appcast:publish:dry-run`
-11. Generate/check appcast publication bundle:
+12. Generate/check appcast publication bundle:
    - `pnpm run desktop:release:appcast:bundle:generate`
    - `pnpm run desktop:release:appcast:bundle:check`
-12. Run external production guard:
+13. Run external production guard:
    - `pnpm run desktop:release:appcast:external:production:guard`
    - non-dry-run publication requires explicit workflow input `allow_appcast_external_production=true`.
-13. Run external publication readiness checks:
+14. Run external publication readiness checks:
    - `pnpm run desktop:release:appcast:external:readiness`
    - use strict mode when production credentials/execution are expected: `pnpm run desktop:release:appcast:external:readiness:strict`.
    - strict production readiness additionally expects:
@@ -154,10 +155,10 @@ This baseline defines minimum release validation requirements for desktop distri
      - `APPCAST_EXTERNAL_INVALIDATION_CHECK_COMMAND` (invalidation validation command),
      - `APPCAST_CACHE_INVALIDATION_COMMAND` (actual invalidation execution command).
    - strict mode also rejects placeholder command hooks (for example `echo ...`, `<...>`, `todo`/`tbd` markers) for identity/invalidation/invalidation-execution checks.
-14. Run external publication dry-run report:
+15. Run external publication dry-run report:
    - `pnpm run desktop:release:appcast:publish:external:dry-run`
-15. Record evidence in release checklist ticket and Phase C execution log.
-16. Block release promotion if any required gate is missing or only manually asserted without evidence.
+16. Record evidence in release checklist ticket and Phase C execution log.
+17. Block release promotion if any required gate is missing or only manually asserted without evidence.
 
 CI baseline note:
 - `.github/workflows/tests-desktop-flutter.yml` includes `release-evidence-guard` and `release-update-manifest-guard` jobs, and uploads parity/build artifacts for audit traceability.
@@ -167,11 +168,13 @@ CI baseline note:
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads verify test coverage report artifacts (`desktop-verify-test-coverage-report-*`).
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads desktop command inventory report artifacts (`desktop-command-inventory-report-*`).
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads update manifest validation report artifacts (`desktop-update-manifest-validation-report-*`).
+- `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads release smoke gate policy contract report artifacts (`desktop-release-smoke-gate-policy-contract-report-*`).
 - `.github/workflows/release-desktop-installer-smoke.yml` includes `signing-readiness` job with optional strict enforcement via workflow input.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job runs release script syntax and verify test coverage checks, and uploads `desktop-release-script-syntax-report-smoke` + `desktop-verify-test-coverage-report-smoke` artifacts.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs desktop command inventory checks and uploads `desktop-command-inventory-report-smoke` artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs update manifest checks and uploads `desktop-update-manifest-validation-report-smoke` artifact.
-- `desktop/scripts/verify_desktop.sh` now runs release script syntax checks, verify test coverage checks, desktop command inventory checks, and update manifest checks before test/analyze/build phases, and executes contract/parity/mode-matrix tests through dedicated scripts to avoid duplicate suite execution.
+- `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs release smoke gate policy contract checks and uploads `desktop-release-smoke-gate-policy-contract-report` artifact.
+- `desktop/scripts/verify_desktop.sh` now runs release script syntax checks, verify test coverage checks, desktop command inventory checks, update manifest checks, and release smoke gate policy contract checks before test/analyze/build phases, and executes contract/parity/mode-matrix tests through dedicated scripts to avoid duplicate suite execution.
 - `desktop/scripts/verify_desktop.sh` emits verify stage timing reports (`release/reports/verify_stage_timing_report.md`) including stage-level durations and status.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job runs release smoke gate policy preflight and uploads gate policy report artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing command-hook enforcement via `enforce_signing_command_hooks` input.
@@ -219,6 +222,7 @@ CI baseline note:
 - Update manifest checker: `desktop/scripts/check_update_manifest.sh` (outputs `release/reports/update_manifest_validation_report.md`).
 - Installer/update smoke report generator: `desktop/scripts/generate_installer_update_report.sh`.
 - Release smoke gate policy checker: `desktop/scripts/check_release_smoke_gate_policy.sh`.
+- Release smoke gate policy contract checker: `desktop/scripts/check_release_smoke_gate_policy_contract.sh`.
 - Release script syntax checker: `desktop/scripts/check_release_script_syntax.sh`.
 - Verify test coverage checker: `desktop/scripts/check_verify_test_coverage.sh`.
 - Desktop command inventory checker: `desktop/scripts/check_desktop_command_inventory.sh`.
