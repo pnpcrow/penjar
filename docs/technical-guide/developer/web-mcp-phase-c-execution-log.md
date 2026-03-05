@@ -7956,6 +7956,51 @@ delegate behavior can be audited without inspecting environment variables.
     covered at contract/parity levels.
   - targeted tests and full desktop verification remain green after diagnostics expansion.
 
+## Unit WS-D-176: Strict-schema fallback policy parity diagnostics coverage
+
+### Planned objective
+
+Close remaining backend-auth diagnostics visibility risk by proving strict-schema fallback-policy
+label rendering (`auth-backend-fallback: strict-schema`) in parity UI when backend execution
+transport is active and required-state gate is explicitly opted out.
+
+### Implemented changes
+
+1. Added parity regression in `desktop/test/parity/remote_stub_mode_parity_test.dart`:
+   - `backend execution transport strict-schema mode surfaces strict fallback profile label`.
+2. New parity case validates diagnostics profile summary includes:
+   - `auth-backend-schema: strict`,
+   - `auth-backend-fallback: strict-schema`,
+   - and excludes `auth-backend-state: required` under explicit required-state opt-out.
+3. Updated continuity docs:
+   - `desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && flutter test test/parity/remote_stub_mode_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - parity-level diagnostics visibility for strict fallback-policy label mode,
+  - backend execution transport policy-mode switching behavior under explicit required-state opt-out,
+  - regression impact against full desktop verification chain.
+- **Issues found during review**
+  1. Strict fallback-policy label (`strict-schema`) had contract coverage but no parity UI assertion,
+     leaving a diagnostics-surface regression gap.
+  2. Backend execution transport policy labeling needed explicit guard that strict mode remains
+     distinguishable from required-state mode in diagnostics text.
+- **Fix applied**
+  1. Added dedicated parity diagnostics test for strict-schema fallback-policy label mode.
+  2. Asserted combined strict-schema + strict-fallback label rendering and required-state label
+     exclusion in one backend execution transport scenario.
+- **Post-fix validation criteria**
+  - strict fallback-policy label rendering is parity-covered for backend execution transport mode.
+  - strict-schema and required-state diagnostics labels remain unambiguous under explicit opt-out.
+  - targeted parity test and full desktop verification remain green after parity gap closure.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

@@ -355,6 +355,42 @@ void main() {
   );
 
   testWidgets(
+    'backend execution transport strict-schema mode surfaces strict fallback profile label',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient: RemoteStubHttpTransportClient(
+            backendBaseUrl: 'https://api.penjar.app',
+            executionProbe: (_) =>
+                const RemoteStubHttpBackendExecutionResult.allowed(),
+          ),
+          remoteStubAuthStrictBackendSchema: true,
+          remoteStubAuthRequireBackendState: false,
+        ),
+      );
+
+      await openWorkflowSection(tester, 'diagnostics');
+      final Text diagnosticsProfileText = tester.widget(
+        find.byKey(const ValueKey<String>('diagnostics-remote-profile')),
+      );
+      expect(
+        diagnosticsProfileText.data,
+        contains('auth-backend-schema: strict'),
+      );
+      expect(
+        diagnosticsProfileText.data,
+        contains('auth-backend-fallback: strict-schema'),
+      );
+      expect(
+        diagnosticsProfileText.data,
+        isNot(contains('auth-backend-state: required')),
+      );
+    },
+  );
+
+  testWidgets(
     'backend signed-out response forces signed-out state after prior sign-in',
     (WidgetTester tester) async {
       await pumpDesktopApp(

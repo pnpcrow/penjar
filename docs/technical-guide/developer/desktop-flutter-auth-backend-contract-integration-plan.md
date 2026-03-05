@@ -73,7 +73,9 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
    - diagnostics remote profile can surface `auth-backend-state: required`,
    - diagnostics remote profile now surfaces backend fallback policy label as
      `auth-backend-fallback: require-state|strict-schema|delegate-enabled` for backend execution transport,
-   - parity UI coverage now includes required-state fallback blocking behavior.
+   - parity UI coverage now includes required-state fallback blocking behavior and backend execution
+     transport fallback-policy label visibility (`require-state`, `delegate-enabled`,
+     `strict-schema`).
 13. Auth-session parity backend integration coverage expansion:
    - `desktop/test/parity/auth_session_parity_test.dart` now includes backend snapshot sign-in/signed-out transition coverage, required-state fallback-block coverage, snake-case/isOk failure-flag status mapping coverage, snake_case signed-in/remember alias normalization coverage, signed-out alias variant fallback-status coverage (`signedOut` / `isSignedOut` / `signed_out` / `is_signed_out`), and payload-envelope parity coverage for top-level/nested wrapper paths (`payload`, `result -> payload`).
 14. Auth backend failure-taxonomy fallback status mapping baseline:
