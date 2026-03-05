@@ -97,6 +97,7 @@ This baseline defines minimum release validation requirements for desktop distri
      - `PENJAR_MACOS_SIGN_VERIFY_COMMAND`,
      - `PENJAR_WINDOWS_SIGN_VERIFY_COMMAND`,
      - `PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND`.
+   - signing readiness checks require protocol register command hook (`PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND`) when `STRICT_WINDOWS_PROTOCOL_REGISTRATION=1`.
    - standalone signing provenance checks:
      - `pnpm run desktop:release:signing:provenance:macos`
      - `pnpm run desktop:release:signing:provenance:windows`
@@ -207,7 +208,7 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job runs release smoke gate policy preflight and uploads gate policy report artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing command-hook enforcement via `enforce_signing_command_hooks` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing placeholder hygiene enforcement via `enforce_signing_placeholder_hygiene` input.
-- `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness command-hook checks include sign-verify/provenance/protocol hooks (`PENJAR_MACOS_SIGN_VERIFY_COMMAND`, `PENJAR_WINDOWS_SIGN_VERIFY_COMMAND`, `PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND`, `PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND`).
+- `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness command-hook checks include sign-verify/provenance hooks by default (`PENJAR_MACOS_SIGN_VERIFY_COMMAND`, `PENJAR_WINDOWS_SIGN_VERIFY_COMMAND`, `PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND`), and require `PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND` when `enforce_windows_protocol_registration=true`.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing execution enforcement via `enforce_signing_execution` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now requires `enforce_signing_placeholder_hygiene=true` when `enforce_signing_execution=true`.
 - `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now requires `enforce_signing_readiness=true` when `enforce_signing_execution=true` or `enforce_signing_provenance=true`.

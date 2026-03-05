@@ -5828,6 +5828,44 @@ Provide an executable baseline template for Windows URL protocol registration so
   - documentation now links strict protocol gate + command hook + helper script in one traceable chain.
   - full desktop verification chain remains green after helper baseline addition.
 
+## Unit WS-D-132: Conditional protocol hook enforcement in signing readiness strict mode
+
+### Planned objective
+
+Prevent over-enforcement regressions by making Windows protocol register command-hook strictness conditional on protocol strict gate intent, so generic strict signing-command-hook checks remain compatible when protocol registration is not explicitly enforced.
+
+### Implemented changes
+
+1. Updated signing-readiness checker in `desktop/scripts/check_signing_readiness.sh`:
+   - added protocol strict input support:
+     - `STRICT_WINDOWS_PROTOCOL_REGISTRATION` (or fifth positional argument),
+   - protocol command hook category is now:
+     - `command-hook` when protocol strict mode is enabled,
+     - `optional-command-hook` when protocol strict mode is disabled.
+2. Updated release smoke workflow wiring in `.github/workflows/release-desktop-installer-smoke.yml`:
+   - signing-readiness step now passes `STRICT_WINDOWS_PROTOCOL_REGISTRATION` input value to readiness checker.
+3. Updated release validation docs:
+   - `desktop-flutter-release-validation-baseline.md` now documents conditional protocol-hook requirement semantics for signing readiness.
+4. Re-ran validation command:
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict command-hook enforcement compatibility between signing-readiness and protocol strict gate,
+  - workflow env propagation correctness for conditional protocol-hook enforcement.
+- **Issues found during review**
+  1. Protocol command hook could be treated as globally strict-required under strict command-hook mode, even when protocol strict gate was not intended.
+  2. Signing-readiness workflow step did not pass protocol strict toggle, preventing context-aware requirement handling.
+- **Fix applied**
+  1. Added conditional category handling for protocol command hook in readiness checker.
+  2. Propagated protocol strict input into workflow signing-readiness step.
+  3. Updated release validation baseline wording to match conditional enforcement behavior.
+- **Post-fix validation criteria**
+  - strict signing command-hook mode no longer over-requires protocol hook unless protocol strict gate is enabled.
+  - protocol strict enforcement still requires protocol command hook through signing-readiness + gate-policy chain.
+  - full desktop verification chain remains green after conditional-enforcement adjustment.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

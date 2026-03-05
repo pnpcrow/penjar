@@ -5,6 +5,7 @@ strict_input="${1:-${STRICT_SIGNING:-0}}"
 report_file="${2:-release/reports/signing_readiness_report.md}"
 strict_command_hooks_input="${3:-${STRICT_SIGNING_COMMAND_HOOKS:-0}}"
 strict_placeholders_input="${4:-${STRICT_SIGNING_PLACEHOLDERS:-0}}"
+strict_windows_protocol_registration_input="${5:-${STRICT_WINDOWS_PROTOCOL_REGISTRATION:-0}}"
 
 strict_mode=0
 case "$(printf '%s' "$strict_input" | tr '[:upper:]' '[:lower:]')" in
@@ -19,6 +20,11 @@ esac
 strict_placeholders_mode=0
 case "$(printf '%s' "$strict_placeholders_input" | tr '[:upper:]' '[:lower:]')" in
   1|true|yes|strict) strict_placeholders_mode=1 ;;
+esac
+
+strict_windows_protocol_registration_mode=0
+case "$(printf '%s' "$strict_windows_protocol_registration_input" | tr '[:upper:]' '[:lower:]')" in
+  1|true|yes|strict) strict_windows_protocol_registration_mode=1 ;;
 esac
 
 mkdir -p "$(dirname "$report_file")"
@@ -81,6 +87,7 @@ write_row() {
   echo "- Strict mode: $strict_mode"
   echo "- Strict command hooks mode: $strict_command_hooks_mode"
   echo "- Strict placeholder mode: $strict_placeholders_mode"
+  echo "- Strict windows protocol registration mode: $strict_windows_protocol_registration_mode"
   echo
   echo "| Requirement | Environment Variable | Category | Status |"
   echo "|---|---|---|---|"
@@ -95,7 +102,11 @@ write_row "macOS sign command hook" "PENJAR_MACOS_SIGN_COMMAND" "command-hook"
 write_row "macOS notarize command hook" "PENJAR_MACOS_NOTARIZE_COMMAND" "command-hook"
 write_row "Windows sign command hook" "PENJAR_WINDOWS_SIGN_COMMAND" "command-hook"
 write_row "Windows installer command hook" "PENJAR_WINDOWS_INSTALLER_COMMAND" "command-hook"
-write_row "Windows protocol register command hook" "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND" "command-hook"
+protocol_register_category="optional-command-hook"
+if [[ "$strict_windows_protocol_registration_mode" -eq 1 ]]; then
+  protocol_register_category="command-hook"
+fi
+write_row "Windows protocol register command hook" "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND" "$protocol_register_category"
 write_row "macOS sign verify command hook" "PENJAR_MACOS_SIGN_VERIFY_COMMAND" "command-hook"
 write_row "Windows sign verify command hook" "PENJAR_WINDOWS_SIGN_VERIFY_COMMAND" "command-hook"
 write_row "Windows installer provenance command hook" "PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND" "command-hook"
