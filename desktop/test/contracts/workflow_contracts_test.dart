@@ -2539,6 +2539,36 @@ void main() {
       ),
       const _AuthBackendFixtureCase(
         name:
+            'restore-session result envelope authState signedIn false alias maps fallback status',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'authState': <String, Object?>{
+              'signedIn': false,
+              'sessionToken': 'fixture-signed-in-camel-false-result-token',
+            },
+          },
+        },
+        expectedSignedIn: false,
+        expectedStatus: '[remote-stub] Authentication required.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session data envelope authState authenticated false alias maps fallback status',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'data': <String, Object?>{
+            'authState': <String, Object?>{
+              'authenticated': false,
+              'sessionToken': 'fixture-authenticated-false-data-token',
+            },
+          },
+        },
+        expectedSignedIn: false,
+        expectedStatus: '[remote-stub] Authentication required.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
             'restore-session result envelope authState signed_in false alias maps fallback status',
         operationId: RemoteStubOperationIds.restoreSession,
         responsePayload: <String, Object?>{

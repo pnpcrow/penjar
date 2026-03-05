@@ -4608,6 +4608,36 @@ void main() {
           absentSuccessText: 'Session restored (simulated).',
         ),
         (
+          description: 'result envelope authState signedIn false alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'signedIn': false,
+                'sessionToken': 'auth-state-signed-in-camel-false-result-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
+          description: 'data envelope authState authenticated false alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'authenticated': false,
+                'sessionToken': 'auth-state-authenticated-false-data-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
           description: 'result envelope authState signed_in false alias',
           restoreSessionPayload: <String, Object?>{
             'result': <String, Object?>{
