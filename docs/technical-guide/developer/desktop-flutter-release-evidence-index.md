@@ -57,3 +57,4 @@ Each release candidate record should include:
 22. Attach release smoke gate policy report (`release/reports/release_smoke_gate_policy_report.md`) before promotion decision.
 23. Attach platform release evidence bundle summaries (`release/reports/release_evidence_bundle_macos.md`, `release/reports/release_evidence_bundle_windows.md`) before promotion decision.
 24. Attach release script syntax report (`release/reports/release_script_syntax_report.md`) before promotion decision.
+25. Attach verify test coverage report (`release/reports/verify_test_coverage_report.md`) before promotion decision.

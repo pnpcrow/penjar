@@ -87,6 +87,14 @@ jobs:
           path: desktop/release/reports/release_script_syntax_report.md
           if-no-files-found: warn
 
+      - name: Upload verify test coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-verify-test-coverage-report-${{ matrix.label }}
+          path: desktop/release/reports/verify_test_coverage_report.md
+          if-no-files-found: warn
+
       - name: Upload macOS debug app artifact
         if: matrix.label == 'macos'
         uses: actions/upload-artifact@v4

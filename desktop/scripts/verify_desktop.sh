@@ -6,6 +6,7 @@ if [[ "${SKIP_PUB_GET:-0}" != "1" ]]; then
 fi
 
 ./scripts/check_release_script_syntax.sh
+./scripts/check_verify_test_coverage.sh
 
 FLUTTER_NO_PUB=1 ./scripts/run_contract_tests.sh
 FLUTTER_NO_PUB=1 ./scripts/run_parity_tests.sh

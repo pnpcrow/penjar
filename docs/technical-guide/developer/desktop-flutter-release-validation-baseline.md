@@ -67,6 +67,7 @@ This baseline defines minimum release validation requirements for desktop distri
 
 1. Before RC cut, confirm Flutter parity verification chain is green.
    - run release script syntax check: `pnpm run desktop:release:scripts:syntax:check`.
+   - run verify test coverage check: `pnpm run desktop:test:coverage:check`.
 2. Run signing readiness preflight:
    - `pnpm run desktop:release:signing:readiness`
    - use strict mode when release secrets are expected: `pnpm run desktop:release:signing:readiness:strict`.
@@ -144,8 +145,9 @@ This baseline defines minimum release validation requirements for desktop distri
 CI baseline note:
 - `.github/workflows/tests-desktop-flutter.yml` includes `release-evidence-guard` and `release-update-manifest-guard` jobs, and uploads parity/build artifacts for audit traceability.
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads release script syntax report artifacts (`desktop-release-script-syntax-report-*`).
+- `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads verify test coverage report artifacts (`desktop-verify-test-coverage-report-*`).
 - `.github/workflows/release-desktop-installer-smoke.yml` includes `signing-readiness` job with optional strict enforcement via workflow input.
-- `desktop/scripts/verify_desktop.sh` now runs release script syntax checks before test/analyze/build phases and executes contract/parity/mode-matrix tests through dedicated scripts to avoid duplicate suite execution.
+- `desktop/scripts/verify_desktop.sh` now runs release script syntax checks and verify test coverage checks before test/analyze/build phases, and executes contract/parity/mode-matrix tests through dedicated scripts to avoid duplicate suite execution.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job runs release smoke gate policy preflight and uploads gate policy report artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing command-hook enforcement via `enforce_signing_command_hooks` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing execution enforcement via `enforce_signing_execution` input.
@@ -174,6 +176,7 @@ CI baseline note:
 - Installer/update smoke report generator: `desktop/scripts/generate_installer_update_report.sh`.
 - Release smoke gate policy checker: `desktop/scripts/check_release_smoke_gate_policy.sh`.
 - Release script syntax checker: `desktop/scripts/check_release_script_syntax.sh`.
+- Verify test coverage checker: `desktop/scripts/check_verify_test_coverage.sh`.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.

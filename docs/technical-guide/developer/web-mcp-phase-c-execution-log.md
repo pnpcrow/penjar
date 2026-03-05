@@ -2776,8 +2776,55 @@ Reduce duplicate test execution time in desktop verification while preserving fu
   - Full-fast desktop verification remains green with the optimized test chain.
   - Release evidence guard remains green after verify-chain refactor.
 
+## Unit WS-D-65: Verify test coverage guard baseline
+
+### Planned objective
+
+Prevent test omission regressions by validating that canonical verify runners cover every desktop test file and only allow intentional duplicate coverage paths.
+
+### Implemented changes
+
+1. Added verify test coverage checker:
+   - `desktop/scripts/check_verify_test_coverage.sh`.
+2. Implemented coverage-guard semantics:
+   - scans `test/**/*_test.dart`,
+   - parses runner references from `run_contract_tests.sh`, `run_parity_tests.sh`, and `run_mode_matrix_tests.sh`,
+   - fails when uncovered tests or missing referenced tests are detected,
+   - allows explicit duplicate-coverage exceptions via `VERIFY_TEST_COVERAGE_ALLOW_DUPLICATES` (default: `test/widget_test.dart`),
+   - emits report (`release/reports/verify_test_coverage_report.md`) with discovered/covered/uncovered/missing/duplicate sections.
+3. Integrated coverage guard into canonical verification:
+   - `desktop/scripts/verify_desktop.sh` now runs `check_verify_test_coverage.sh` before test execution.
+4. Added root command surface:
+   - `desktop:test:coverage:check`.
+5. Extended desktop CI artifact chain:
+   - `.github/workflows/tests-desktop-flutter.yml` now uploads verify test coverage report artifacts (`desktop-verify-test-coverage-report-*`) for each matrix run.
+6. Updated release/runbook/index docs:
+   - `desktop-flutter-development-runbook.md` command inventory now includes verify test coverage command,
+   - `desktop-flutter-release-validation-baseline.md` now includes verify coverage protocol and CI/script references,
+   - `desktop-flutter-release-evidence-index.md` now includes verify test coverage report attachment rule.
+7. Re-ran validation commands:
+   - `pnpm run desktop:test:coverage:check`,
+   - `cd desktop && VERIFY_TEST_COVERAGE_ALLOW_DUPLICATES='' ./scripts/check_verify_test_coverage.sh` (expected failure: unexpected duplicate widget coverage),
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - completeness of test discovery vs runner coverage mappings,
+  - expected duplicate-coverage handling for mode matrix widget test,
+  - verify-chain and CI artifact integration stability.
+- **Issues found during review**
+  1. Without explicit duplicate allowance, mode matrix widget test appears as duplicate coverage and should fail guard.
+- **Fix applied**
+  1. Added default duplicate allowlist (`test/widget_test.dart`) with env override support to keep intentional mode-matrix duplication while still detecting accidental duplicates.
+- **Post-fix validation criteria**
+  - Verify coverage guard fails on uncovered tests/missing references/unexpected duplicates.
+  - Verify coverage report is generated in local and CI runs.
+  - Full-fast desktop verification remains green after coverage guard integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, de-duplicated contract/parity/mode-matrix verification chain, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, de-duplicated contract/parity/mode-matrix verification chain, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
