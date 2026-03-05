@@ -1377,6 +1377,43 @@ Close the remaining CI matrix coverage gap by extending the desktop verification
   - Linux/macOS entries remain unchanged and still use canonical verification script.
   - Acceptance baseline reflects three-platform matrix status.
 
+## Unit WS-D-35: Verification-chain fast path (`SKIP_PUB_GET`) optimization
+
+### Planned objective
+
+Reduce repeated local verification latency by allowing dependency-resolution skipping when lock/dependency state is unchanged, without altering CI-safe default behavior.
+
+### Implemented changes
+
+1. Added optional fast-path gate to canonical verifier:
+   - `desktop/scripts/verify_desktop.sh` now skips `flutter pub get` when `SKIP_PUB_GET=1`.
+2. Kept default behavior stable:
+   - without `SKIP_PUB_GET`, verification chain still runs `flutter pub get` before tests.
+3. Expanded root command surface for faster local iteration:
+   - added `desktop:verify:fast`,
+   - added `desktop:verify:full:fast`.
+4. Updated continuity/runbook anchors:
+   - `desktop-flutter-development-runbook.md` command list and verification policy now include fast-path usage.
+5. Updated acceptance baseline CI/protocol notes:
+   - `desktop-flutter-parity-acceptance-baseline.md` now documents `SKIP_PUB_GET` fast-path commands for local use.
+6. Re-ran verification with fast path:
+   - `pnpm run desktop:verify:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of fast-path guard logic and default-path preservation,
+  - regression risk from new root command variants,
+  - documentation accuracy for when fast path is safe to use.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - `desktop:verify:fast` completes successfully and preserves test/analyze behavior.
+  - Default `desktop:verify` path still performs dependency resolution.
+  - Docs clearly restrict fast path to unchanged dependency state.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

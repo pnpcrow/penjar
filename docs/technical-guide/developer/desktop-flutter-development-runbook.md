@@ -23,7 +23,9 @@ This runbook defines the repeatable execution loop for the Flutter desktop full-
 3. Identify one explicit implementation unit (scope, files, validation target, expected docs updates).
 4. Verify canonical commands are available:
    - `pnpm run desktop:verify`
+   - `pnpm run desktop:verify:fast`
    - `pnpm run desktop:verify:full`
+   - `pnpm run desktop:verify:full:fast`
    - `pnpm run desktop:test:parity`
    - `pnpm run desktop:test:mode-matrix`
 
@@ -60,7 +62,7 @@ Every unit entry must contain:
 
 ## 4) Verification policy
 
-- Fast loop (`desktop:verify`) is allowed while iterating.
+- Fast loop (`desktop:verify` / `desktop:verify:fast`) is allowed while iterating.
 - Closure gate requires `desktop:verify:full` green status.
 - Mode routing changes must validate matrix behavior via verification chain (`run_mode_matrix_tests.sh`).
 - Workflow-level UI changes must remain covered in parity suite (`run_parity_tests.sh`).

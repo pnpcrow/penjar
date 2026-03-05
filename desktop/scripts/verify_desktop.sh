@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-flutter pub get
+if [[ "${SKIP_PUB_GET:-0}" != "1" ]]; then
+  flutter pub get
+fi
+
 flutter test --no-pub
 FLUTTER_NO_PUB=1 ./scripts/run_parity_tests.sh
 FLUTTER_NO_PUB=1 ./scripts/run_mode_matrix_tests.sh
