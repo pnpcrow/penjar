@@ -1557,6 +1557,47 @@ void main() {
     );
 
     test(
+      'asset backend sibling data envelope is used when result envelope lacks asset state',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.importAsset: <String, Object?>{
+                'result': <String, Object?>{
+                  'meta': <String, Object?>{'requestId': 'req-asset-1'},
+                },
+                'data': <String, Object?>{
+                  'detail': 'Backend sibling data asset snapshot applied.',
+                  'assetState': <String, Object?>{
+                    'assets': <Map<String, Object?>>[
+                      <String, Object?>{
+                        'id': 'asset-sibling',
+                        'name': 'brand-kit.png',
+                        'type': 'image',
+                        'usedCount': 2,
+                      },
+                    ],
+                    'selectedAssetIndex': 0,
+                  },
+                },
+              },
+            });
+        final RemoteStubAssetManagementContract assetContract =
+            RemoteStubAssetManagementContract(transportClient: transportClient);
+
+        assetContract.importAsset('ignored', 'image');
+
+        expect(assetContract.state.assets, hasLength(1));
+        expect(assetContract.state.selectedAsset?.id, 'asset-sibling');
+        expect(assetContract.state.selectedAsset?.name, 'brand-kit.png');
+        expect(assetContract.state.selectedAsset?.usedCount, 2);
+        expect(
+          assetContract.state.status,
+          '[remote-stub] Backend sibling data asset snapshot applied.',
+        );
+      },
+    );
+
+    test(
       'supports deep backend response envelope chains beyond four levels',
       () {
         final _BackendResponseTransportClient transportClient =
