@@ -905,8 +905,50 @@ Continue WS-D contract-boundary extraction by moving asset import/select/use/rem
   - Asset contract unit tests pass for lifecycle and guard paths.
   - Desktop test/analyze/build chain remains green after extraction.
 
+## Unit WS-D-23: Collaboration-context contract boundary extraction
+
+### Planned objective
+
+Continue WS-D contract-boundary extraction by moving collaboration presence/thread rules from widget-local mutable state into an explicit in-memory contract adapter with unit-test coverage.
+
+### Implemented changes
+
+1. Extended contract module:
+   - `desktop/lib/contracts/workflow_contracts.dart`.
+2. Implemented collaboration contract baseline:
+   - `CollaborationContextContract` interface,
+   - `InMemoryCollaborationContextContract` adapter,
+   - thread/state models and guard path for invalid thread selection.
+3. Refactored `CollaborationContextPanel` to use contract adapter:
+   - peer presence toggle and thread create/select/resolve actions now delegate to contract methods,
+   - active session/thread counts and status are now rendered from contract state snapshot.
+4. Added collaboration contract unit tests:
+   - expanded `desktop/test/contracts/workflow_contracts_test.dart` with presence/thread lifecycle and invalid-selection coverage.
+5. Re-ran desktop verification chain:
+   - `pnpm run desktop:test`,
+   - `pnpm run desktop:test:parity`,
+   - `pnpm run desktop:analyze`,
+   - `pnpm run desktop:build:macos:debug`.
+6. Updated migration/parity trackers:
+   - collaboration notes now explicitly reference in-memory contract boundary baseline.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of collaboration state transitions after contract extraction,
+  - parity regression risk for existing collaboration widget interactions,
+  - consistency between tracker notes and implementation state.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Collaboration parity test remains green with contract-driven state.
+  - Collaboration contract unit tests pass for lifecycle and guard paths.
+  - Desktop test/analyze/build chain remains green after extraction.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, and auth/project/file/canvas/asset/export/diagnostics include contract-boundary pilots, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
+- All workflow domains now have Flutter parity scaffolds/harnesses, and auth/project/file/canvas/asset/collaboration/export/diagnostics include contract-boundary pilots, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
 - Desktop parity CI baseline is now configured on Linux with consolidated parity runner, but macOS/Windows build-matrix coverage and release-grade installer/update validation are not yet configured.

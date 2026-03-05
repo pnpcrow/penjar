@@ -187,6 +187,44 @@ void main() {
     });
   });
 
+  group('InMemoryCollaborationContextContract', () {
+    test('supports presence and thread lifecycle transitions', () {
+      final InMemoryCollaborationContextContract contract =
+          InMemoryCollaborationContextContract();
+
+      expect(contract.state.peerActive, isFalse);
+      expect(contract.state.activeSessions, 1);
+      expect(contract.state.threads, isEmpty);
+      expect(contract.state.status, 'Idle');
+
+      contract.togglePeerPresence();
+      expect(contract.state.peerActive, isTrue);
+      expect(contract.state.status, 'Peer connected: reviewer@penjar.app.');
+      expect(contract.state.activeSessions, 2);
+
+      contract.createThread('');
+      expect(contract.state.status, 'Thread create failed: title is required.');
+
+      contract.createThread('Review button spacing');
+      expect(contract.state.status, 'Thread created: Review button spacing.');
+      expect(contract.state.threads, hasLength(1));
+      expect(contract.state.selectedThread?.title, 'Review button spacing');
+
+      contract.resolveSelectedThread();
+      expect(contract.state.status, 'Thread resolved: Review button spacing.');
+      expect(contract.state.threads, isEmpty);
+      expect(contract.state.selectedThread, isNull);
+    });
+
+    test('guards invalid thread selection index', () {
+      final InMemoryCollaborationContextContract contract =
+          InMemoryCollaborationContextContract();
+
+      contract.selectThread(2);
+      expect(contract.state.status, 'Thread select failed: invalid index.');
+    });
+  });
+
   group('InMemoryExportWorkflowContract', () {
     test('returns validation failure for empty file name', () {
       final InMemoryExportWorkflowContract contract =

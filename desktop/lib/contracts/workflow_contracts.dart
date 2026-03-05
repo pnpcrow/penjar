@@ -528,6 +528,118 @@ class InMemoryAssetManagementContract implements AssetManagementContract {
   }
 }
 
+class ThreadRecord {
+  const ThreadRecord({required this.id, required this.title});
+
+  final String id;
+  final String title;
+}
+
+class CollaborationContextState {
+  const CollaborationContextState({
+    required this.peerActive,
+    required this.threads,
+    required this.selectedThreadIndex,
+    required this.status,
+  });
+
+  final bool peerActive;
+  final List<ThreadRecord> threads;
+  final int selectedThreadIndex;
+  final String status;
+
+  int get activeSessions => peerActive ? 2 : 1;
+
+  ThreadRecord? get selectedThread {
+    if (selectedThreadIndex < 0 || selectedThreadIndex >= threads.length) {
+      return null;
+    }
+    return threads[selectedThreadIndex];
+  }
+}
+
+abstract class CollaborationContextContract {
+  CollaborationContextState get state;
+  CollaborationContextState togglePeerPresence();
+  CollaborationContextState createThread(String title);
+  CollaborationContextState selectThread(int index);
+  CollaborationContextState resolveSelectedThread();
+}
+
+class InMemoryCollaborationContextContract
+    implements CollaborationContextContract {
+  final List<ThreadRecord> _threads = <ThreadRecord>[];
+  int _nextThreadNumber = 1;
+  int _selectedThreadIndex = -1;
+  bool _peerActive = false;
+  String _status = 'Idle';
+
+  @override
+  CollaborationContextState get state => CollaborationContextState(
+    peerActive: _peerActive,
+    threads: List<ThreadRecord>.unmodifiable(_threads),
+    selectedThreadIndex: _selectedThreadIndex,
+    status: _status,
+  );
+
+  @override
+  CollaborationContextState togglePeerPresence() {
+    _peerActive = !_peerActive;
+    _status = _peerActive
+        ? 'Peer connected: reviewer@penjar.app.'
+        : 'Peer disconnected: reviewer@penjar.app.';
+    return state;
+  }
+
+  @override
+  CollaborationContextState createThread(String title) {
+    final String normalizedTitle = title.trim();
+    if (normalizedTitle.isEmpty) {
+      _status = 'Thread create failed: title is required.';
+      return state;
+    }
+
+    final ThreadRecord created = ThreadRecord(
+      id: 'thread-${_nextThreadNumber++}',
+      title: normalizedTitle,
+    );
+    _threads.add(created);
+    _selectedThreadIndex = _threads.length - 1;
+    _status = 'Thread created: ${created.title}.';
+    return state;
+  }
+
+  @override
+  CollaborationContextState selectThread(int index) {
+    if (index < 0 || index >= _threads.length) {
+      _status = 'Thread select failed: invalid index.';
+      return state;
+    }
+    _selectedThreadIndex = index;
+    _status = 'Thread selected: ${_threads[index].title}.';
+    return state;
+  }
+
+  @override
+  CollaborationContextState resolveSelectedThread() {
+    final ThreadRecord? thread = state.selectedThread;
+    if (thread == null) {
+      _status = 'Thread resolve skipped: no thread selected.';
+      return state;
+    }
+
+    final String resolved = thread.title;
+    _threads.removeAt(_selectedThreadIndex);
+    if (_threads.isEmpty) {
+      _selectedThreadIndex = -1;
+    } else if (_selectedThreadIndex >= _threads.length) {
+      _selectedThreadIndex = _threads.length - 1;
+    }
+    _status = 'Thread resolved: $resolved.';
+    return state;
+  }
+}
+
 class ExportRequest {
   const ExportRequest({
     required this.fileName,

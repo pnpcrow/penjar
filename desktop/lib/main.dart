@@ -819,13 +819,6 @@ class _AssetManagementPanelState extends State<AssetManagementPanel> {
   }
 }
 
-class _ThreadRecord {
-  _ThreadRecord({required this.id, required this.title});
-
-  final String id;
-  final String title;
-}
-
 class CollaborationContextPanel extends StatefulWidget {
   const CollaborationContextPanel({super.key});
 
@@ -835,12 +828,9 @@ class CollaborationContextPanel extends StatefulWidget {
 }
 
 class _CollaborationContextPanelState extends State<CollaborationContextPanel> {
+  final CollaborationContextContract _contract =
+      InMemoryCollaborationContextContract();
   final TextEditingController _threadTitleController = TextEditingController();
-  final List<_ThreadRecord> _threads = <_ThreadRecord>[];
-  int _nextThreadNumber = 1;
-  int _selectedThreadIndex = -1;
-  bool _peerActive = false;
-  String _status = 'Idle';
 
   @override
   void dispose() {
@@ -848,77 +838,41 @@ class _CollaborationContextPanelState extends State<CollaborationContextPanel> {
     super.dispose();
   }
 
-  _ThreadRecord? get _selectedThread {
-    if (_selectedThreadIndex < 0 || _selectedThreadIndex >= _threads.length) {
-      return null;
-    }
-    return _threads[_selectedThreadIndex];
-  }
-
-  void _setStatus(String status) {
-    setState(() {
-      _status = status;
-    });
-  }
-
   void _togglePeerPresence() {
     setState(() {
-      _peerActive = !_peerActive;
-      _status = _peerActive
-          ? 'Peer connected: reviewer@penjar.app.'
-          : 'Peer disconnected: reviewer@penjar.app.';
+      _contract.togglePeerPresence();
     });
   }
 
   void _createThread() {
-    final String title = _threadTitleController.text.trim();
-    if (title.isEmpty) {
-      _setStatus('Thread create failed: title is required.');
-      return;
-    }
-
     setState(() {
-      final _ThreadRecord created = _ThreadRecord(
-        id: 'thread-${_nextThreadNumber++}',
-        title: title,
+      final String previousStatus = _contract.state.status;
+      final CollaborationContextState nextState = _contract.createThread(
+        _threadTitleController.text,
       );
-      _threads.add(created);
-      _selectedThreadIndex = _threads.length - 1;
-      _threadTitleController.clear();
-      _status = 'Thread created: ${created.title}.';
+      if (nextState.status != previousStatus &&
+          nextState.status.startsWith('Thread created:')) {
+        _threadTitleController.clear();
+      }
     });
   }
 
   void _selectThread(int index) {
     setState(() {
-      _selectedThreadIndex = index;
-      _status = 'Thread selected: ${_selectedThread!.title}.';
+      _contract.selectThread(index);
     });
   }
 
   void _resolveSelectedThread() {
-    final _ThreadRecord? thread = _selectedThread;
-    if (thread == null) {
-      _setStatus('Thread resolve skipped: no thread selected.');
-      return;
-    }
-
     setState(() {
-      final String resolved = thread.title;
-      _threads.removeAt(_selectedThreadIndex);
-      if (_threads.isEmpty) {
-        _selectedThreadIndex = -1;
-      } else if (_selectedThreadIndex >= _threads.length) {
-        _selectedThreadIndex = _threads.length - 1;
-      }
-      _status = 'Thread resolved: $resolved.';
+      _contract.resolveSelectedThread();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final int activeSessions = _peerActive ? 2 : 1;
-    final _ThreadRecord? thread = _selectedThread;
+    final CollaborationContextState collaborationState = _contract.state;
+    final ThreadRecord? thread = collaborationState.selectedThread;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Column(
@@ -931,7 +885,7 @@ class _CollaborationContextPanelState extends State<CollaborationContextPanel> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Active sessions: $activeSessions · Open threads: ${_threads.length}',
+          'Active sessions: ${collaborationState.activeSessions} · Open threads: ${collaborationState.threads.length}',
           key: const ValueKey<String>('collaboration-summary'),
           style: textTheme.bodyMedium,
         ),
@@ -939,7 +893,9 @@ class _CollaborationContextPanelState extends State<CollaborationContextPanel> {
         OutlinedButton(
           key: const ValueKey<String>('collaboration-toggle-peer'),
           onPressed: _togglePeerPresence,
-          child: Text(_peerActive ? 'Disconnect Peer' : 'Connect Peer'),
+          child: Text(
+            collaborationState.peerActive ? 'Disconnect Peer' : 'Connect Peer',
+          ),
         ),
         const SizedBox(height: 16),
         TextField(
@@ -968,15 +924,18 @@ class _CollaborationContextPanelState extends State<CollaborationContextPanel> {
           ],
         ),
         const SizedBox(height: 16),
-        if (_threads.isEmpty)
+        if (collaborationState.threads.isEmpty)
           const Text('No open threads.', key: ValueKey<String>('thread-empty'))
         else
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: List<Widget>.generate(_threads.length, (int index) {
-              final _ThreadRecord item = _threads[index];
-              final bool selected = index == _selectedThreadIndex;
+            children: List<Widget>.generate(collaborationState.threads.length, (
+              int index,
+            ) {
+              final ThreadRecord item = collaborationState.threads[index];
+              final bool selected =
+                  index == collaborationState.selectedThreadIndex;
               return ChoiceChip(
                 key: ValueKey<String>('thread-chip-${item.id}'),
                 label: Text(item.title),
@@ -993,7 +952,7 @@ class _CollaborationContextPanelState extends State<CollaborationContextPanel> {
           ),
         const SizedBox(height: 8),
         Text(
-          'Status: $_status',
+          'Status: ${collaborationState.status}',
           key: const ValueKey<String>('collaboration-status'),
           style: textTheme.bodyMedium,
         ),
