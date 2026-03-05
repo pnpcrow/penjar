@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:penjar_desktop/contracts/desktop_contract_bundle.dart';
 import 'package:penjar_desktop/contracts/remote_stub_contracts.dart';
@@ -154,6 +154,27 @@ class _AuthBackendFailureFlagIsOkParityTransportClient
         const <String, Object?>{
           'isOk': false,
           'state': <String, Object?>{'sessionToken': 'expired-session'},
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
+class _AuthBackendSnakeCaseStateAliasParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendSnakeCaseStateAliasParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend snake-case sign-in snapshot applied.',
+          'state': <String, Object?>{
+            'signed_in': true,
+            'remember_session': true,
+          },
         },
       );
     }
@@ -515,6 +536,44 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'auth/session parity normalizes snake_case signed-in state aliases',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendSnakeCaseStateAliasParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend snake-case sign-in snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+      final CheckboxListTile rememberSessionTile = tester.widget(
+        find.byKey(const ValueKey<String>('auth-remember')),
+      );
+      expect(rememberSessionTile.value, isTrue);
+
+      expect(find.textContaining('Signed in (simulated).'), findsNothing);
     },
   );
 

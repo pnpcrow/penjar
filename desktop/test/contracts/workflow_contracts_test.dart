@@ -1483,6 +1483,56 @@ void main() {
     );
 
     test(
+      'auth backend snake_case signed_in and remember_session aliases are normalized',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'detail': 'Backend snake-case auth payload applied.',
+                'state': <String, Object?>{
+                  'signed_in': true,
+                  'remember_session': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.rememberSession, isTrue);
+        expect(authContract.state.signedIn, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend snake-case auth payload applied.',
+        );
+      },
+    );
+
+    test(
+      'auth backend snake_case signed_in alias overrides unauthorized code inference',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'code': 'AUTH_REQUIRED',
+                'state': <String, Object?>{
+                  'signed_in': true,
+                  'remember_session': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
+
+    test(
       'auth backend nested explicit signed-out aliases override token inference',
       () {
         final _BackendResponseTransportClient transportClient =

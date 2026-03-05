@@ -1262,11 +1262,23 @@ AuthSessionState? _authStateFromBackendPayload(
 
   final bool hasRememberSessionFields = _containsAnyKeyInSources(
     authSources,
-    const <String>{'rememberSession', 'remember', 'persistSession'},
+    const <String>{
+      'rememberSession',
+      'remember',
+      'persistSession',
+      'remember_session',
+      'persist_session',
+    },
   );
   final bool hasSignedInFields = _containsAnyKeyInSources(
     authSources,
-    const <String>{'signedIn', 'isAuthenticated', 'authenticated'},
+    const <String>{
+      'signedIn',
+      'isAuthenticated',
+      'authenticated',
+      'signed_in',
+      'is_authenticated',
+    },
   );
   final bool hasCredentialFields = _containsAnyNonEmptyStringInSources(
     authSources,
@@ -1309,6 +1321,8 @@ AuthSessionState? _authStateFromBackendPayload(
       'rememberSession',
       'remember',
       'persistSession',
+      'remember_session',
+      'persist_session',
     ]),
   );
   final bool? resolvedSignedIn = _coerceBool(
@@ -1316,6 +1330,8 @@ AuthSessionState? _authStateFromBackendPayload(
       'signedIn',
       'isAuthenticated',
       'authenticated',
+      'signed_in',
+      'is_authenticated',
     ]),
   );
   final String? backendCode = _resolveBackendCodeValue(
