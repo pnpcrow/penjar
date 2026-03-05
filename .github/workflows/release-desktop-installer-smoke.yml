@@ -23,6 +23,11 @@ on:
         type: boolean
         required: true
         default: false
+      enforce_appcast_external_readiness:
+        description: "Fail workflow when external appcast publication readiness checks fail"
+        type: boolean
+        required: true
+        default: false
       appcast_external_provider:
         description: "External publication provider"
         type: choice
@@ -254,6 +259,24 @@ jobs:
         working-directory: ./desktop
         run: ./scripts/check_appcast_publication_bundle.sh
 
+      - name: Run appcast external readiness check
+        if: ${{ inputs.publish_appcast_external }}
+        working-directory: ./desktop
+        env:
+          STRICT_APPCAST_EXTERNAL_READINESS: ${{ inputs.enforce_appcast_external_readiness }}
+          APPCAST_PUBLISH_PROVIDER: ${{ inputs.appcast_external_provider }}
+          APPCAST_PUBLISH_DRY_RUN: ${{ inputs.appcast_external_dry_run }}
+          APPCAST_S3_BUCKET: ${{ secrets.APPCAST_S3_BUCKET }}
+          APPCAST_S3_PREFIX: ${{ vars.APPCAST_S3_PREFIX }}
+          APPCAST_CACHE_INVALIDATION_COMMAND: ${{ secrets.APPCAST_CACHE_INVALIDATION_COMMAND }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+          AWS_PROFILE: ${{ vars.AWS_PROFILE }}
+          AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+          AWS_WEB_IDENTITY_TOKEN_FILE: ${{ vars.AWS_WEB_IDENTITY_TOKEN_FILE }}
+        run: ./scripts/check_appcast_external_readiness.sh
+
       - name: Publish appcast to external target
         if: ${{ inputs.publish_appcast_external }}
         working-directory: ./desktop
@@ -263,6 +286,12 @@ jobs:
           APPCAST_S3_BUCKET: ${{ secrets.APPCAST_S3_BUCKET }}
           APPCAST_S3_PREFIX: ${{ vars.APPCAST_S3_PREFIX }}
           APPCAST_CACHE_INVALIDATION_COMMAND: ${{ secrets.APPCAST_CACHE_INVALIDATION_COMMAND }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+          AWS_PROFILE: ${{ vars.AWS_PROFILE }}
+          AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+          AWS_WEB_IDENTITY_TOKEN_FILE: ${{ vars.AWS_WEB_IDENTITY_TOKEN_FILE }}
         run: ./scripts/publish_appcast_external.sh
 
       - name: Upload appcast preview
@@ -287,6 +316,14 @@ jobs:
         with:
           name: desktop-appcast-publication-bundle
           path: desktop/release/reports/appcast_publication_bundle.json
+          if-no-files-found: warn
+
+      - name: Upload appcast external readiness report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-appcast-external-readiness-report
+          path: desktop/release/reports/appcast_external_readiness_report.md
           if-no-files-found: warn
 
       - name: Upload appcast external publication report

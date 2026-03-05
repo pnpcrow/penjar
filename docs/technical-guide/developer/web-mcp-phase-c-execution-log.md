@@ -2207,8 +2207,62 @@ Establish explicit command-hooked Windows installer generation pipeline with str
   - Strict execution gate is configurable in workflow dispatch.
   - Full-fast desktop verification remains green after Windows installer pipeline integration.
 
+## Unit WS-D-53: External appcast publication readiness gate baseline
+
+### Planned objective
+
+Introduce explicit external appcast publication readiness checks with strict/non-strict gating, so non-dry-run rollout preconditions are auditable before external publish execution.
+
+### Implemented changes
+
+1. Added external publication readiness checker:
+   - `desktop/scripts/check_appcast_external_readiness.sh`.
+2. Implemented readiness semantics:
+   - supports strict/non-strict mode (`STRICT_APPCAST_EXTERNAL_READINESS`),
+   - provider-aware checks (`none`, `s3`),
+   - verifies publication bundle presence for external providers,
+   - validates required S3 bucket configuration,
+   - for non-dry-run mode, validates AWS CLI presence and credential signal availability (`AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`, `AWS_PROFILE`, or role/web-identity pair),
+   - records cache invalidation command absence as advisory warning,
+   - emits readiness report (`release/reports/appcast_external_readiness_report.md`).
+3. Added root command surface:
+   - `desktop:release:appcast:external:readiness`,
+   - `desktop:release:appcast:external:readiness:strict`.
+4. Extended manual smoke workflow dispatch contract:
+   - added `enforce_appcast_external_readiness` input.
+5. Extended appcast-preview workflow stage:
+   - runs readiness checker before external publication execution when `publish_appcast_external=true`,
+   - passes external publication env/credential context to readiness and publish steps.
+6. Extended artifact evidence chain:
+   - uploads `desktop/release/reports/appcast_external_readiness_report.md` artifact.
+7. Updated release/runbook/index docs:
+   - `desktop-flutter-release-validation-baseline.md` now includes external readiness operating protocol and CI readiness gate references,
+   - `desktop-flutter-development-runbook.md` command inventory now includes external readiness commands,
+   - `desktop-flutter-release-evidence-index.md` maintenance rules now include readiness report attachment.
+8. Re-ran validation commands:
+   - `pnpm run desktop:release:appcast:external:readiness`,
+   - `pnpm run desktop:release:appcast:external:readiness:strict`,
+   - `pnpm run desktop:release:appcast:publish:external:dry-run`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict/non-strict readiness behavior for external publication preconditions,
+  - workflow dispatch input propagation and appcast-preview stage ordering,
+  - evidence artifact continuity for readiness + publication reports.
+- **Issues found during review**
+  1. Initial workflow patch reused the same step name (`Publish appcast to external target`) for readiness and publish stages, reducing run-log clarity.
+- **Fix applied**
+  1. Renamed readiness stage to `Run appcast external readiness check` for explicit traceability.
+- **Post-fix validation criteria**
+  - External publication readiness report is generated in dry-run/default conditions.
+  - Strict readiness path can be enabled through workflow dispatch input.
+  - Full-fast desktop verification remains green after readiness gate integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, signing readiness gating, command-hooked signing execution baseline, optional external publication dry-run stage, Windows installer packaging verification baseline, and command-hooked Windows installer pipeline baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication execution (non-dry-run credentials/invalidation) are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, signing readiness gating, command-hooked signing execution baseline, optional external publication dry-run stage, external publication readiness gate baseline, Windows installer packaging verification baseline, and command-hooked Windows installer pipeline baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

@@ -45,6 +45,8 @@ This runbook defines the repeatable execution loop for the Flutter desktop full-
    - `pnpm run desktop:release:appcast:publish:dry-run`
    - `pnpm run desktop:release:appcast:bundle:generate`
    - `pnpm run desktop:release:appcast:bundle:check`
+   - `pnpm run desktop:release:appcast:external:readiness`
+   - `pnpm run desktop:release:appcast:external:readiness:strict`
    - `pnpm run desktop:release:appcast:publish:external:dry-run`
    - `pnpm run desktop:release:signing:readiness`
    - `pnpm run desktop:release:signing:readiness:strict`
@@ -111,4 +113,5 @@ Before pausing or transferring work:
 
 1. Backend transport wiring for runtime-switchable contract adapters.
 2. Real command wiring for signed packaging/notarization in installer smoke workflow (`PENJAR_*_SIGN_COMMAND` paths).
-3. Windows installer generation command wiring (`PENJAR_WINDOWS_INSTALLER_COMMAND`) + strict execution rollout.
+3. Real Windows signed installer generation (`.msi/.exe`) command chain and artifact naming policy validation.
+4. External appcast publication production rollout with real credentials/invalidation execution.

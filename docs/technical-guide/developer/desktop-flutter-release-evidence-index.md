@@ -50,3 +50,4 @@ Each release candidate record should include:
 15. Attach external publication report (`release/reports/appcast_external_publication_report.md`) when external publication stage is executed.
 16. Attach Windows installer packaging report (`release/reports/windows_installer_packaging_report.md`) before promotion decision.
 17. Attach Windows installer pipeline report (`release/reports/windows_installer_pipeline_report.md`) before promotion decision.
+18. Attach external publication readiness report (`release/reports/appcast_external_readiness_report.md`) when external publication stage is executed.
