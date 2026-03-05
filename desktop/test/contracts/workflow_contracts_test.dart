@@ -1791,6 +1791,39 @@ void main() {
     );
 
     test(
+      'auth backend statusCode unauthorized payload maps authentication-required fallback status',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'statusCode': 401,
+                'state': <String, Object?>{
+                  'sessionToken': 'status-code-unauthorized-token',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(
+              transportClient: transportClient,
+              initialState: const AuthSessionState(
+                rememberSession: true,
+                signedIn: true,
+                status: 'Previously signed in.',
+              ),
+            );
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(authContract.state.rememberSession, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Authentication required.',
+        );
+      },
+    );
+
+    test(
       'auth backend code-only token-expired payload maps session-expired fallback status',
       () {
         final _BackendResponseTransportClient transportClient =
@@ -1799,6 +1832,31 @@ void main() {
                 'errorCode': 'TOKEN_EXPIRED',
                 'state': <String, Object?>{
                   'sessionToken': 'code-only-expired-token',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend session expired.',
+        );
+      },
+    );
+
+    test(
+      'auth backend httpStatus session-expired payload maps session-expired fallback status',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'httpStatus': '440',
+                'state': <String, Object?>{
+                  'sessionToken': 'http-status-expired-token',
                 },
               },
             });
@@ -2084,6 +2142,29 @@ void main() {
             _BackendResponseTransportClient(<String, Map<String, Object?>>{
               RemoteStubOperationIds.restoreSession: <String, Object?>{
                 'code': 401,
+                'state': <String, Object?>{
+                  'signedIn': true,
+                  'rememberSession': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
+
+    test(
+      'auth backend explicit signed-in state overrides statusCode unauthorized variant',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'statusCode': 401,
                 'state': <String, Object?>{
                   'signedIn': true,
                   'rememberSession': true,

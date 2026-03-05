@@ -1083,7 +1083,11 @@ String? _resolveBackendCodeFromPayload(Map<String, Object?> payload) {
   final String? directCode =
       _coerceBackendCodeString(payload['code']) ??
       _coerceBackendCodeString(payload['errorCode']) ??
-      _coerceBackendCodeString(payload['reasonCode']);
+      _coerceBackendCodeString(payload['reasonCode']) ??
+      _coerceBackendCodeString(payload['statusCode']) ??
+      _coerceBackendCodeString(payload['httpStatus']) ??
+      _coerceBackendCodeString(payload['status_code']) ??
+      _coerceBackendCodeString(payload['http_status']);
   if (directCode != null) {
     return directCode;
   }
