@@ -442,5 +442,98 @@ void main() {
         '[remote-stub] WebSocket disconnected; MCP stream unavailable.',
       );
     });
+
+    test(
+      'block mutating operations when remote stub fault profile is unavailable',
+      () {
+        const RemoteStubFaultProfile faultProfile = RemoteStubFaultProfile(
+          unavailable: true,
+        );
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(faultProfile: faultProfile);
+        final RemoteStubProjectLifecycleContract projectContract =
+            RemoteStubProjectLifecycleContract(faultProfile: faultProfile);
+        final RemoteStubCanvasEditingContract canvasContract =
+            RemoteStubCanvasEditingContract(faultProfile: faultProfile);
+        final RemoteStubAssetManagementContract assetContract =
+            RemoteStubAssetManagementContract(faultProfile: faultProfile);
+        final RemoteStubCollaborationContextContract collaborationContract =
+            RemoteStubCollaborationContextContract(faultProfile: faultProfile);
+        final RemoteStubInspectHandoffContract inspectContract =
+            RemoteStubInspectHandoffContract(faultProfile: faultProfile);
+        final RemoteStubExportWorkflowContract exportContract =
+            RemoteStubExportWorkflowContract(faultProfile: faultProfile);
+        final RemoteStubDiagnosticsRecoveryContract diagnosticsContract =
+            RemoteStubDiagnosticsRecoveryContract(faultProfile: faultProfile);
+
+        authContract.signIn(
+          const AuthSignInRequest(
+            email: 'designer@penjar.app',
+            password: 'desktop-pass',
+          ),
+        );
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Remote bridge unavailable: sign-in.',
+        );
+
+        projectContract.createProject('Blocked Project');
+        expect(projectContract.state.projects, hasLength(1));
+        expect(
+          projectContract.state.status,
+          '[remote-stub] Remote bridge unavailable: create-project.',
+        );
+
+        canvasContract.createRectangle();
+        expect(canvasContract.state.shapes, isEmpty);
+        expect(
+          canvasContract.state.status,
+          '[remote-stub] Remote bridge unavailable: create-rectangle.',
+        );
+
+        assetContract.importAsset('hero.png', 'image');
+        expect(assetContract.state.assets, isEmpty);
+        expect(
+          assetContract.state.status,
+          '[remote-stub] Remote bridge unavailable: import-asset.',
+        );
+
+        collaborationContract.createThread('Blocked Thread');
+        expect(collaborationContract.state.threads, isEmpty);
+        expect(
+          collaborationContract.state.status,
+          '[remote-stub] Remote bridge unavailable: create-thread.',
+        );
+
+        inspectContract.generateSnippet('button/primary');
+        expect(inspectContract.state.snippet, 'No snippet generated.');
+        expect(
+          inspectContract.state.status,
+          '[remote-stub] Remote bridge unavailable: generate-snippet.',
+        );
+
+        exportContract.runExport(
+          const ExportRequest(
+            fileName: 'landing',
+            format: 'png',
+            scale: '2x',
+            includeBackground: true,
+          ),
+        );
+        expect(exportContract.state.artifacts, isEmpty);
+        expect(
+          exportContract.state.status,
+          '[remote-stub] Remote bridge unavailable: run-export.',
+        );
+
+        diagnosticsContract.simulateDisconnect();
+        expect(diagnosticsContract.state.websocketHealthy, isTrue);
+        expect(
+          diagnosticsContract.state.status,
+          '[remote-stub] Remote bridge unavailable: simulate-disconnect.',
+        );
+      },
+    );
   });
 }

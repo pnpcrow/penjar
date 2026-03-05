@@ -84,9 +84,66 @@ void main() {
     );
     final DesktopContractBundle remoteStubBundle =
         DesktopContractBundle.fromMode(DesktopContractMode.remoteStub);
+    final DesktopContractBundle blockedRemoteStubBundle =
+        DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubFaultProfile: const RemoteStubFaultProfile(
+            unavailable: true,
+          ),
+        );
 
     expect(inMemoryBundle.mode, DesktopContractMode.inMemory);
     expect(remoteStubBundle.mode, DesktopContractMode.remoteStub);
     expect(remoteStubBundle.authSession.state.status, '[remote-stub] Idle');
+
+    blockedRemoteStubBundle.authSession.signIn(
+      const AuthSignInRequest(
+        email: 'designer@penjar.app',
+        password: 'desktop-pass',
+      ),
+    );
+    expect(
+      blockedRemoteStubBundle.authSession.state.status,
+      '[remote-stub] Remote bridge unavailable: sign-in.',
+    );
+  });
+
+  test('remote-stub unavailable profile blocks mutating operations', () {
+    final DesktopContractBundle bundle = DesktopContractBundle.remoteStub(
+      faultProfile: const RemoteStubFaultProfile(unavailable: true),
+    );
+
+    bundle.authSession.signIn(
+      const AuthSignInRequest(
+        email: 'designer@penjar.app',
+        password: 'desktop-pass',
+      ),
+    );
+    expect(bundle.authSession.state.signedIn, isFalse);
+    expect(
+      bundle.authSession.state.status,
+      '[remote-stub] Remote bridge unavailable: sign-in.',
+    );
+
+    bundle.projectLifecycle.createProject('Remote Fail');
+    expect(bundle.projectLifecycle.state.projects, hasLength(1));
+    expect(
+      bundle.projectLifecycle.state.status,
+      '[remote-stub] Remote bridge unavailable: create-project.',
+    );
+
+    bundle.exportWorkflow.runExport(
+      const ExportRequest(
+        fileName: 'landing',
+        format: 'png',
+        scale: '2x',
+        includeBackground: true,
+      ),
+    );
+    expect(bundle.exportWorkflow.state.artifacts, isEmpty);
+    expect(
+      bundle.exportWorkflow.state.status,
+      '[remote-stub] Remote bridge unavailable: run-export.',
+    );
   });
 }

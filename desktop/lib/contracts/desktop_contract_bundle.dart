@@ -1,6 +1,18 @@
 import 'package:penjar_desktop/contracts/remote_stub_contracts.dart';
 import 'package:penjar_desktop/contracts/workflow_contracts.dart';
 
+bool _envFlagEnabled(String raw) {
+  switch (raw.trim().toLowerCase()) {
+    case '1':
+    case 'true':
+    case 'yes':
+    case 'on':
+      return true;
+    default:
+      return false;
+  }
+}
+
 enum DesktopContractMode {
   inMemory,
   remoteStub;
@@ -39,13 +51,28 @@ class DesktopContractBundle {
     final DesktopContractMode mode = DesktopContractMode.fromEnv(
       const String.fromEnvironment('PENJAR_DESKTOP_CONTRACT_MODE'),
     );
-    return DesktopContractBundle.fromMode(mode);
+    final bool remoteStubUnavailable = _envFlagEnabled(
+      const String.fromEnvironment('PENJAR_DESKTOP_REMOTE_STUB_UNAVAILABLE'),
+    );
+
+    return DesktopContractBundle.fromMode(
+      mode,
+      remoteStubFaultProfile: RemoteStubFaultProfile(
+        unavailable: remoteStubUnavailable,
+      ),
+    );
   }
 
-  factory DesktopContractBundle.fromMode(DesktopContractMode mode) {
+  factory DesktopContractBundle.fromMode(
+    DesktopContractMode mode, {
+    RemoteStubFaultProfile remoteStubFaultProfile =
+        const RemoteStubFaultProfile(),
+  }) {
     return switch (mode) {
       DesktopContractMode.inMemory => DesktopContractBundle.inMemory(),
-      DesktopContractMode.remoteStub => DesktopContractBundle.remoteStub(),
+      DesktopContractMode.remoteStub => DesktopContractBundle.remoteStub(
+        faultProfile: remoteStubFaultProfile,
+      ),
     };
   }
 
@@ -63,17 +90,33 @@ class DesktopContractBundle {
     );
   }
 
-  factory DesktopContractBundle.remoteStub() {
+  factory DesktopContractBundle.remoteStub({
+    RemoteStubFaultProfile faultProfile = const RemoteStubFaultProfile(),
+  }) {
     return DesktopContractBundle(
       mode: DesktopContractMode.remoteStub,
-      authSession: RemoteStubAuthSessionContract(),
-      projectLifecycle: RemoteStubProjectLifecycleContract(),
-      canvasEditing: RemoteStubCanvasEditingContract(),
-      assetManagement: RemoteStubAssetManagementContract(),
-      collaborationContext: RemoteStubCollaborationContextContract(),
-      inspectHandoff: RemoteStubInspectHandoffContract(),
-      exportWorkflow: RemoteStubExportWorkflowContract(),
-      diagnosticsRecovery: RemoteStubDiagnosticsRecoveryContract(),
+      authSession: RemoteStubAuthSessionContract(faultProfile: faultProfile),
+      projectLifecycle: RemoteStubProjectLifecycleContract(
+        faultProfile: faultProfile,
+      ),
+      canvasEditing: RemoteStubCanvasEditingContract(
+        faultProfile: faultProfile,
+      ),
+      assetManagement: RemoteStubAssetManagementContract(
+        faultProfile: faultProfile,
+      ),
+      collaborationContext: RemoteStubCollaborationContextContract(
+        faultProfile: faultProfile,
+      ),
+      inspectHandoff: RemoteStubInspectHandoffContract(
+        faultProfile: faultProfile,
+      ),
+      exportWorkflow: RemoteStubExportWorkflowContract(
+        faultProfile: faultProfile,
+      ),
+      diagnosticsRecovery: RemoteStubDiagnosticsRecoveryContract(
+        faultProfile: faultProfile,
+      ),
     );
   }
 

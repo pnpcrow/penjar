@@ -1458,8 +1458,53 @@ Establish a concrete release-readiness baseline for desktop distribution by defi
   - Remaining gaps now reference execution/automation readiness rather than missing baseline definition.
   - Fast verification chain remains green after documentation expansion.
 
+## Unit WS-D-37: Remote-stub fault-profile boundary and degraded-path parity
+
+### Planned objective
+
+Increase backend-adapter readiness by giving remote-stub mode an executable degraded-path profile (`remote bridge unavailable`) so blocked-mutation behavior can be validated before real transport integration.
+
+### Implemented changes
+
+1. Extended remote-stub contract adapter model:
+   - `desktop/lib/contracts/remote_stub_contracts.dart` now defines `RemoteStubFaultProfile`.
+2. Added blocked-operation behavior in remote-stub contracts:
+   - all mutating workflow operations now return deterministic `[remote-stub] Remote bridge unavailable: <operation>.` status when profile `unavailable=true`,
+   - mutating delegate state is preserved (no unintended local mutation) under blocked profile.
+3. Extended bundle wiring for fault-profile injection:
+   - `desktop/lib/contracts/desktop_contract_bundle.dart` now supports:
+     - `DesktopContractBundle.remoteStub(faultProfile: ...)`,
+     - `DesktopContractBundle.fromMode(..., remoteStubFaultProfile: ...)`,
+     - env-driven degraded mode via `PENJAR_DESKTOP_REMOTE_STUB_UNAVAILABLE`.
+4. Expanded contract-level coverage:
+   - `desktop/test/contracts/desktop_contract_bundle_test.dart` now verifies blocked behavior via unavailable fault profile.
+   - `desktop/test/contracts/workflow_contracts_test.dart` now verifies blocked mutation semantics across auth/project/canvas/asset/collaboration/inspect/export/diagnostics remote-stub adapters.
+5. Added degraded-path parity gate:
+   - `desktop/test/parity/remote_stub_unavailable_parity_test.dart`.
+6. Updated canonical parity runner list:
+   - `desktop/scripts/run_parity_tests.sh` now includes `remote_stub_unavailable_parity_test.dart`.
+7. Updated acceptance baseline CI anchor notes:
+   - `desktop-flutter-parity-acceptance-baseline.md` now references remote-stub unavailable-profile parity gate.
+8. Re-ran canonical full verification (fast path):
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of blocked-operation behavior under unavailable remote-stub profile,
+  - regression risk on existing remote-stub nominal parity behavior,
+  - parity-runner stability after adding degraded-path test.
+- **Issues found during review**
+  1. Initial implementation returned blocked status only from method return values; state getter continued reading delegate `Idle` status, causing contract/parity assertions to fail after UI re-render.
+- **Fix applied**
+  1. Added per-adapter status override state (`_statusOverride`) in all remote-stub contracts so blocked-operation status persists across subsequent state reads until next successful delegate operation clears override.
+- **Post-fix validation criteria**
+  - Unavailable-profile contract tests confirm blocked mutations and deterministic status semantics.
+  - New degraded-path parity test passes in canonical parity suite.
+  - Full verification chain remains green with fault-profile expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
+- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
 - Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts and macOS build validation, and release-validation baseline documentation is published, but automated installer/update validation execution pipelines and evidence artifact automation are not yet configured.
