@@ -46,4 +46,23 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('remote-stub mode surfaces strict backend schema profile label', (
+    WidgetTester tester,
+  ) async {
+    await pumpDesktopApp(
+      tester,
+      contracts: DesktopContractBundle.fromMode(
+        DesktopContractMode.remoteStub,
+        remoteStubAuthStrictBackendSchema: true,
+      ),
+    );
+
+    await openWorkflowSection(tester, 'diagnostics');
+    expect(find.textContaining('Contract mode: remote-stub'), findsOneWidget);
+    expect(
+      find.textContaining('Remote profile: auth-backend-schema: strict'),
+      findsOneWidget,
+    );
+  });
 }

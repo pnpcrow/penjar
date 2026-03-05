@@ -143,7 +143,7 @@ Before pausing or transferring work:
 
 ## 7) Current next-unit candidates
 
-1. Backend auth contract integration for Flutter desktop auth/session workflows (replace remote-stub simulated auth state transitions with real backend session/token contract wiring; strict malformed-schema runtime toggle is already available via `PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_SCHEMA_STRICT` and exposed in remote profile summary as `auth-backend-schema: strict`), executed via [Desktop Flutter Auth Backend Contract Integration Plan](/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan/).
+1. Backend auth contract integration for Flutter desktop auth/session workflows (replace remote-stub simulated auth state transitions with real backend session/token contract wiring; strict malformed-schema runtime toggle is already available via `PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_SCHEMA_STRICT`, exposed in remote profile summary as `auth-backend-schema: strict`, and parity-covered in `desktop/test/parity/remote_stub_mode_parity_test.dart`), executed via [Desktop Flutter Auth Backend Contract Integration Plan](/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan/).
 2. Production Windows protocol-registration command provisioning and signed installer wiring validation (command-hook + strict protocol gate + PowerShell helper baseline are complete; real registry/installer command secrets and release execution evidence remain pending).
 3. Real command wiring for signed packaging/notarization/verification in installer smoke workflow (`PENJAR_*_SIGN_COMMAND`, `PENJAR_*_SIGN_VERIFY_COMMAND` paths).
 4. Real Windows signed installer generation (`.msi/.exe`) command chain and provenance command/secret wiring.

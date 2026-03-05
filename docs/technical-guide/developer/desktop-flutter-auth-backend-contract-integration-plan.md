@@ -55,6 +55,7 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
    - `DesktopContractBundle.fromEnvironment()` / `loadFromEnvironment()` can enable strict mode through `PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_SCHEMA_STRICT`.
 9. Diagnostics-visible strict-mode profile labeling:
    - remote profile summary now surfaces `auth-backend-schema: strict` when strict backend auth schema mode is enabled.
+   - strict-mode profile label visibility is covered in parity UI test `desktop/test/parity/remote_stub_mode_parity_test.dart`.
 
 ## Remaining integration gaps (auth scope)
 
