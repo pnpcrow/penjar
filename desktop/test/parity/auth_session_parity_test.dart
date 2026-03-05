@@ -182,6 +182,27 @@ class _AuthBackendSnakeCaseStateAliasParityTransportClient
   }
 }
 
+class _AuthBackendLoggedInStateAliasParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendLoggedInStateAliasParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend logged-in sign-in snapshot applied.',
+          'state': <String, Object?>{
+            'logged_in': true,
+            'persist_session': true,
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 class _AuthBackendSignedOutAliasParityTransportClient
     extends RemoteStubTransportClient {
   const _AuthBackendSignedOutAliasParityTransportClient({
@@ -645,11 +666,52 @@ void main() {
     },
   );
 
+  testWidgets('auth/session parity normalizes logged_in state aliases', (
+    WidgetTester tester,
+  ) async {
+    await pumpDesktopApp(
+      tester,
+      contracts: DesktopContractBundle.fromMode(
+        DesktopContractMode.remoteStub,
+        remoteStubTransportClient:
+            const _AuthBackendLoggedInStateAliasParityTransportClient(),
+      ),
+    );
+    await openWorkflowSection(tester, 'auth');
+
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('auth-password')),
+      'desktop-pass',
+    );
+    await tester.ensureVisible(
+      find.byKey(const ValueKey<String>('auth-sign-in')),
+    );
+    await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining(
+        'Status: [remote-stub] Backend logged-in sign-in snapshot applied.',
+      ),
+      findsOneWidget,
+    );
+    final CheckboxListTile rememberSessionTile = tester.widget(
+      find.byKey(const ValueKey<String>('auth-remember')),
+    );
+    expect(rememberSessionTile.value, isTrue);
+
+    expect(find.textContaining('Signed in (simulated).'), findsNothing);
+  });
+
   for (final String signedOutAlias in const <String>[
     'signedOut',
     'isSignedOut',
+    'loggedOut',
+    'isLoggedOut',
     'signed_out',
     'is_signed_out',
+    'logged_out',
+    'is_logged_out',
   ]) {
     testWidgets(
       'auth/session parity maps $signedOutAlias alias to deterministic auth-required status',

@@ -1556,6 +1556,33 @@ void main() {
     );
 
     test(
+      'auth backend logged_in and persist_session aliases are normalized',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'detail': 'Backend logged-in auth payload applied.',
+                'state': <String, Object?>{
+                  'logged_in': true,
+                  'persist_session': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.rememberSession, isTrue);
+        expect(authContract.state.signedIn, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend logged-in auth payload applied.',
+        );
+      },
+    );
+
+    test(
       'auth backend snake_case signed_in alias overrides unauthorized code inference',
       () {
         final _BackendResponseTransportClient transportClient =
@@ -1578,11 +1605,38 @@ void main() {
       },
     );
 
+    test(
+      'auth backend is_logged_in alias overrides unauthorized code inference',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'code': 'AUTH_REQUIRED',
+                'state': <String, Object?>{
+                  'is_logged_in': true,
+                  'persist_session': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
+
     for (final String signedOutAlias in const <String>[
       'signedOut',
       'isSignedOut',
+      'loggedOut',
+      'isLoggedOut',
       'signed_out',
       'is_signed_out',
+      'logged_out',
+      'is_logged_out',
     ]) {
       test(
         'auth backend $signedOutAlias alias without explicit status maps authentication-required fallback status',

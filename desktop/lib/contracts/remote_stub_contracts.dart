@@ -839,30 +839,46 @@ const Set<String> _authSignedInAliasKeys = <String>{
   'signedIn',
   'isAuthenticated',
   'authenticated',
+  'isLoggedIn',
+  'loggedIn',
   'signed_in',
   'is_authenticated',
+  'is_logged_in',
+  'logged_in',
 };
 
 const List<String> _authSignedInAliases = <String>[
   'signedIn',
   'isAuthenticated',
   'authenticated',
+  'isLoggedIn',
+  'loggedIn',
   'signed_in',
   'is_authenticated',
+  'is_logged_in',
+  'logged_in',
 ];
 
 const Set<String> _authSignedOutAliasKeys = <String>{
   'signedOut',
   'isSignedOut',
+  'loggedOut',
+  'isLoggedOut',
   'signed_out',
   'is_signed_out',
+  'logged_out',
+  'is_logged_out',
 };
 
 const List<String> _authSignedOutAliases = <String>[
   'signedOut',
   'isSignedOut',
+  'loggedOut',
+  'isLoggedOut',
   'signed_out',
   'is_signed_out',
+  'logged_out',
+  'is_logged_out',
 ];
 
 const List<String> _authCredentialAliases = <String>[
