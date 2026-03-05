@@ -928,6 +928,73 @@ String _resolveBackendStatusValue({
   List<Map<String, Object?>> additionalPayloads =
       const <Map<String, Object?>>[],
 }) {
+  final String? resolvedStatus = _tryResolveBackendStatusValue(
+    responsePayload: responsePayload,
+    envelopePayload: envelopePayload,
+    statePayload: statePayload,
+    additionalPayloads: additionalPayloads,
+  );
+  return resolvedStatus ?? fallbackStatus;
+}
+
+String _resolveAuthBackendStatusValue({
+  required Map<String, Object?> responsePayload,
+  required Map<String, Object?> envelopePayload,
+  required Map<String, Object?> statePayload,
+  required String fallbackStatus,
+  required bool signedIn,
+  required bool signedOutByCode,
+  required bool hasExplicitFailureFlag,
+  required String? backendCode,
+  List<Map<String, Object?>> additionalPayloads =
+      const <Map<String, Object?>>[],
+}) {
+  final String? explicitStatus = _tryResolveBackendStatusValue(
+    responsePayload: responsePayload,
+    envelopePayload: envelopePayload,
+    statePayload: statePayload,
+    additionalPayloads: additionalPayloads,
+  );
+  if (explicitStatus != null) {
+    return explicitStatus;
+  }
+  final String? fallbackMappedStatus = _resolveAuthBackendFallbackStatus(
+    signedIn: signedIn,
+    signedOutByCode: signedOutByCode,
+    hasExplicitFailureFlag: hasExplicitFailureFlag,
+    backendCode: backendCode,
+  );
+  return fallbackMappedStatus ?? fallbackStatus;
+}
+
+String? _resolveAuthBackendFallbackStatus({
+  required bool signedIn,
+  required bool signedOutByCode,
+  required bool hasExplicitFailureFlag,
+  required String? backendCode,
+}) {
+  if (signedIn) {
+    return null;
+  }
+  if (signedOutByCode && backendCode != null) {
+    if (_backendCodeIndicatesSessionExpired(backendCode)) {
+      return 'Backend session expired.';
+    }
+    return 'Authentication required.';
+  }
+  if (hasExplicitFailureFlag) {
+    return 'Backend auth request failed.';
+  }
+  return null;
+}
+
+String? _tryResolveBackendStatusValue({
+  required Map<String, Object?> responsePayload,
+  required Map<String, Object?> envelopePayload,
+  required Map<String, Object?> statePayload,
+  List<Map<String, Object?>> additionalPayloads =
+      const <Map<String, Object?>>[],
+}) {
   for (final Map<String, Object?> payload in <Map<String, Object?>>[
     responsePayload,
     envelopePayload,
@@ -939,7 +1006,7 @@ String _resolveBackendStatusValue({
       return status;
     }
   }
-  return fallbackStatus;
+  return null;
 }
 
 String? _resolveBackendStatusFromPayload(Map<String, Object?> payload) {
@@ -1062,10 +1129,7 @@ bool _backendCodeIndicatesSignedOut(String rawCode) {
       trimmed == '440') {
     return true;
   }
-  final String compact = rawCode.trim().toLowerCase().replaceAll(
-    RegExp(r'[^a-z0-9]'),
-    '',
-  );
+  final String compact = _compactBackendCode(rawCode);
   if (compact.isEmpty) {
     return false;
   }
@@ -1084,6 +1148,34 @@ bool _backendCodeIndicatesSignedOut(String rawCode) {
     }
   }
   return false;
+}
+
+bool _backendCodeIndicatesSessionExpired(String rawCode) {
+  final String trimmed = rawCode.trim();
+  if (trimmed == '419' || trimmed == '440') {
+    return true;
+  }
+  final String compact = _compactBackendCode(rawCode);
+  if (compact.isEmpty) {
+    return false;
+  }
+  for (final String marker in const <String>[
+    'tokenexpired',
+    'sessionexpired',
+    'invalidtoken',
+    'accesstokenexpired',
+    'refreshtokenexpired',
+    'jwtexpired',
+  ]) {
+    if (compact.contains(marker)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+String _compactBackendCode(String rawCode) {
+  return rawCode.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
 }
 
 int _clampIndex(int index, {required int itemCount}) {
@@ -1231,11 +1323,15 @@ AuthSessionState? _authStateFromBackendPayload(
   return AuthSessionState(
     rememberSession: resolvedRememberSession ?? currentState.rememberSession,
     signedIn: nextSignedIn,
-    status: _resolveBackendStatusValue(
+    status: _resolveAuthBackendStatusValue(
       responsePayload: responsePayload,
       envelopePayload: envelopePayload,
       statePayload: statePayload,
       fallbackStatus: currentState.status,
+      signedIn: nextSignedIn,
+      signedOutByCode: signedOutByCode,
+      hasExplicitFailureFlag: hasExplicitFailureFlag,
+      backendCode: backendCode,
       additionalPayloads: authSources,
     ),
   );

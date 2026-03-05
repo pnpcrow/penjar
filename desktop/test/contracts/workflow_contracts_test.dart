@@ -1758,6 +1758,90 @@ void main() {
     );
 
     test(
+      'auth backend code-only unauthorized payload maps authentication-required fallback status',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'code': 401,
+                'state': <String, Object?>{
+                  'sessionToken': 'code-only-unauthorized-token',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(
+              transportClient: transportClient,
+              initialState: const AuthSessionState(
+                rememberSession: true,
+                signedIn: true,
+                status: 'Previously signed in.',
+              ),
+            );
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(authContract.state.rememberSession, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Authentication required.',
+        );
+      },
+    );
+
+    test(
+      'auth backend code-only token-expired payload maps session-expired fallback status',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'errorCode': 'TOKEN_EXPIRED',
+                'state': <String, Object?>{
+                  'sessionToken': 'code-only-expired-token',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend session expired.',
+        );
+      },
+    );
+
+    test(
+      'auth backend explicit message keeps precedence over code-based fallback mapping',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'code': 401,
+                'detail': 'Backend code-only detail takes precedence.',
+                'state': <String, Object?>{
+                  'sessionToken': 'code-only-detail-token',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend code-only detail takes precedence.',
+        );
+      },
+    );
+
+    test(
       'auth backend explicit failure flag overrides token/session inference',
       () {
         final _BackendResponseTransportClient transportClient =
@@ -1780,6 +1864,32 @@ void main() {
         expect(
           authContract.state.status,
           '[remote-stub] Backend auth failure flag signaled.',
+        );
+      },
+    );
+
+    test(
+      'auth backend failure flag without status maps auth-request-failed fallback status',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'success': false,
+                'state': <String, Object?>{
+                  'sessionToken': 'failure-only-session-token',
+                  'user': <String, Object?>{'id': 'failure-only-user'},
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend auth request failed.',
         );
       },
     );
