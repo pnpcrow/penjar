@@ -780,8 +780,49 @@ Extend WS-D contract-boundary hardening to project/file lifecycle flows by extra
   - Project/file contract unit tests pass for lifecycle and guard paths.
   - Desktop test/analyze/build chain remains green after extraction.
 
+## Unit WS-D-20: Parity runner consolidation and CI no-pub optimization
+
+### Planned objective
+
+Reduce parity-maintenance drift and improve validation runtime efficiency by centralizing parity test target definitions and removing redundant dependency resolution in CI steps.
+
+### Implemented changes
+
+1. Added canonical parity runner script:
+   - `desktop/scripts/run_parity_tests.sh`.
+2. Updated root parity command to use canonical script:
+   - `package.json` `desktop:test:parity` now executes `cd desktop && ./scripts/run_parity_tests.sh`.
+3. Updated desktop CI workflow to consume canonical parity runner:
+   - `.github/workflows/tests-desktop-flutter.yml` parity step now runs `FLUTTER_NO_PUB=1 ./scripts/run_parity_tests.sh`.
+4. Applied CI runtime optimization:
+   - desktop test step now uses `flutter test --no-pub`,
+   - desktop analyze step now uses `flutter analyze --no-pub`,
+   - parity runner supports `FLUTTER_NO_PUB=1` mode.
+5. Updated acceptance baseline CI anchor:
+   - canonical parity test-file source now documented as `desktop/scripts/run_parity_tests.sh`.
+6. Re-ran desktop verification chain:
+   - `pnpm run desktop:test`,
+   - `pnpm run desktop:test:parity`,
+   - `pnpm run desktop:analyze`,
+   - `pnpm run desktop:build:macos:debug`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - consistency between local parity command and CI parity target set,
+  - robustness of parity-runner shell implementation under strict shell options,
+  - regression impact on desktop validation chain.
+- **Issues found during review**
+  1. Initial parity runner used `set -u` with empty array expansion, causing `unbound variable` failure when no optional args were enabled.
+- **Fix applied**
+  1. Switched script strict mode from `set -euo pipefail` to `set -eo pipefail` and re-ran full validation chain.
+- **Post-fix validation criteria**
+  - Root parity command and CI workflow both execute through one canonical parity script.
+  - Parity/analyze/build validation chain remains green after runner consolidation.
+  - CI no-pub optimization path is compatible with existing desktop commands.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, and auth/project/file/export/diagnostics include contract-boundary pilots, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux, but macOS/Windows build-matrix coverage and release-grade installer/update validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux with consolidated parity runner, but macOS/Windows build-matrix coverage and release-grade installer/update validation are not yet configured.

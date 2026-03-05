@@ -50,4 +50,4 @@ the [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-pha
 ## CI execution anchor
 
 - Desktop parity CI baseline workflow: `.github/workflows/tests-desktop-flutter.yml`.
-- Keep workflow parity test file list synchronized with this baseline table and root `desktop:test:parity` script.
+- Canonical parity test-file list is managed in `desktop/scripts/run_parity_tests.sh` and consumed by root `desktop:test:parity` script + CI workflow.
