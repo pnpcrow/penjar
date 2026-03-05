@@ -17,6 +17,7 @@ the [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-pha
 - [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/)
 - [Desktop Flutter Parity Checklist](/technical-guide/developer/desktop-flutter-parity-checklist/)
 - [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/)
+- [Desktop Flutter Development Runbook](/technical-guide/developer/desktop-flutter-development-runbook/)
 
 ## Gate status legend
 

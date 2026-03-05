@@ -1301,6 +1301,49 @@ Reduce desktop release-risk by extending CI coverage from Linux-only verificatio
   - macOS path now executes build validation in CI through `INCLUDE_BUILD=1`.
   - Local full verification remains green after matrix workflow update.
 
+## Unit WS-D-33: Desktop development continuity runbook linkage
+
+### Planned objective
+
+Strengthen long-running desktop migration continuity by adding a desktop-specific execution runbook and wiring it into all Phase C navigation anchors so future units can resume without document-gap drift.
+
+### Implemented changes
+
+1. Added desktop runbook artifact:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`.
+2. Runbook scope includes:
+   - session-start protocol,
+   - per-unit execution loop,
+   - required Phase C log schema,
+   - verification/CI alignment policy,
+   - handoff checklist and next-unit candidates.
+3. Linked runbook into canonical documentation map:
+   - `web-mcp-documentation-map.md` now references runbook in relationship graph and Phase C anchor semantics.
+4. Linked runbook into implementation/entry anchors:
+   - `web-mcp-desktop-implementation-plan.md` traceability anchors now include runbook,
+   - `developer/index.md` implementation-planning link set now includes runbook.
+5. Linked runbook into Phase C tracker docs:
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran canonical desktop verification chain:
+   - `pnpm run desktop:verify`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness/completeness of cross-document runbook linkage,
+  - risk of broken navigation anchors in developer entrypoints,
+  - consistency of runbook protocol with existing Phase C execution policy.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Runbook is reachable from documentation map, implementation plan, and developer index.
+  - Phase C parity/inventory/acceptance artifacts all link back to runbook.
+  - Desktop verification chain remains green after docs continuity update.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
