@@ -262,6 +262,79 @@ void main() {
     );
   });
 
+  test(
+    'fromMode auto-enables required backend auth state mode for backend execution transport',
+    () {
+      final RemoteStubHttpTransportClient backendTransportClient =
+          RemoteStubHttpTransportClient(
+            backendBaseUrl: 'https://api.penjar.app',
+            executionProbe: (_) =>
+                const RemoteStubHttpBackendExecutionResult.allowed(),
+          );
+      final DesktopContractBundle autoRequiredBundle =
+          DesktopContractBundle.fromMode(
+            DesktopContractMode.remoteStub,
+            remoteStubTransportClient: backendTransportClient,
+          );
+
+      autoRequiredBundle.authSession.signIn(
+        const AuthSignInRequest(
+          email: 'designer@penjar.app',
+          password: 'desktop-pass',
+        ),
+      );
+
+      expect(autoRequiredBundle.authSession.state.signedIn, isFalse);
+      expect(
+        autoRequiredBundle.authSession.state.status,
+        '[remote-stub] Backend auth state payload required.',
+      );
+      expect(
+        autoRequiredBundle.remoteStubProfile?.authBackendStateLabel,
+        'required',
+      );
+      expect(
+        autoRequiredBundle.remoteStubProfile?.summaryLabel,
+        contains('auth-backend-state: required'),
+      );
+    },
+  );
+
+  test(
+    'fromMode allows explicit opt-out from auto required backend auth state mode',
+    () {
+      final RemoteStubHttpTransportClient backendTransportClient =
+          RemoteStubHttpTransportClient(
+            backendBaseUrl: 'https://api.penjar.app',
+            executionProbe: (_) =>
+                const RemoteStubHttpBackendExecutionResult.allowed(),
+          );
+      final DesktopContractBundle optOutBundle = DesktopContractBundle.fromMode(
+        DesktopContractMode.remoteStub,
+        remoteStubTransportClient: backendTransportClient,
+        remoteStubAuthRequireBackendState: false,
+      );
+
+      optOutBundle.authSession.signIn(
+        const AuthSignInRequest(
+          email: 'designer@penjar.app',
+          password: 'desktop-pass',
+        ),
+      );
+
+      expect(optOutBundle.authSession.state.signedIn, isTrue);
+      expect(
+        optOutBundle.authSession.state.status,
+        '[remote-stub] Signed in (simulated).',
+      );
+      expect(optOutBundle.remoteStubProfile?.authBackendStateLabel, isEmpty);
+      expect(
+        optOutBundle.remoteStubProfile?.summaryLabel,
+        isNot(contains('auth-backend-state: required')),
+      );
+    },
+  );
+
   test('fromMode forwards auth sign-in credential payload mode', () {
     final _BundleCaptureTransportClient sanitizedTransportClient =
         _BundleCaptureTransportClient();

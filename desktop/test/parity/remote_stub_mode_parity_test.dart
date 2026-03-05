@@ -275,6 +275,51 @@ void main() {
   );
 
   testWidgets(
+    'backend execution transport auto-enables required backend auth state mode',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient: RemoteStubHttpTransportClient(
+            backendBaseUrl: 'https://api.penjar.app',
+            executionProbe: (_) =>
+                const RemoteStubHttpBackendExecutionResult.allowed(),
+          ),
+        ),
+      );
+
+      await openWorkflowSection(tester, 'diagnostics');
+      final Text diagnosticsProfileText = tester.widget(
+        find.byKey(const ValueKey<String>('diagnostics-remote-profile')),
+      );
+      expect(
+        diagnosticsProfileText.data,
+        contains('auth-backend-state: required'),
+      );
+
+      await openWorkflowSection(tester, 'auth');
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend auth state payload required.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Signed in (simulated).'), findsNothing);
+    },
+  );
+
+  testWidgets(
     'backend signed-out response forces signed-out state after prior sign-in',
     (WidgetTester tester) async {
       await pumpDesktopApp(
