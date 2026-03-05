@@ -1226,8 +1226,48 @@ Replace placeholder remote-mode mapping with dedicated remote-stub contract adap
   - Remote mode parity test passes inside canonical parity runner.
   - Full verification chain remains green (`desktop:test`, parity runner, `desktop:analyze`, macOS debug build).
 
+## Unit WS-D-31: Contract-mode matrix verification in canonical chain
+
+### Planned objective
+
+Prevent regressions in environment-driven contract-mode routing by validating desktop shell rendering under both default (`in-memory`) and env-switched (`remote-stub`) modes inside the canonical verification chain.
+
+### Implemented changes
+
+1. Added contract-mode matrix runner:
+   - `desktop/scripts/run_mode_matrix_tests.sh`.
+2. Implemented matrix test flow:
+   - `flutter test test/widget_test.dart` (default mode),
+   - `flutter test --dart-define=PENJAR_DESKTOP_CONTRACT_MODE=remote-stub test/widget_test.dart`.
+3. Extended canonical verification script:
+   - `desktop/scripts/verify_desktop.sh` now runs `FLUTTER_NO_PUB=1 ./scripts/run_mode_matrix_tests.sh` between parity and analyze steps.
+4. Updated root desktop command surface:
+   - added `desktop:test:mode-matrix`,
+   - added `desktop:test:mode-matrix:no-pub`.
+5. Updated widget-mode assertion semantics:
+   - `desktop/test/widget_test.dart` now derives expected contract mode through `DesktopContractMode.fromEnv(const String.fromEnvironment(...)).label`, so the same widget test validates both modes.
+6. Updated acceptance baseline execution anchor:
+   - `desktop-flutter-parity-acceptance-baseline.md` now references mode-matrix script linkage in verification chain.
+7. Re-ran consolidated full verification:
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of env-driven mode resolution under test runtime flags,
+  - regression risk on existing widget parity expectations after mode-neutral assertion refactor,
+  - verification-chain performance/consistency impact of added matrix step.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Widget-level contract mode assertions pass in both default and remote-stub matrix runs.
+  - Canonical `desktop:verify:full` remains green with additional mode-matrix stage.
+  - Mode-routing regressions are now caught before analyze/build stages in one chain.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, shared contract-bundle injection, and runtime mode parity gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
+- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
 - Desktop parity CI baseline is now configured on Linux with consolidated verification scripts, but macOS/Windows build-matrix coverage and release-grade installer/update validation are not yet configured.

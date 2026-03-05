@@ -53,5 +53,6 @@ the [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-pha
 - Desktop parity CI baseline workflow: `.github/workflows/tests-desktop-flutter.yml`.
 - Canonical desktop verification chain script: `desktop/scripts/verify_desktop.sh`.
 - Canonical parity test-file list is managed in `desktop/scripts/run_parity_tests.sh` and consumed by root `desktop:test:parity` script + CI workflow.
+- Contract-mode matrix script is managed in `desktop/scripts/run_mode_matrix_tests.sh` and consumed by root `desktop:test:mode-matrix` script + verification chain.
 - Canonical parity list includes cross-cutting navigation persistence gate: `desktop/test/parity/shell_contract_persistence_parity_test.dart`.
 - Canonical parity list includes cross-cutting runtime mode gate: `desktop/test/parity/remote_stub_mode_parity_test.dart`.

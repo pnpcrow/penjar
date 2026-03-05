@@ -16,6 +16,8 @@
     "desktop:test": "cd desktop && flutter test",
     "desktop:test:parity": "cd desktop && ./scripts/run_parity_tests.sh",
     "desktop:test:parity:no-pub": "cd desktop && FLUTTER_NO_PUB=1 ./scripts/run_parity_tests.sh",
+    "desktop:test:mode-matrix": "cd desktop && ./scripts/run_mode_matrix_tests.sh",
+    "desktop:test:mode-matrix:no-pub": "cd desktop && FLUTTER_NO_PUB=1 ./scripts/run_mode_matrix_tests.sh",
     "desktop:analyze": "cd desktop && flutter analyze",
     "desktop:build:macos:debug": "cd desktop && flutter build macos --debug",
     "desktop:verify": "cd desktop && ./scripts/verify_desktop.sh",
