@@ -136,6 +136,10 @@ jobs:
         working-directory: ./desktop
         run: ./scripts/check_update_manifest.sh
 
+      - name: Run update manifest contract check
+        working-directory: ./desktop
+        run: ./scripts/check_update_manifest_contract.sh
+
       - name: Run release smoke gate policy check
         working-directory: ./desktop
         env:
@@ -261,6 +265,14 @@ jobs:
         with:
           name: desktop-update-manifest-validation-report-smoke
           path: desktop/release/reports/update_manifest_validation_report.md
+          if-no-files-found: warn
+
+      - name: Upload update manifest contract report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-update-manifest-contract-report-smoke
+          path: desktop/release/reports/update_manifest_contract_report.md
           if-no-files-found: warn
 
   installer-smoke:

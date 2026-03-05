@@ -110,6 +110,7 @@ required_attachment_paths=(
   "release/reports/verify_test_coverage_report.md"
   "release/reports/desktop_command_inventory_report.md"
   "release/reports/update_manifest_validation_report.md"
+  "release/reports/update_manifest_contract_report.md"
   "release/reports/verify_stage_timing_report.md"
   "release/reports/release_evidence_bundle_check_macos.md"
   "release/reports/release_evidence_bundle_check_windows.md"

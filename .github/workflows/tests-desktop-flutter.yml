@@ -135,6 +135,14 @@ jobs:
           path: desktop/release/reports/update_manifest_validation_report.md
           if-no-files-found: warn
 
+      - name: Upload update manifest contract report (verify matrix)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-update-manifest-contract-report-${{ matrix.label }}
+          path: desktop/release/reports/update_manifest_contract_report.md
+          if-no-files-found: warn
+
       - name: Upload release smoke gate policy contract report (verify matrix)
         if: always()
         uses: actions/upload-artifact@v4

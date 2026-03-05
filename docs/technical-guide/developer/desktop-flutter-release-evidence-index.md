@@ -38,7 +38,7 @@ Each release candidate record should include:
 3. Add latest entry at top for quick audit visibility.
 4. Keep artifact/report links immutable after promotion.
 5. Run `pnpm run desktop:release:evidence:check` and `pnpm run desktop:release:evidence:contract:check` before release promotion.
-6. Run `pnpm run desktop:release:update-manifest:check` before release promotion.
+6. Run `pnpm run desktop:release:update-manifest:check` and `pnpm run desktop:release:update-manifest:contract:check` before release promotion.
 7. Attach installer/update smoke report artifact links from `.github/workflows/release-desktop-installer-smoke.yml` before promotion review.
 8. Generate platform row snippets from smoke reports with `pnpm run desktop:release:evidence:row:macos` and `pnpm run desktop:release:evidence:row:windows`, then review before table update.
 9. Generate evidence-index previews with `pnpm run desktop:release:evidence:index:preview:macos` and `pnpm run desktop:release:evidence:index:preview:windows`, then apply updates via `desktop:release:evidence:index:apply:macos` and `desktop:release:evidence:index:apply:windows` only after reviewer sign-off.
@@ -66,3 +66,4 @@ Each release candidate record should include:
 31. Attach release script syntax contract report (`release/reports/release_script_syntax_contract_report.md`) before promotion decision.
 32. Attach release evidence index contract report (`release/reports/release_evidence_index_contract_report.md`) before promotion decision.
 33. Attach desktop command inventory contract report (`release/reports/desktop_command_inventory_contract_report.md`) before promotion decision.
+34. Attach update manifest contract report (`release/reports/update_manifest_contract_report.md`) before promotion decision.
