@@ -17,6 +17,9 @@ case "$(printf '%s' "$dry_run_input" | tr '[:upper:]' '[:lower:]')" in
   1|true|yes|dry-run|dryrun) dry_run=1 ;;
 esac
 
+identity_check_command="${APPCAST_EXTERNAL_IDENTITY_CHECK_COMMAND:-}"
+invalidation_check_command="${APPCAST_EXTERNAL_INVALIDATION_CHECK_COMMAND:-}"
+
 timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 mkdir -p "$(dirname "$report_file")"
 
@@ -26,6 +29,8 @@ warning_count=0
 required_notes=""
 warning_notes=""
 aws_credentials_detected="no"
+identity_check_status="not-applicable"
+invalidation_check_status="not-applicable"
 
 add_required() {
   local line="$1"
@@ -59,6 +64,9 @@ elif [[ "$provider" == "s3" ]]; then
   fi
 
   if [[ "$dry_run" -eq 0 ]]; then
+    identity_check_status="missing"
+    invalidation_check_status="missing"
+
     if ! command -v aws >/dev/null 2>&1; then
       add_required "aws CLI is required for non-dry-run external publication."
     fi
@@ -75,9 +83,42 @@ elif [[ "$provider" == "s3" ]]; then
       add_required "AWS credentials are not detected. Provide access keys, profile, or role/web-identity variables."
     fi
 
-    if [[ -z "${APPCAST_CACHE_INVALIDATION_COMMAND:-}" ]]; then
-      add_warning "APPCAST_CACHE_INVALIDATION_COMMAND is not set; cache invalidation will be skipped."
+    if [[ -n "$identity_check_command" ]]; then
+      if bash -lc "$identity_check_command"; then
+        identity_check_status="executed"
+      else
+        identity_check_status="failed"
+        add_required "APPCAST_EXTERNAL_IDENTITY_CHECK_COMMAND execution failed."
+      fi
+    elif [[ "$strict_mode" -eq 1 ]]; then
+      add_required "APPCAST_EXTERNAL_IDENTITY_CHECK_COMMAND is required in strict mode for non-dry-run publication."
+    else
+      add_warning "APPCAST_EXTERNAL_IDENTITY_CHECK_COMMAND is not set; production identity validation is skipped."
     fi
+
+    if [[ -z "${APPCAST_CACHE_INVALIDATION_COMMAND:-}" ]]; then
+      if [[ "$strict_mode" -eq 1 ]]; then
+        add_required "APPCAST_CACHE_INVALIDATION_COMMAND is required in strict mode for non-dry-run publication."
+      else
+        add_warning "APPCAST_CACHE_INVALIDATION_COMMAND is not set; cache invalidation will be skipped."
+      fi
+    fi
+
+    if [[ -n "$invalidation_check_command" ]]; then
+      if bash -lc "$invalidation_check_command"; then
+        invalidation_check_status="executed"
+      else
+        invalidation_check_status="failed"
+        add_required "APPCAST_EXTERNAL_INVALIDATION_CHECK_COMMAND execution failed."
+      fi
+    elif [[ "$strict_mode" -eq 1 ]]; then
+      add_required "APPCAST_EXTERNAL_INVALIDATION_CHECK_COMMAND is required in strict mode for non-dry-run publication."
+    else
+      add_warning "APPCAST_EXTERNAL_INVALIDATION_CHECK_COMMAND is not set; invalidation validation is skipped."
+    fi
+  else
+    identity_check_status="skipped-dry-run"
+    invalidation_check_status="skipped-dry-run"
   fi
 else
   add_required "unsupported APPCAST_PUBLISH_PROVIDER: ${provider}"
@@ -102,6 +143,10 @@ fi
   echo "- Dry-run: $dry_run"
   echo "- Publication bundle path: $bundle_file"
   echo "- AWS credentials detected: $aws_credentials_detected"
+  echo "- Identity check command configured: $([[ -n "$identity_check_command" ]] && echo yes || echo no)"
+  echo "- Identity check status: $identity_check_status"
+  echo "- Invalidation check command configured: $([[ -n "$invalidation_check_command" ]] && echo yes || echo no)"
+  echo "- Invalidation check status: $invalidation_check_status"
   echo "- Status: $status"
   echo
   echo "## Required checks"

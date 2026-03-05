@@ -121,6 +121,10 @@ This baseline defines minimum release validation requirements for desktop distri
 12. Run external publication readiness checks:
    - `pnpm run desktop:release:appcast:external:readiness`
    - use strict mode when production credentials/execution are expected: `pnpm run desktop:release:appcast:external:readiness:strict`.
+   - strict production readiness additionally expects:
+     - `APPCAST_EXTERNAL_IDENTITY_CHECK_COMMAND` (credential identity validation command),
+     - `APPCAST_EXTERNAL_INVALIDATION_CHECK_COMMAND` (invalidation validation command),
+     - `APPCAST_CACHE_INVALIDATION_COMMAND` (actual invalidation execution command).
 13. Run external publication dry-run report:
    - `pnpm run desktop:release:appcast:publish:external:dry-run`
 14. Record evidence in release checklist ticket and Phase C execution log.
@@ -149,6 +153,7 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job runs external production guard checks and uploads production guard report artifacts.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict external publication readiness enforcement via `enforce_appcast_external_readiness` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job runs external publication readiness checks and uploads readiness report artifacts.
+- `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview readiness step accepts production identity/invalidation validation command hooks (`APPCAST_EXTERNAL_IDENTITY_CHECK_COMMAND`, `APPCAST_EXTERNAL_INVALIDATION_CHECK_COMMAND`).
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job optionally runs external publication stage and uploads publication report artifact.
 - Update manifest baseline file: `desktop/release/update_manifest.example.json`.
 - Installer/update smoke report generator: `desktop/scripts/generate_installer_update_report.sh`.

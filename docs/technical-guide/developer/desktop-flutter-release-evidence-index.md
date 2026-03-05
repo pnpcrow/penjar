@@ -50,6 +50,6 @@ Each release candidate record should include:
 15. Attach external publication report (`release/reports/appcast_external_publication_report.md`) when external publication stage is executed.
 16. Attach Windows installer packaging report (`release/reports/windows_installer_packaging_report.md`) before promotion decision, and require naming policy status to be `passed` when strict naming mode is enabled.
 17. Attach Windows installer pipeline report (`release/reports/windows_installer_pipeline_report.md`) before promotion decision.
-18. Attach external publication readiness report (`release/reports/appcast_external_readiness_report.md`) when external publication stage is executed.
+18. Attach external publication readiness report (`release/reports/appcast_external_readiness_report.md`) when external publication stage is executed, including identity/invalidation check status fields when non-dry-run readiness is evaluated.
 19. Attach external production guard report (`release/reports/appcast_external_production_guard_report.md`) when external publication stage is executed.
 20. Attach Windows installer provenance report (`release/reports/windows_installer_provenance_report.md`) before promotion decision when installer smoke is executed.

@@ -2457,8 +2457,52 @@ Introduce explicit Windows installer provenance verification and strict gating, 
   - Strict provenance mode fails when artifact/provenance-command requirements are unmet.
   - Full-fast desktop verification remains green after provenance gate integration.
 
+## Unit WS-D-58: External production identity/invalidation readiness validation baseline
+
+### Planned objective
+
+Strengthen external publication readiness for non-dry-run mode by validating credential identity and invalidation check commands before production publication.
+
+### Implemented changes
+
+1. Extended external publication readiness checker:
+   - `desktop/scripts/check_appcast_external_readiness.sh`.
+2. Implemented production validation semantics for non-dry-run mode:
+   - added identity validation command hook (`APPCAST_EXTERNAL_IDENTITY_CHECK_COMMAND`),
+   - added invalidation validation command hook (`APPCAST_EXTERNAL_INVALIDATION_CHECK_COMMAND`),
+   - readiness report now includes command configuration/status fields,
+   - strict mode now requires identity/invalidation validation command hooks and actual invalidation execution command (`APPCAST_CACHE_INVALIDATION_COMMAND`) for non-dry-run checks.
+3. Extended appcast-preview readiness step env contract:
+   - `.github/workflows/release-desktop-installer-smoke.yml` now passes
+     - `APPCAST_EXTERNAL_IDENTITY_CHECK_COMMAND`,
+     - `APPCAST_EXTERNAL_INVALIDATION_CHECK_COMMAND`.
+4. Updated release docs:
+   - `desktop-flutter-release-validation-baseline.md` now documents strict production readiness command-hook expectations,
+   - `desktop-flutter-release-evidence-index.md` now requires readiness report command-status fields for non-dry-run readiness evaluation.
+5. Re-ran validation commands:
+   - `pnpm run desktop:release:appcast:external:readiness`,
+   - `cd desktop && APPCAST_PUBLISH_PROVIDER=s3 APPCAST_PUBLISH_DRY_RUN=0 APPCAST_S3_BUCKET=test-bucket STRICT_APPCAST_EXTERNAL_READINESS=1 ./scripts/check_appcast_external_readiness.sh` (expected strict failure),
+   - `cd desktop && APPCAST_PUBLISH_PROVIDER=s3 APPCAST_PUBLISH_DRY_RUN=0 APPCAST_S3_BUCKET=test-bucket STRICT_APPCAST_EXTERNAL_READINESS=1 AWS_PROFILE=mock APPCAST_CACHE_INVALIDATION_COMMAND='echo invalidate' APPCAST_EXTERNAL_IDENTITY_CHECK_COMMAND='echo identity-ok' APPCAST_EXTERNAL_INVALIDATION_CHECK_COMMAND='echo invalidation-check-ok' ./scripts/check_appcast_external_readiness.sh`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict/non-strict readiness behavior for production identity/invalidation validation hooks,
+  - workflow env propagation for new readiness command hooks,
+  - readiness report completeness for command-state traceability.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Strict non-dry-run readiness fails when identity/invalidation validation hooks are missing.
+  - Readiness report exposes identity/invalidation command configuration and execution status.
+  - Full-fast desktop verification remains green after readiness validation extension.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline, optional external publication dry-run stage with production consent guard and readiness gate baseline, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, and Windows installer provenance gate baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, and Windows installer provenance gate baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

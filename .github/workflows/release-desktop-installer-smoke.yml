@@ -321,6 +321,8 @@ jobs:
           AWS_PROFILE: ${{ vars.AWS_PROFILE }}
           AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
           AWS_WEB_IDENTITY_TOKEN_FILE: ${{ vars.AWS_WEB_IDENTITY_TOKEN_FILE }}
+          APPCAST_EXTERNAL_IDENTITY_CHECK_COMMAND: ${{ secrets.APPCAST_EXTERNAL_IDENTITY_CHECK_COMMAND }}
+          APPCAST_EXTERNAL_INVALIDATION_CHECK_COMMAND: ${{ secrets.APPCAST_EXTERNAL_INVALIDATION_CHECK_COMMAND }}
         run: ./scripts/check_appcast_external_readiness.sh
 
       - name: Publish appcast to external target
