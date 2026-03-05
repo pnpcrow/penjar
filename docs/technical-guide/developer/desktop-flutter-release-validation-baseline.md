@@ -71,6 +71,8 @@ This baseline defines minimum release validation requirements for desktop distri
    - use strict mode when release secrets are expected: `pnpm run desktop:release:signing:readiness:strict`.
    - enforce command-hook presence when execution hooks are expected: `pnpm run desktop:release:signing:readiness:command-hooks:strict`.
 3. Execute platform-specific installer/update smoke automation:
+   - preflight gate policy check:
+     - `pnpm run desktop:release:smoke:gate-policy:check`.
    - local/manual entrypoints:
      - `pnpm run desktop:release:installer-smoke:macos`
      - `pnpm run desktop:release:installer-smoke:windows`
@@ -133,6 +135,7 @@ This baseline defines minimum release validation requirements for desktop distri
 CI baseline note:
 - `.github/workflows/tests-desktop-flutter.yml` includes `release-evidence-guard` and `release-update-manifest-guard` jobs, and uploads parity/build artifacts for audit traceability.
 - `.github/workflows/release-desktop-installer-smoke.yml` includes `signing-readiness` job with optional strict enforcement via workflow input.
+- `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job runs release smoke gate policy preflight and uploads gate policy report artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing command-hook enforcement via `enforce_signing_command_hooks` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing execution enforcement via `enforce_signing_execution` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer artifact enforcement via `enforce_windows_installer_packaging` input.
@@ -157,6 +160,7 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job optionally runs external publication stage and uploads publication report artifact.
 - Update manifest baseline file: `desktop/release/update_manifest.example.json`.
 - Installer/update smoke report generator: `desktop/scripts/generate_installer_update_report.sh`.
+- Release smoke gate policy checker: `desktop/scripts/check_release_smoke_gate_policy.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence index updater: `desktop/scripts/update_release_evidence_index.sh`.
 - Appcast preview generator/checker: `desktop/scripts/generate_appcast_from_reports.sh`, `desktop/scripts/check_appcast.sh`.

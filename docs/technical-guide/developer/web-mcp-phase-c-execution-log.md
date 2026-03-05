@@ -2501,8 +2501,55 @@ Strengthen external publication readiness for non-dry-run mode by validating cre
   - Readiness report exposes identity/invalidation command configuration and execution status.
   - Full-fast desktop verification remains green after readiness validation extension.
 
+## Unit WS-D-59: Release smoke gate policy preflight baseline
+
+### Planned objective
+
+Add an explicit gate-policy preflight to prevent inconsistent strict toggle combinations before expensive smoke/release stages run.
+
+### Implemented changes
+
+1. Added release smoke gate-policy checker:
+   - `desktop/scripts/check_release_smoke_gate_policy.sh`.
+2. Implemented preflight policy semantics:
+   - normalizes boolean gate toggles from workflow/local env,
+   - enforces required relationships (execution strict implies prerequisite strict hooks/gates),
+   - enforces non-dry-run external publish consent requirement,
+   - emits policy report (`release/reports/release_smoke_gate_policy_report.md`) with effective toggle map and required/advisory findings.
+3. Added root command surface:
+   - `desktop:release:smoke:gate-policy:check`.
+4. Integrated policy preflight into installer smoke workflow:
+   - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job now runs preflight step before readiness checks.
+5. Extended workflow artifact chain:
+   - uploads `desktop/release/reports/release_smoke_gate_policy_report.md`.
+6. Updated release/runbook/index docs:
+   - `desktop-flutter-development-runbook.md` command inventory now includes gate-policy check command,
+   - `desktop-flutter-release-validation-baseline.md` now includes preflight gate-policy protocol, CI note, and script index reference,
+   - `desktop-flutter-release-evidence-index.md` now includes gate-policy report attachment rule.
+7. Re-ran validation commands:
+   - `pnpm run desktop:release:smoke:gate-policy:check`,
+   - `cd desktop && STRICT_SIGNING_EXECUTION=1 ./scripts/check_release_smoke_gate_policy.sh` (expected failure: missing strict signing command-hook gate),
+   - `cd desktop && STRICT_SIGNING_EXECUTION=1 STRICT_SIGNING_COMMAND_HOOKS=1 STRICT_WINDOWS_INSTALLER_EXECUTION=1 STRICT_WINDOWS_INSTALLER_PACKAGING=1 STRICT_WINDOWS_INSTALLER_PROVENANCE=1 PUBLISH_APPCAST_EXTERNAL=1 APPCAST_PUBLISH_DRY_RUN=0 ALLOW_APPCAST_EXTERNAL_PRODUCTION=1 STRICT_APPCAST_EXTERNAL_READINESS=1 ./scripts/check_release_smoke_gate_policy.sh`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict-toggle dependency correctness in policy rules,
+  - workflow preflight placement and artifact continuity,
+  - local command parity with workflow policy checks.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Invalid strict-toggle combinations fail preflight immediately.
+  - Gate-policy report captures effective toggle map and findings.
+  - Full-fast desktop verification remains green after preflight integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, and Windows installer provenance gate baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, and Windows installer provenance gate baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

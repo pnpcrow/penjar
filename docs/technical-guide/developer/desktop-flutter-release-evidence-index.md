@@ -53,3 +53,4 @@ Each release candidate record should include:
 18. Attach external publication readiness report (`release/reports/appcast_external_readiness_report.md`) when external publication stage is executed, including identity/invalidation check status fields when non-dry-run readiness is evaluated.
 19. Attach external production guard report (`release/reports/appcast_external_production_guard_report.md`) when external publication stage is executed.
 20. Attach Windows installer provenance report (`release/reports/windows_installer_provenance_report.md`) before promotion decision when installer smoke is executed.
+21. Attach release smoke gate policy report (`release/reports/release_smoke_gate_policy_report.md`) before promotion decision.

@@ -97,6 +97,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Run release smoke gate policy check
+        working-directory: ./desktop
+        env:
+          STRICT_SIGNING_EXECUTION: ${{ inputs.enforce_signing_execution }}
+          STRICT_SIGNING_COMMAND_HOOKS: ${{ inputs.enforce_signing_command_hooks }}
+          STRICT_WINDOWS_INSTALLER_EXECUTION: ${{ inputs.enforce_windows_installer_execution }}
+          STRICT_WINDOWS_INSTALLER_PACKAGING: ${{ inputs.enforce_windows_installer_packaging }}
+          STRICT_WINDOWS_INSTALLER_PROVENANCE: ${{ inputs.enforce_windows_installer_provenance }}
+          PUBLISH_APPCAST_EXTERNAL: ${{ inputs.publish_appcast_external }}
+          APPCAST_PUBLISH_DRY_RUN: ${{ inputs.appcast_external_dry_run }}
+          ALLOW_APPCAST_EXTERNAL_PRODUCTION: ${{ inputs.allow_appcast_external_production }}
+          STRICT_APPCAST_EXTERNAL_READINESS: ${{ inputs.enforce_appcast_external_readiness }}
+        run: ./scripts/check_release_smoke_gate_policy.sh
+
       - name: Run signing readiness check
         working-directory: ./desktop
         env:
@@ -119,6 +133,14 @@ jobs:
         with:
           name: desktop-signing-readiness-report
           path: desktop/release/reports/signing_readiness_report.md
+
+      - name: Upload release smoke gate policy report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-release-smoke-gate-policy-report
+          path: desktop/release/reports/release_smoke_gate_policy_report.md
+          if-no-files-found: warn
 
   installer-smoke:
     name: "Installer Smoke (${{ matrix.label }})"

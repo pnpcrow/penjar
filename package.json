@@ -39,6 +39,7 @@
     "desktop:release:appcast:publish:dry-run": "cd desktop && ./scripts/publish_appcast.sh",
     "desktop:release:appcast:bundle:generate": "cd desktop && ./scripts/generate_appcast_publication_bundle.sh",
     "desktop:release:appcast:bundle:check": "cd desktop && ./scripts/check_appcast_publication_bundle.sh",
+    "desktop:release:smoke:gate-policy:check": "cd desktop && ./scripts/check_release_smoke_gate_policy.sh",
     "desktop:release:appcast:external:production:guard": "cd desktop && ./scripts/guard_appcast_external_production.sh",
     "desktop:release:appcast:external:readiness": "cd desktop && ./scripts/check_appcast_external_readiness.sh",
     "desktop:release:appcast:external:readiness:strict": "cd desktop && STRICT_APPCAST_EXTERNAL_READINESS=1 ./scripts/check_appcast_external_readiness.sh",
