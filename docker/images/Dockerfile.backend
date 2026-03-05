@@ -1,5 +1,5 @@
 FROM ubuntu:24.04 AS build
-LABEL maintainer="Penpot <docker@penpot.app>"
+LABEL maintainer="Penjar <docker@penjar.app>"
 
 ENV LANG='C.UTF-8' \
     LC_ALL='C.UTF-8' \
@@ -72,7 +72,7 @@ RUN set -eux; \
        --output /opt/jre;
 
 FROM ubuntu:24.04 AS image
-LABEL maintainer="Penpot <docker@penpot.app>"
+LABEL maintainer="Penjar <docker@penjar.app>"
 
 ENV LANG='C.UTF-8' \
     LC_ALL='C.UTF-8' \
@@ -82,7 +82,7 @@ ENV LANG='C.UTF-8' \
     TZ=Etc/UTC
 
 RUN set -ex; \
-    useradd -U -M -u 1001 -s /bin/false -d /opt/penpot penpot; \
+    useradd -U -M -u 1001 -s /bin/false -d /opt/penjar penjar; \
     apt-get -qq update; \
     apt-get -qq upgrade; \
     apt-get -qqy --no-install-recommends install \
@@ -118,18 +118,18 @@ RUN set -ex; \
     rm -rf /var/lib /var/cache; \
     rm -rf /usr/include; \
     mkdir -p /opt/data/assets; \
-    mkdir -p /opt/penpot; \
-    chown -R penpot:penpot /opt/penpot; \
-    chown -R penpot:penpot /opt/data; \
+    mkdir -p /opt/penjar; \
+    chown -R penjar:penjar /opt/penjar; \
+    chown -R penjar:penjar /opt/data; \
     rm -rf /var/lib/apt/lists/*;
 
 COPY --from=build /opt/jre /opt/jre
 COPY --from=build /opt/node /opt/node
-COPY --from=penpotapp/imagemagick:7.1.2-13 /opt/imagick /opt/imagick
+COPY --from=penjarapp/imagemagick:7.1.2-13 /opt/imagick /opt/imagick
 
 ARG BUNDLE_PATH="./bundle-backend/"
-COPY --chown=penpot:penpot $BUNDLE_PATH /opt/penpot/backend/
+COPY --chown=penjar:penjar $BUNDLE_PATH /opt/penjar/backend/
 
-USER penpot:penpot
-WORKDIR /opt/penpot/backend
+USER penjar:penjar
+WORKDIR /opt/penjar/backend
 CMD ["/bin/bash", "run.sh"]

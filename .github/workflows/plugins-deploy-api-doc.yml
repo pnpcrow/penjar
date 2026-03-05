@@ -11,7 +11,7 @@ on:
       - 'plugins/libs/plugin-types/REAME.md'
       - 'plugins/tools/typedoc.css'
       - 'plugins/CHANGELOG.md'
-      - 'plugins/wrangler-penpot-plugins-api-doc.toml'
+      - 'plugins/wrangler-penjar-plugins-api-doc.toml'
   workflow_dispatch:
     inputs:
       gh_ref:
@@ -87,14 +87,14 @@ jobs:
           REF="${{ steps.vars.outputs.gh_ref }}"
           case "$REF" in
             main)
-              echo "WORKER_NAME=penpot-plugins-api-doc-pro" >> $GITHUB_ENV
-              echo "WORKER_URI=doc.plugins.penpot.app" >> $GITHUB_ENV ;;
+              echo "WORKER_NAME=penjar-plugins-api-doc-pro" >> $GITHUB_ENV
+              echo "WORKER_URI=doc.plugins.penjar.app" >> $GITHUB_ENV ;;
             staging)
-              echo "WORKER_NAME=penpot-plugins-api-doc-pre" >> $GITHUB_ENV
-              echo "WORKER_URI=doc.plugins.penpot.dev" >> $GITHUB_ENV ;;
+              echo "WORKER_NAME=penjar-plugins-api-doc-pre" >> $GITHUB_ENV
+              echo "WORKER_URI=doc.plugins.penjar.dev" >> $GITHUB_ENV ;;
             develop)
-              echo "WORKER_NAME=penpot-plugins-api-doc-hourly" >> $GITHUB_ENV
-              echo "WORKER_URI=doc.plugins.hourly.penpot.dev" >> $GITHUB_ENV ;;
+              echo "WORKER_NAME=penjar-plugins-api-doc-hourly" >> $GITHUB_ENV
+              echo "WORKER_URI=doc.plugins.hourly.penjar.dev" >> $GITHUB_ENV ;;
             *) echo "Unsupported branch ${REF}" && exit 1 ;;
           esac
 
@@ -102,7 +102,7 @@ jobs:
         working-directory: plugins
         shell: bash
         run: |
-          sed -i "s/WORKER_URI/${{ env.WORKER_URI }}/g" wrangler-penpot-plugins-api-doc.toml
+          sed -i "s/WORKER_URI/${{ env.WORKER_URI }}/g" wrangler-penjar-plugins-api-doc.toml
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
@@ -110,7 +110,7 @@ jobs:
           workingDirectory: plugins
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --config wrangler-penpot-plugins-api-doc.toml --name ${{ env.WORKER_NAME }}
+          command: deploy --config wrangler-penjar-plugins-api-doc.toml --name ${{ env.WORKER_NAME }}
 
       - name: Notify Mattermost
         if: failure()
@@ -119,7 +119,7 @@ jobs:
           MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK }}
           MATTERMOST_CHANNEL: bot-alerts-cicd
           TEXT: |
-            ❌ 🧩📚 *[PENPOT PLUGINS] Error deploying API documentation.*
+            ❌ 🧩📚 *[PENJAR PLUGINS] Error deploying API documentation.*
             📄 Triggered from ref: `${{ inputs.gh_ref }}`
             🔗 Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
             @infra

@@ -1,4 +1,4 @@
-import { Text } from '@penpot/plugin-types';
+import { Text } from '@penjar/plugin-types';
 import type {
   PluginMessageEvent,
   PluginUIEvent,
@@ -11,44 +11,44 @@ import {
   generateCharacters,
 } from './generator.js';
 
-penpot.ui.open('LOREM IPSUM PLUGIN', `?theme=${penpot.theme}`);
+penjar.ui.open('LOREM IPSUM PLUGIN', `?theme=${penjar.theme}`);
 
-penpot.on('themechange', (theme) => {
+penjar.on('themechange', (theme) => {
   sendMessage({ type: 'theme', content: theme });
 });
 
 function getSelectedShapes(): Text[] {
-  return penpot.selection.filter((it): it is Text => {
-    return penpot.utils.types.isText(it);
+  return penjar.selection.filter((it): it is Text => {
+    return penjar.utils.types.isText(it);
   });
 }
 
-penpot.on('selectionchange', () => {
+penjar.on('selectionchange', () => {
   sendMessage({ type: 'selection', content: getSelectedShapes().length });
 });
 
-penpot.ui.onMessage<PluginUIEvent>((message) => {
+penjar.ui.onMessage<PluginUIEvent>((message) => {
   if (message.type === 'text') {
     generateText(message);
 
     if (message.autoClose) {
-      penpot.closePlugin();
+      penjar.closePlugin();
     }
   }
 });
 
 function sendMessage(message: PluginMessageEvent) {
-  penpot.ui.sendMessage(message);
+  penjar.ui.sendMessage(message);
 }
 
 function generateText(event: TextPluginUIEvent) {
   const selection = getSelectedShapes();
 
   if (!selection.length) {
-    const text = penpot.createText('lorem ipsum');
+    const text = penjar.createText('lorem ipsum');
     if (text) {
-      text.x = penpot.viewport.center.x;
-      text.y = penpot.viewport.center.y;
+      text.x = penjar.viewport.center.x;
+      text.y = penjar.viewport.center.y;
       selection.push(text);
     }
   }

@@ -217,7 +217,7 @@
   (rds/add-listener sconn (create-listener rcv-ch))
 
   (px/thread
-    {:name "penpot/msgbus"}
+    {:name "penjar/msgbus"}
     (try
       (loop []
         (let [timeout-ch (sp/timeout-chan 1000)

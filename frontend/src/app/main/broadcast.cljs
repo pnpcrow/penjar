@@ -16,7 +16,7 @@
   cljs.core/IDeref
   (-deref [_] data))
 
-(def ^:const default-topic "penpot")
+(def ^:const default-topic "penjar")
 
 ;; The main broadcast channel instance, used for emit data
 ;; If used as a library may be we can't access js/BroadcastChannel.

@@ -1,0 +1,374 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SERVER_DIR="$PROJECT_ROOT/packages/server"
+
+HEALTH_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/health"
+MCP_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/mcp"
+WS_URL="ws://127.0.0.1:${PENJAR_MCP_WEBSOCKET_PORT:-4402}"
+
+TMP_BASE="${TMPDIR:-/tmp}"
+SERVER_LOG="$TMP_BASE/penjar-mcp-file-lifecycle-$$.log"
+SERVER_PID=""
+
+log_step() {
+    printf "\n[FILE-CHECK] %s\n" "$1"
+}
+
+cleanup() {
+    if [ -n "$SERVER_PID" ] && kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+        kill "$SERVER_PID" >/dev/null 2>&1 || true
+        wait "$SERVER_PID" >/dev/null 2>&1 || true
+    fi
+
+    rm -f "$SERVER_LOG"
+}
+
+trap cleanup EXIT
+
+if [ "${VERIFY_FILE_SKIP_BUILD:-false}" = "true" ]; then
+    log_step "Skip build step (VERIFY_FILE_SKIP_BUILD=true)"
+else
+    log_step "Build required packages for file lifecycle probe"
+    cd "$PROJECT_ROOT"
+    pnpm --filter mcp-common run build
+    pnpm --filter mcp-server run build
+fi
+
+log_step "Start MCP server (single-user)"
+cd "$SERVER_DIR"
+node dist/index.js >"$SERVER_LOG" 2>&1 &
+SERVER_PID="$!"
+
+log_step "Wait for /health endpoint"
+for _ in $(seq 1 20); do
+    if curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+done
+
+if ! curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+    echo "[FILE-CHECK][FAIL] server did not become healthy."
+    echo "[FILE-CHECK][INFO] Server log:"
+    cat "$SERVER_LOG"
+    exit 1
+fi
+
+log_step "Run file_lifecycle E2E probe with fake plugin session"
+node --input-type=module - "$MCP_URL" "$WS_URL" <<'EOF'
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
+import WebSocket from "ws";
+
+const [mcpUrl, wsUrl] = process.argv.slice(2);
+let observedOps = new Set();
+
+const ws = new WebSocket(wsUrl);
+await new Promise((resolve, reject) => {
+  ws.once("open", resolve);
+  ws.once("error", reject);
+});
+
+ws.on("message", (payload) => {
+  try {
+    const request = JSON.parse(payload.toString());
+    if (!request || typeof request !== "object" || request.task !== "executeCode" || !request.id) {
+      return;
+    }
+
+    const code = request.params?.code ?? "";
+    let result;
+    if (typeof code === "string" && code.includes("file_lifecycle_operation: inspect")) {
+      observedOps.add("inspect");
+      result = {
+        operation: "inspect",
+        file: {
+          id: "file-fixture",
+          name: "Lifecycle Fixture",
+          revn: 42,
+          pageCount: 2,
+          pages: [
+            { id: "p1", name: "Cover" },
+            { id: "p2", name: "Details" },
+          ],
+        },
+      };
+    } else if (typeof code === "string" && code.includes("file_lifecycle_operation: create_page")) {
+      if (code.includes('"Untitled page"')) {
+        observedOps.add("create_page_defaults");
+        result = {
+          operation: "create_page",
+          createdPage: { id: "p4", name: "Untitled page" },
+          file: { id: "file-fixture", name: "Lifecycle Fixture", pageCount: 4 },
+        };
+      } else {
+        observedOps.add("create_page");
+        result = {
+          operation: "create_page",
+          createdPage: { id: "p3", name: "New Lifecycle Page" },
+          file: { id: "file-fixture", name: "Lifecycle Fixture", pageCount: 3 },
+        };
+      }
+    } else if (typeof code === "string" && code.includes("file_lifecycle_operation: rename_file")) {
+      if (code.includes("Lifecycle Forbidden")) {
+        observedOps.add("permission_denied");
+        ws.send(
+          JSON.stringify({
+            id: request.id,
+            success: false,
+            error: "Permission denied: missing content:write scope for rename_file operation",
+          })
+        );
+        return;
+      }
+
+      observedOps.add("rename_file");
+      result = {
+        operation: "rename_file",
+        file: { id: "file-fixture", previousName: "Lifecycle Fixture", currentName: "Lifecycle Fixture v2" },
+      };
+    } else if (typeof code === "string" && code.includes("file_lifecycle_operation: rename_page")) {
+      if (code.includes("missing-page")) {
+        observedOps.add("resource_not_found");
+        ws.send(
+          JSON.stringify({
+            id: request.id,
+            success: false,
+            error: "Target page was not found.",
+          })
+        );
+        return;
+      }
+
+      observedOps.add("rename_page");
+      result = {
+        operation: "rename_page",
+        page: { id: "p2", previousName: "Details", currentName: "Details v2" },
+      };
+    } else if (typeof code === "string" && code.includes("file_lifecycle_operation: open_page")) {
+      if (code.includes('toLowerCase() === "cover"')) {
+        observedOps.add("open_page_by_name");
+      } else {
+        observedOps.add("open_page");
+      }
+      result = {
+        operation: "open_page",
+        page: { id: "p1", name: "Cover" },
+        file: { id: "file-fixture", name: "Lifecycle Fixture v2" },
+      };
+    } else {
+      ws.send(JSON.stringify({ id: request.id, success: false, error: "Unknown lifecycle test payload" }));
+      return;
+    }
+
+    ws.send(JSON.stringify({ id: request.id, success: true, data: { result, log: "" } }));
+  } catch {
+    // ignore malformed messages in probe mode
+  }
+});
+
+const client = new Client({ name: "file-lifecycle-check", version: "1.0.0" }, { capabilities: {} });
+const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
+
+async function callToolText(name, args) {
+  const result = await client.request(
+    { method: "tools/call", params: { name, arguments: args } },
+    CallToolResultSchema
+  );
+  return result.content.find((item) => item.type === "text")?.text ?? "";
+}
+
+async function callTool(name, args) {
+  const text = await callToolText(name, args);
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(`Tool ${name} returned non-JSON payload: ${text}`);
+  }
+}
+
+function assertPageContract(page, label) {
+  if (!page || typeof page !== "object") {
+    throw new Error(`${label}: page must be an object: ${JSON.stringify(page)}`);
+  }
+  if (typeof page.id !== "string" || page.id.length === 0) {
+    throw new Error(`${label}: page.id contract mismatch: ${JSON.stringify(page)}`);
+  }
+  if (page.name !== null && typeof page.name !== "string") {
+    throw new Error(`${label}: page.name contract mismatch: ${JSON.stringify(page)}`);
+  }
+}
+
+function assertFileContract(file, label) {
+  if (!file || typeof file !== "object") {
+    throw new Error(`${label}: file must be an object: ${JSON.stringify(file)}`);
+  }
+  if (typeof file.id !== "string" || file.id.length === 0) {
+    throw new Error(`${label}: file.id contract mismatch: ${JSON.stringify(file)}`);
+  }
+  if (file.name !== null && typeof file.name !== "string") {
+    throw new Error(`${label}: file.name contract mismatch: ${JSON.stringify(file)}`);
+  }
+}
+
+function assertRenameFileContract(file, label) {
+  if (!file || typeof file !== "object") {
+    throw new Error(`${label}: file must be an object: ${JSON.stringify(file)}`);
+  }
+  if (typeof file.id !== "string" || file.id.length === 0) {
+    throw new Error(`${label}: file.id contract mismatch: ${JSON.stringify(file)}`);
+  }
+  if (typeof file.previousName !== "string" || typeof file.currentName !== "string") {
+    throw new Error(`${label}: previous/current name contract mismatch: ${JSON.stringify(file)}`);
+  }
+}
+
+function assertRenamePageContract(page, label) {
+  if (!page || typeof page !== "object") {
+    throw new Error(`${label}: page must be an object: ${JSON.stringify(page)}`);
+  }
+  if (typeof page.id !== "string" || page.id.length === 0) {
+    throw new Error(`${label}: page.id contract mismatch: ${JSON.stringify(page)}`);
+  }
+  if (typeof page.previousName !== "string" || typeof page.currentName !== "string") {
+    throw new Error(`${label}: previous/current page name contract mismatch: ${JSON.stringify(page)}`);
+  }
+}
+
+try {
+  await client.connect(transport);
+
+  const inspectPayload = await callTool("file_lifecycle", { operation: "inspect" });
+  if (inspectPayload?.operation !== "inspect" || inspectPayload?.file?.pageCount !== 2) {
+    throw new Error(`inspect operation mismatch: ${JSON.stringify(inspectPayload)}`);
+  }
+  assertFileContract(inspectPayload.file, "inspect");
+  if (!Array.isArray(inspectPayload?.file?.pages) || inspectPayload.file.pages.length !== 2) {
+    throw new Error(`inspect pages contract mismatch: ${JSON.stringify(inspectPayload)}`);
+  }
+  inspectPayload.file.pages.forEach((page, index) => assertPageContract(page, `inspect.pages[${index}]`));
+  if (typeof inspectPayload?.file?.revn !== "number") {
+    throw new Error(`inspect revn contract mismatch: ${JSON.stringify(inspectPayload)}`);
+  }
+
+  const createPayload = await callTool("file_lifecycle", { operation: "create_page", pageName: "New Lifecycle Page" });
+  if (createPayload?.operation !== "create_page" || createPayload?.file?.pageCount !== 3) {
+    throw new Error(`create_page operation mismatch: ${JSON.stringify(createPayload)}`);
+  }
+  assertPageContract(createPayload.createdPage, "create_page");
+  if (createPayload?.createdPage?.name !== "New Lifecycle Page") {
+    throw new Error(`create_page custom name mismatch: ${JSON.stringify(createPayload)}`);
+  }
+  assertFileContract(createPayload.file, "create_page");
+
+  const createDefaultPayload = await callTool("file_lifecycle", { operation: "create_page" });
+  if (createDefaultPayload?.operation !== "create_page" || createDefaultPayload?.file?.pageCount !== 4) {
+    throw new Error(`create_page defaults operation mismatch: ${JSON.stringify(createDefaultPayload)}`);
+  }
+  assertPageContract(createDefaultPayload.createdPage, "create_page_defaults");
+  if (createDefaultPayload?.createdPage?.name !== "Untitled page") {
+    throw new Error(`create_page defaults name mismatch: ${JSON.stringify(createDefaultPayload)}`);
+  }
+  assertFileContract(createDefaultPayload.file, "create_page_defaults");
+
+  const renameFilePayload = await callTool("file_lifecycle", { operation: "rename_file", fileName: "Lifecycle Fixture v2" });
+  if (
+    renameFilePayload?.operation !== "rename_file" ||
+    renameFilePayload?.file?.currentName !== "Lifecycle Fixture v2"
+  ) {
+    throw new Error(`rename_file operation mismatch: ${JSON.stringify(renameFilePayload)}`);
+  }
+  assertRenameFileContract(renameFilePayload.file, "rename_file");
+  if (renameFilePayload?.file?.previousName !== "Lifecycle Fixture") {
+    throw new Error(`rename_file previousName mismatch: ${JSON.stringify(renameFilePayload)}`);
+  }
+
+  const renamePagePayload = await callTool("file_lifecycle", {
+    operation: "rename_page",
+    pageName: "Details v2",
+    pageId: "p2",
+  });
+  if (renamePagePayload?.operation !== "rename_page" || renamePagePayload?.page?.currentName !== "Details v2") {
+    throw new Error(`rename_page operation mismatch: ${JSON.stringify(renamePagePayload)}`);
+  }
+  assertRenamePageContract(renamePagePayload.page, "rename_page");
+  if (renamePagePayload?.page?.previousName !== "Details") {
+    throw new Error(`rename_page previousName mismatch: ${JSON.stringify(renamePagePayload)}`);
+  }
+
+  const openPagePayload = await callTool("file_lifecycle", {
+    operation: "open_page",
+    pageId: "p1",
+  });
+  if (openPagePayload?.operation !== "open_page" || openPagePayload?.page?.id !== "p1") {
+    throw new Error(`open_page operation mismatch: ${JSON.stringify(openPagePayload)}`);
+  }
+  assertPageContract(openPagePayload.page, "open_page");
+  assertFileContract(openPagePayload.file, "open_page");
+
+  const openPageByNamePayload = await callTool("file_lifecycle", {
+    operation: "open_page",
+    pageName: "COVER",
+  });
+  if (openPageByNamePayload?.operation !== "open_page" || openPageByNamePayload?.page?.id !== "p1") {
+    throw new Error(`open_page by-name operation mismatch: ${JSON.stringify(openPageByNamePayload)}`);
+  }
+  assertPageContract(openPageByNamePayload.page, "open_page_by_name");
+  assertFileContract(openPageByNamePayload.file, "open_page_by_name");
+
+  const unsupportedDeleteText = await callToolText("file_lifecycle", {
+    operation: "delete_page",
+    pageId: "p1",
+  });
+  if (!unsupportedDeleteText.includes("[Diagnostic UNSUPPORTED_OPERATION]")) {
+    throw new Error(`Expected unsupported operation diagnostic, got: ${unsupportedDeleteText}`);
+  }
+
+  const deniedText = await callToolText("file_lifecycle", {
+    operation: "rename_file",
+    fileName: "Lifecycle Forbidden",
+  });
+  if (!deniedText.includes("[Diagnostic PERMISSION_DENIED]")) {
+    throw new Error(`Expected permission denied diagnostic, got: ${deniedText}`);
+  }
+
+  const notFoundText = await callToolText("file_lifecycle", {
+    operation: "rename_page",
+    pageName: "Ghost Page",
+    pageId: "missing-page",
+  });
+  if (!notFoundText.includes("[Diagnostic RESOURCE_NOT_FOUND]")) {
+    throw new Error(`Expected resource not found diagnostic, got: ${notFoundText}`);
+  }
+
+  const requiredOps = [
+    "inspect",
+    "create_page",
+    "create_page_defaults",
+    "rename_file",
+    "rename_page",
+    "open_page",
+    "open_page_by_name",
+    "permission_denied",
+    "resource_not_found",
+  ];
+  for (const op of requiredOps) {
+    if (!observedOps.has(op)) {
+      throw new Error(`Expected fake plugin to receive ${op} operation payload.`);
+    }
+  }
+
+  console.log("[FILE-CHECK] Verified file_lifecycle contract + defaults + name-open + diagnostics");
+} finally {
+  await transport.close();
+  ws.close();
+  await new Promise((resolve) => ws.once("close", resolve));
+}
+EOF
+
+log_step "File lifecycle probe passed"

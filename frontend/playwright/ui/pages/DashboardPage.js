@@ -26,7 +26,7 @@ export class DashboardPage extends BaseWebSocketPage {
     await super.mockRPC(
       page,
       "get-team-members?team-id=*",
-      "logged-in-user/get-team-members-your-penpot.json",
+      "logged-in-user/get-team-members-your-penjar.json",
     );
     await super.mockRPC(
       page,
@@ -86,7 +86,7 @@ export class DashboardPage extends BaseWebSocketPage {
     this.searchInput = page.getByPlaceholder("Search…");
 
     this.teamDropdown = this.sidebar.getByRole("button", {
-      name: "Your Penpot",
+      name: "Your Penjar",
     });
     this.userAccount = this.sidebar.getByRole("button", {
       name: /Princesa Leia/,

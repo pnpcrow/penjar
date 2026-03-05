@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-export ORGANIZATION="penpotapp";
+export ORGANIZATION="penjarapp";
 export DEVENV_IMGNAME="$ORGANIZATION/devenv";
-export DEVENV_PNAME="penpotdev";
+export DEVENV_PNAME="penjardev";
 
 export CURRENT_USER_ID=$(id -u);
 export CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD);
@@ -10,7 +10,7 @@ export CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD);
 export IMAGEMAGICK_VERSION=7.1.2-13
 
 # Safe directory to avoid ownership errors with Git
-git config --global --add safe.directory /home/penpot/penpot || true
+git config --global --add safe.directory /home/penjar/penjar || true
 
 # Set default java options
 export JAVA_OPTS=${JAVA_OPTS:-"-Xmx1000m -Xms50m"};
@@ -35,13 +35,13 @@ function print-current-version {
 
 function setup-buildx {
     docker run --privileged --rm tonistiigi/binfmt --install all
-    docker buildx inspect penpot > /dev/null 2>&1;
+    docker buildx inspect penjar > /dev/null 2>&1;
 
     if [ $? -eq 1 ]; then
-        docker buildx create --name=penpot --use
+        docker buildx create --name=penjar --use
         docker buildx inspect --bootstrap > /dev/null 2>&1;
     else
-        docker buildx use penpot;
+        docker buildx use penjar;
         docker buildx inspect --bootstrap  > /dev/null 2>&1;
     fi
 }
@@ -108,42 +108,42 @@ function log-devenv {
 }
 
 function run-devenv-tmux {
-    if [[ ! $(docker ps -f "name=penpot-devenv-main" -q) ]]; then
+    if [[ ! $(docker ps -f "name=penjar-devenv-main" -q) ]]; then
         start-devenv
         echo "Waiting for containers fully start (5s)..."
         sleep 5;
     fi
 
-    docker exec -ti penpot-devenv-main sudo -EH -u penpot PENPOT_PLUGIN_DEV=$PENPOT_PLUGIN_DEV /home/start-tmux.sh
+    docker exec -ti penjar-devenv-main sudo -EH -u penjar PENJAR_PLUGIN_DEV=$PENJAR_PLUGIN_DEV /home/start-tmux.sh
 }
 
 function run-devenv-shell {
-    if [[ ! $(docker ps -f "name=penpot-devenv-main" -q) ]]; then
+    if [[ ! $(docker ps -f "name=penjar-devenv-main" -q) ]]; then
         start-devenv
     fi
     docker exec -ti \
            -e JAVA_OPTS="$JAVA_OPTS" \
            -e EXTERNAL_UID=$CURRENT_USER_ID \
-           penpot-devenv-main sudo -EH -u penpot $@
+           penjar-devenv-main sudo -EH -u penjar $@
 }
 
 function run-devenv-isolated-shell {
     docker volume create ${DEVENV_PNAME}_user_data;
     docker run -ti --rm \
-           --mount source=${DEVENV_PNAME}_user_data,type=volume,target=/home/penpot/ \
-           --mount source=`pwd`,type=bind,target=/home/penpot/penpot \
+           --mount source=${DEVENV_PNAME}_user_data,type=volume,target=/home/penjar/ \
+           --mount source=`pwd`,type=bind,target=/home/penjar/penjar \
            -e EXTERNAL_UID=$CURRENT_USER_ID \
            -e BUILD_STORYBOOK=$BUILD_STORYBOOK \
            -e BUILD_WASM=$BUILD_WASM \
            -e SHADOWCLJS_EXTRA_PARAMS=$SHADOWCLJS_EXTRA_PARAMS \
            -e JAVA_OPTS="$JAVA_OPTS" \
-           -w /home/penpot/penpot/$1 \
-           $DEVENV_IMGNAME:latest sudo -EH -u penpot $@
+           -w /home/penjar/penjar/$1 \
+           $DEVENV_IMGNAME:latest sudo -EH -u penjar $@
 }
 
 function build-imagemagick-docker-image {
     set +e;
-    echo "Building image penpotapp/imagemagick:$IMAGEMAGICK_VERSION"
+    echo "Building image penjarapp/imagemagick:$IMAGEMAGICK_VERSION"
 
     pushd docker/imagemagick;
 
@@ -161,8 +161,8 @@ function build-imagemagick-docker-image {
       --build-arg IMAGEMAGICK_VERSION=$IMAGEMAGICK_VERSION \
       --platform $platform \
       --output $output_option \
-      -t penpotapp/imagemagick:latest \
-      -t penpotapp/imagemagick:$IMAGEMAGICK_VERSION .;
+      -t penjarapp/imagemagick:latest \
+      -t penjarapp/imagemagick:$IMAGEMAGICK_VERSION .;
 
     popd;
 }
@@ -175,15 +175,15 @@ function build {
     pull-devenv-if-not-exists;
     docker volume create ${DEVENV_PNAME}_user_data;
     docker run -t --rm \
-           --mount source=${DEVENV_PNAME}_user_data,type=volume,target=/home/penpot/ \
-           --mount source=`pwd`,type=bind,target=/home/penpot/penpot \
+           --mount source=${DEVENV_PNAME}_user_data,type=volume,target=/home/penjar/ \
+           --mount source=`pwd`,type=bind,target=/home/penjar/penjar \
            -e EXTERNAL_UID=$CURRENT_USER_ID \
            -e BUILD_STORYBOOK=$BUILD_STORYBOOK \
            -e BUILD_WASM=$BUILD_WASM \
            -e SHADOWCLJS_EXTRA_PARAMS=$SHADOWCLJS_EXTRA_PARAMS \
            -e JAVA_OPTS="$JAVA_OPTS" \
-           -w /home/penpot/penpot/$1 \
-           $DEVENV_IMGNAME:latest sudo -EH -u penpot ./scripts/$script $version
+           -w /home/penjar/penjar/$1 \
+           $DEVENV_IMGNAME:latest sudo -EH -u penjar ./scripts/$script $version
 
     echo ">> build end: $1"
 }
@@ -300,7 +300,7 @@ function build-frontend-docker-image {
     rsync -avr --delete ./bundles/frontend/ ./docker/images/bundle-frontend/;
     pushd ./docker/images;
     docker build \
-        -t penpotapp/frontend:$CURRENT_BRANCH -t penpotapp/frontend:latest \
+        -t penjarapp/frontend:$CURRENT_BRANCH -t penjarapp/frontend:latest \
         --build-arg BUNDLE_PATH="./bundle-frontend/" \
         -f Dockerfile.frontend .;
     popd;
@@ -310,7 +310,7 @@ function build-backend-docker-image {
     rsync -avr --delete ./bundles/backend/ ./docker/images/bundle-backend/;
     pushd ./docker/images;
     docker build \
-        -t penpotapp/backend:$CURRENT_BRANCH -t penpotapp/backend:latest \
+        -t penjarapp/backend:$CURRENT_BRANCH -t penjarapp/backend:latest \
         --build-arg BUNDLE_PATH="./bundle-backend/" \
         -f Dockerfile.backend .;
     popd;
@@ -320,7 +320,7 @@ function build-exporter-docker-image {
     rsync -avr --delete ./bundles/exporter/ ./docker/images/bundle-exporter/;
     pushd ./docker/images;
     docker build \
-        -t penpotapp/exporter:$CURRENT_BRANCH -t penpotapp/exporter:latest \
+        -t penjarapp/exporter:$CURRENT_BRANCH -t penjarapp/exporter:latest \
         --build-arg BUNDLE_PATH="./bundle-exporter/" \
         -f Dockerfile.exporter .;
     popd;
@@ -330,7 +330,7 @@ function build-mcp-docker-image {
     rsync -avr --delete ./bundles/mcp/ ./docker/images/bundle-mcp/;
     pushd ./docker/images;
     docker build \
-        -t penpotapp/mcp:$CURRENT_BRANCH -t penpotapp/mcp:latest \
+        -t penjarapp/mcp:$CURRENT_BRANCH -t penjarapp/mcp:latest \
         --build-arg BUNDLE_PATH="./bundle-mcp/" \
         -f Dockerfile.mcp .;
     popd;
@@ -340,14 +340,14 @@ function build-storybook-docker-image {
     rsync -avr --delete ./bundles/storybook/ ./docker/images/bundle-storybook/;
     pushd ./docker/images;
     docker build \
-        -t penpotapp/storybook:$CURRENT_BRANCH -t penpotapp/storybook:latest \
+        -t penjarapp/storybook:$CURRENT_BRANCH -t penjarapp/storybook:latest \
         --build-arg BUNDLE_PATH="./bundle-storybook/" \
         -f Dockerfile.storybook .;
     popd;
 }
 
 function usage {
-    echo "PENPOT build & release manager"
+    echo "PENJAR build & release manager"
     echo "USAGE: $0 OPTION"
     echo "Options:"
     echo "- pull-devenv                      Pulls docker development oriented image"
@@ -377,7 +377,7 @@ function usage {
     echo "- build-mcp-docker-image           Build exporter docker images."
     echo "- build-storybook-docker-image     Build storybook docker images."
     echo ""
-    echo "- version                          Show penpot's version."
+    echo "- version                          Show penjar's version."
 }
 
 case $1 in

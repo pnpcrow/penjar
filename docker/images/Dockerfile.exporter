@@ -1,15 +1,15 @@
 FROM ubuntu:24.04
-LABEL maintainer="Penpot <docker@penpot.app>"
+LABEL maintainer="Penjar <docker@penjar.app>"
 
 ENV LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8 \
     NODE_VERSION=v22.22.0 \
     DEBIAN_FRONTEND=noninteractive \
     PATH=/opt/node/bin:/opt/imagick/bin:$PATH \
-    PLAYWRIGHT_BROWSERS_PATH=/opt/penpot/browsers
+    PLAYWRIGHT_BROWSERS_PATH=/opt/penjar/browsers
 
 RUN set -ex; \
-    useradd -U -M -u 1001 -s /bin/false -d /opt/penpot penpot; \
+    useradd -U -M -u 1001 -s /bin/false -d /opt/penjar penjar; \
     mkdir -p /etc/resolvconf/resolv.conf.d; \
     echo "nameserver 127.0.0.11" > /etc/resolvconf/resolv.conf.d/tail; \
     apt-get -qq update; \
@@ -103,15 +103,15 @@ RUN set -eux; \
     chown -R root /opt/node; \
     rm -rf /tmp/nodejs.tar.gz; \
     corepack enable; \
-    mkdir -p /opt/penpot; \
-    chown -R penpot:penpot /opt/penpot;
+    mkdir -p /opt/penjar; \
+    chown -R penjar:penjar /opt/penjar;
 
 ARG BUNDLE_PATH="./bundle-exporter/"
-COPY --chown=penpot:penpot $BUNDLE_PATH /opt/penpot/exporter/
-COPY --from=penpotapp/imagemagick:7.1.2-13 /opt/imagick /opt/imagick
+COPY --chown=penjar:penjar $BUNDLE_PATH /opt/penjar/exporter/
+COPY --from=penjarapp/imagemagick:7.1.2-13 /opt/imagick /opt/imagick
 
-WORKDIR /opt/penpot/exporter
-USER penpot:penpot
+WORKDIR /opt/penjar/exporter
+USER penjar:penjar
 
 RUN ./setup
 

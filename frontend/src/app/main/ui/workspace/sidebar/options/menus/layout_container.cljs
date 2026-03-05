@@ -991,7 +991,7 @@
 
         [dprops dref]
         (h/use-sortable
-         :data-type "penpot/grid-track"
+         :data-type "penjar/grid-track"
          :on-drop drop-track
          :data {:is-column is-column
                 :index index

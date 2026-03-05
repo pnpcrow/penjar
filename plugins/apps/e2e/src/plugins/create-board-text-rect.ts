@@ -1,26 +1,26 @@
-import type { Board, Rectangle, Text } from '@penpot/plugin-types';
+import type { Board, Rectangle, Text } from '@penjar/plugin-types';
 
 export default function () {
   function createText(text: string): Text | undefined {
-    const textNode = penpot.createText(text);
+    const textNode = penjar.createText(text);
 
     if (!textNode) {
       return;
     }
 
-    textNode.x = penpot.viewport.center.x;
-    textNode.y = penpot.viewport.center.y;
+    textNode.x = penjar.viewport.center.x;
+    textNode.y = penjar.viewport.center.y;
 
     return textNode;
   }
 
   function createRectangle(): Rectangle {
-    const rectangle = penpot.createRectangle();
+    const rectangle = penjar.createRectangle();
 
     rectangle.setPluginData('customKey', 'customValue');
 
-    rectangle.x = penpot.viewport.center.x;
-    rectangle.y = penpot.viewport.center.y;
+    rectangle.x = penjar.viewport.center.x;
+    rectangle.y = penjar.viewport.center.y;
 
     rectangle.resize(200, 200);
 
@@ -28,18 +28,18 @@ export default function () {
   }
 
   function createBoard(): Board {
-    const board = penpot.createBoard();
+    const board = penjar.createBoard();
 
     board.name = 'Board name';
 
-    board.x = penpot.viewport.center.x;
-    board.y = penpot.viewport.center.y;
+    board.x = penjar.viewport.center.x;
+    board.y = penjar.viewport.center.y;
 
     board.borderRadius = 8;
 
     board.resize(300, 300);
 
-    const text = penpot.createText('Hello from board');
+    const text = penjar.createText('Hello from board');
 
     if (!text) {
       throw new Error('Could not create text');

@@ -6,7 +6,7 @@
 
 (ns app.main.data.workspace.media
   (:require
-   ["@penpot/svgo$default" :as svgo]
+   ["@penjar/svgo$default" :as svgo]
    [app.common.data :as d]
    [app.common.data.macros :as dm]
    [app.common.exceptions :as ex]
@@ -282,7 +282,7 @@
 ;; --- Upload File Media objects
 
 (defn create-shapes-svg
-  "Convert svg elements into penpot shapes."
+  "Convert svg elements into penjar shapes."
   [file-id objects pos svg-data]
   (let [upload-images
         (fn [svg-data]

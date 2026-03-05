@@ -96,7 +96,7 @@
         (tr "onboarding-v2.newsletter.privacy1")
         [:a {:class (stl/css :modal-link)
              :target "_blank"
-             :href "https://penpot.app/privacy"}
+             :href "https://penjar.app/privacy"}
          (tr "onboarding.newsletter.policy")]]
        [:p {:class (stl/css :modal-text)}
         (tr "onboarding-v2.newsletter.privacy2")]

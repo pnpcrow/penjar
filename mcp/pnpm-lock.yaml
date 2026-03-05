@@ -23,12 +23,12 @@ importers:
 
   packages/plugin:
     dependencies:
-      '@penpot/plugin-styles':
-        specifier: 1.4.1
-        version: 1.4.1
-      '@penpot/plugin-types':
-        specifier: 1.4.1
-        version: 1.4.1
+      '@penjar/plugin-styles':
+        specifier: file:../../../plugins/libs/plugins-styles
+        version: file:../plugins/libs/plugins-styles
+      '@penjar/plugin-types':
+        specifier: file:../../../plugins/libs/plugin-types
+        version: file:../plugins/libs/plugin-types
     devDependencies:
       cross-env:
         specifier: ^7.0.3
@@ -60,7 +60,7 @@ importers:
       js-yaml:
         specifier: ^4.1.1
         version: 4.1.1
-      penpot-mcp:
+      penjar-mcp:
         specifier: file:..
         version: packages@file:packages
       pino:
@@ -82,7 +82,7 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
     devDependencies:
-      '@penpot/mcp-common':
+      '@penjar/mcp-common':
         specifier: workspace:../common
         version: link:../common
       '@types/express':
@@ -612,11 +612,11 @@ packages:
       '@cfworker/json-schema':
         optional: true
 
-  '@penpot/plugin-styles@1.4.1':
-    resolution: {integrity: sha512-6TuJqKQsq1Xmhn2A02R+kCOzIzIdqgFg5z6ncLH2PlAflKIX6aYsGiOF7yFx4RYgCegRVMFPnVis6/hwO+YGQg==}
+  '@penjar/plugin-styles@file:../plugins/libs/plugins-styles':
+    resolution: {directory: ../plugins/libs/plugins-styles, type: directory}
 
-  '@penpot/plugin-types@1.4.1':
-    resolution: {integrity: sha512-pHE2B3GI8M5JR03S/NdBoN+z6e1R1IEh3vpFbLG9LN0EZpQE6nEbmCo5jWAWI73Jqlg6CHG/RWVJNmWECnkDTA==}
+  '@penjar/plugin-types@file:../plugins/libs/plugin-types':
+    resolution: {directory: ../plugins/libs/plugin-types, type: directory}
 
   '@pinojs/redact@0.4.0':
     resolution: {integrity: sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg==}
@@ -1889,9 +1889,9 @@ snapshots:
       - hono
       - supports-color
 
-  '@penpot/plugin-styles@1.4.1': {}
+  '@penjar/plugin-styles@file:../plugins/libs/plugins-styles': {}
 
-  '@penpot/plugin-types@1.4.1': {}
+  '@penjar/plugin-types@file:../plugins/libs/plugin-types': {}
 
   '@pinojs/redact@0.4.0': {}
 

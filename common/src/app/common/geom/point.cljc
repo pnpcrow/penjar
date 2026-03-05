@@ -526,7 +526,7 @@
 #?(:clj
    (defmethod print-dup Point
      [^Point pt ^java.io.Writer writer]
-     (.write writer (str "#penpot/point \"" (dm/get-prop pt :x) "," (dm/get-prop pt :y) "\""))))
+     (.write writer (str "#penjar/point \"" (dm/get-prop pt :x) "," (dm/get-prop pt :y) "\""))))
 
 (defmethod pp/simple-dispatch Point
   [obj]
@@ -534,7 +534,7 @@
 
 #?(:clj
    (fres/add-handlers!
-    {:name "penpot/point"
+    {:name "penjar/point"
      :class Point
      :wfn (fn [n w ^Point o]
             (fres/write-tag! w n 1)

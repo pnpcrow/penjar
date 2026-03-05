@@ -524,7 +524,7 @@
                               :shape shape-main
                               :is-local is-local})
 
-             (dnd/set-data! event "penpot/component" true)
+             (dnd/set-data! event "penjar/component" true)
 
              ;; Remove the ghost image for componentes because we're going to instantiate it on the viewport
              (dnd/set-drag-image! event (dnd/invisible-image))

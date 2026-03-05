@@ -1,17 +1,17 @@
 export default function () {
   async function createComment() {
-    const page = penpot.currentPage;
+    const page = penjar.currentPage;
 
     if (page) {
       await page.addCommentThread('Hello world!', {
-        x: penpot.viewport.center.x,
-        y: penpot.viewport.center.y,
+        x: penjar.viewport.center.x,
+        y: penjar.viewport.center.y,
       });
     }
   }
 
   async function replyComment() {
-    const page = penpot.currentPage;
+    const page = penjar.currentPage;
 
     if (page) {
       const comments = await page.findCommentThreads({
@@ -23,7 +23,7 @@ export default function () {
   }
 
   async function deleteComment() {
-    const page = penpot.currentPage;
+    const page = penjar.currentPage;
 
     if (page) {
       const commentThreads = await page.findCommentThreads({

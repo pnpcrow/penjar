@@ -144,7 +144,7 @@
       (ts/asap dom/browser-back))))
 
 (defn nav-back-local
-  "Navigate back only if the previous page is in penpot app."
+  "Navigate back only if the previous page is in penjar app."
   []
   (let [location (.-location js/document)
         referrer (u/uri (.-referrer js/document))]

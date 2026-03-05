@@ -163,7 +163,7 @@
         token
         {:value value
          :name (if (or (not valid-token-name?) (str/blank? token-name))
-                 "__PENPOT__TOKEN__NAME__PLACEHOLDER__"
+                 "__PENJAR__TOKEN__NAME__PLACEHOLDER__"
                  token-name)}
         tokens
         (-> tokens
@@ -177,7 +177,7 @@
           (fn [resolved-tokens]
             (let [{:keys [errors resolved-value] :as resolved-token} (get resolved-tokens (:name token))
                   resolved-value (if (contains? cf/flags :tokenscript)
-                                   (ts/tokenscript-symbols->penpot-unit resolved-value)
+                                   (ts/tokenscript-symbols->penjar-unit resolved-value)
                                    resolved-value)]
               (if resolved-value
                 (rx/of {:value resolved-value})

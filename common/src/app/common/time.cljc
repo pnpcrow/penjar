@@ -414,7 +414,7 @@
 #?(:clj
    (defmethod print-dup Duration
      [mv ^java.io.Writer writer]
-     (.write writer (str "#penpot/duration \"" (str/lower (subs (str mv) 2)) "\""))))
+     (.write writer (str "#penjar/duration \"" (str/lower (subs (str mv) 2)) "\""))))
 
 #?(:clj
    (defmethod print-method Instant
@@ -424,7 +424,7 @@
 #?(:clj
    (defmethod print-dup Instant
      [mv ^java.io.Writer writer]
-     (.write writer (str "#penpot/inst \"" (format-inst mv) "\""))))
+     (.write writer (str "#penjar/inst \"" (format-inst mv) "\""))))
 
 (def schema:inst
   (sm/register!

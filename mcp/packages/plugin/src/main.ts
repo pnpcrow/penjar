@@ -8,7 +8,7 @@ document.body.dataset.theme = searchParams.get("theme") ?? "light";
 
 // Determine whether multi-user mode is enabled based on URL parameters
 const isMultiUserMode = searchParams.get("multiUser") === "true";
-console.log("Penpot MCP multi-user mode:", isMultiUserMode);
+console.log("Penjar MCP multi-user mode:", isMultiUserMode);
 
 // WebSocket connection management
 let ws: WebSocket | null = null;
@@ -60,7 +60,7 @@ function connectToMcpServer(baseUrl?: string, token?: string): void {
     }
 
     try {
-        let wsUrl = baseUrl || PENPOT_MCP_WEBSOCKET_URL;
+        let wsUrl = baseUrl || PENJAR_MCP_WEBSOCKET_URL;
         if (isMultiUserMode && token) {
             wsUrl += `?userToken=${encodeURIComponent(token)}`;
         }
@@ -121,7 +121,7 @@ window.addEventListener("message", (event) => {
     }
     if (event.data.type === "stop-server") {
         ws?.close();
-    } else if (event.data.source === "penpot") {
+    } else if (event.data.source === "penjar") {
         document.body.dataset.theme = event.data.theme;
     } else if (event.data.type === "task-response") {
         // Forward task response back to MCP server

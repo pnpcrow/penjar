@@ -55,7 +55,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def ^:const buffer-size (:xnio/buffer-size yt/defaults))
-(def ^:const penpot-magic-number 800099563638710213)
+(def ^:const penjar-magic-number 800099563638710213)
 
 (def ^:dynamic *position* nil)
 
@@ -202,7 +202,7 @@
         output (io/data-output-stream output)]
     (doto output
       (write-byte! (get-mark :header))
-      (write-long! penpot-magic-number)
+      (write-long! penjar-magic-number)
       (write-long! vers))))
 
 (defn read-header!
@@ -214,10 +214,10 @@
         vers  (read-long! input)]
 
     (when (or (not= mark (get-mark :header))
-              (not= mnum penpot-magic-number))
+              (not= mnum penjar-magic-number))
       (ex/raise :type :validation
-                :code :invalid-penpot-file
-                :hint "invalid penpot file"))
+                :code :invalid-penjar-file
+                :hint "invalid penjar file"))
 
     (keyword (str "v" vers))))
 
@@ -242,7 +242,7 @@
   (l/trace :fn "read-stream!" :position @*position* ::l/sync? true)
   (let [m (read-byte! input)
         s (read-long! input)
-        p (tmp/tempfile :prefix "penpot.binfile.")]
+        p (tmp/tempfile :prefix "penjar.binfile.")]
     (assert-mark m :stream)
 
     (when (> s bfc/max-object-size)
@@ -359,7 +359,7 @@
 
           media      (bfc/get-file-media cfg file)]
 
-      (l/dbg :hint "write penpot file"
+      (l/dbg :hint "write penjar file"
              :id (str file-id)
              :name (:name file)
              :thumbnails (count thumbnails)
@@ -368,11 +368,11 @@
              ::l/sync? true)
 
       (doseq [item media]
-        (l/dbg :hint "write penpot file media object"
+        (l/dbg :hint "write penjar file media object"
                :id (:id item) ::l/sync? true))
 
       (doseq [item thumbnails]
-        (l/dbg :hint "write penpot file object thumbnail"
+        (l/dbg :hint "write penjar file object thumbnail"
                :media-id (str (:media-id item)) ::l/sync? true))
 
       (doto output
@@ -432,7 +432,7 @@
           :opt [::ignore-index-errors?]))
 
 (defn read-import!
-  "Do the importation of the specified resource in penpot custom binary
+  "Do the importation of the specified resource in penjar custom binary
   format."
   [{:keys [::bfc/input ::bfc/timestamp] :or {timestamp (ct/now)} :as options}]
 
@@ -517,10 +517,10 @@
 
       (when (not= file-id expected-file-id)
         (ex/raise :type :validation
-                  :code :inconsistent-penpot-file
+                  :code :inconsistent-penjar-file
                   :found-id file-id
                   :expected-id expected-file-id
-                  :hint "the penpot file seems corrupt, found unexpected uuid (file-id)"))
+                  :hint "the penjar file seems corrupt, found unexpected uuid (file-id)"))
 
       (l/dbg :hint "processing file"
              :id (str file-id)
@@ -602,8 +602,8 @@
 
         (when (not= id expected-storage-id)
           (ex/raise :type :validation
-                    :code :inconsistent-penpot-file
-                    :hint "the penpot file seems corrupt, found unexpected uuid (storage-object-id)"))
+                    :code :inconsistent-penjar-file
+                    :hint "the penjar file seems corrupt, found unexpected uuid (storage-object-id)"))
 
         (l/dbg :hint "readed storage object" :id (str id) ::l/sync? true)
 
@@ -660,7 +660,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn export-files!
-  "Do the exportation of a specified file in custom penpot binary
+  "Do the exportation of a specified file in custom penjar binary
   format. There are some options available for customize the output:
 
   `::bfc/include-libraries`: additionally to the specified file, all the
@@ -731,8 +731,8 @@
 
       (catch ZstdIOException cause
         (ex/raise :type :validation
-                  :code :invalid-penpot-file
-                  :hint "invalid penpot file received: probably truncated"
+                  :code :invalid-penjar-file
+                  :hint "invalid penjar file received: probably truncated"
                   :cause cause))
 
       (catch Throwable cause

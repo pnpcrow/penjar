@@ -222,7 +222,7 @@
                             "~:rotation": 0,
                             "~:grow-type": "~:fixed",
                             "~:content": {
-                                "~#penpot/path-data": "~bAQAAAAAAAAAAAAAAAAAAAAAAAADfEBJEKATkQwMAAADg1AREdITjQ28u+kP3fe5D4NQERJy3A0QDAAAAiJIMRD0wEERiQUVEPOInRHsEO0RGcQ5EAwAAAJTHMESeAOpD3xASRCgE5EPfEBJEKATkQw=="
+                                "~#penjar/path-data": "~bAQAAAAAAAAAAAAAAAAAAAAAAAADfEBJEKATkQwMAAADg1AREdITjQ28u+kP3fe5D4NQERJy3A0QDAAAAiJIMRD0wEERiQUVEPOInRHsEO0RGcQ5EAwAAAJTHMESeAOpD3xASRCgE5EPfEBJEKATkQw=="
                             },
                             "~:name": "Path",
                             "~:width": null,
@@ -434,7 +434,7 @@
                             "~:rotation": 0,
                             "~:grow-type": "~:fixed",
                             "~:content": {
-                                "~#penpot/path-data": "~bAQAAAAAAAAAAAAAAAAAAAAAAAADe0BBEUQh0QwMAAADflANE6AhzQ26u90P3fYRD35QDRDlvnUMDAAAAiFILRHtgtkNhAUREecTlQ3rEOUSM4rJDAwAAAJOHL0SfAIBD3tAQRFEIdEPe0BBEUQh0Qw=="
+                                "~#penjar/path-data": "~bAQAAAAAAAAAAAAAAAAAAAAAAAADe0BBEUQh0QwMAAADflANE6AhzQ26u90P3fYRD35QDRDlvnUMDAAAAiFILRHtgtkNhAUREecTlQ3rEOUSM4rJDAwAAAJOHL0SfAIBD3tAQRFEIdEPe0BBEUQh0Qw=="
                             },
                             "~:name": "Path",
                             "~:width": null,

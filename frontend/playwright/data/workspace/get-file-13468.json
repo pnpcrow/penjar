@@ -114,7 +114,7 @@
     ],
     "~:pages-index": {
       "~u95b23c15-79f9-81ba-8007-99d81b5290dd": {
-        "~#penpot/pointer": [
+        "~#penjar/pointer": [
           "~u3a4d7ec7-c391-8146-8007-9dd6c998fbc4",
           {
             "~:created-at": "~m1771846681187"

@@ -105,7 +105,7 @@ RETURNING task.id, task.queue")
 
           (push-tasks [{:keys [::rds/conn] :as cfg} [queue tasks]]
             (let [items (mapv (juxt :id :scheduled-at) tasks)
-                  key   (str/ffmt "penpot.worker.queue:%" queue)]
+                  key   (str/ffmt "penjar.worker.queue:%" queue)]
 
               (rds/rpush conn key (mapv t/encode-str items))
               (mark-as-scheduled cfg tasks)
@@ -183,7 +183,7 @@ RETURNING task.id, task.queue")
 
     (if (db/read-only? pool)
       (l/wrn :hint "not started (db is read-only)")
-      (px/fn->thread dispatcher :name "penpot/worker-dispatcher"))))
+      (px/fn->thread dispatcher :name "penjar/worker-dispatcher"))))
 
 (defmethod ig/halt-key! ::wrk/dispatcher
   [_ thread]

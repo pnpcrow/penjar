@@ -191,7 +191,7 @@ export function addBlurSelectionEntity(state) {
   let content = state.getCurrentContent(state);
   const selection = state.getSelection();
 
-  content = content.createEntity("PENPOT_SELECTION", "MUTABLE");
+  content = content.createEntity("PENJAR_SELECTION", "MUTABLE");
   const entityKey = content.getLastCreatedEntityKey();
 
   content = Modifier.applyEntity(content, selection, entityKey);

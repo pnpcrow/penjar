@@ -36,7 +36,7 @@
   Sans Pro) in WASM.
   A font id may not exist for different reasons:
   - the gfonts.json catalog was updated and fonts were renamed or removed,
-  - the file was imported from another Penpot instance with different fonts,
+  - the file was imported from another Penjar instance with different fonts,
   ..."
   [font-id]
   (let [font (fonts/get-font-data font-id)

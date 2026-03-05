@@ -331,7 +331,7 @@
           (c/-write w (pr-str (c/-key item)))
           (c/-write w \space)
           (c/-write w (pr-str (c/-val item))))
-        "#penpot/objects-map {" ", " "}"
+        "#penjar/objects-map {" ", " "}"
         opts
         (seq this))))
 
@@ -506,7 +506,7 @@
 
 #?(:clj
    (fres/add-handlers!
-    {:name "penpot/objects-map/v2"
+    {:name "penjar/objects-map/v2"
      :class ObjectsMap
      :wfn (fn [n w o]
             (fres/write-tag! w n)
@@ -515,7 +515,7 @@
             (-> r fres/read-object! from-data))}))
 
 (t/add-handlers!
- {:id "penpot/objects-map/v2"
+ {:id "penjar/objects-map/v2"
   :class ObjectsMap
   :wfn get-data
   :rfn from-data})

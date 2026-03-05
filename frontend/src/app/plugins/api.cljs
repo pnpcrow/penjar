@@ -77,7 +77,7 @@
 
 (defn create-context
   [plugin-id]
-  (obj/reify {:name "PenpotContext"}
+  (obj/reify {:name "PenjarContext"}
     ;; Private properties
     :$plugin {:enumerable false :get (fn [] plugin-id)}
 

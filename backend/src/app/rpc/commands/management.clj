@@ -395,7 +395,7 @@
 (defn clone-template
   [{:keys [::db/pool] :as cfg} {:keys [project-id profile-id] :as params} template]
   (let [template (tmp/tempfile-from template
-                                    :prefix "penpot.template."
+                                    :prefix "penjar.template."
                                     :suffix ""
                                     :min-age "30m")
 

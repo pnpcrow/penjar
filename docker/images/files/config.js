@@ -1,2 +1,2 @@
 // Frontend configuration
-//var penpotFlags = "";
+//var penjarFlags = "";

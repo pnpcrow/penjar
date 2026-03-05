@@ -9,7 +9,7 @@ on:
     paths:
       - 'plugins/apps/example-styles/**'
       - 'plugins/libs/plugins-styles/**'
-      - 'plugins/wrangler-penpot-plugins-styles-doc.toml'
+      - 'plugins/wrangler-penjar-plugins-styles-doc.toml'
   workflow_dispatch:
     inputs:
       gh_ref:
@@ -85,14 +85,14 @@ jobs:
           REF="${{ steps.vars.outputs.gh_ref }}"
           case "$REF" in
             main)
-              echo "WORKER_NAME=penpot-plugins-styles-doc-pro" >> $GITHUB_ENV
-              echo "WORKER_URI=styles-doc.plugins.penpot.app" >> $GITHUB_ENV ;;
+              echo "WORKER_NAME=penjar-plugins-styles-doc-pro" >> $GITHUB_ENV
+              echo "WORKER_URI=styles-doc.plugins.penjar.app" >> $GITHUB_ENV ;;
             staging)
-              echo "WORKER_NAME=penpot-plugins-styles-doc-pre" >> $GITHUB_ENV
-              echo "WORKER_URI=styles-doc.plugins.penpot.dev" >> $GITHUB_ENV ;;
+              echo "WORKER_NAME=penjar-plugins-styles-doc-pre" >> $GITHUB_ENV
+              echo "WORKER_URI=styles-doc.plugins.penjar.dev" >> $GITHUB_ENV ;;
             develop)
-              echo "WORKER_NAME=penpot-plugins-styles-doc-hourly" >> $GITHUB_ENV
-              echo "WORKER_URI=styles-doc.plugins.hourly.penpot.dev" >> $GITHUB_ENV ;;
+              echo "WORKER_NAME=penjar-plugins-styles-doc-hourly" >> $GITHUB_ENV
+              echo "WORKER_URI=styles-doc.plugins.hourly.penjar.dev" >> $GITHUB_ENV ;;
             *) echo "Unsupported branch ${REF}" && exit 1 ;;
           esac
 
@@ -100,7 +100,7 @@ jobs:
         working-directory: plugins
         shell: bash
         run: |
-          sed -i "s/WORKER_URI/${{ env.WORKER_URI }}/g" wrangler-penpot-plugins-styles-doc.toml
+          sed -i "s/WORKER_URI/${{ env.WORKER_URI }}/g" wrangler-penjar-plugins-styles-doc.toml
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
@@ -108,7 +108,7 @@ jobs:
           workingDirectory: plugins
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --config wrangler-penpot-plugins-styles-doc.toml --name ${{ env.WORKER_NAME }}
+          command: deploy --config wrangler-penjar-plugins-styles-doc.toml --name ${{ env.WORKER_NAME }}
 
       - name: Notify Mattermost
         if: failure()
@@ -117,7 +117,7 @@ jobs:
           MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK }}
           MATTERMOST_CHANNEL: bot-alerts-cicd
           TEXT: |
-            ❌ 🧩💅 *[PENPOT PLUGINS] Error deploying Styles documentation.*
+            ❌ 🧩💅 *[PENJAR PLUGINS] Error deploying Styles documentation.*
             📄 Triggered from ref: `${{ inputs.gh_ref }}`
             🔗 Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
             @infra

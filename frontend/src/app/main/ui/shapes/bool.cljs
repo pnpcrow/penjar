@@ -41,7 +41,7 @@
          [:& path-shape {:shape shape}])
 
        (when metadata?
-         [:> "penpot:bool" {}
+         [:> "penjar:bool" {}
           (for [item (map #(get child-objs %) (:shapes shape))]
             [:& shape-wrapper
              {:shape item

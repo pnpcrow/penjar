@@ -7,7 +7,7 @@
 (ns app.plugins
   "RPC for plugins runtime."
   (:require
-   ["@penpot/plugins-runtime" :as runtime]
+   ["@penjar/plugins-runtime" :as runtime]
    [app.main.features :as features]
    [app.main.store :as st]
    [app.plugins.api :as api]

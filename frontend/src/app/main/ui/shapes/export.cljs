@@ -5,7 +5,7 @@
 ;; Copyright (c) KALEIDOS INC
 
 (ns app.main.ui.shapes.export
-  "Components that generates penpot specific svg nodes with
+  "Components that generates penjar specific svg nodes with
   exportation data. This xml nodes serves mainly to enable
   importation."
   (:require
@@ -55,7 +55,7 @@
     ([props attr trfn]
      (let [val (get shape attr)
            val (if (keyword? val) (d/name val) val)
-           ns-attr (-> (str "penpot:" (-> attr d/name))
+           ns-attr (-> (str "penjar:" (-> attr d/name))
                        (str/strip-suffix "?"))]
        (cond-> props
          (some? val)
@@ -89,8 +89,8 @@
         (add! :proportion)
         (add! :proportion-lock)
         (add! :rotation)
-        (obj/set! "penpot:center-x" (-> center :x str))
-        (obj/set! "penpot:center-y" (-> center :y str))
+        (obj/set! "penjar:center-x" (-> center :x str))
+        (obj/set! "penjar:center-y" (-> center :y str))
 
         ;; Constraints
         (add! :constraints-h)
@@ -124,7 +124,7 @@
               (add! :position-data json/encode)))
 
         (cond-> mask?
-          (obj/set! "penpot:masked-group" "true"))
+          (obj/set! "penjar:masked-group" "true"))
 
         (cond-> bool?
           (add! :bool-type)))))
@@ -147,39 +147,39 @@
 
 (defn prefix-keys [m]
   (letfn [(prefix-entry [[k v]]
-            [(str "penpot:" (d/name k)) v])]
+            [(str "penjar:" (d/name k)) v])]
     (into {} (map prefix-entry) m)))
 
 (defn- export-grid-data [{:keys [grids]}]
   (when (d/not-empty? grids)
     (mf/html
-     [:> "penpot:grids" #js {}
+     [:> "penjar:grids" #js {}
       (for [{:keys [type display params]} grids]
         (let [props (->> (dissoc params :color)
                          (prefix-keys)
                          (clj->js))]
-          [:> "penpot:grid"
+          [:> "penjar:grid"
            (-> props
-               (obj/set! "penpot:color" (get-in params [:color :color]))
-               (obj/set! "penpot:opacity" (get-in params [:color :opacity]))
-               (obj/set! "penpot:type" (d/name type))
+               (obj/set! "penjar:color" (get-in params [:color :color]))
+               (obj/set! "penjar:opacity" (get-in params [:color :opacity]))
+               (obj/set! "penjar:type" (d/name type))
                (cond-> (some? display)
-                 (obj/set! "penpot:display" (str display))))]))])))
+                 (obj/set! "penjar:display" (str display))))]))])))
 
 (mf/defc export-flows
   [{:keys [flows]}]
-  [:> "penpot:flows" #js {}
+  [:> "penjar:flows" #js {}
    (for [{:keys [id name starting-frame]} (vals flows)]
-     [:> "penpot:flow" #js {:id id
+     [:> "penjar:flow" #js {:id id
                             :key id
                             :name name
                             :starting-frame starting-frame}])])
 
 (mf/defc export-guides
   [{:keys [guides]}]
-  [:> "penpot:guides" #js {}
+  [:> "penjar:guides" #js {}
    (for [{:keys [position frame-id axis]} (vals guides)]
-     [:> "penpot:guide" #js {:position position
+     [:> "penjar:guide" #js {:position position
                              :frame-id frame-id
                              :axis (d/name axis)}])])
 
@@ -190,7 +190,7 @@
         grids  (get page :grids)
         flows  (get page :flows)
         guides (get page :guides)]
-    [:> "penpot:page" #js {:id id}
+    [:> "penjar:page" #js {:id id}
      (when (d/not-empty? grids)
        (let [parse-grid (fn [[type params]] {:type type :params params})
              grids (mapv parse-grid grids)]
@@ -205,33 +205,33 @@
 (defn- export-shadow-data [{:keys [shadow]}]
   (mf/html
    (for [{:keys [style hidden color offset-x offset-y blur spread]} shadow]
-     [:> "penpot:shadow"
-      #js {:penpot:shadow-type (d/name style)
+     [:> "penjar:shadow"
+      #js {:penjar:shadow-type (d/name style)
            :key (swap! internal-counter inc)
-           :penpot:hidden (str hidden)
-           :penpot:color (str (:color color))
-           :penpot:opacity (str (:opacity color))
-           :penpot:offset-x (str offset-x)
-           :penpot:offset-y (str offset-y)
-           :penpot:blur (str blur)
-           :penpot:spread (str spread)}])))
+           :penjar:hidden (str hidden)
+           :penjar:color (str (:color color))
+           :penjar:opacity (str (:opacity color))
+           :penjar:offset-x (str offset-x)
+           :penjar:offset-y (str offset-y)
+           :penjar:blur (str blur)
+           :penjar:spread (str spread)}])))
 
 (defn- export-blur-data [{:keys [blur]}]
   (when-let [{:keys [type hidden value]} blur]
     (mf/html
-     [:> "penpot:blur"
-      #js {:penpot:blur-type (d/name type)
-           :penpot:hidden    (str hidden)
-           :penpot:value     (str value)}])))
+     [:> "penjar:blur"
+      #js {:penjar:blur-type (d/name type)
+           :penjar:hidden    (str hidden)
+           :penjar:value     (str value)}])))
 
 (defn export-exports-data [{:keys [exports]}]
   (mf/html
    (for [{:keys [scale suffix type]} exports]
-     [:> "penpot:export"
-      #js {:penpot:type   (d/name type)
+     [:> "penjar:export"
+      #js {:penjar:type   (d/name type)
            :key (swap! internal-counter inc)
-           :penpot:suffix suffix
-           :penpot:scale  (str scale)}])))
+           :penjar:suffix suffix
+           :penjar:scale  (str scale)}])))
 
 (defn str->style
   [style-str]
@@ -258,20 +258,20 @@
       (let [svg-transform (get shape :svg-transform)
             svg-attrs     (->> shape :svg-attrs keys (mapv (comp d/name str/kebab)) (str/join ","))
             svg-defs      (->> shape :svg-defs keys (mapv d/name) (str/join ","))]
-        [:> "penpot:svg-import"
-         #js {:penpot:svg-attrs          (when-not (empty? svg-attrs) svg-attrs)
+        [:> "penjar:svg-import"
+         #js {:penjar:svg-attrs          (when-not (empty? svg-attrs) svg-attrs)
               ;; Style and filter are special properties so we need to save it otherwise will be indistingishible from
               ;; standard properties
-              :penpot:svg-style          (when (contains? (:svg-attrs shape) :style) (style->str (get-in shape [:svg-attrs :style])))
-              :penpot:svg-filter         (when (contains? (:svg-attrs shape) :filter) (get-in shape [:svg-attrs :filter]))
-              :penpot:svg-defs           (when-not (empty? svg-defs) svg-defs)
-              :penpot:svg-transform      (when svg-transform (str svg-transform))
-              :penpot:svg-viewbox-x      (get-in shape [:svg-viewbox :x])
-              :penpot:svg-viewbox-y      (get-in shape [:svg-viewbox :y])
-              :penpot:svg-viewbox-width  (get-in shape [:svg-viewbox :width])
-              :penpot:svg-viewbox-height (get-in shape [:svg-viewbox :height])}
+              :penjar:svg-style          (when (contains? (:svg-attrs shape) :style) (style->str (get-in shape [:svg-attrs :style])))
+              :penjar:svg-filter         (when (contains? (:svg-attrs shape) :filter) (get-in shape [:svg-attrs :filter]))
+              :penjar:svg-defs           (when-not (empty? svg-defs) svg-defs)
+              :penjar:svg-transform      (when svg-transform (str svg-transform))
+              :penjar:svg-viewbox-x      (get-in shape [:svg-viewbox :x])
+              :penjar:svg-viewbox-y      (get-in shape [:svg-viewbox :y])
+              :penjar:svg-viewbox-width  (get-in shape [:svg-viewbox :width])
+              :penjar:svg-viewbox-height (get-in shape [:svg-viewbox :height])}
          (for [[def-id def-xml] (:svg-defs shape)]
-           [:> "penpot:svg-def" #js {:def-id def-id
+           [:> "penjar:svg-def" #js {:def-id def-id
                                      :key (swap! internal-counter inc)}
             [:& render-xml {:xml def-xml}]])]))
 
@@ -279,27 +279,27 @@
       (let [shape (-> shape (d/update-in-when [:content :attrs :style] str->style))
             props
             (-> (obj/create)
-                (obj/set! "penpot:x" (:x shape))
-                (obj/set! "penpot:y" (:y shape))
-                (obj/set! "penpot:width" (:width shape))
-                (obj/set! "penpot:height" (:height shape))
-                (obj/set! "penpot:tag" (-> (get-in shape [:content :tag]) d/name))
+                (obj/set! "penjar:x" (:x shape))
+                (obj/set! "penjar:y" (:y shape))
+                (obj/set! "penjar:width" (:width shape))
+                (obj/set! "penjar:height" (:height shape))
+                (obj/set! "penjar:tag" (-> (get-in shape [:content :tag]) d/name))
                 (obj/merge! (-> (get-in shape [:content :attrs])
                                 (clj->js))))]
-        [:> "penpot:svg-content" props
+        [:> "penjar:svg-content" props
          (for [leaf (->> shape :content :content (filter string?))]
-           [:> "penpot:svg-child" {:key (swap! internal-counter inc)} leaf])]))]))
+           [:> "penjar:svg-child" {:key (swap! internal-counter inc)} leaf])]))]))
 
 
 (defn- export-fills-data [{:keys [fills]}]
   (when-let [fills     (seq fills)]
     (let [render-id (mf/use-ctx muc/render-id)]
       (mf/html
-       [:> "penpot:fills" #js {}
+       [:> "penjar:fills" #js {}
         (for [[index fill] (d/enumerate fills)]
           (let [fill-image-id (dm/str "fill-image-" render-id "-" index)]
-            [:> "penpot:fill"
-             #js {:penpot:fill-color          (cond
+            [:> "penjar:fill"
+             #js {:penjar:fill-color          (cond
                                                 (some? (:fill-color-gradient fill))
                                                 (str/format "url(#%s)" (str "fill-color-gradient-" render-id "-" index))
 
@@ -307,54 +307,54 @@
                                                 (d/name (:fill-color fill)))
                   :key                        (swap! internal-counter inc)
 
-                  :penpot:fill-image-id       (when (:fill-image fill) fill-image-id)
-                  :penpot:fill-color-ref-file (d/name (:fill-color-ref-file fill))
-                  :penpot:fill-color-ref-id   (d/name (:fill-color-ref-id fill))
-                  :penpot:fill-opacity        (d/name (:fill-opacity fill))}]))]))))
+                  :penjar:fill-image-id       (when (:fill-image fill) fill-image-id)
+                  :penjar:fill-color-ref-file (d/name (:fill-color-ref-file fill))
+                  :penjar:fill-color-ref-id   (d/name (:fill-color-ref-id fill))
+                  :penjar:fill-opacity        (d/name (:fill-opacity fill))}]))]))))
 
 (defn- export-strokes-data [{:keys [strokes]}]
   (when-let [strokes (seq strokes)]
     (let [render-id (mf/use-ctx muc/render-id)]
       (mf/html
-       [:> "penpot:strokes" #js {}
+       [:> "penjar:strokes" #js {}
         (for [[index stroke] (d/enumerate strokes)]
           (let [stroke-image-id (dm/str "stroke-image-" render-id "-" index)]
-            [:> "penpot:stroke"
-             #js {:penpot:stroke-color          (cond
+            [:> "penjar:stroke"
+             #js {:penjar:stroke-color          (cond
                                                   (some? (:stroke-color-gradient stroke))
                                                   (str/format "url(#%s)" (str "stroke-color-gradient-" render-id "-" index))
 
                                                   :else
                                                   (d/name (:stroke-color stroke)))
                   :key                          (swap! internal-counter inc)
-                  :penpot:stroke-image-id       (when (:stroke-image stroke) stroke-image-id)
-                  :penpot:stroke-color-ref-file (d/name (:stroke-color-ref-file stroke))
-                  :penpot:stroke-color-ref-id   (d/name (:stroke-color-ref-id stroke))
-                  :penpot:stroke-opacity        (d/name (:stroke-opacity stroke))
-                  :penpot:stroke-style          (d/name (:stroke-style stroke))
-                  :penpot:stroke-width          (d/name (:stroke-width stroke))
-                  :penpot:stroke-alignment      (d/name (:stroke-alignment stroke))
-                  :penpot:stroke-cap-start      (d/name (:stroke-cap-start stroke))
-                  :penpot:stroke-cap-end        (d/name (:stroke-cap-end stroke))}]))]))))
+                  :penjar:stroke-image-id       (when (:stroke-image stroke) stroke-image-id)
+                  :penjar:stroke-color-ref-file (d/name (:stroke-color-ref-file stroke))
+                  :penjar:stroke-color-ref-id   (d/name (:stroke-color-ref-id stroke))
+                  :penjar:stroke-opacity        (d/name (:stroke-opacity stroke))
+                  :penjar:stroke-style          (d/name (:stroke-style stroke))
+                  :penjar:stroke-width          (d/name (:stroke-width stroke))
+                  :penjar:stroke-alignment      (d/name (:stroke-alignment stroke))
+                  :penjar:stroke-cap-start      (d/name (:stroke-cap-start stroke))
+                  :penjar:stroke-cap-end        (d/name (:stroke-cap-end stroke))}]))]))))
 
 (defn- export-interactions-data [{:keys [interactions]}]
   (when-let [interactions (seq interactions)]
     (mf/html
-     [:> "penpot:interactions" #js {}
+     [:> "penjar:interactions" #js {}
       (for [interaction interactions]
-        [:> "penpot:interaction"
-         #js {:penpot:event-type (d/name (:event-type interaction))
-              :penpot:action-type (d/name (:action-type interaction))
-              :penpot:delay ((d/nilf str) (:delay interaction))
-              :penpot:destination ((d/nilf str) (:destination interaction))
-              :penpot:overlay-pos-type ((d/nilf d/name) (:overlay-pos-type interaction))
-              :penpot:overlay-position-x ((d/nilf get-in) interaction [:overlay-position :x])
-              :penpot:overlay-position-y ((d/nilf get-in) interaction [:overlay-position :y])
-              :penpot:url (:url interaction)
+        [:> "penjar:interaction"
+         #js {:penjar:event-type (d/name (:event-type interaction))
+              :penjar:action-type (d/name (:action-type interaction))
+              :penjar:delay ((d/nilf str) (:delay interaction))
+              :penjar:destination ((d/nilf str) (:destination interaction))
+              :penjar:overlay-pos-type ((d/nilf d/name) (:overlay-pos-type interaction))
+              :penjar:overlay-position-x ((d/nilf get-in) interaction [:overlay-position :x])
+              :penjar:overlay-position-y ((d/nilf get-in) interaction [:overlay-position :y])
+              :penjar:url (:url interaction)
               :key (swap! internal-counter inc)
-              :penpot:close-click-outside ((d/nilf str) (:close-click-outside interaction))
-              :penpot:background-overlay ((d/nilf str) (:background-overlay interaction))
-              :penpot:preserve-scroll ((d/nilf str) (:preserve-scroll interaction))}])])))
+              :penjar:close-click-outside ((d/nilf str) (:close-click-outside interaction))
+              :penjar:background-overlay ((d/nilf str) (:background-overlay interaction))
+              :penjar:preserve-scroll ((d/nilf str) (:preserve-scroll interaction))}])])))
 
 
 (defn- export-layout-container-data
@@ -376,41 +376,41 @@
 
   (when layout
     (mf/html
-     [:> "penpot:layout"
-      #js {:penpot:layout (d/name layout)
-           :penpot:layout-flex-dir (d/name layout-flex-dir)
-           :penpot:layout-gap-type (d/name layout-gap-type)
-           :penpot:layout-gap-row (:row-gap layout-gap)
-           :penpot:layout-gap-column (:column-gap layout-gap)
-           :penpot:layout-wrap-type (d/name layout-wrap-type)
-           :penpot:layout-padding-type (d/name layout-padding-type)
-           :penpot:layout-padding-p1 (:p1 layout-padding)
-           :penpot:layout-padding-p2 (:p2 layout-padding)
-           :penpot:layout-padding-p3 (:p3 layout-padding)
-           :penpot:layout-padding-p4 (:p4 layout-padding)
-           :penpot:layout-justify-items (d/name layout-justify-items)
-           :penpot:layout-justify-content (d/name layout-justify-content)
-           :penpot:layout-align-items (d/name layout-align-items)
-           :penpot:layout-align-content (d/name layout-align-content)
-           :penpot:layout-grid-dir (d/name layout-grid-dir)}
+     [:> "penjar:layout"
+      #js {:penjar:layout (d/name layout)
+           :penjar:layout-flex-dir (d/name layout-flex-dir)
+           :penjar:layout-gap-type (d/name layout-gap-type)
+           :penjar:layout-gap-row (:row-gap layout-gap)
+           :penjar:layout-gap-column (:column-gap layout-gap)
+           :penjar:layout-wrap-type (d/name layout-wrap-type)
+           :penjar:layout-padding-type (d/name layout-padding-type)
+           :penjar:layout-padding-p1 (:p1 layout-padding)
+           :penjar:layout-padding-p2 (:p2 layout-padding)
+           :penjar:layout-padding-p3 (:p3 layout-padding)
+           :penjar:layout-padding-p4 (:p4 layout-padding)
+           :penjar:layout-justify-items (d/name layout-justify-items)
+           :penjar:layout-justify-content (d/name layout-justify-content)
+           :penjar:layout-align-items (d/name layout-align-items)
+           :penjar:layout-align-content (d/name layout-align-content)
+           :penjar:layout-grid-dir (d/name layout-grid-dir)}
 
-      [:> "penpot:grid-rows" #js {}
+      [:> "penjar:grid-rows" #js {}
        (for [[idx {:keys [type value]}] (d/enumerate layout-grid-rows)]
-         [:> "penpot:grid-track"
-          #js {:penpot:index idx
+         [:> "penjar:grid-track"
+          #js {:penjar:index idx
                :key (swap! internal-counter inc)
-               :penpot:type (d/name type)
-               :penpot:value value}])]
+               :penjar:type (d/name type)
+               :penjar:value value}])]
 
-      [:> "penpot:grid-columns" #js {}
+      [:> "penjar:grid-columns" #js {}
        (for [[idx {:keys [type value]}] (d/enumerate layout-grid-columns)]
-         [:> "penpot:grid-track"
-          #js {:penpot:index idx
+         [:> "penjar:grid-track"
+          #js {:penjar:index idx
                :key (swap! internal-counter inc)
-               :penpot:type (d/name type)
-               :penpot:value value}])]
+               :penjar:type (d/name type)
+               :penjar:value value}])]
 
-      [:> "penpot:grid-cells" #js {}
+      [:> "penjar:grid-cells" #js {}
        (for [[_ {:keys [id
                         area-name
                         row
@@ -421,18 +421,18 @@
                         align-self
                         justify-self
                         shapes]}] layout-grid-cells]
-         [:> "penpot:grid-cell"
-          #js {:penpot:id id
+         [:> "penjar:grid-cell"
+          #js {:penjar:id id
                :key (swap! internal-counter inc)
-               :penpot:area-name area-name
-               :penpot:row row
-               :penpot:row-span row-span
-               :penpot:column column
-               :penpot:column-span column-span
-               :penpot:position (d/name position)
-               :penpot:align-self (d/name align-self)
-               :penpot:justify-self (d/name justify-self)
-               :penpot:shapes (str/join " " shapes)}])]])))
+               :penjar:area-name area-name
+               :penjar:row row
+               :penjar:row-span row-span
+               :penjar:column column
+               :penjar:column-span column-span
+               :penjar:position (d/name position)
+               :penjar:align-self (d/name align-self)
+               :penjar:justify-self (d/name justify-self)
+               :penjar:shapes (str/join " " shapes)}])]])))
 
 (defn- export-layout-item-data
   [{:keys [layout-item-margin
@@ -459,27 +459,27 @@
             layout-item-absolute
             layout-item-z-index)
     (mf/html
-     [:> "penpot:layout-item"
-      #js {:penpot:layout-item-margin-m1 (:m1 layout-item-margin)
-           :penpot:layout-item-margin-m2 (:m2 layout-item-margin)
-           :penpot:layout-item-margin-m3 (:m3 layout-item-margin)
-           :penpot:layout-item-margin-m4 (:m4 layout-item-margin)
-           :penpot:layout-item-margin-type (d/name layout-item-margin-type)
-           :penpot:layout-item-h-sizing (d/name layout-item-h-sizing)
-           :penpot:layout-item-v-sizing (d/name layout-item-v-sizing)
-           :penpot:layout-item-max-h layout-item-max-h
-           :penpot:layout-item-min-h layout-item-min-h
-           :penpot:layout-item-max-w layout-item-max-w
-           :penpot:layout-item-min-w layout-item-min-w
-           :penpot:layout-item-align-self (d/name layout-item-align-self)
-           :penpot:layout-item-absolute layout-item-absolute
-           :penpot:layout-item-z-index layout-item-z-index}])))
+     [:> "penjar:layout-item"
+      #js {:penjar:layout-item-margin-m1 (:m1 layout-item-margin)
+           :penjar:layout-item-margin-m2 (:m2 layout-item-margin)
+           :penjar:layout-item-margin-m3 (:m3 layout-item-margin)
+           :penjar:layout-item-margin-m4 (:m4 layout-item-margin)
+           :penjar:layout-item-margin-type (d/name layout-item-margin-type)
+           :penjar:layout-item-h-sizing (d/name layout-item-h-sizing)
+           :penjar:layout-item-v-sizing (d/name layout-item-v-sizing)
+           :penjar:layout-item-max-h layout-item-max-h
+           :penjar:layout-item-min-h layout-item-min-h
+           :penjar:layout-item-max-w layout-item-max-w
+           :penjar:layout-item-min-w layout-item-min-w
+           :penjar:layout-item-align-self (d/name layout-item-align-self)
+           :penjar:layout-item-absolute layout-item-absolute
+           :penjar:layout-item-z-index layout-item-z-index}])))
 
 
 (mf/defc export-data
   [{:keys [shape]}]
   (let [props (-> (obj/create) (add-data shape) (add-library-refs shape))]
-    [:> "penpot:shape" props
+    [:> "penjar:shape" props
      (export-shadow-data           shape)
      (export-blur-data             shape)
      (export-exports-data          shape)

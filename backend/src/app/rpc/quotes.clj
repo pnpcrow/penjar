@@ -5,7 +5,7 @@
 ;; Copyright (c) KALEIDOS INC
 
 (ns app.rpc.quotes
-  "Penpot resource usage quotes."
+  "Penjar resource usage quotes."
   (:require
    [app.common.exceptions :as ex]
    [app.common.logging :as l]

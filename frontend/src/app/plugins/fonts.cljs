@@ -91,7 +91,7 @@
 
 (defn fonts-subcontext
   [plugin-id]
-  (obj/reify {:name "PenpotFontsSubcontext"}
+  (obj/reify {:name "PenjarFontsSubcontext"}
     :$plugin {:name "" :enumerable false :get (constantly plugin-id)}
 
     :all

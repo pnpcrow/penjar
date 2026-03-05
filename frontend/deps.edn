@@ -1,6 +1,6 @@
 {:paths ["src" "vendor" "resources" "test"]
  :deps
- {penpot/common
+ {penjar/common
   {:local/root "../common"}
 
   org.clojure/clojure {:mvn/version "1.12.2"}
@@ -56,7 +56,7 @@
   :shadow-cljs
   {:main-opts ["-m" "shadow.cljs.devtools.cli"]
    :jvm-opts ["--sun-misc-unsafe-memory-access=allow"
-              "-Dpenpot.wasm.profile-marks=true"
+              "-Dpenjar.wasm.profile-marks=true"
               "-XX:+UnlockExperimentalVMOptions"
               "-XX:CompileCommand=blackhole,criterium.blackhole.Blackhole::consume"]}
   }}

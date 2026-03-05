@@ -1,14 +1,14 @@
 /**
- * These are methods and properties available on the `penpot` global object.
+ * These are methods and properties available on the `penjar` global object.
  *
  */
-export interface Penpot extends Omit<
+export interface Penjar extends Omit<
   Context,
   'addListener' | 'removeListener'
 > {
   ui: {
     /**
-     * Opens the plugin UI. It is possible to develop a plugin without interface (see Palette color example) but if you need, the way to open this UI is using `penpot.ui.open`.
+     * Opens the plugin UI. It is possible to develop a plugin without interface (see Palette color example) but if you need, the way to open this UI is using `penjar.ui.open`.
      * There is a minimum and maximum size for this modal and a default size but it's possible to customize it anyway with the options parameter.
      *
      * @param name title of the plugin, it'll be displayed on the top of the modal
@@ -17,7 +17,7 @@ export interface Penpot extends Omit<
      *
      * @example
      * ```js
-     * penpot.ui.open('Plugin name', 'url', {width: 150, height: 300});
+     * penjar.ui.open('Plugin name', 'url', {width: 150, height: 300});
      * ```
      */
     open: (
@@ -31,7 +31,7 @@ export interface Penpot extends Omit<
        * Returns the size of the modal.
        * @example
        * ```js
-       * const size = penpot.ui.size;
+       * const size = penjar.ui.size;
        * console.log(size);
        * ```
        */
@@ -45,7 +45,7 @@ export interface Penpot extends Omit<
      * @param height The height of the modal.
      * @example
      * ```js
-     * penpot.ui.resize(300, 400);
+     * penjar.ui.resize(300, 400);
      * ```
      * */
     resize: (width: number, height: number) => void;
@@ -69,7 +69,7 @@ export interface Penpot extends Omit<
      *
      * @example
      * ```js
-     * penpot.ui.onMessage((message) => {if(message.type === 'example-type' { ...do something })});
+     * penjar.ui.onMessage((message) => {if(message.type === 'example-type' { ...do something })});
      * ```
      */
     onMessage: <T>(callback: (message: T) => void) => void;
@@ -83,7 +83,7 @@ export interface Penpot extends Omit<
    *
    * @example
    * ```js
-   * penpot.closePlugin();
+   * penjar.closePlugin();
    * ```
    */
   closePlugin: () => void;
@@ -97,7 +97,7 @@ export interface Penpot extends Omit<
    *  that will be observed. For example:
    *  ```javascript
    *  // Observe the current selected shape
-   *  penpot.on('shapechange', (shape) => console.log(shape.name), { shapeId: penpot.selection[0].id });
+   *  penjar.on('shapechange', (shape) => console.log(shape.name), { shapeId: penjar.selection[0].id });
    *  ```
    *  - selectionchange: event emitted when the current selection changes. The callback will receive the list of ids for the new selection
    *  - themechange: event emitted when the user changes its theme. The callback will receive the new theme (currently: either `dark` or `light`)
@@ -110,7 +110,7 @@ export interface Penpot extends Omit<
    *
    * @example
    * ```js
-   * penpot.on('pagechange', () => {...do something}).
+   * penjar.on('pagechange', () => {...do something}).
    * ```
    */
   on<T extends keyof EventsMap>(
@@ -126,8 +126,8 @@ export interface Penpot extends Omit<
    *
    * @example
    * ```js
-   * const listenerId = penpot.on('contentsave', () => console.log("Changed"));
-   * penpot.off(listenerId);
+   * const listenerId = penjar.on('contentsave', () => console.log("Changed"));
+   * penjar.off(listenerId);
    * ```
    */
   off(listenerId: symbol): void;
@@ -145,7 +145,7 @@ export type Action =
   | OpenUrl;
 
 /**
- * Represents an active user in Penpot, extending the `User` interface.
+ * Represents an active user in Penjar, extending the `User` interface.
  * This interface includes additional properties specific to active users.
  */
 export interface ActiveUser extends User {
@@ -177,7 +177,7 @@ export interface ActiveUser extends User {
 export type Animation = Dissolve | Slide | Push;
 
 /**
- * Represents blur properties in Penpot.
+ * Represents blur properties in Penjar.
  * This interface includes properties for defining the type and intensity of a blur effect, along with its visibility.
  */
 export interface Blur {
@@ -202,7 +202,7 @@ export interface Blur {
 }
 
 /**
- * Represents a board in Penpot.
+ * Represents a board in Penjar.
  * This interface extends `ShapeBase` and includes properties and methods specific to board.
  */
 export interface Board extends ShapeBase {
@@ -298,7 +298,7 @@ export interface Board extends ShapeBase {
    * @return Returns the flex layout configuration added to the board.
    * @example
    * ```js
-   * const board = penpot.createBoard();
+   * const board = penjar.createBoard();
    * const flex = board.addFlexLayout();
    *
    * // You can change the flex properties as follows.
@@ -316,7 +316,7 @@ export interface Board extends ShapeBase {
    * @return Returns the grid layout configuration added to the board.
    * @example
    * ```js
-   * const board = penpot.createBoard();
+   * const board = penjar.createBoard();
    * const grid = board.addGridLayout();
    *
    * // You can change the grid properties as follows.
@@ -346,7 +346,7 @@ export interface Board extends ShapeBase {
 }
 
 /**
- * Represents a VariantContainer in Penpot
+ * Represents a VariantContainer in Penjar
  * This interface extends `Board` and includes properties and methods specific to VariantContainer.
  */
 export interface VariantContainer extends Board {
@@ -357,7 +357,7 @@ export interface VariantContainer extends Board {
 }
 
 /**
- * Represents a boolean operation shape in Penpot.
+ * Represents a boolean operation shape in Penjar.
  * This interface extends `ShapeBase` and includes properties and methods specific to boolean operations.
  */
 export interface Boolean extends ShapeBase {
@@ -423,7 +423,7 @@ export interface Boolean extends ShapeBase {
 }
 
 /**
- * Represents the boolean operation types available in Penpot.
+ * Represents the boolean operation types available in Penjar.
  * These types define how shapes can be combined or modified using boolean operations.
  */
 export type BooleanType = 'union' | 'difference' | 'exclude' | 'intersection';
@@ -478,7 +478,7 @@ export interface CloseOverlay {
 }
 
 /**
- * Represents color properties in Penpot.
+ * Represents color properties in Penjar.
  * This interface includes properties for defining solid colors, gradients, and image fills, along with metadata.
  */
 export interface Color {
@@ -587,7 +587,7 @@ export interface Comment {
 
 /**
  * Represents a list of comments one after the other. Usually these threads
- * are conversations the users have in Penpot.
+ * are conversations the users have in Penjar.
  */
 export interface CommentThread {
   /**
@@ -639,7 +639,7 @@ export interface CommentThread {
 }
 
 /**
- * CommonLayout represents a common layout interface in the Penpot application.
+ * CommonLayout represents a common layout interface in the Penjar application.
  * It includes various properties for alignment, spacing, padding, and sizing, as well as a method to remove the layout.
  */
 export interface CommonLayout {
@@ -759,11 +759,11 @@ export interface CommonLayout {
 }
 
 /**
- * Represents the context of Penpot, providing access to various Penpot functionalities and data.
+ * Represents the context of Penjar, providing access to various Penjar functionalities and data.
  */
 export interface Context {
   /**
-   * The root shape in the current Penpot context. Requires `content:read` permission.
+   * The root shape in the current Penjar context. Requires `content:read` permission.
    *
    * @example
    * ```js
@@ -773,7 +773,7 @@ export interface Context {
    */
   readonly root: Shape | null;
   /**
-   * Retrieves file data from the current Penpot context. Requires `content:read` permission.
+   * Retrieves file data from the current Penjar context. Requires `content:read` permission.
    * @return Returns the file data or `null` if no file is available.
    *
    * @example
@@ -784,7 +784,7 @@ export interface Context {
    */
   readonly currentFile: File | null;
   /**
-   * The current page in the Penpot context. Requires `content:read` permission.
+   * The current page in the Penjar context. Requires `content:read` permission.
    *
    * @example
    * ```js
@@ -794,7 +794,7 @@ export interface Context {
    */
   readonly currentPage: Page | null;
   /**
-   * The viewport settings in the Penpot context.
+   * The viewport settings in the Penjar context.
    *
    * @example
    * ```js
@@ -821,7 +821,7 @@ export interface Context {
   readonly history: HistoryContext;
 
   /**
-   * The library context in the Penpot context, including both local and connected libraries. Requires `library:read` permission.
+   * The library context in the Penjar context, including both local and connected libraries. Requires `library:read` permission.
    *
    * @example
    * ```js
@@ -831,7 +831,7 @@ export interface Context {
    */
   readonly library: LibraryContext;
   /**
-   * The fonts context in the Penpot context, providing methods to manage fonts. Requires `content:read` permission.
+   * The fonts context in the Penjar context, providing methods to manage fonts. Requires `content:read` permission.
    *
    * @example
    * ```js
@@ -841,7 +841,7 @@ export interface Context {
    */
   readonly fonts: FontsContext;
   /**
-   * The current user in the Penpot context. Requires `user:read` permission.
+   * The current user in the Penjar context. Requires `user:read` permission.
    *
    * @example
    * ```js
@@ -851,7 +851,7 @@ export interface Context {
    */
   readonly currentUser: User;
   /**
-   * An array of active users in the Penpot context. Requires `user:read` permission.
+   * An array of active users in the Penjar context. Requires `user:read` permission.
    *
    * @example
    * ```js
@@ -862,7 +862,7 @@ export interface Context {
   readonly activeUsers: ActiveUser[];
 
   /**
-   * The current theme (light or dark) in Penpot.
+   * The current theme (light or dark) in Penjar.
    *
    * @example
    * ```js
@@ -878,7 +878,7 @@ export interface Context {
   readonly localStorage: LocalStorage;
 
   /**
-   * The currently selected shapes in Penpot. Requires `content:read` permission.
+   * The currently selected shapes in Penjar. Requires `content:read` permission.
    *
    * @example
    * ```js
@@ -889,7 +889,7 @@ export interface Context {
   selection: Shape[];
 
   /**
-   * Retrieves colors applied to the given shapes in Penpot. Requires `content:read` permission.
+   * Retrieves colors applied to the given shapes in Penjar. Requires `content:read` permission.
    * @return Returns an array of colors and their shape information.
    *
    * @example
@@ -911,7 +911,7 @@ export interface Context {
   replaceColor(shapes: Shape[], oldColor: Color, newColor: Color): void;
 
   /**
-   * Uploads media to Penpot and retrieves its image data. Requires `content:write` permission.
+   * Uploads media to Penjar and retrieves its image data. Requires `content:write` permission.
    * @param name The name of the media.
    * @param url The URL of the media to be uploaded.
    * @return Returns a promise that resolves to the image data of the uploaded media.
@@ -922,8 +922,8 @@ export interface Context {
    * console.log(imageData);
    *
    * // to insert the image in a shape we can do
-   * const board = penpot.createBoard();
-   * const shape = penpot.createRectangle();
+   * const board = penjar.createBoard();
+   * const shape = penjar.createRectangle();
    * board.appendChild(shape);
    * shape.fills = [{ fillOpacity: 1, fillImage: imageData }];
    * ```
@@ -931,7 +931,7 @@ export interface Context {
   uploadMediaUrl(name: string, url: string): Promise<ImageData>;
 
   /**
-   * Uploads media to penpot and retrieves the image data. Requires `content:write` permission.
+   * Uploads media to penjar and retrieves the image data. Requires `content:write` permission.
    * @param name The name of the media.
    * @param data The image content data
    * @return Returns a promise that resolves to the image data of the uploaded media.
@@ -954,8 +954,8 @@ export interface Context {
    * @return Returns the newly created group or `null` if the group could not be created.
    * @example
    * ```js
-   * const penpotShapesArray = penpot.selection;
-   * penpot.group(penpotShapesArray);
+   * const penjarShapesArray = penjar.selection;
+   * penjar.group(penjarShapesArray);
    * ```
    */
   group(shapes: Shape[]): Group | null;
@@ -966,10 +966,10 @@ export interface Context {
    *
    * @example
    * ```js
-   * const penpotShapesArray = penpot.selection;
+   * const penjarShapesArray = penjar.selection;
    * // We need to make sure that something is selected, and if the selected shape is a group,
-   * if (selected.length && penpot.utils.types.isGroup(penpotShapesArray[0])) {
-   *   penpot.group(penpotShapesArray[0]);
+   * if (selected.length && penjar.utils.types.isGroup(penjarShapesArray[0])) {
+   *   penjar.group(penjarShapesArray[0]);
    * }
    * ```
    */
@@ -980,7 +980,7 @@ export interface Context {
    *
    * @example
    * ```js
-   * const shape = penpot.createRectangle();
+   * const shape = penjar.createRectangle();
    * // just change the values like this
    * shape.name = "Example rectangle";
    *
@@ -1028,11 +1028,11 @@ export interface Context {
   /**
    * Use this method to create a board. This is the first step before anything else, the container. Requires `content:write` permission.
    * Then you can add a gridlayout, flexlayout or add a shape inside the board.
-   * Just a heads-up: board is a board in Penpot UI.
+   * Just a heads-up: board is a board in Penjar UI.
    *
    * @example
    * ```js
-   * const board = penpot.createBoard();
+   * const board = penjar.createBoard();
    *
    * // to add grid layout
    * board.addGridLayout();
@@ -1040,7 +1040,7 @@ export interface Context {
    * board.addFlexLayout();
    *
    * // to create a shape inside the board
-   * const shape = penpot.createRectangle();
+   * const shape = penjar.createRectangle();
    * board.appendChild(shape);
    * ```
    */
@@ -1050,7 +1050,7 @@ export interface Context {
    *
    * @example
    * ```js
-   * const shape = penpot.createEllipse();
+   * const shape = penjar.createEllipse();
    * // just change the values like this
    * shape.name = "Example ellipse";
    *
@@ -1099,7 +1099,7 @@ export interface Context {
    *
    * @example
    * ```js
-   * const path = penpot.createPath();
+   * const path = penjar.createPath();
    * path.name = "My path";
    *
    * // for solid color
@@ -1152,9 +1152,9 @@ export interface Context {
    *
    * @example
    * ```js
-   * const board = penpot.createBoard();
+   * const board = penjar.createBoard();
    * let text;
-   * text = penpot.createText();
+   * text = penjar.createText();
    * // just change the values like this
    * text.growType = 'auto-height';
    * text.fontFamily = 'Work Sans';
@@ -1206,7 +1206,7 @@ export interface Context {
    *
    * @example
    * ```js
-   * const fontfaces = context.generateFontFaces(penpot.selection);
+   * const fontfaces = context.generateFontFaces(penjar.selection);
    * console.log(fontfaces);
    * ```
    */
@@ -1300,7 +1300,7 @@ export interface Context {
 }
 
 /**
- * Utility methods for geometric calculations in Penpot.
+ * Utility methods for geometric calculations in Penjar.
  *
  * @example
  * ```js
@@ -1325,7 +1325,7 @@ export interface ContextGeometryUtils {
 }
 
 /**
- * Utility methods for determining the types of Penpot shapes.
+ * Utility methods for determining the types of Penjar shapes.
  *
  * @example
  * ```js
@@ -1415,23 +1415,23 @@ export interface ContextTypesUtils {
 }
 
 /**
- * Utility methods for various operations in Penpot.
+ * Utility methods for various operations in Penjar.
  */
 export interface ContextUtils {
   /**
-   * Geometry utility methods for Penpot.
+   * Geometry utility methods for Penjar.
    * Provides methods for geometric calculations, such as finding the center of a group of shapes.
    *
    * @example
    * ```js
-   * const centerPoint = penpot.utils.geometry.center(shapes);
+   * const centerPoint = penjar.utils.geometry.center(shapes);
    * console.log(centerPoint);
    * ```
    */
   readonly geometry: ContextGeometryUtils;
   /**
-   * Type utility methods for Penpot.
-   * Provides methods for determining the types of various shapes in Penpot.
+   * Type utility methods for Penjar.
+   * Provides methods for determining the types of various shapes in Penjar.
    *
    * @example
    * ```js
@@ -1464,7 +1464,7 @@ export interface Dissolve {
 }
 
 /**
- * Represents an ellipse shape in Penpot.
+ * Represents an ellipse shape in Penjar.
  * This interface extends `ShapeBase` and includes properties specific to ellipses.
  */
 export interface Ellipse extends ShapeBase {
@@ -1477,12 +1477,12 @@ export interface Ellipse extends ShapeBase {
 }
 
 /**
- * Represents a mapping of events to their corresponding types in Penpot.
+ * Represents a mapping of events to their corresponding types in Penjar.
  * This interface provides information about various events that can be triggered in the application.
  *
  * @example
  * ```js
- * penpot.on('pagechange', (event) => {
+ * penjar.on('pagechange', (event) => {
  *   console.log(event);
  * });
  * ```
@@ -1523,7 +1523,7 @@ export interface EventsMap {
 }
 
 /**
- * Represents export settings in Penpot.
+ * Represents export settings in Penjar.
  * This interface includes properties for defining export configurations.
  */
 export interface Export {
@@ -1546,7 +1546,7 @@ export interface Export {
 }
 
 /**
- * File represents a file in the Penpot application.
+ * File represents a file in the Penjar application.
  * It includes properties for the file's identifier, name, and revision number.
  */
 export interface File extends PluginData {
@@ -1573,7 +1573,7 @@ export interface File extends PluginData {
   /*
    * Export the current file to an archive.
    * @param `exportType` indicates the type of file to generate.
-   * - `'penpot'` will create a *.penpot file with a binary representation of the file
+   * - `'penjar'` will create a *.penjar file with a binary representation of the file
    * - `'zip'` will create a *.zip with the file exported in several SVG files with some JSON metadata
    * @param `libraryExportType` indicates what to do with the linked libraries of the file when
    * exporting it. Defaults to `all` if not sent.
@@ -1584,11 +1584,11 @@ export interface File extends PluginData {
    *
    * @example
    * ```js
-   * const exportedData = await file.export('penpot', 'all');
+   * const exportedData = await file.export('penjar', 'all');
    * ```
    */
   export(
-    exportType: 'penpot' | 'zip',
+    exportType: 'penjar' | 'zip',
     libraryExportType?: 'all' | 'merge' | 'detach',
   ): Promise<Uint8Array>;
 
@@ -1653,7 +1653,7 @@ export interface FileVersion {
 }
 
 /**
- * Represents fill properties in Penpot. You can add a fill to any shape except for groups.
+ * Represents fill properties in Penjar. You can add a fill to any shape except for groups.
  * This interface includes properties for defining solid color fills, gradient fills, and image fills.
  */
 export interface Fill {
@@ -1698,7 +1698,7 @@ export interface Flags {
 }
 
 /**
- * Represents a flexible layout configuration in Penpot.
+ * Represents a flexible layout configuration in Penjar.
  * This interface extends `CommonLayout` and includes properties for defining the direction,
  * wrapping behavior, and child management of a flex layout.
  */
@@ -1730,7 +1730,7 @@ export interface FlexLayout extends CommonLayout {
 }
 
 /**
- * Defines an interaction flow inside penpot. A flow is defined by a starting board for an interaction.
+ * Defines an interaction flow inside penjar. A flow is defined by a starting board for an interaction.
  */
 export interface Flow {
   /**
@@ -1755,8 +1755,8 @@ export interface Flow {
 }
 
 /**
- * Represents a font in Penpot, which includes details about the font family, variants, and styling options.
- * This interface provides properties and methods for describing and applying fonts within Penpot.
+ * Represents a font in Penjar, which includes details about the font family, variants, and styling options.
+ * This interface provides properties and methods for describing and applying fonts within Penjar.
  */
 export interface Font {
   /**
@@ -1820,7 +1820,7 @@ export interface Font {
 }
 
 /**
- * Represents a font variant in Penpot, which defines a specific style variation of a font.
+ * Represents a font variant in Penjar, which defines a specific style variation of a font.
  * This interface provides properties for describing the characteristics of a font variant.
  */
 export interface FontVariant {
@@ -1846,7 +1846,7 @@ export interface FontVariant {
 }
 
 /**
- * Represents the context for managing fonts in Penpot.
+ * Represents the context for managing fonts in Penjar.
  * This interface provides methods to interact with fonts, such as retrieving fonts by ID or name.
  */
 export interface FontsContext {
@@ -1913,7 +1913,7 @@ export interface FontsContext {
 }
 
 /**
- * Represents a gradient configuration in Penpot.
+ * Represents a gradient configuration in Penjar.
  * A gradient can be either linear or radial and includes properties to define its shape, position, and color stops.
  */
 export type Gradient = {
@@ -1955,7 +1955,7 @@ export type Gradient = {
 };
 
 /**
- * GridLayout represents a grid layout in the Penpot application, extending the common layout interface.
+ * GridLayout represents a grid layout in the Penjar application, extending the common layout interface.
  * It includes properties and methods to manage rows, columns, and child elements within the grid.
  */
 export interface GridLayout extends CommonLayout {
@@ -1982,7 +1982,7 @@ export interface GridLayout extends CommonLayout {
    *
    * @example
    * ```js
-   * const board = penpot.createBoard();
+   * const board = penjar.createBoard();
    * const grid = board.addGridLayout();
    * grid.addRow("flex", 1);
    * ```
@@ -2007,7 +2007,7 @@ export interface GridLayout extends CommonLayout {
    *
    * @example
    * ```js
-   * const board = penpot.createBoard();
+   * const board = penjar.createBoard();
    * const grid = board.addGridLayout();
    * grid.addColumn('percent', 50);
    * ```
@@ -2085,7 +2085,7 @@ export interface GridLayout extends CommonLayout {
 }
 
 /**
- * Represents a group of shapes in Penpot.
+ * Represents a group of shapes in Penjar.
  * This interface extends `ShapeBase` and includes properties and methods specific to groups.
  */
 export interface Group extends ShapeBase {
@@ -2138,13 +2138,13 @@ export interface Group extends ShapeBase {
 }
 
 /**
- * Represents a board guide in Penpot.
+ * Represents a board guide in Penjar.
  * This type can be one of several specific board guide types: column, row, or square.
  */
 export type Guide = GuideColumn | GuideRow | GuideSquare;
 
 /**
- * Represents a goard guide for columns in Penpot.
+ * Represents a goard guide for columns in Penjar.
  * This interface includes properties for defining the type, visibility, and parameters of column guides within a board.
  */
 export interface GuideColumn {
@@ -2163,7 +2163,7 @@ export interface GuideColumn {
 }
 
 /**
- * Represents parameters for board guide columns in Penpot.
+ * Represents parameters for board guide columns in Penjar.
  * This interface includes properties for defining the appearance and layout of column guides within a board.
  */
 export interface GuideColumnParams {
@@ -2198,7 +2198,7 @@ export interface GuideColumnParams {
 }
 
 /**
- * Represents a board guide for rows in Penpot.
+ * Represents a board guide for rows in Penjar.
  * This interface includes properties for defining the type, visibility, and parameters of row guides within a board.
  */
 export interface GuideRow {
@@ -2218,7 +2218,7 @@ export interface GuideRow {
 }
 
 /**
- * Represents a board guide for squares in Penpot.
+ * Represents a board guide for squares in Penjar.
  * This interface includes properties for defining the type, visibility, and parameters of square guides within a board.
  */
 export interface GuideSquare {
@@ -2237,7 +2237,7 @@ export interface GuideSquare {
 }
 
 /**
- * Represents parameters for board guide squares in Penpot.
+ * Represents parameters for board guide squares in Penjar.
  * This interface includes properties for defining the appearance and size of square guides within a board.
  */
 export interface GuideSquareParams {
@@ -2275,7 +2275,7 @@ export interface HistoryContext {
 }
 
 /**
- * Represents an image shape in Penpot.
+ * Represents an image shape in Penjar.
  * This interface extends `ShapeBase` and includes properties specific to image shapes.
  */
 export interface Image extends ShapeBase {
@@ -2288,7 +2288,7 @@ export interface Image extends ShapeBase {
 }
 
 /**
- * Represents image data in Penpot.
+ * Represents image data in Penjar.
  * This includes properties for defining the image's dimensions, metadata, and aspect ratio handling.
  */
 export type ImageData = {
@@ -2325,7 +2325,7 @@ export type ImageData = {
 };
 
 /**
- * Penpot allows you to prototype interactions by connecting boards, which can act as screens.
+ * Penjar allows you to prototype interactions by connecting boards, which can act as screens.
  */
 export interface Interaction {
   /**
@@ -2355,7 +2355,7 @@ export interface Interaction {
 }
 
 /**
- * Properties for defining the layout of a cell in Penpot.
+ * Properties for defining the layout of a cell in Penjar.
  */
 export interface LayoutCellProperties {
   /**
@@ -2396,7 +2396,7 @@ export interface LayoutCellProperties {
 }
 
 /**
- * Properties for defining the layout of a child element in Penpot.
+ * Properties for defining the layout of a child element in Penjar.
  */
 export interface LayoutChildProperties {
   /**
@@ -2498,7 +2498,7 @@ export interface LayoutChildProperties {
 }
 
 /**
- * Represents a library in Penpot, containing colors, typographies, and components.
+ * Represents a library in Penjar, containing colors, typographies, and components.
  */
 export interface Library extends PluginData {
   /**
@@ -2515,7 +2515,7 @@ export interface Library extends PluginData {
    * An array of color elements in the library.
    * @example
    * ```js
-   * console.log(penpot.library.local.colors);
+   * console.log(penjar.library.local.colors);
    * ```
    */
   readonly colors: LibraryColor[];
@@ -2529,7 +2529,7 @@ export interface Library extends PluginData {
    * An array of component elements in the library.
    * @example
    * ```js
-   * console.log(penpot.library.local.components);
+   * console.log(penjar.library.local.components);
    */
   readonly components: LibraryComponent[];
 
@@ -2546,7 +2546,7 @@ export interface Library extends PluginData {
    *
    * @example
    * ```js
-   * const newColor = penpot.library.local.createColor();
+   * const newColor = penjar.library.local.createColor();
    * console.log(newColor);
    * ```
    */
@@ -2570,14 +2570,14 @@ export interface Library extends PluginData {
    *
    * @example
    * ```js
-   * const newComponent = penpot.library.local.createComponent([shape1, shape2]);
+   * const newComponent = penjar.library.local.createComponent([shape1, shape2]);
    * ```
    */
   createComponent(shapes: Shape[]): LibraryComponent;
 }
 
 /**
- * Represents a color element from a library in Penpot.
+ * Represents a color element from a library in Penjar.
  * This interface extends `LibraryElement` and includes properties specific to color elements.
  */
 export interface LibraryColor extends LibraryElement {
@@ -2624,7 +2624,7 @@ export interface LibraryColor extends LibraryElement {
 }
 
 /**
- * Represents a component element from a library in Penpot.
+ * Represents a component element from a library in Penjar.
  * This interface extends `LibraryElement` and includes properties specific to component elements.
  */
 export interface LibraryComponent extends LibraryElement {
@@ -2652,13 +2652,13 @@ export interface LibraryComponent extends LibraryElement {
   /**
    * Creates a new Variant from this standard Component. It creates a VariantContainer, transform this Component into a VariantComponent, duplicates it, and creates a
    * set of properties based on the component name and path.
-   * Similar to doing it with the contextual menu or the shortcut on the Penpot interface
+   * Similar to doing it with the contextual menu or the shortcut on the Penjar interface
    */
   transformInVariant(): void;
 }
 
 /**
- * Represents a component element from a library in Penpot.
+ * Represents a component element from a library in Penjar.
  * This interface extends `LibraryElement` and includes properties specific to component elements.
  */
 export interface LibraryVariantComponent extends LibraryComponent {
@@ -2691,12 +2691,12 @@ export interface LibraryVariantComponent extends LibraryComponent {
 }
 
 /**
- * Represents the context of Penpot libraries, including both local and connected libraries.
+ * Represents the context of Penjar libraries, including both local and connected libraries.
  * This type contains references to the local library and an array of connected libraries.
  */
 export type LibraryContext = {
   /**
-   * The local library in the Penpot context.
+   * The local library in the Penjar context.
    *
    * @example
    * ```js
@@ -2706,7 +2706,7 @@ export type LibraryContext = {
   readonly local: Library;
 
   /**
-   * An array of connected libraries in the Penpot context.
+   * An array of connected libraries in the Penjar context.
    *
    * @example
    * ```js
@@ -2740,7 +2740,7 @@ export type LibraryContext = {
 };
 
 /**
- * Represents an element in a Penpot library.
+ * Represents an element in a Penjar library.
  * This interface provides information about a specific element in a library.
  */
 export interface LibraryElement extends PluginData {
@@ -2766,8 +2766,8 @@ export interface LibraryElement extends PluginData {
 }
 
 /**
- * Represents a summary of a Penpot library.
- * This interface provides properties for summarizing various aspects of a Penpot library.
+ * Represents a summary of a Penjar library.
+ * This interface provides properties for summarizing various aspects of a Penjar library.
  */
 export interface LibrarySummary {
   /**
@@ -2797,7 +2797,7 @@ export interface LibrarySummary {
 }
 
 /**
- * Represents a typography element from a library in Penpot.
+ * Represents a typography element from a library in Penjar.
  * This interface extends `LibraryElement` and includes properties specific to typography elements.
  */
 export interface LibraryTypography extends LibraryElement {
@@ -3012,7 +3012,7 @@ export interface OverlayAction {
 }
 
 /**
- * Page represents a page in the Penpot application.
+ * Page represents a page in the Penjar application.
  * It includes properties for the page's identifier and name, as well as methods for managing shapes on the page.
  */
 export interface Page extends PluginData {
@@ -3042,7 +3042,7 @@ export interface Page extends PluginData {
    *
    * @example
    * ```js
-   * const shape = penpot.currentPage.getShapeById('shapeId');
+   * const shape = penjar.currentPage.getShapeById('shapeId');
    * ```
    */
   getShapeById(id: string): Shape | null;
@@ -3053,7 +3053,7 @@ export interface Page extends PluginData {
    * @param criteria
    * @example
    * ```js
-   * const shapes = penpot.currentPage.findShapes({ name: 'exampleName' });
+   * const shapes = penjar.currentPage.findShapes({ name: 'exampleName' });
    * ```
    */
   findShapes(criteria?: {
@@ -3083,7 +3083,7 @@ export interface Page extends PluginData {
    *
    * @example
    * ```js
-   * const flow = penpot.currentPage.createFlow('exampleFlow', board);
+   * const flow = penjar.currentPage.createFlow('exampleFlow', board);
    * ```
    */
   createFlow(name: string, board: Board): Flow;
@@ -3137,7 +3137,7 @@ export interface Page extends PluginData {
 }
 
 /**
- * Represents a path shape in Penpot.
+ * Represents a path shape in Penjar.
  * This interface extends `ShapeBase` and includes properties and methods specific to paths.
  */
 export interface Path extends ShapeBase {
@@ -3175,7 +3175,7 @@ export interface Path extends ShapeBase {
 }
 
 /**
- * Represents a path command in Penpot.
+ * Represents a path command in Penjar.
  * This interface includes a property for defining the type of command.
  */
 interface PathCommand {
@@ -3282,7 +3282,7 @@ interface PathCommand {
 }
 
 /**
- * Provides methods for managing plugin-specific data associated with a Penpot shape.
+ * Provides methods for managing plugin-specific data associated with a Penjar shape.
  */
 export interface PluginData {
   /**
@@ -3411,7 +3411,7 @@ export interface Push {
 }
 
 /**
- * Represents a rectangle shape in Penpot.
+ * Represents a rectangle shape in Penjar.
  * This interface extends `ShapeBase` and includes properties specific to rectangles.
  */
 export interface Rectangle extends ShapeBase {
@@ -3454,7 +3454,7 @@ export interface RulerGuide {
 export type RulerGuideOrientation = 'horizontal' | 'vertical';
 
 /**
- * Represents shadow properties in Penpot.
+ * Represents shadow properties in Penjar.
  * This interface includes properties for defining drop shadows and inner shadows, along with their visual attributes.
  */
 export interface Shadow {
@@ -3496,13 +3496,13 @@ export interface Shadow {
 }
 
 /**
- * Shape represents a union of various shape types used in the Penpot project.
+ * Shape represents a union of various shape types used in the Penjar project.
  * This type allows for different shapes to be handled under a single type umbrella.
  *
  * @example
  * ```js
  * let shape: Shape;
- * if (penpot.utils.types.isRectangle(shape)) {
+ * if (penjar.utils.types.isRectangle(shape)) {
  *   console.log(shape.type);
  * }
  * ```
@@ -3519,7 +3519,7 @@ export type Shape =
   | Image;
 
 /**
- * Represents the base properties and methods of a shape in Penpot.
+ * Represents the base properties and methods of a shape in Penjar.
  * This interface provides common properties and methods shared by all shapes.
  */
 export interface ShapeBase extends PluginData {
@@ -3815,7 +3815,7 @@ export interface ShapeBase extends PluginData {
 
   /**
    * Combine several standard Components into a VariantComponent. Similar to doing it with the contextual menu
-   * on the Penpot interface.
+   * on the Penjar interface.
    * The current shape must be a component main instance.
    * @param ids A list of ids of the main instances of the components to combine with this one.
    */
@@ -3972,7 +3972,7 @@ export interface Slide {
 }
 
 /**
- * Represents stroke properties in Penpot. You can add a stroke to any shape except for groups.
+ * Represents stroke properties in Penjar. You can add a stroke to any shape except for groups.
  * This interface includes properties for defining the color, style, width, alignment, and caps of a stroke.
  */
 export interface Stroke {
@@ -4020,7 +4020,7 @@ export interface Stroke {
 }
 
 /**
- * Represents the cap style of a stroke in Penpot.
+ * Represents the cap style of a stroke in Penjar.
  * This type defines various styles for the ends of a stroke.
  */
 export type StrokeCap =
@@ -4033,7 +4033,7 @@ export type StrokeCap =
   | 'diamond-marker';
 
 /**
- * Represents an SVG raw shape in Penpot.
+ * Represents an SVG raw shape in Penjar.
  * This interface extends `ShapeBase` and includes properties specific to raw SVG shapes.
  */
 export interface SvgRaw extends ShapeBase {
@@ -4041,7 +4041,7 @@ export interface SvgRaw extends ShapeBase {
 }
 
 /**
- * Text represents a text element in the Penpot application, extending the base shape interface.
+ * Text represents a text element in the Penjar application, extending the base shape interface.
  * It includes various properties to define the text content and its styling attributes.
  */
 export interface Text extends ShapeBase {
@@ -4281,7 +4281,7 @@ export interface ToggleOverlay extends OverlayAction {
 }
 
 /**
- * Represents a track configuration in Penpot.
+ * Represents a track configuration in Penjar.
  * This interface includes properties for defining the type and value of a track used in layout configurations.
  */
 export interface Track {
@@ -4302,7 +4302,7 @@ export interface Track {
 }
 
 /**
- * Represents the type of track in Penpot.
+ * Represents the type of track in Penjar.
  * This type defines various track types that can be used in layout configurations.
  */
 export type TrackType = 'flex' | 'fixed' | 'percent' | 'auto';
@@ -4317,12 +4317,12 @@ export type TrackType = 'flex' | 'fixed' | 'percent' | 'auto';
 export type Trigger = 'click' | 'mouse-enter' | 'mouse-leave' | 'after-delay';
 
 /**
- * Represents the base properties and methods of a Design Token in Penpot, shared by
+ * Represents the base properties and methods of a Design Token in Penjar, shared by
  * all token types.
  */
 export interface TokenBase {
   /**
-   * The unique identifier for this token, used only internally inside Penpot.
+   * The unique identifier for this token, used only internally inside Penjar.
    * This one is not exported or synced with external Design Token sources.
    */
   readonly id: string;
@@ -4987,7 +4987,7 @@ export type TokenValueString =
   | string[];
 
 /**
- * The supported Design Tokens in Penpot.
+ * The supported Design Tokens in Penjar.
  */
 export type Token =
   | TokenBorderRadius
@@ -5009,7 +5009,7 @@ export type Token =
   | TokenTypography;
 
 /**
- * The collection of all tokens in a Penpot file's library.
+ * The collection of all tokens in a Penjar file's library.
  *
  * Tokens are contained in sets, that can be marked as active
  * or inactive to control the resolved value of the tokens.
@@ -5070,7 +5070,7 @@ export interface TokenCatalog {
  */
 export interface TokenSet {
   /**
-   * The unique identifier for this set, used only internally inside Penpot.
+   * The unique identifier for this set, used only internally inside Penjar.
    * This one is not exported or synced with external Design Token sources.
    */
   readonly id: string;
@@ -5155,7 +5155,7 @@ export interface TokenSet {
  */
 export interface TokenTheme {
   /**
-   * The unique identifier for this theme, used only internally inside Penpot.
+   * The unique identifier for this theme, used only internally inside Penjar.
    * This one is not exported or synced with external Design Token sources.
    */
   readonly id: string;
@@ -5349,7 +5349,7 @@ export type TokenProperty =
   | TokenTypographyProps;
 
 /**
- * The supported types of Design Tokens in Penpot.
+ * The supported types of Design Tokens in Penjar.
  */
 export type TokenType =
   | 'borderRadius'
@@ -5371,7 +5371,7 @@ export type TokenType =
   | 'typography';
 
 /**
- * Represents a user in Penpot.
+ * Represents a user in Penjar.
  */
 export interface User {
   /**
@@ -5486,7 +5486,7 @@ export interface Variants {
 }
 
 /**
- * Viewport represents the viewport in the Penpot application.
+ * Viewport represents the viewport in the Penjar application.
  * It includes the center point, zoom level, and the bounds of the viewport.
  */
 export interface Viewport {
@@ -5524,5 +5524,5 @@ export interface Viewport {
 }
 
 declare global {
-  const penpot: Penpot;
+  const penjar: Penjar;
 }

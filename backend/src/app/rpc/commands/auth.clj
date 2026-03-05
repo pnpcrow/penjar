@@ -126,7 +126,7 @@
    [:invitation-token {:optional true} schema:token]])
 
 (sv/defmethod ::login-with-password
-  "Performs authentication using penpot password."
+  "Performs authentication using penjar password."
   {::rpc/auth false
    ::doc/added "1.15"
    ::climit/id :auth/global
@@ -263,7 +263,7 @@
                  :fullname fullname
                  :password (:password params)
                  :invitation-token (:invitation-token params)
-                 :backend "penpot"
+                 :backend "penjar"
                  :iss :prepared-register
                  :profile-id (:id profile)
                  :exp (ct/in-future {:days 7})
@@ -331,7 +331,7 @@
         locale    (when (and (string? locale) (not (str/blank? locale)))
                     locale)
 
-        backend   (:backend params "penpot")
+        backend   (:backend params "penjar")
         is-demo   (:is-demo params false)
         is-muted  (:is-muted params false)
         is-active (:is-active params false)

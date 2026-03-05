@@ -106,7 +106,7 @@ test("Renders a file with shapes with multiple fills", async ({ page }) => {
 });
 
 // TODO: update the screenshots for this test once Taiga #11325 is fixed
-// https://tree.taiga.io/project/penpot/task/11325
+// https://tree.taiga.io/project/penjar/task/11325
 test("Renders shapes taking into account blend modes", async ({ page }) => {
   const workspace = new WasmWorkspacePage(page);
   await workspace.setupEmptyFile();

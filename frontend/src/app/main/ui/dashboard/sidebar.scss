@@ -112,7 +112,7 @@
 }
 
 // This icon still use the old svg
-.penpot-icon {
+.penjar-icon {
   @include deprecated.flexCenter;
 
   svg {
@@ -462,7 +462,7 @@
   }
 }
 
-.about-penpot {
+.about-penjar {
   align-items: baseline;
   display: grid;
   grid-template-columns: auto 1fr;
@@ -504,7 +504,7 @@
   cursor: pointer;
 }
 
-.penpot-free {
+.penjar-free {
   @include t.use-typography("body-medium");
   display: flex;
   flex-direction: column;
@@ -545,7 +545,7 @@
   text-transform: uppercase;
 }
 
-.nitrate-penpot-icon {
+.nitrate-penjar-icon {
   display: flex;
   justify-content: center;
   align-items: center;

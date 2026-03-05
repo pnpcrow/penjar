@@ -17,4 +17,4 @@
 - [ ] Check CI passes successfully.
 - [ ] Update the `CHANGES.md` file, referencing the related GitHub issue, if applicable.
 
-<!-- For more details, check the contribution guidelines: https://github.com/penpot/penpot/blob/develop/CONTRIBUTING.md -->
+<!-- For more details, check the contribution guidelines: https://github.com/penjar/penjar/blob/develop/CONTRIBUTING.md -->

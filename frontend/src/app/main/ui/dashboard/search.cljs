@@ -45,7 +45,7 @@
     (mf/with-effect [team]
       (when team
         (let [tname (if (:is-default team)
-                      (tr "dashboard.your-penpot")
+                      (tr "dashboard.your-penjar")
                       (:name team))]
           (dom/set-html-title (tr "title.dashboard.search" tname)))))
 

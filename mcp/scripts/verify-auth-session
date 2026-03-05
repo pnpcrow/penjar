@@ -1,0 +1,281 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SERVER_DIR="$PROJECT_ROOT/packages/server"
+
+HEALTH_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/health"
+TMP_BASE="${TMPDIR:-/tmp}"
+SERVER_LOG="$TMP_BASE/penjar-mcp-auth-$$.log"
+SERVER_PID=""
+
+log_step() {
+    printf "\n[AUTH-CHECK] %s\n" "$1"
+}
+
+cleanup() {
+    if [ -n "$SERVER_PID" ] && kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+        kill "$SERVER_PID" >/dev/null 2>&1 || true
+        wait "$SERVER_PID" >/dev/null 2>&1 || true
+    fi
+
+    rm -f "$SERVER_LOG"
+}
+
+trap cleanup EXIT
+
+probe_tool_diagnostic() {
+    local base_url="$1"
+    local expected_code="$2"
+
+    node --input-type=module - "$base_url" "$expected_code" <<'EOF'
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
+
+const [url, expectedCode] = process.argv.slice(2);
+const client = new Client({ name: "auth-session-check", version: "1.0.0" }, { capabilities: {} });
+const transport = new StreamableHTTPClientTransport(new URL(url));
+
+try {
+  await client.connect(transport);
+  const result = await client.request(
+    {
+      method: "tools/call",
+      params: {
+        name: "execute_code",
+        arguments: { code: "return 1;" }
+      }
+    },
+    CallToolResultSchema
+  );
+
+  const textBlock = result.content.find((item) => item.type === "text");
+  const text = textBlock?.text ?? "";
+  const diagnosticToken = `[Diagnostic ${expectedCode}]`;
+  if (!text.includes(diagnosticToken)) {
+    throw new Error(`Expected diagnostic ${expectedCode}, got content: ${text}`);
+  }
+  console.log(`[AUTH-CHECK] Verified diagnostic ${expectedCode}`);
+} finally {
+  await transport.close();
+}
+EOF
+}
+
+probe_recovery_flow() {
+    local http_port="$1"
+    local websocket_port="$2"
+
+    node --input-type=module - "$http_port" "$websocket_port" <<'EOF'
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
+import WebSocket from "ws";
+
+const [httpPort, websocketPort] = process.argv.slice(2);
+const token = "phase-a-recovery-token";
+
+async function callExecuteCode(baseUrl) {
+  const client = new Client({ name: "auth-session-recovery-check", version: "1.0.0" }, { capabilities: {} });
+  const transport = new StreamableHTTPClientTransport(new URL(baseUrl));
+
+  try {
+    await client.connect(transport);
+    const result = await client.request(
+      {
+        method: "tools/call",
+        params: {
+          name: "execute_code",
+          arguments: { code: "return 1;" }
+        }
+      },
+      CallToolResultSchema
+    );
+    const textBlock = result.content.find((item) => item.type === "text");
+    return textBlock?.text ?? "";
+  } finally {
+    await transport.close();
+  }
+}
+
+const toolUrl = `http://127.0.0.1:${httpPort}/mcp?userToken=${token}`;
+const beforeRecovery = await callExecuteCode(toolUrl);
+if (!beforeRecovery.includes("[Diagnostic AUTH_TOKEN_EXPIRED_OR_MISMATCH]")) {
+  throw new Error(`Expected pre-recovery mismatch diagnostic, got: ${beforeRecovery}`);
+}
+
+const wsUrl = `ws://127.0.0.1:${websocketPort}?userToken=${encodeURIComponent(token)}`;
+const ws = new WebSocket(wsUrl);
+await new Promise((resolve, reject) => {
+  ws.once("open", resolve);
+  ws.once("error", reject);
+});
+
+ws.on("message", (payload) => {
+  try {
+    const request = JSON.parse(payload.toString());
+    if (!request || typeof request !== "object" || !request.id) {
+      return;
+    }
+    ws.send(
+      JSON.stringify({
+        id: request.id,
+        success: true,
+        data: { result: "recovered", log: "" },
+      })
+    );
+  } catch {
+    // ignore malformed payloads for this probe
+  }
+});
+
+const afterRecovery = await callExecuteCode(toolUrl);
+if (afterRecovery.includes("[Diagnostic")) {
+  throw new Error(`Expected successful post-recovery execution, got diagnostic payload: ${afterRecovery}`);
+}
+if (!afterRecovery.includes('"result": "recovered"')) {
+  throw new Error(`Expected successful tool output, got: ${afterRecovery}`);
+}
+
+ws.close();
+await new Promise((resolve) => ws.once("close", resolve));
+
+console.log("[AUTH-CHECK] Verified reconnect-retry recovery flow");
+EOF
+}
+
+probe_duplicate_connection_conflict() {
+    local http_port="$1"
+    local websocket_port="$2"
+
+    node --input-type=module - "$http_port" "$websocket_port" <<'EOF'
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
+import WebSocket from "ws";
+
+const [httpPort, websocketPort] = process.argv.slice(2);
+const token = "phase-a-conflict-token";
+const wsUrl = `ws://127.0.0.1:${websocketPort}?userToken=${encodeURIComponent(token)}`;
+
+const wsPrimary = new WebSocket(wsUrl);
+await new Promise((resolve, reject) => {
+  wsPrimary.once("open", resolve);
+  wsPrimary.once("error", reject);
+});
+
+wsPrimary.on("message", (payload) => {
+  try {
+    const request = JSON.parse(payload.toString());
+    if (!request || typeof request !== "object" || !request.id) {
+      return;
+    }
+    wsPrimary.send(
+      JSON.stringify({
+        id: request.id,
+        success: true,
+        data: { result: "conflict-primary-ok", log: "" },
+      })
+    );
+  } catch {
+    // ignore malformed probe payloads
+  }
+});
+
+const wsDuplicate = new WebSocket(wsUrl);
+const duplicateClose = await new Promise((resolve, reject) => {
+  wsDuplicate.once("close", (code, reason) => resolve({ code, reason: reason.toString() }));
+  wsDuplicate.once("error", reject);
+});
+
+if (duplicateClose.code !== 1008 || !duplicateClose.reason.toLowerCase().includes("duplicate connection")) {
+  throw new Error(`Expected duplicate-token close 1008, got: ${JSON.stringify(duplicateClose)}`);
+}
+
+const healthResponse = await fetch(`http://127.0.0.1:${httpPort}/health`);
+if (!healthResponse.ok) {
+  throw new Error(`Health endpoint returned HTTP ${healthResponse.status}`);
+}
+const healthPayload = await healthResponse.json();
+const conflictCode = healthPayload?.pluginBridge?.lastFailure?.diagnosticCode;
+if (conflictCode !== "PLUGIN_CONNECTION_CONFLICT") {
+  throw new Error(`Expected PLUGIN_CONNECTION_CONFLICT lastFailure, got: ${JSON.stringify(healthPayload?.pluginBridge?.lastFailure)}`);
+}
+
+const client = new Client({ name: "auth-session-conflict-check", version: "1.0.0" }, { capabilities: {} });
+const transport = new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${httpPort}/mcp?userToken=${token}`));
+
+try {
+  await client.connect(transport);
+  const result = await client.request(
+    {
+      method: "tools/call",
+      params: {
+        name: "execute_code",
+        arguments: { code: "return 1;" }
+      }
+    },
+    CallToolResultSchema
+  );
+  const text = result.content.find((item) => item.type === "text")?.text ?? "";
+  if (text.includes("[Diagnostic")) {
+    throw new Error(`Expected successful execution through primary token session, got: ${text}`);
+  }
+  if (!text.includes('"result": "conflict-primary-ok"')) {
+    throw new Error(`Expected primary conflict-session payload, got: ${text}`);
+  }
+} finally {
+  await transport.close();
+  wsPrimary.close();
+  await new Promise((resolve) => wsPrimary.once("close", resolve));
+}
+
+console.log("[AUTH-CHECK] Verified duplicate-token conflict handling");
+EOF
+}
+
+if [ "${VERIFY_AUTH_SKIP_BUILD:-false}" = "true" ]; then
+    log_step "Skip build step (VERIFY_AUTH_SKIP_BUILD=true)"
+else
+    log_step "Build required packages for auth/session runtime checks"
+    cd "$PROJECT_ROOT"
+    pnpm --filter mcp-common run build
+    pnpm --filter mcp-server run build
+fi
+
+log_step "Start MCP server in multi-user mode"
+cd "$SERVER_DIR"
+node dist/index.js --multi-user >"$SERVER_LOG" 2>&1 &
+SERVER_PID="$!"
+
+log_step "Wait for /health endpoint"
+for _ in $(seq 1 20); do
+    if curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+done
+
+if ! curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+    echo "[AUTH-CHECK][FAIL] server did not become healthy."
+    echo "[AUTH-CHECK][INFO] Server log:"
+    cat "$SERVER_LOG"
+    exit 1
+fi
+
+log_step "Probe missing-token path"
+probe_tool_diagnostic "http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/mcp" "AUTH_TOKEN_MISSING"
+
+log_step "Probe token-mismatch path"
+probe_tool_diagnostic "http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/mcp?userToken=phase-a-token" "AUTH_TOKEN_EXPIRED_OR_MISMATCH"
+
+log_step "Probe reconnect-retry recovery path"
+probe_recovery_flow "${PENJAR_MCP_SERVER_PORT:-4401}" "${PENJAR_MCP_WEBSOCKET_PORT:-4402}"
+
+log_step "Probe duplicate-token conflict path"
+probe_duplicate_connection_conflict "${PENJAR_MCP_SERVER_PORT:-4401}" "${PENJAR_MCP_WEBSOCKET_PORT:-4402}"
+
+log_step "Auth/session runtime checks passed"

@@ -38,10 +38,10 @@
 
 (defn- update-welcome-shape
   [_ file name]
-  (let [text (str "Welcome to Penpot, " name "!")]
+  (let [text (str "Welcome to Penjar, " name "!")]
     (-> file
         (update-in update-path assoc :text text)
-        (update-in [:data :pages-index page-id :objects shape-id] assoc :name "Welcome to Penpot!")
+        (update-in [:data :pages-index page-id :objects shape-id] assoc :name "Welcome to Penjar!")
         (update-in [:data :pages-index page-id :objects shape-id] dissoc :position-data))))
 
 (defn create-welcome-file

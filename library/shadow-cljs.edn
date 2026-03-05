@@ -13,7 +13,7 @@
    :devtools {:autoload false}
 
    :modules
-   {:penpot
+   {:penjar
     {:exports {BuilderError lib.builder/BuilderError
                createBuildContext lib.builder/create-build-context
                exportAsBytes lib.export/export-bytes
@@ -37,7 +37,7 @@
    :release
    {:compiler-options
     {:fn-invoke-direct true
-     :optimizations #shadow/env ["PENPOT_BUILD_OPTIMIZATIONS" :as :keyword :default :advanced]
+     :optimizations #shadow/env ["PENJAR_BUILD_OPTIMIZATIONS" :as :keyword :default :advanced]
      :pretty-print false
      :source-map true
      :elide-asserts true

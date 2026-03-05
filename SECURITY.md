@@ -5,7 +5,7 @@
 We take the security of this project seriously. If you have discovered
 a security vulnerability, please do **not** open a public issue.
 
-Please report vulnerabilities via email to: **[support@penpot.app]**
+Please report vulnerabilities via email to: **[support@penjar.app]**
 
 
 ### What to include:

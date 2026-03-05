@@ -3,7 +3,7 @@ msgstr ""
 "PO-Revision-Date: 2025-06-05 09:01+0000\n"
 "Last-Translator: Anderson Paulo <anderson.pr10@gmail.com>\n"
 "Language-Team: Portuguese "
-"<https://hosted.weblate.org/projects/penpot/frontend/pt/>\n"
+"<https://hosted.weblate.org/projects/penjar/frontend/pt/>\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -24,7 +24,7 @@ msgstr "Verifique seu e-mail"
 msgid "auth.check-your-email"
 msgstr ""
 "Verifique seu e-mail e clique no link para verificar e começar a usar o "
-"Penpot."
+"Penjar."
 
 #: src/app/main/ui/auth/recovery.cljs:67
 msgid "auth.confirm-password"
@@ -69,7 +69,7 @@ msgstr "Login"
 #: src/app/main/ui/auth/login.cljs:274
 msgid "auth.login-tagline"
 msgstr ""
-"Penpot é a ferramenta de design de código aberto e gratuita para "
+"Penjar é a ferramenta de design de código aberto e gratuita para "
 "colaboração em design e código"
 
 #: src/app/main/ui/auth/login.cljs:231
@@ -162,7 +162,7 @@ msgstr "Criar uma conta"
 #, unused
 msgid "auth.register-tagline"
 msgstr ""
-"Com uma conta gratuita do Penpot, você pode criar equipes ilimitadas e "
+"Com uma conta gratuita do Penjar, você pode criar equipes ilimitadas e "
 "colaborar com outros designers e desenvolvedores em quantos projetos "
 "quiser. "
 
@@ -213,7 +213,7 @@ msgstr "Publicar"
 
 #: src/app/main/ui/viewer/share_link.cljs:304, src/app/main/ui/viewer/share_link.cljs:315
 msgid "common.share-link.all-users"
-msgstr "Todos os usuários do Penpot"
+msgstr "Todos os usuários do Penjar"
 
 #: src/app/main/ui/viewer/share_link.cljs:204
 msgid "common.share-link.confirm-deletion-link-description"
@@ -290,7 +290,7 @@ msgstr "Gestão da equipe"
 #: src/app/main/ui/dashboard/projects.cljs:92
 msgid "dasboard.team-hero.text"
 msgstr ""
-"O Penpot foi feito para equipes. Convide membros para trabalharem juntos em "
+"O Penjar foi feito para equipes. Convide membros para trabalharem juntos em "
 "projetos e arquivos"
 
 #: src/app/main/ui/dashboard/projects.cljs:90
@@ -300,7 +300,7 @@ msgstr "Monte sua equipe!"
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
 msgid "dasboard.tutorial-hero.info"
-msgstr "Aprenda o básico no Penpot enquanto se diverte com este tutorial prático."
+msgstr "Aprenda o básico no Penjar enquanto se diverte com este tutorial prático."
 
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
@@ -315,7 +315,7 @@ msgstr "Tutorial prático"
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
 msgid "dasboard.walkthrough-hero.info"
-msgstr "Explore o Penpot e conheça suas principais funcionalidades."
+msgstr "Explore o Penjar e conheça suas principais funcionalidades."
 
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
@@ -388,7 +388,7 @@ msgid "dashboard.access-tokens.personal.description"
 msgstr ""
 "Tokens de acesso pessoal funcionam como uma alternativa ao nosso sistema de "
 "autenticação por login e senha, e podem ser usados para permitir que um "
-"aplicativo acesse a API interna do Penpot"
+"aplicativo acesse a API interna do Penjar"
 
 #: src/app/main/ui/settings/access_tokens.cljs:142
 msgid "dashboard.access-tokens.token-will-expire"

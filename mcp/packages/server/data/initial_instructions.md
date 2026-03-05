@@ -1,26 +1,26 @@
-You have access to Penpot tools in order to interact with a Penpot design project directly.
-As a precondition, the user must connect the Penpot design project to the MCP server using the Penpot MCP Plugin.
+You have access to Penjar tools in order to interact with a Penjar design project directly.
+As a precondition, the user must connect the Penjar design project to the MCP server using the Penjar MCP Plugin.
 
 # Executing Code
 
-One of your key tools is the `execute_code` tool, which allows you to run JavaScript code using the Penpot Plugin API
+One of your key tools is the `execute_code` tool, which allows you to run JavaScript code using the Penjar Plugin API
 directly in the connected project.
 
 VERY IMPORTANT: When writing code, NEVER LOG INFORMATION YOU ARE ALSO RETURNING. It would duplicate the information you receive!
 
-To execute code correctly, you need to understand the Penpot Plugin API. You can retrieve API documentation via
-the `penpot_api_info` tool.
+To execute code correctly, you need to understand the Penjar Plugin API. You can retrieve API documentation via
+the `penjar_api_info` tool.
 
-This is the full list of types/interfaces in the Penpot API: $api_types
+This is the full list of types/interfaces in the Penjar API: $api_types
 
 You use the `storage` object extensively to store data and utility functions you define across tool calls.
 This allows you to inspect intermediate results while still being able to build on them in subsequent code executions.
 
-# The Structure of Penpot Designs
+# The Structure of Penjar Designs
 
-A Penpot design ultimately consists of shapes.
+A Penjar design ultimately consists of shapes.
 The type `Shape` is a union type, which encompasses both containers and low-level shapes.
-Shapes in a Penpot design are organized hierarchically.
+Shapes in a Penjar design are organized hierarchically.
 At the top level, a design project contains one or more `Page` objects.
 Each `Page` contains a tree of elements. For a given instance `page`, its root shape is `page.root`.
 A Page is frequently structured into boards. A `Board` is a high-level grouping element.
@@ -37,7 +37,7 @@ Actual low-level shape types are `Rectangle`, `Path`, `Text`, `Ellipse`, `Image`
   * The location properties `x` and `y` refer to the top left corner of a shape's bounding box in the absolute (Page) coordinate system.
     These are writable - set them directly to position shapes.
   * `parentX` and `parentY` (as well as `boardX` and `boardY`) are READ-ONLY computed properties showing position relative to parent/board.
-    To position relative to parent, use `penpotUtils.setParentXY(shape, parentX, parentY)` or manually set `shape.x = parent.x + parentX`.
+    To position relative to parent, use `penjarUtils.setParentXY(shape, parentX, parentY)` or manually set `shape.x = parent.x + parentX`.
   * `width` and `height` are READ-ONLY. Use `resize(width, height)` method to change dimensions.
   * `bounds` is READ-ONLY (members: x, y, width, height). To modify the bounding box, change `x`, `y` or apply `resize()`. 
 
@@ -76,7 +76,7 @@ Actual low-level shape types are `Rectangle`, `Path`, `Text`, `Ellipse`, `Image`
   * To add children to a parent shape (e.g. a `Board`): `parent.appendChild(shape)` or `parent.insertChild(index, shape)` 
   * Reparenting: `newParent.appendChild(shape)` or `newParent.insertChild(index, shape)` will move a shape to new parent
     - Automatically removes the shape from its old parent
-    - Absolute x/y positions are preserved (use `penpotUtils.setParentXY` to adjust relative position)
+    - Absolute x/y positions are preserved (use `penjarUtils.setParentXY` to adjust relative position)
 
 Cloning: Use `shape.clone(): Shape` to create an exact duplicate (including all properties and children) of a shape; same position as original.
 
@@ -112,7 +112,7 @@ Boards can have layout systems that automatically control the positioning and sp
       To insert at a specific index, use `board.insertChild(index, shape)`.
     - Add to a board with `board.addFlexLayout(): FlexLayout`; instance then accessible via `board.flex`.
       IMPORTANT: When adding a flex layout to a container that already has children,
-      use `penpotUtils.addFlexLayout(container, dir)` instead! This preserves the existing visual order of children.
+      use `penjarUtils.addFlexLayout(container, dir)` instead! This preserves the existing visual order of children.
       Otherwise, children will be arbitrarily reordered when the children order suddenly determines the display order.
     - Check with: `if (board.flex) { ... }`
 
@@ -139,20 +139,20 @@ The bounding box is sized automatically as long as the `growType` property is se
 `resize` always sets `growType` to "fixed", so ALWAYS set it back to "auto-*" if you want automatic sizing!
 The auto-sizing is not immediate; sleep for a short time (100ms) if you want to read the updated bounding box.
 
-# The `penpot` and `penpotUtils` Objects, Exploring Designs
+# The `penjar` and `penjarUtils` Objects, Exploring Designs
 
-A key object to use in your code is the `penpot` object (which is of type `Penpot`):
-  * `penpot.selection` provides the list of shapes the user has selected in the Penpot UI.
+A key object to use in your code is the `penjar` object (which is of type `Penjar`):
+  * `penjar.selection` provides the list of shapes the user has selected in the Penjar UI.
      If it is unclear which elements to work on, you can ask the user to select them for you.
      ALWAYS immediately copy the selected shape(s) into `storage`! Do not assume that the selection remains unchanged.
-  * `penpot.root` provides the root shape of the currently active page.
-  * Generation of CSS content for elements via `penpot.generateStyle`
-  * Generation of HTML/SVG content for elements via `penpot.generateMarkup`
+  * `penjar.root` provides the root shape of the currently active page.
+  * Generation of CSS content for elements via `penjar.generateStyle`
+  * Generation of HTML/SVG content for elements via `penjar.generateMarkup`
 
 For example, to generate CSS for the currently selected elements, you can execute this:
-    return penpot.generateStyle(penpot.selection, { type: "css", withChildren: true });
+    return penjar.generateStyle(penjar.selection, { type: "css", withChildren: true });
 
-CRITICAL: The `penpotUtils` object provides essential utilities - USE THESE INSTEAD OF WRITING YOUR OWN:
+CRITICAL: The `penjarUtils` object provides essential utilities - USE THESE INSTEAD OF WRITING YOUR OWN:
   * getPages(): { id: string; name: string }[]
   * getPageById(id: string): Page | null
   * getPageByName(name: string): Page | null
@@ -175,51 +175,51 @@ CRITICAL: The `penpotUtils` object provides essential utilities - USE THESE INST
     Powerful pattern: evaluator can return corrector functions or diagnostic data
   * Further functions for specific tasks (described in the sections below)
 
-General pointers for working with Penpot designs:
-  * Prefer `penpotUtils` helper functions — avoid reimplementing shape searching.
-  * To get an overview of a single page, use `penpotUtils.shapeStructure(page.root, 3)`.
-    Note that `penpot.root` refers to the current page only. When working across pages, first determine the relevant page(s).
-  * Use `penpotUtils.findShapes()` or `penpotUtils.findShape()` with predicates to locate elements efficiently.
+General pointers for working with Penjar designs:
+  * Prefer `penjarUtils` helper functions — avoid reimplementing shape searching.
+  * To get an overview of a single page, use `penjarUtils.shapeStructure(page.root, 3)`.
+    Note that `penjar.root` refers to the current page only. When working across pages, first determine the relevant page(s).
+  * Use `penjarUtils.findShapes()` or `penjarUtils.findShape()` with predicates to locate elements efficiently.
 
-Common tasks - Quick Reference (ALWAYS use penpotUtils for these):
+Common tasks - Quick Reference (ALWAYS use penjarUtils for these):
   * Find all images:
-      const images = penpotUtils.findShapes(
+      const images = penjarUtils.findShapes(
         shape => shape.type === 'image' || shape.fills?.some(fill => fill.fillImage),
-        penpot.root
+        penjar.root
       );
   * Find text elements:
-      const texts = penpotUtils.findShapes(shape => shape.type === 'text', penpot.root);
+      const texts = penjarUtils.findShapes(shape => shape.type === 'text', penjar.root);
   * Find (the first) shape with a given name:
-      const shape = penpotUtils.findShape(shape => shape.name === 'MyShape');
+      const shape = penjarUtils.findShape(shape => shape.name === 'MyShape');
   * Get structure of current selection:
-      const structure = penpotUtils.shapeStructure(penpot.selection[0]);
+      const structure = penjarUtils.shapeStructure(penjar.selection[0]);
   * Find shapes in current selection/board:
-      const shapes = penpotUtils.findShapes(predicate, penpot.selection[0] || penpot.root);
+      const shapes = penjarUtils.findShapes(predicate, penjar.selection[0] || penjar.root);
   * Validate/analyze descendants (returning corrector functions):
-      const fixes = penpotUtils.analyzeDescendants(board, (root, shape) => {
+      const fixes = penjarUtils.analyzeDescendants(board, (root, shape) => {
         const xMod = shape.parentX % 4;
         if (xMod !== 0) {
-          return () => penpotUtils.setParentXY(shape, Math.round(shape.parentX / 4) * 4, shape.parentY);
+          return () => penjarUtils.setParentXY(shape, Math.round(shape.parentX / 4) * 4, shape.parentY);
         }
       });
       fixes.forEach(f => f.result()); // Apply all fixes
   * Find containment violations:
-      const violations = penpotUtils.analyzeDescendants(board, (root, shape) => {
-        return !penpotUtils.isContainedIn(shape, root) ? 'outside-bounds' : null;
+      const violations = penjarUtils.analyzeDescendants(board, (root, shape) => {
+        return !penjarUtils.isContainedIn(shape, root) ? 'outside-bounds' : null;
       });
       Always validate against the root container that is supposed to contain the shapes.
 
 # Asset Libraries
 
-Libraries in Penpot are collections of reusable design assets (components, colors, and typographies) that can be shared across files.
+Libraries in Penjar are collections of reusable design assets (components, colors, and typographies) that can be shared across files.
 They enable design systems and consistent styling across projects.
-Each Penpot file has its own local library and can connect to external shared libraries.
+Each Penjar file has its own local library and can connect to external shared libraries.
 
-Accessing libraries: via `penpot.library` (type: `LibraryContext`):
-  * `penpot.library.local` (type: `Library`) - The current file's own library
-  * `penpot.library.connected` (type: `Library[]`) - Array of already-connected external libraries
-  * `penpot.library.availableLibraries()` (returns: `Promise<LibrarySummary[]>`) - Libraries available to connect
-  * `penpot.library.connectLibrary(libraryId: string)` (returns: `Promise<Library>`) - Connect a new library
+Accessing libraries: via `penjar.library` (type: `LibraryContext`):
+  * `penjar.library.local` (type: `Library`) - The current file's own library
+  * `penjar.library.connected` (type: `Library[]`) - Array of already-connected external libraries
+  * `penjar.library.availableLibraries()` (returns: `Promise<LibrarySummary[]>`) - Libraries available to connect
+  * `penjar.library.connectLibrary(libraryId: string)` (returns: `Promise<Library>`) - Connect a new library
 
 Each `Library` object has:
   * `id: string`
@@ -232,14 +232,14 @@ Each `Library` object has:
 
 Adding a color:
 ```
-const newColor: LibraryColor = penpot.library.local.createColor();
+const newColor: LibraryColor = penjar.library.local.createColor();
 newColor.name = 'Brand Primary';
 newColor.color = '#0066FF';
 ```
 
 Adding a typography:
 ```
-const newTypo: LibraryTypography = penpot.library.local.createTypography();
+const newTypo: LibraryTypography = penjar.library.local.createTypography();
 newTypo.name = 'Heading Large';
 // Set typography properties...
 ```
@@ -259,7 +259,7 @@ Using library components:
 Adding a component to a library:
 ```
 const shapes: Shape[] = [shape1, shape2]; // shapes to include
-const newComponent: LibraryComponent = penpot.library.local.createComponent(shapes);
+const newComponent: LibraryComponent = penjar.library.local.createComponent(shapes);
 newComponent.name = 'My Button';
 ```
 
@@ -302,7 +302,7 @@ Use `variantContainer.appendChild(mainInstance)` to move a component's main inst
 
 Design tokens are reusable design values (colors, dimensions, typography, etc.) for consistent styling.
 
-The token library: `penpot.library.local.tokens` (type: `TokenCatalog`)
+The token library: `penjar.library.local.tokens` (type: `TokenCatalog`)
   * `sets: TokenSet[]` - Token collections (order matters for precedence)
   * `themes: TokenTheme[]` - Presets that activate specific sets
   * `addSet(name: string): TokenSet` - Create new set
@@ -325,10 +325,10 @@ The token library: `penpot.library.local.tokens` (type: `TokenCatalog`)
   * `type: TokenType`
 
 Discovering tokens:
-  * `penpotUtils.tokenOverview()`: Maps from token set name to a mapping from token type to list of token names
-  * `penpotUtils.findTokenByName(name: string): Token | null`: Finds the first applicable token matching the given name
-  * `penpotUtils.findTokensByName(name: string): Token[]`: Finds all tokens that match the given name across all token sets
-  * `penpotUtils.getTokenSet(token: Token): TokenSet | null`: Gets the token set that contains the given token
+  * `penjarUtils.tokenOverview()`: Maps from token set name to a mapping from token type to list of token names
+  * `penjarUtils.findTokenByName(name: string): Token | null`: Finds the first applicable token matching the given name
+  * `penjarUtils.findTokensByName(name: string): Token[]`: Finds all tokens that match the given name across all token sets
+  * `penjarUtils.getTokenSet(token: Token): TokenSet | null`: Gets the token set that contains the given token
 
 Applying tokens:
   * `shape.applyToken(token, properties: undefined | TokenProperty[])` - Apply a token to a shape for one or more properties
@@ -367,7 +367,7 @@ For many tasks, it can be critical to visually inspect the design. Remember to u
 
 # Creating and Translating Designs
 
-* When transferring styles from a Penpot design to code, make sure that you strictly adhere to the design.
+* When transferring styles from a Penjar design to code, make sure that you strictly adhere to the design.
   NEVER make assumptions about missing values and don't get overly creative (e.g. don't pick your own colours and stick to
   non-creative defaults such as white/black if you are lacking information).
 
@@ -381,4 +381,4 @@ For many tasks, it can be critical to visually inspect the design. Remember to u
   Consider converting boards to flex layout when appropriate.
 
 --
-You have hereby read the 'Penpot High-Level Overview' and need not use a tool to read it again.
+You have hereby read the 'Penjar High-Level Overview' and need not use a tool to read it again.

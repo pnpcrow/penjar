@@ -66,7 +66,7 @@
     [:div {:class (stl/css :modal-overlay)}
      [:div {:class (stl/css :modal-container)}
       [:div {:class (stl/css :modal-header)}
-       [:h2 {:class (stl/css :modal-title)} (tr "labels.continue-with-penpot")]
+       [:h2 {:class (stl/css :modal-title)} (tr "labels.continue-with-penjar")]
        [:button {:class (stl/css :modal-close-btn)
                  :title (tr "labels.close")
                  :on-click close} deprecated-icon/close]]

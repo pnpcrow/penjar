@@ -171,7 +171,7 @@
   the nearest existing sibling; when fewer appear we truncate.
 
   exported-texts  vector of vectors  [[\"span1\" \"span2\"] [\"p2s1\"]]
-  content         existing Penpot content map (root -> paragraph-set -> …)"
+  content         existing Penjar content map (root -> paragraph-set -> …)"
   [content exported-texts]
   (let [para-set       (first (get content :children))
         orig-paras     (get para-set :children)

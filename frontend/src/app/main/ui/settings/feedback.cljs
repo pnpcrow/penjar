@@ -123,10 +123,10 @@
         :rows 5}]]
 
      [:div {:class (stl/css :fields-row)}
-      [:p {:class (stl/css :field-text)} (tr "feedback.penpot.link")]
+      [:p {:class (stl/css :field-text)} (tr "feedback.penjar.link")]
       [:& fm/input {:label ""
                     :name :error-href
-                    :placeholder "https://penpot.app/"
+                    :placeholder "https://penjar.app/"
                     :show-success? true}]
 
       (when report
@@ -144,13 +144,13 @@
 
 
      [:a {:class (stl/css :link)
-          :href "https://community.penpot.app"
+          :href "https://community.penjar.app"
           :target "_blank"}
       (tr "feedback.discourse-title")]
      [:p {:class (stl/css :field-text :bottom-margin)} (tr "feedback.discourse-subtitle1")]
 
      [:a {:class (stl/css :link)
-          :href "https://x.com/penpotapp"
+          :href "https://x.com/penjarapp"
           :target "_blank"}
       (tr "feedback.twitter-title")]
      [:p {:class (stl/css :field-text)} (tr "feedback.twitter-subtitle1")]]))

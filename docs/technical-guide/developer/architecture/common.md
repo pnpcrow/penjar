@@ -1,11 +1,11 @@
 ---
 title: Common code
-desc: Learn about architecture, data models, and development environments. See Penpot's technical guide for developers. Dive into common code.
+desc: Learn about architecture, data models, and development environments. See Penjar's technical guide for developers. Dive into common code.
 ---
 
 # Common code
 
-In penpot, we take advantage of using the same language in frontend and
+In penjar, we take advantage of using the same language in frontend and
 backend, to have a bunch of shared code.
 
 Sometimes, we use conditional compilation, for small chunks of code that
@@ -41,7 +41,7 @@ Some of the modules need some refactoring, to organize them more cleanly.
       rectangle.
 * **path** contains functions to manage SVG paths, transform them and also
   convert other types of shapes into paths.
-* **pages** contains the definition of the [Penpot data model](/technical-guide/developer/data-model/) and
+* **pages** contains the definition of the [Penjar data model](/technical-guide/developer/data-model/) and
   the conceptual business logic (transformations of the model entities,
   independent of the user interface or data storage).
     - **spec** has the definitions of data structures of files and shapes, and
@@ -71,7 +71,7 @@ The main ones are:
 * **data** basic data structures and utility functions that could be added to
   Clojure standard library.
 * **math** some mathematic functions that could also be standard.
-* **file_builder** functions to parse the content of a <code class="language-text">.penpot</code> exported file
+* **file_builder** functions to parse the content of a <code class="language-text">.penjar</code> exported file
   and build a File data structure from it.
 * **logging** functions to generate traces for debugging and usage analysis.
 * **text** an adapter layer over the [DraftJS editor](https://draftjs.org) that
@@ -81,5 +81,5 @@ The main ones are:
   but more powerful.
 * **uuid** functions to generate [Universally Unique Identifiers
   (UUID)](https://en.wikipedia.org/wiki/Universally_unique_identifier), used
-  over all Penpot models to have identifiers for objects that are practically
+  over all Penjar models to have identifiers for objects that are practically
   ensured to be unique, without having a central control.

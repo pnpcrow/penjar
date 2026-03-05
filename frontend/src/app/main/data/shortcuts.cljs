@@ -7,7 +7,7 @@
 (ns app.main.data.shortcuts
   (:refer-clojure :exclude [meta reset!])
   (:require
-   ["@penpot/mousetrap$default" :as mousetrap]
+   ["@penjar/mousetrap$default" :as mousetrap]
    [app.common.data :as d]
    [app.common.logging :as log]
    [app.common.schema :as sm]

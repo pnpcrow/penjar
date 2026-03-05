@@ -16,7 +16,7 @@ test.beforeEach(async ({ page }) => {
   await WasmWorkspacePage.init(page);
 });
 
-// Fix for https://tree.taiga.io/project/penpot/issue/9042
+// Fix for https://tree.taiga.io/project/penjar/issue/9042
 test("Bug 9056 - 'More info' doesn't open the update tab", async ({ page }) => {
   const workspacePage = new WasmWorkspacePage(page);
   await workspacePage.setupEmptyFile(page);

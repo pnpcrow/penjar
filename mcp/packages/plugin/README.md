@@ -1,8 +1,8 @@
-# Penpot MCP Plugin
+# Penjar MCP Plugin
 
-This project contains a Penpot plugin that accompanies the Penpot MCP server.
+This project contains a Penjar plugin that accompanies the Penjar MCP server.
 It connects to the MCP server via WebSocket, subsequently allowing the MCP
-server to execute tasks in Penpot using the Plugin API.
+server to execute tasks in Penjar using the Plugin API.
 
 ## Setup
 

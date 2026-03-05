@@ -256,7 +256,7 @@
       (let [handle-wasm-render
             (fn [_]
               (reset! first-frame-rendered? true))
-            listener-key (events/listen globals/document "penpot:wasm:render" handle-wasm-render)]
+            listener-key (events/listen globals/document "penjar:wasm:render" handle-wasm-render)]
         (fn []
           (events/unlistenByKey listener-key))))
 

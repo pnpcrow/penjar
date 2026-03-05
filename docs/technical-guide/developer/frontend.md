@@ -1,6 +1,6 @@
 ---
 title: 3.05. Frontend Guide
-desc: "See Penpot's technical guide: self-hosting, configuration, developer insights (architecture, data model), frontend, backend, and integrations & more!"
+desc: "See Penjar's technical guide: self-hosting, configuration, developer insights (architecture, data model), frontend, backend, and integrations & more!"
 ---
 
 # Frontend Guide
@@ -104,7 +104,7 @@ of the trace.
 
 ### Access to clojure from js console
 
-The penpot namespace of the main application is exported, so that is
+The penjar namespace of the main application is exported, so that is
 accessible from javascript console in Chrome developer tools. Object
 names and data types are converted to javascript style. For example
 you can emit the event to reset zoom level by typing this at the
@@ -220,7 +220,7 @@ repository:
 pnpm run translations
 ```
 
-At Penpot core team we maintain manually the english and spanish .po files. All
+At Penjar core team we maintain manually the english and spanish .po files. All
 the others are managed in https://weblate.org.
 
 **When a new language is available in weblate**, to enable it in the application
@@ -305,7 +305,7 @@ Ensure your development environment docker image is up to date.
 
 #### Release mode
 
-This is not required, but it may be convenient to compile Penpot in release mode before running the tests. This way they will be much quicker and stable. For this, go to the frontend window in the tmux session (<code class="language-bash">Ctrl + b 1</code>), interrupt the watch process with <code class="language-bash">Ctrl + C</code> and type:
+This is not required, but it may be convenient to compile Penjar in release mode before running the tests. This way they will be much quicker and stable. For this, go to the frontend window in the tmux session (<code class="language-bash">Ctrl + b 1</code>), interrupt the watch process with <code class="language-bash">Ctrl + C</code> and type:
 
 ```bash
 ./scripts/build
@@ -325,7 +325,7 @@ Here's how to run the tests with a headless browser (i.e. within the terminal, n
 2. Go to the frontend folder:
 
 ```bash
-cd penpot/frontend
+cd penjar/frontend
 ```
 
 3. Run the tests with <code class="language-bash">pnpm</code>:
@@ -446,11 +446,11 @@ test("User submits a wrong formatted email", async ({ page }) => {
 
 #### Mocking the back-end
 
-In the penpot repository there are some POMs that are meant to be extended by more specific pages. These include methods that should be useful when you write your own POMs.
+In the penjar repository there are some POMs that are meant to be extended by more specific pages. These include methods that should be useful when you write your own POMs.
 
 - <code class="language-bash">BasePage</code> contains methods to intercept network requests and return JSON data fixtures.
 
-- <code class="language-bash">BaseWebSocketPage</code> also can intercept websocket connections, which are a must for tests in the workspace, or any other Penpot page that uses a WebSocket.
+- <code class="language-bash">BaseWebSocketPage</code> also can intercept websocket connections, which are a must for tests in the workspace, or any other Penjar page that uses a WebSocket.
 
 ##### API calls
 
@@ -475,13 +475,13 @@ export class FooPage extends BasePage {
 }
 ```
 
-> ❗️ **IMPORTANT:** The <code class="language-bash">mockRPC</code> method is meant to intercept calls to Penpot's RPC API, and already prefixes the path you provide with <code class="language-bash">/api/rpc/command/</code>. So, if you need to intercept <code class="language-bash">/api/rpc/command/get-profile</code> you would just need to call <code class="language-bash">mockRPC("get-profile", "json-data.json")</code>.
+> ❗️ **IMPORTANT:** The <code class="language-bash">mockRPC</code> method is meant to intercept calls to Penjar's RPC API, and already prefixes the path you provide with <code class="language-bash">/api/rpc/command/</code>. So, if you need to intercept <code class="language-bash">/api/rpc/command/get-profile</code> you would just need to call <code class="language-bash">mockRPC("get-profile", "json-data.json")</code>.
 
 ##### WebSockets
 
-Any Penpot page that uses a WebSocket requires it to be intercepted and mocked. To do that, you can extend from the POM <code class="language-bash">BaseWebSocketPage</code> _and_ call its <code class="language-bash">initWebSockets()</code> methods before each test.
+Any Penjar page that uses a WebSocket requires it to be intercepted and mocked. To do that, you can extend from the POM <code class="language-bash">BaseWebSocketPage</code> _and_ call its <code class="language-bash">initWebSockets()</code> methods before each test.
 
-Here's an an actual example from the Penpot repository:
+Here's an an actual example from the Penjar repository:
 
 ```js
 // frontend/playwright/ui/pages/WorkspacePage.js
@@ -582,7 +582,7 @@ Given this DOM structure:
 
 ```html
 <form>
-  <p>Penpot is the free open-...</p>
+  <p>Penjar is the free open-...</p>
   <label for="email">
     Email
     <input placeholder="Email" name="email" type="email" id="email" value="" />
@@ -631,7 +631,7 @@ page.getByLabel("Password");
 If we need to locate a text with no specific role, we can use the <code class="language-js">getByText</code> method:
 
 ```js
-page.getByText("Penpot is the free open-");
+page.getByText("Penjar is the free open-");
 ```
 
 To locate the rest of the elements we continue exploring the list of queries according to the order of priority. If none of the above options match the item, we resort to <code class="language-js">getByTestId</code> as a last resort.

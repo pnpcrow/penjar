@@ -15,9 +15,9 @@ import sys
 
 log = logging.getLogger(__name__)
 
-class PenpotAPIContentMarkdownConverter(MarkdownConverter):
+class PenjarAPIContentMarkdownConverter(MarkdownConverter):
     """
-    Markdown converter for Penpot API docs, specifically for the .col-content element
+    Markdown converter for Penjar API docs, specifically for the .col-content element
     (and sub-elements thereof)
     """
     def process_tag(self, node, parent_tags=None):
@@ -153,9 +153,9 @@ class YamlConverter:
             self.yaml.dump(processed_data, f)
 
 
-class PenpotAPIDocsProcessor:
+class PenjarAPIDocsProcessor:
     def __init__(self, url: str):
-        self.md_converter = PenpotAPIContentMarkdownConverter()
+        self.md_converter = PenjarAPIContentMarkdownConverter()
         self.base_url = url
         self.types: dict[str, TypeInfo] = {}
         self.type_referenced_by: dict[str, set[str]] = collections.defaultdict(set)
@@ -267,7 +267,7 @@ class PenpotAPIDocsProcessor:
 
 
 LOCAL_API_DOCS_URL = "http://localhost:9090"
-PROD_API_DOCS_URL = "https://doc.plugins.penpot.app"
+PROD_API_DOCS_URL = "https://doc.plugins.penjar.app"
 DEFAULT_API_DOCS_URL = LOCAL_API_DOCS_URL
 
 
@@ -276,7 +276,7 @@ def main():
     url = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_API_DOCS_URL
 
     log.info("Fetching plugin data from: {}".format(url))
-    PenpotAPIDocsProcessor(url).run(target_dir=str(target_dir))
+    PenjarAPIDocsProcessor(url).run(target_dir=str(target_dir))
 
 
 def debug_type_conversion(rel_url: str, base_url: str):
@@ -288,7 +288,7 @@ def debug_type_conversion(rel_url: str, base_url: str):
     :param rel_url: relative URL of the type page (e.g., "interfaces/ShapeBase")
     """
     type_name = rel_url.split("/")[-1].replace(".html", "")
-    processor = PenpotAPIDocsProcessor(url=base_url)
+    processor = PenjarAPIDocsProcessor(url=base_url)
     type_info = processor.process_page(rel_url, type_name)
     print(f"--- overview ---\n{type_info.overview}\n")
     for member_type, members in type_info.members.items():

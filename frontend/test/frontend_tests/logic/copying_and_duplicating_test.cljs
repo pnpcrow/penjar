@@ -24,7 +24,7 @@
 (t/use-fixtures :each
   {:before thp/reset-idmap!})
 
-;; Related .penpot file: common/test/cases/copying-and-duplicating.penpot
+;; Related .penjar file: common/test/cases/copying-and-duplicating.penjar
 (defn- setup-file []
   (-> (cthf/sample-file :file1 :page-label :page-1)
       (ctho/add-simple-component :simple-1 :frame-simple-1 :rect-simple-1 :child-params {:type :rect :fills (cths/sample-fills-color :fill-color "#2152e5") :name "rect-simple-1"})

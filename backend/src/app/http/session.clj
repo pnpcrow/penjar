@@ -160,7 +160,7 @@
 (defn- assign-token
   [cfg session]
   (let [claims {:iss "authentication"
-                :aud "penpot"
+                :aud "penjar"
                 :sid (:id session)
                 :iat (:modified-at session)
                 :uid (:profile-id session)

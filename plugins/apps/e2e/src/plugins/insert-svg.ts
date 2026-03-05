@@ -1,11 +1,11 @@
 export default function () {
   function insertSvg(svg: string) {
-    const icon = penpot.createShapeFromSvg(svg);
+    const icon = penjar.createShapeFromSvg(svg);
 
     if (icon) {
       icon.name = 'Test icon';
-      icon.x = penpot.viewport.center.x;
-      icon.y = penpot.viewport.center.y;
+      icon.x = penjar.viewport.center.x;
+      icon.y = penjar.viewport.center.y;
     }
 
     return icon;

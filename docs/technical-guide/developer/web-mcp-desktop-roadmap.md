@@ -164,3 +164,5 @@ A task is considered complete only when:
 - [Web ↔ MCP Capability Matrix](/technical-guide/developer/web-mcp-capability-matrix/)
 - [Web ↔ MCP Parity Backlog](/technical-guide/developer/web-mcp-parity-backlog/)
 - [Web + MCP Phase A Execution Log](/technical-guide/developer/web-mcp-phase-a-execution-log/)
+- [Web ↔ MCP Auth/Session Recovery Contract](/technical-guide/developer/web-mcp-auth-session-recovery-contract/)
+- [Web + MCP Phase A Ticket Seed](/technical-guide/developer/web-mcp-phase-a-ticket-seed/)

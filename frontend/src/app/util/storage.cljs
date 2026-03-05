@@ -154,10 +154,10 @@
       (-remove-watch [_ key]
         (.delete watches key)))))
 
-(defonce global  (create-storage local-storage-backend "penpot-global"))
-(defonce user    (create-storage local-storage-backend "penpot-user"))
-(defonce storage (create-storage local-storage-backend "penpot"))
-(defonce session (create-storage session-storage-backend "penpot"))
+(defonce global  (create-storage local-storage-backend "penjar-global"))
+(defonce user    (create-storage local-storage-backend "penjar-user"))
+(defonce storage (create-storage local-storage-backend "penjar"))
+(defonce session (create-storage session-storage-backend "penjar"))
 
 (defonce before-unload
   (letfn [(on-before-unload [_]

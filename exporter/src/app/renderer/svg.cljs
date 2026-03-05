@@ -237,7 +237,7 @@
 
           (trace-node [{:keys [data] :as node}]
             (l/trace :fn :trace-node)
-            (p/let [pngpath (sh/tempfile :prefix "penpot.tmp.render.svg.parse."
+            (p/let [pngpath (sh/tempfile :prefix "penjar.tmp.render.svg.parse."
                                          :suffix ".origin.png")
                     _       (sh/write-file! pngpath data)
                     ppmpath (convert-to-ppm pngpath)
@@ -306,7 +306,7 @@
                  :userAgent bw/default-user-agent})
 
           (render-object [page {:keys [id] :as object}]
-            (p/let [path (sh/tempfile :prefix "penpot.tmp.render.svg." :suffix (mime/get-extension type))
+            (p/let [path (sh/tempfile :prefix "penjar.tmp.render.svg." :suffix (mime/get-extension type))
                     node (bw/select page (str/concat "#screenshot-" id))]
               (bw/wait-for node)
               (p/let [xmldata (extract-svg page object)

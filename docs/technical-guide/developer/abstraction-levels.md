@@ -1,11 +1,11 @@
 ---
 title: 3.07. Abstraction levels
-desc: "Penpot Technical Guide: organize data and logic in clear abstraction layers—ADTs, file ops, event-sourced changes, business rules, and data events."
+desc: "Penjar Technical Guide: organize data and logic in clear abstraction layers—ADTs, file ops, event-sourced changes, business rules, and data events."
 ---
 
 # Code organization in abstraction levels
 
-Initially, Penpot data model implementation was organized in a different way.
+Initially, Penjar data model implementation was organized in a different way.
 We are currently in a process of reorganization. The objective is to have data
 manipulation code structured in abstraction layers, with well-defined
 boundaries, and a hierarchical structure (each level may only use same or
@@ -167,7 +167,7 @@ Each structure in this module has:
 >    control of the internal data dependencies, b) easier bug tracking of
 >    corrupted data, and c) easier refactoring when the structure is modified.
 
-Currently most of Penpot code does not follow those requirements, but it
+Currently most of Penjar code does not follow those requirements, but it
 should do in new code or in any refactor.
 
 ## File operations
@@ -325,7 +325,7 @@ has an applied token.
     ▾ workspace/
 ```
 
-This is the intersection of the logic and the presentation in Penpot. Data
+This is the intersection of the logic and the presentation in Penjar. Data
 events belong to the presentation interface and they manage the global state of
 the application. But they may also work on loaded files by using **File** or
 **Abstract Data Types** operations to query the data, and by creating and
@@ -335,7 +335,7 @@ commiting **changes** via the **Business logic** generate functions.
 directly manipulate data structures. They only may modify or query the global
 state, and delegate all logic to lower level functions.
 
-In current Penpot code, there is some quantity of business logic in data events,
+In current Penjar code, there is some quantity of business logic in data events,
 that should be progressively moved elsewhere as we keep refactoring.
 
 ```clojure

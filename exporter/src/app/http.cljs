@@ -171,7 +171,7 @@
         port    (cf/get :http-server-port 6061)]
 
     (.listen server port)
-    (l/info :hint "welcome to penpot"
+    (l/info :hint "welcome to penjar"
             :module "exporter"
             :flags cf/flags
             :version (:full cf/version))

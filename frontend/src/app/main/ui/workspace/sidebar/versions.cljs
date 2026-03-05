@@ -48,7 +48,7 @@
   (let [subscription-type   (get-subscription-type (:subscription team))
         is-owner?           (-> team :permissions :is-owner)
         email-owner         (:email (some #(when (:is-owner %) %) (:members team)))
-        support-email       "support@penpot.app"
+        support-email       "support@penjar.app"
         go-to-subscription  (dm/str (u/join cfg/public-uri "#/settings/subscriptions"))]
 
     (if (contains? cfg/flags :subscriptions)

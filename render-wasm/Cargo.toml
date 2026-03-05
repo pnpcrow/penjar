@@ -2,9 +2,9 @@
 name = "render"
 version = "0.1.0"
 edition = "2021"
-repository = "https://github.com/penpot/penpot"
+repository = "https://github.com/penjar/penjar"
 license-file = "../LICENSE"
-description = "Wasm-based canvas renderer for Penpot"
+description = "Wasm-based canvas renderer for Penjar"
 
 build = "build.rs"
 

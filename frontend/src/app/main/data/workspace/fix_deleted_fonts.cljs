@@ -17,7 +17,7 @@
 ;; This event will update the file so the texts with non existing
 ;; custom fonts try to be fixed. This can happen when:
 ;;
-;; - Exporting/importing files to different teams or penpot instances
+;; - Exporting/importing files to different teams or penjar instances
 ;; - Moving files from one team to another in the same instance
 ;; - Custom fonts are explicitly deleted in the team area
 

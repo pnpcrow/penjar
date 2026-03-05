@@ -1,6 +1,6 @@
 ---
 title: 3.04. Common Guide
-desc: "View Penpot's technical guide: self-hosting, configuration, developer insights, architecture, data model, integration, and troubleshooting."
+desc: "View Penjar's technical guide: self-hosting, configuration, developer insights, architecture, data model, integration, and troubleshooting."
 ---
 
 # Common guide
@@ -15,18 +15,18 @@ Both in the backend, the frontend and the exporter subsystems, there are an
 <code class="language-text">app.config</code> namespace that defines the global configuration variables,
 their specs and the default values.
 
-All variables have a conservative default, meaning that you can set up a Penpot
+All variables have a conservative default, meaning that you can set up a Penjar
 instance without changing any configuration, and it will be reasonably safe
 and useful.
 
 In backend and exporter, to change the runtime values you need to set them in
 the process environment, following the rule that an environment variable in the
-form <code class="language-bash">PENPOT_<VARIABLE_NAME_IN_UPPERCASE></code> correspond to a configuration
+form <code class="language-bash">PENJAR_<VARIABLE_NAME_IN_UPPERCASE></code> correspond to a configuration
 variable named <code class="language-bash">variable-name-in-lowercase</code>. Example:
 
 ```bash
 (env)
-PENPOT_ASSETS_STORAGE_BACKEND=assets-s3
+PENJAR_ASSETS_STORAGE_BACKEND=assets-s3
 
 (config)
 assets-storage-backend :assets-s3
@@ -36,26 +36,26 @@ In frontend, the main <code class="language-text">resources/public/index.html</c
 exists) a file named <code class="language-text">js/config.js</code>, where you can set configuration values
 as javascript global variables. The file is not created by default, so if
 you need it you must create it blank, and set the variables you want, in
-the form <code class="language-bash">penpot\<VariableNameInCamelCase></code>:
+the form <code class="language-bash">penjar\<VariableNameInCamelCase></code>:
 
 ```js
 (js/config.js)
-var penpotPublicURI = "https://penpot.example.com";
+var penjarPublicURI = "https://penjar.example.com";
 
 (config)
-public-uri "https://penpot.example.com"
+public-uri "https://penjar.example.com"
 ```
 
 ### On premise instances
 
-If you use the official Penpot docker images, as explained in the [Getting
-Started](/technical-guide/getting-started/#start-penpot) section, there is a
-[config.env](https://github.com/penpot/penpot/blob/develop/docker/images/config.env)
+If you use the official Penjar docker images, as explained in the [Getting
+Started](/technical-guide/getting-started/#start-penjar) section, there is a
+[config.env](https://github.com/penjar/penjar/blob/develop/docker/images/config.env)
 file that sets the configuration environment variables. It's the same file for
 backend, exporter and frontend.
 
 For this last one, there is a script
-[nginx-entrypoint.sh](https://github.com/penpot/penpot/blob/develop/docker/images/files/nginx-entrypoint.sh)
+[nginx-entrypoint.sh](https://github.com/penjar/penjar/blob/develop/docker/images/files/nginx-entrypoint.sh)
 that reads the environment and generates the <code class="language-text">js/config.js</code> when the container
 is started. This way all configuration is made in the single <code class="language-text">config.env</code> file.
 
@@ -63,12 +63,12 @@ is started. This way all configuration is made in the single <code class="langua
 ### Dev environment
 
 If you use the [developer docker images](/technical-guide/developer/devenv/),
-the [docker-compose.yaml](https://github.com/penpot/penpot/blob/develop/docker/devenv/docker-compose.yaml)
+the [docker-compose.yaml](https://github.com/penjar/penjar/blob/develop/docker/devenv/docker-compose.yaml)
 directly sets the environment variables more appropriate for backend and
 exporter development.
 
-Additionally, the backend [start script](https://github.com/penpot/penpot/blob/develop/backend/scripts/start-dev)
-and [repl script](https://github.com/penpot/penpot/blob/develop/backend/scripts/repl) set
+Additionally, the backend [start script](https://github.com/penjar/penjar/blob/develop/backend/scripts/start-dev)
+and [repl script](https://github.com/penjar/penjar/blob/develop/backend/scripts/repl) set
 some more variables.
 
 The frontend uses only the defaults.
@@ -83,7 +83,7 @@ ignored in git) and define your settings there. Then, just reload the page.
 
 ## System logging
 
-In [app.common.logging](https://github.com/penpot/penpot/blob/develop/common/src/app/common/logging.cljc)
+In [app.common.logging](https://github.com/penjar/penjar/blob/develop/common/src/app/common/logging.cljc)
 we have a general system logging utility, that may be used throughout all our
 code to generate execution traces, mainly for debugging.
 
@@ -131,12 +131,12 @@ The logging utility uses a different library for Clojure and Clojurescript. In
 the first case we use [log4j2](https://logging.apache.org/log4j/2.x) to have
 much flexibility.
 
-The configuration is made in [log4j2.xml](https://github.com/penpot/penpot/blob/develop/backend/resources/log4j2.xml)
+The configuration is made in [log4j2.xml](https://github.com/penjar/penjar/blob/develop/backend/resources/log4j2.xml)
 file. The Logger used for this is named "app" (there are other loggers for
 other subsystems). The default configuration just outputs all traces of level
 <code class="language-clojure">debug</code> or higher to the console standard output.
 
-There is a different [log4j2-devenv](https://github.com/penpot/penpot/blob/develop/backend/resources/log4j2-devenv.xml)
+There is a different [log4j2-devenv](https://github.com/penjar/penjar/blob/develop/backend/resources/log4j2-devenv.xml)
 for the development environment. This one outputs traces of level <code class="language-text">trace</code> or
 higher to a file, and <code class="language-text">debug</code> or higher to a <code class="language-text">zmq</code> queue, that may be
 subscribed for other parts of the application for further processing.
@@ -175,7 +175,7 @@ debug.set_logging("namespace", "level")
 
 ## Assertions
 
-Penpot source code has this types of assertions:
+Penjar source code has this types of assertions:
 
 ### **assert**
 
@@ -197,7 +197,7 @@ Using the <code class="language-text">app.common.spec/assert</code> macro.
 This macro is based in <code class="language-text">cojure.spec.alpha/assert</code> macro, and it's
 also ignored in a production environment.
 
-The Penpot variant doesn't have any runtime checks to know if asserts
+The Penjar variant doesn't have any runtime checks to know if asserts
 are disabled. Instead, the assert calls are completely removed by the
 compiler/runtime, thus generating simpler and faster code in production
 builds.
@@ -231,7 +231,7 @@ appropriately).
 
 ## Unit tests
 
-We expect all Penpot code (either in frontend, backend or common subsystems) to
+We expect all Penjar code (either in frontend, backend or common subsystems) to
 have unit tests, i.e. the ones that test a single unit of code, in isolation
 from other blocks. Currently we are quite far from that objective, but we are
 working to improve this.
@@ -292,7 +292,7 @@ of brackets <code class="language-bash">[ ]</code> for each suite, a pair of par
 and a dot <code class="language-bash">.</code> for each assertion <code class="language-bash">t/is</code> inside tests.
 
 ```bash
-penpot@c261c95d4623:~/penpot/common$ clojure -M:dev:test
+penjar@c261c95d4623:~/penjar/common$ clojure -M:dev:test
 [(...)(............................................................
 .............................)(....................................
 ..)(..........)(.................................)(.)(.............
@@ -350,7 +350,7 @@ and runs all tests or a selection. It is defined in <code class="language-bash">
 First start a REPL:
 
 ```bash
-~/penpot/backend$ scripts/repl
+~/penjar/backend$ scripts/repl
 ```
 
 And then:
@@ -379,7 +379,7 @@ Clojure, that we follow as much as possible.
 
 #### Sample files helpers
 
-An important issue when writing tests in Penpot is to have files with the
+An important issue when writing tests in Penjar is to have files with the
 specific configurations we need to test. For this, we have defined a namespace
 of helpers to easily create files and its elements with sample data.
 

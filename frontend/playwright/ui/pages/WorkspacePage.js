@@ -131,7 +131,7 @@ export class WorkspacePage extends BaseWebSocketPage {
       "get-team?id=*": "workspace/get-team-default.json",
       "get-teams": "get-teams.json",
       "get-team-members?team-id=*":
-        "logged-in-user/get-team-members-your-penpot.json",
+        "logged-in-user/get-team-members-your-penjar.json",
       "get-profiles-for-file-comments?file-id=*":
         "workspace/get-profile-for-file-comments.json",
       "update-profile-props": "workspace/update-profile-empty.json",

@@ -346,9 +346,9 @@
 
     (mf/with-effect []
       (handle-canvas-changed)
-      (.addEventListener ug/document "penpot:wasm:render" handle-canvas-changed)
+      (.addEventListener ug/document "penjar:wasm:render" handle-canvas-changed)
       (fn []
-        (.removeEventListener ug/document "penpot:wasm:render" handle-canvas-changed)))
+        (.removeEventListener ug/document "penjar:wasm:render" handle-canvas-changed)))
 
     (mf/use-effect
      (mf/deps viewport-node canvas canvas-image-data zoom-view-context)

@@ -222,7 +222,7 @@
          ;; Resolve gradient href references in all defs before processing shapes
          def-nodes (resolve-gradient-href def-nodes)
 
-         ;; In penpot groups have the size of their children. To
+         ;; In penjar groups have the size of their children. To
          ;; respect the imported svg size and empty space let's create
          ;; a transparent shape as background to respect the imported
          ;; size

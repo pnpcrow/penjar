@@ -26,8 +26,8 @@ on:
 jobs:
   test:
     name: "Test"
-    runs-on: penpot-runner-02
-    container: penpotapp/devenv:latest
+    runs-on: penjar-runner-02
+    container: penjarapp/devenv:latest
 
     steps:
       - name: Checkout code

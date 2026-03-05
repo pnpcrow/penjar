@@ -132,7 +132,7 @@
               data))
 
           (process-chunks [chunks]
-            (let [tmp     (tmp/tempfile :prefix "penpot.tempfont." :suffix "")
+            (let [tmp     (tmp/tempfile :prefix "penjar.tempfont." :suffix "")
                   streams (map io/input-stream chunks)
                   streams (Collections/enumeration streams)]
               (with-open [^OutputStream output (io/output-stream tmp)

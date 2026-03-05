@@ -1,11 +1,11 @@
 ---
 title: 1.4 Install with Kubernetes
-desc: Learn how to install and configure Penpot on your Kubernetes cluster using Helm. Our technical guide provides step-by-step instructions for setup.
+desc: Learn how to install and configure Penjar on your Kubernetes cluster using Helm. Our technical guide provides step-by-step instructions for setup.
 ---
 
 # Install with Kubernetes
 
-This section details everything you need to know to get Penpot up and running in
+This section details everything you need to know to get Penjar up and running in
 production environments using a Kubernetes cluster of your choice. To do this, we have
 created a <a href="https://helm.sh/" target="_blank">Helm</a> repository with everything
 you need.
@@ -46,24 +46,24 @@ There are different ways to install Helm, depending on your infrastructure and o
 system.
 
 
-## Add Penpot repository
+## Add Penjar repository
 
-To add the Penpot Helm repository, run the following command:
+To add the Penjar Helm repository, run the following command:
 
 ```bash
-helm repo add penpot http://helm.penpot.app
+helm repo add penjar http://helm.penjar.app
 ```
 
-This will add the Penpot repository to your Helm configuration, so you can install all
-the Penpot charts stored there.
+This will add the Penjar repository to your Helm configuration, so you can install all
+the Penjar charts stored there.
 
 
-## Install Penpot Chart
+## Install Penjar Chart
 
 To install the chart with the release name `my-release`:
 
 ```bash
-helm install my-release penpot/penpot
+helm install my-release penjar/penjar
 ```
 
 You can customize the installation by specifying each parameter using the `--set key=value[,key=value]`
@@ -74,47 +74,47 @@ helm install my-release \
   --set global.postgresqlEnabled=true \
   --set global.valkeyEnabled=true \
   --set persistence.assets.enabled=true \
-  penpot/penpot
+  penjar/penjar
 ```
 
 Alternatively, a YAML file that specifies the values for the above parameters can be
 provided while installing the chart. For example,
 
 ```bash
-helm install my-release -f values.yaml penpot/penpot
+helm install my-release -f values.yaml penjar/penjar
 ```
 
-## Configure Penpot with Helm Chart
+## Configure Penjar with Helm Chart
 
-In the previous section we have shown how to configure penpot during installation by
+In the previous section we have shown how to configure penjar during installation by
 using parameters or by using a yaml file.
 
 The default values are defined in the
-<a href="https://github.com/penpot/penpot-helm/blob/main/charts/penpot/values.yaml" target="_blank">`values.yml`</a>
+<a href="https://github.com/penjar/penjar-helm/blob/main/charts/penjar/values.yaml" target="_blank">`values.yml`</a>
 file itself, which you can use as a basis for creating your own settings.
 
 You can also consult the list of parameters on the
-<a href="https://artifacthub.io/packages/helm/penpot/penpot#parameters" target="_blank">ArtifactHub page of the project</a>.
+<a href="https://artifacthub.io/packages/helm/penjar/penjar#parameters" target="_blank">ArtifactHub page of the project</a>.
 
 ### Using OpenShift?
 
-If you are deploying Penpot on OpenShift, we recommend following the specific guidelines provided in our Penpot-helm documentation:
-<a href="https://artifacthub.io/packages/helm/penpot/penpot#-openshift-requirements" target="_blank">Installing the chart with OpenShift requirements</a>.
+If you are deploying Penjar on OpenShift, we recommend following the specific guidelines provided in our Penjar-helm documentation:
+<a href="https://artifacthub.io/packages/helm/penjar/penjar#-openshift-requirements" target="_blank">Installing the chart with OpenShift requirements</a>.
 
 Make sure to review the section **OpenShift Requirements** for important security and compatibility considerations.
 
 ### Using Rancher?
 
-If you are deploying Penpot on Rancher, we recommend following the specific guidelines provided in the official documentation:
-<a href="https://docs.apps.rancher.io/reference-guides/penpot/" target="_blank">Reference guides / Penpot</a>.
+If you are deploying Penjar on Rancher, we recommend following the specific guidelines provided in the official documentation:
+<a href="https://docs.apps.rancher.io/reference-guides/penjar/" target="_blank">Reference guides / Penjar</a>.
 
-## Upgrade Penpot
+## Upgrade Penjar
 
-When a new version of Penpot's chart is released, or when you want to change the
+When a new version of Penjar's chart is released, or when you want to change the
 configuration of your release, you can use the helm upgrade command.
 
 ```bash
-helm upgrade my-release -f values.yaml penpot/penpot
+helm upgrade my-release -f values.yaml penjar/penjar
 ```
 
 An upgrade takes an existing release and upgrades it according to the information you
@@ -128,9 +128,9 @@ if something went wrong with `helm rollback my-release 1` (`1` is the revision n
 the previous release revision).
 
 
-## Backup Penpot
+## Backup Penjar
 
-The Penpot's Helm Chart uses different Persistent Volumes to store all persistent data.
+The Penjar's Helm Chart uses different Persistent Volumes to store all persistent data.
 This allows you to delete and recreate the instance whenever you want without losing
 information.
 

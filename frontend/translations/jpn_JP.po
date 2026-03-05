@@ -3,7 +3,7 @@ msgstr ""
 "PO-Revision-Date: 2024-09-26 15:15+0000\n"
 "Last-Translator: Tatsuto Yamamoto <me@laminne33569.net>\n"
 "Language-Team: Japanese "
-"<https://hosted.weblate.org/projects/penpot/frontend/ja/>\n"
+"<https://hosted.weblate.org/projects/penjar/frontend/ja/>\n"
 "Language: jpn_JP\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -22,7 +22,7 @@ msgstr "メールを確認してください"
 #: src/app/main/ui/auth/register.cljs:277
 #, unused
 msgid "auth.check-your-email"
-msgstr "Penpotを使う前にメールのリンクをクリックして、メールアドレスを認証してください。"
+msgstr "Penjarを使う前にメールのリンクをクリックして、メールアドレスを認証してください。"
 
 #: src/app/main/ui/auth/recovery.cljs:67
 msgid "auth.confirm-password"
@@ -166,7 +166,7 @@ msgstr "公開"
 
 #: src/app/main/ui/viewer/share_link.cljs:304, src/app/main/ui/viewer/share_link.cljs:315
 msgid "common.share-link.all-users"
-msgstr "すべてのPenpotユーザー"
+msgstr "すべてのPenjarユーザー"
 
 #: src/app/main/ui/viewer/share_link.cljs:204
 msgid "common.share-link.confirm-deletion-link-description"
@@ -264,7 +264,7 @@ msgstr "チームを新規作成"
 
 #: src/app/main/ui/components/context_menu_a11y.cljs:300, src/app/main/ui/dashboard/sidebar.cljs:638
 msgid "dashboard.default-team-name"
-msgstr "あなたのPenpot"
+msgstr "あなたのPenjar"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:495
 msgid "dashboard.delete-team"
@@ -272,7 +272,7 @@ msgstr "チームを削除"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:328, src/app/main/ui/workspace/main_menu.cljs:690
 msgid "dashboard.download-binary-file"
-msgstr "Penpotファイル(.penpot)をダウンロード"
+msgstr "Penjarファイル(.penjar)をダウンロード"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:321, src/app/main/ui/workspace/main_menu.cljs:712
 #, unused
@@ -310,11 +310,11 @@ msgstr "すべてアップロード"
 
 #: src/app/main/ui/dashboard/import.cljs:464, src/app/main/ui/dashboard/project_menu.cljs:109
 msgid "dashboard.import"
-msgstr "Penpotをインポート"
+msgstr "Penjarをインポート"
 
 #: src/app/main/ui/dashboard/import.cljs:293, src/app/worker/import.cljs:121, src/app/worker/import.cljs:124
 msgid "dashboard.import.analyze-error"
-msgstr "Penpotファイルをインポート"
+msgstr "Penjarファイルをインポート"
 
 #: src/app/main/ui/dashboard/import.cljs:128
 msgid "dashboard.import.progress.process-colors"
@@ -518,8 +518,8 @@ msgid "dashboard.your-name"
 msgstr "名前"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:40, src/app/main/ui/dashboard/fonts.cljs:42, src/app/main/ui/dashboard/libraries.cljs:56, src/app/main/ui/dashboard/projects.cljs:355, src/app/main/ui/dashboard/search.cljs:48, src/app/main/ui/dashboard/sidebar.cljs:312, src/app/main/ui/dashboard/team.cljs:537, src/app/main/ui/dashboard/team.cljs:983, src/app/main/ui/dashboard/team.cljs:1251, src/app/main/ui/dashboard/team.cljs:1298
-msgid "dashboard.your-penpot"
-msgstr "あなたのPenpot"
+msgid "dashboard.your-penjar"
+msgstr "あなたのPenjar"
 
 #: src/app/main/ui/comments.cljs:674, src/app/main/ui/confirm.cljs:37, src/app/main/ui/settings/subscription.cljs:273, src/app/main/ui/settings/subscription.cljs:306, src/app/main/ui/workspace/plugins.cljs:334, src/app/main/ui/workspace/plugins.cljs:388
 msgid "ds.confirm-cancel"
@@ -640,7 +640,7 @@ msgstr "記述"
 
 #: src/app/main/ui/settings/feedback.cljs:149
 msgid "feedback.discourse-title"
-msgstr "Penpot コミュニティ"
+msgstr "Penjar コミュニティ"
 
 #: src/app/main/ui/settings/feedback.cljs:105
 msgid "feedback.subject"

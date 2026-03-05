@@ -30,7 +30,7 @@
                 ;; but we still want to resolve the value to show in the form.
                 ;; So we use a temporary token name that hopefully doesn't clash with any of the users token names
                 (not (sm/valid? cto/schema:token-name (:name token)))
-                (assoc :name "__PENPOT__TOKEN__NAME__PLACEHOLDER__"))
+                (assoc :name "__PENJAR__TOKEN__NAME__PLACEHOLDER__"))
         tokens' (cond-> tokens
                   ;; Remove previous token when renaming a token
                   (not= (:name token) (:name prev-token))
@@ -46,7 +46,7 @@
           (fn [resolved-tokens]
             (let [resolved-token (cond-> (get resolved-tokens (:name token))
                                    (contains? cf/flags :tokenscript)
-                                   (update :resolved-value ts/tokenscript-symbols->penpot-unit))]
+                                   (update :resolved-value ts/tokenscript-symbols->penjar-unit))]
               (cond
                 (:resolved-value resolved-token)
                 (rx/of resolved-token)

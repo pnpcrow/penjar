@@ -23,25 +23,25 @@
         [:img {:src "images/features/2.4-slide-0.jpg"
                :class (stl/css :start-image)
                :border "0"
-               :alt "A graphic illustration with Penpot style"}]
+               :alt "A graphic illustration with Penjar style"}]
 
         [:div {:class (stl/css :modal-content)}
          [:div {:class (stl/css :modal-header)}
           [:h1 {:class (stl/css :modal-title)}
-           "What’s new in Penpot?"]
+           "What’s new in Penjar?"]
 
           [:div {:class (stl/css :version-tag)}
            (dm/str "Version " version)]]
 
          [:div {:class (stl/css :features-block)}
           [:span {:class (stl/css :feature-title)}
-           "At Penpot we are at full speed!"]
+           "At Penjar we are at full speed!"]
 
           [:p  {:class (stl/css :feature-content)}
            "With the release of the long-awaited Plugins System still fresh, this 2.4 brings improvements in a wide range of areas that will serve a variety of use cases."]
 
           [:p  {:class (stl/css :feature-content)}
-           "This release combines some of the most requested features—such as versioning and the viewer-only role—with performance improvements and a new .penpot format that will streamline the export of files and assets."]
+           "This release combines some of the most requested features—such as versioning and the viewer-only role—with performance improvements and a new .penjar format that will streamline the export of files and assets."]
 
           [:p  {:class (stl/css :feature-content)}
            "Let’s dive in!"]]
@@ -125,7 +125,7 @@
            "New export format: fast and open"]]
          [:div {:class (stl/css :feature)}
           [:p {:class (stl/css :feature-content)}
-           "The new .penpot format will streamline the import and export of files and assets by being more efficient and interoperable."]
+           "The new .penjar format will streamline the import and export of files and assets by being more efficient and interoperable."]
           [:p {:class (stl/css :feature-content)}
            "This format replaces the previous two—so no more choosing between them or accidentally picking the wrong one! It's better for both scenarios: if you just need to import or export files quickly, it’ll be a bit faster. And if you want to extract data (like a list of color assets), this new format is much easier to read."]]
 

@@ -7,7 +7,7 @@ jobs:
   build-and-push:
     name: Build and push DevEnv Docker image
     environment: release-admins
-    runs-on: penpot-runner-02
+    runs-on: penjar-runner-02
 
     steps:
       - name: Set common environment variables
@@ -30,7 +30,7 @@ jobs:
       - name: Build and push DevEnv Docker image
         uses: docker/build-push-action@v6
         env:
-          DOCKER_IMAGE: 'penpotapp/devenv'
+          DOCKER_IMAGE: 'penjarapp/devenv'
         with:
           context: ./docker/devenv/
           file: ./docker/devenv/Dockerfile

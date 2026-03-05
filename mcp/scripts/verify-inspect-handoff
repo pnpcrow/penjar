@@ -1,0 +1,335 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SERVER_DIR="$PROJECT_ROOT/packages/server"
+
+HEALTH_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/health"
+MCP_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/mcp"
+WS_URL="ws://127.0.0.1:${PENJAR_MCP_WEBSOCKET_PORT:-4402}"
+
+TMP_BASE="${TMPDIR:-/tmp}"
+SERVER_LOG="$TMP_BASE/penjar-mcp-inspect-handoff-$$.log"
+SERVER_PID=""
+
+log_step() {
+    printf "\n[INSPECT-CHECK] %s\n" "$1"
+}
+
+cleanup() {
+    if [ -n "$SERVER_PID" ] && kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+        kill "$SERVER_PID" >/dev/null 2>&1 || true
+        wait "$SERVER_PID" >/dev/null 2>&1 || true
+    fi
+
+    rm -f "$SERVER_LOG"
+}
+
+trap cleanup EXIT
+
+if [ "${VERIFY_INSPECT_SKIP_BUILD:-false}" = "true" ]; then
+    log_step "Skip build step (VERIFY_INSPECT_SKIP_BUILD=true)"
+else
+    log_step "Build required packages for inspect handoff probe"
+    cd "$PROJECT_ROOT"
+    pnpm --filter mcp-common run build
+    pnpm --filter mcp-server run build
+fi
+
+log_step "Start MCP server (single-user)"
+cd "$SERVER_DIR"
+node dist/index.js >"$SERVER_LOG" 2>&1 &
+SERVER_PID="$!"
+
+log_step "Wait for /health endpoint"
+for _ in $(seq 1 20); do
+    if curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+done
+
+if ! curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+    echo "[INSPECT-CHECK][FAIL] server did not become healthy."
+    echo "[INSPECT-CHECK][INFO] Server log:"
+    cat "$SERVER_LOG"
+    exit 1
+fi
+
+log_step "Run inspect_handoff E2E probe with fake plugin session"
+node --input-type=module - "$MCP_URL" "$WS_URL" <<'EOF_JS'
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
+import WebSocket from "ws";
+
+const [mcpUrl, wsUrl] = process.argv.slice(2);
+let observedScenarios = new Set();
+
+const ws = new WebSocket(wsUrl);
+await new Promise((resolve, reject) => {
+  ws.once("open", resolve);
+  ws.once("error", reject);
+});
+
+ws.on("message", (payload) => {
+  try {
+    const request = JSON.parse(payload.toString());
+    if (!request || typeof request !== "object" || request.task !== "executeCode" || !request.id) {
+      return;
+    }
+
+    const code = request.params?.code ?? "";
+    if (typeof code === "string" && code.includes("inspect_handoff_operation: extract")) {
+      if (
+        code.includes('const scope = "selection";') &&
+        code.includes("const includeCss = true;") &&
+        code.includes("const maxDepth = 2;")
+      ) {
+        observedScenarios.add("selection_scope");
+        ws.send(
+          JSON.stringify({
+            id: request.id,
+            success: true,
+            data: {
+              result: {
+                operation: "inspect_handoff",
+                scope: "selection",
+                hierarchy: [{ id: "shape-1", name: "Button", type: "rectangle", children: [] }],
+                layoutSemantics: { maxDepth: 2, targetCount: 1, fallbackUsed: false },
+                style: ".button { display:flex; }",
+                tokenHints: ["color.primary", "spacing.sm"],
+              },
+              log: "",
+            },
+          })
+        );
+        return;
+      }
+
+      if (
+        code.includes('const scope = "page";') &&
+        code.includes("const includeCss = false;") &&
+        code.includes("const maxDepth = 4;")
+      ) {
+        observedScenarios.add("page_scope_no_css");
+        ws.send(
+          JSON.stringify({
+            id: request.id,
+            success: true,
+            data: {
+              result: {
+                operation: "inspect_handoff",
+                scope: "page",
+                hierarchy: [{ id: "page-root", name: "Page Root", type: "group", children: [] }],
+                layoutSemantics: { maxDepth: 4, targetCount: 1, fallbackUsed: false },
+                style: null,
+                tokenHints: [],
+              },
+              log: "",
+            },
+          })
+        );
+        return;
+      }
+
+      if (
+        code.includes('const scope = "selection";') &&
+        code.includes("const includeCss = false;") &&
+        code.includes("const maxDepth = 3;")
+      ) {
+        observedScenarios.add("selection_fallback_no_css");
+        ws.send(
+          JSON.stringify({
+            id: request.id,
+            success: true,
+            data: {
+              result: {
+                operation: "inspect_handoff",
+                scope: "selection",
+                hierarchy: [{ id: "page-root", name: "Page Root", type: "group", children: [] }],
+                layoutSemantics: { maxDepth: 3, targetCount: 1, fallbackUsed: true },
+                style: null,
+                tokenHints: ["fallback.selection.empty"],
+              },
+              log: "",
+            },
+          })
+        );
+        return;
+      }
+
+      if (code.includes('const scope = "selection";') && code.includes("const maxDepth = 1;")) {
+        observedScenarios.add("resource_not_found");
+        ws.send(
+          JSON.stringify({
+            id: request.id,
+            success: false,
+            error: "Inspect target was not found.",
+          })
+        );
+        return;
+      }
+
+      ws.send(JSON.stringify({ id: request.id, success: false, error: "Unknown inspect scenario payload" }));
+      return;
+    }
+
+    ws.send(JSON.stringify({ id: request.id, success: false, error: "Unknown inspect payload" }));
+  } catch {
+    // ignore malformed probe payloads
+  }
+});
+
+const client = new Client({ name: "inspect-handoff-check", version: "1.0.0" }, { capabilities: {} });
+const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
+
+async function callToolText(name, args) {
+  const result = await client.request(
+    {
+      method: "tools/call",
+      params: {
+        name,
+        arguments: args,
+      },
+    },
+    CallToolResultSchema
+  );
+
+  return result.content.find((item) => item.type === "text")?.text ?? "";
+}
+
+async function callToolJson(name, args) {
+  const text = await callToolText(name, args);
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(`Tool ${name} returned non-JSON payload: ${text}`);
+  }
+}
+
+function assertHierarchyNode(node, path) {
+  if (!node || typeof node !== "object") {
+    throw new Error(`Hierarchy node at ${path} must be an object: ${JSON.stringify(node)}`);
+  }
+  if (typeof node.id !== "string" || node.id.length === 0) {
+    throw new Error(`Hierarchy node id at ${path} must be a non-empty string: ${JSON.stringify(node)}`);
+  }
+  if (typeof node.type !== "string" || node.type.length === 0) {
+    throw new Error(`Hierarchy node type at ${path} must be a non-empty string: ${JSON.stringify(node)}`);
+  }
+  if (!Array.isArray(node.children)) {
+    throw new Error(`Hierarchy node children at ${path} must be an array: ${JSON.stringify(node)}`);
+  }
+
+  node.children.forEach((child, index) => assertHierarchyNode(child, `${path}.children[${index}]`));
+}
+
+function assertInspectPayloadContract(payload, expectation) {
+  if (!payload || typeof payload !== "object") {
+    throw new Error(`inspect payload must be an object: ${JSON.stringify(payload)}`);
+  }
+  if (payload.operation !== "inspect_handoff") {
+    throw new Error(`inspect payload operation mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (payload.scope !== expectation.scope) {
+    throw new Error(`inspect payload scope mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (!Array.isArray(payload.hierarchy) || payload.hierarchy.length === 0) {
+    throw new Error(`inspect payload hierarchy mismatch: ${JSON.stringify(payload)}`);
+  }
+  payload.hierarchy.forEach((node, index) => assertHierarchyNode(node, `hierarchy[${index}]`));
+
+  const semantics = payload.layoutSemantics;
+  if (!semantics || typeof semantics !== "object") {
+    throw new Error(`inspect payload layoutSemantics missing: ${JSON.stringify(payload)}`);
+  }
+  if (semantics.maxDepth !== expectation.maxDepth) {
+    throw new Error(`inspect payload maxDepth mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (typeof semantics.targetCount !== "number" || semantics.targetCount < 0) {
+    throw new Error(`inspect payload targetCount mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (typeof semantics.fallbackUsed !== "boolean" || semantics.fallbackUsed !== expectation.fallbackUsed) {
+    throw new Error(`inspect payload fallbackUsed mismatch: ${JSON.stringify(payload)}`);
+  }
+
+  if (!Array.isArray(payload.tokenHints) || payload.tokenHints.some((hint) => typeof hint !== "string")) {
+    throw new Error(`inspect payload tokenHints mismatch: ${JSON.stringify(payload)}`);
+  }
+
+  if (expectation.expectCss) {
+    if (typeof payload.style !== "string" || payload.style.length === 0) {
+      throw new Error(`inspect payload style (css expected) mismatch: ${JSON.stringify(payload)}`);
+    }
+  } else if (payload.style !== null) {
+    throw new Error(`inspect payload style expected to be null: ${JSON.stringify(payload)}`);
+  }
+}
+
+try {
+  await client.connect(transport);
+
+  const selectionPayload = await callToolJson("inspect_handoff", {
+    scope: "selection",
+    includeCss: true,
+    maxDepth: 2,
+  });
+  assertInspectPayloadContract(selectionPayload, {
+    scope: "selection",
+    maxDepth: 2,
+    expectCss: true,
+    fallbackUsed: false,
+  });
+
+  const pagePayload = await callToolJson("inspect_handoff", {
+    scope: "page",
+    includeCss: false,
+    maxDepth: 4,
+  });
+  assertInspectPayloadContract(pagePayload, {
+    scope: "page",
+    maxDepth: 4,
+    expectCss: false,
+    fallbackUsed: false,
+  });
+
+  const fallbackSelectionPayload = await callToolJson("inspect_handoff", {
+    scope: "selection",
+    includeCss: false,
+    maxDepth: 3,
+  });
+  assertInspectPayloadContract(fallbackSelectionPayload, {
+    scope: "selection",
+    maxDepth: 3,
+    expectCss: false,
+    fallbackUsed: true,
+  });
+
+  const notFoundText = await callToolText("inspect_handoff", {
+    scope: "selection",
+    includeCss: true,
+    maxDepth: 1,
+  });
+  if (!notFoundText.includes("[Diagnostic RESOURCE_NOT_FOUND]")) {
+    throw new Error(`Expected resource not found diagnostic, got: ${notFoundText}`);
+  }
+
+  const requiredScenarios = ["selection_scope", "page_scope_no_css", "selection_fallback_no_css", "resource_not_found"];
+  for (const scenario of requiredScenarios) {
+    if (!observedScenarios.has(scenario)) {
+      throw new Error(`Expected inspect probe scenario ${scenario} to be observed.`);
+    }
+  }
+
+  console.log("[INSPECT-CHECK] Verified inspect_handoff tool flow + scope/diagnostic scenarios");
+} finally {
+  await transport.close();
+  ws.close();
+  await new Promise((resolve) => ws.once("close", resolve));
+}
+EOF_JS
+
+log_step "Inspect handoff probe passed"

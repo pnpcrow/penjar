@@ -78,7 +78,7 @@
 (def ^:private exit-icon
   (deprecated-icon/icon-xref :exit (stl/css :exit-icon)))
 
-(def ^:private ^:svg-id penpot-logo-icon "penpot-logo-icon")
+(def ^:private ^:svg-id penjar-logo-icon "penjar-logo-icon")
 
 (mf/defc sidebar-project*
   {::mf/private true}
@@ -146,7 +146,7 @@
         (mf/use-fn
          (mf/deps selected-project)
          (fn [e]
-           (when (dnd/has-type? e "penpot/files")
+           (when (dnd/has-type? e "penjar/files")
              (dom/prevent-default e)
              (when-not (dnd/from-child? e)
                (when (not= selected-project (:id item))
@@ -155,7 +155,7 @@
         on-drag-over
         (mf/use-fn
          (fn [e]
-           (when (dnd/has-type? e "penpot/files")
+           (when (dnd/has-type? e "penjar/files")
              (dom/prevent-default e))))
 
         on-drag-leave
@@ -312,9 +312,9 @@
        [:> dropdown-menu-item* {:on-click    on-team-click
                                 :data-value  (:default-team-id profile)
                                 :class       (stl/css :team-dropdown-item)}
-        [:span {:class (stl/css :penpot-icon)} deprecated-icon/logo-icon]
+        [:span {:class (stl/css :penjar-icon)} deprecated-icon/logo-icon]
 
-        [:span {:class (stl/css :team-text)} (tr "dashboard.your-penpot")]
+        [:span {:class (stl/css :team-text)} (tr "dashboard.your-penjar")]
         (when (= (:default-team-id profile) (:id team))
           tick-icon)])
 
@@ -552,9 +552,9 @@
              (st/emit! (dnt/show-nitrate-popup :nitrate-form)))))]
     (if empty?
       [:div {:class (stl/css :nitrate-orgs-empty)}
-       [:span {:class (stl/css :nitrate-penpot-icon)}
-        [:> raw-svg* {:id penpot-logo-icon}]]
-       "Penpot"
+       [:span {:class (stl/css :nitrate-penjar-icon)}
+        [:> raw-svg* {:id penjar-logo-icon}]]
+       "Penjar"
        [:> button* {:variant "ghost"
                     :type "button"
                     :class (stl/css :nitrate-create-org)
@@ -660,7 +660,7 @@
        (cond
          (:is-default team)
          [:div {:class (stl/css :team-name)}
-          [:span {:class (stl/css :penpot-icon)} deprecated-icon/logo-icon]
+          [:span {:class (stl/css :penjar-icon)} deprecated-icon/logo-icon]
           [:span {:class (stl/css :team-text)} (tr "dashboard.default-team-name")]]
 
          (and (contains? cf/flags :subscriptions)
@@ -910,22 +910,22 @@
                         :on-close on-close}
 
      [:> dropdown-menu-item* {:class (stl/css :submenu-item)
-                              :data-url "https://help.penpot.app"
+                              :data-url "https://help.penjar.app"
                               :on-click handle-click-url
                               :data-eventname "explore-help-center-click"}
       (tr "labels.help-center")]
 
      [:> dropdown-menu-item* {:class (stl/css :submenu-item)
-                              :data-url "https://penpot.app/learning-center"
+                              :data-url "https://penjar.app/learning-center"
                               :on-click handle-click-url
                               :data-eventname "explore-learning-center-click"}
       (tr "labels.learning-center")]
 
      [:> dropdown-menu-item* {:class (stl/css :submenu-item)
-                              :data-url "https://penpot.app/penpothub"
+                              :data-url "https://penjar.app/penjarhub"
                               :on-click handle-click-url
-                              :data-eventname "explore-penpot-hub-click"}
-      (tr "labels.penpot-hub")]
+                              :data-eventname "explore-penjar-hub-click"}
+      (tr "labels.penjar-hub")]
 
      (when (contains? cf/flags :user-feedback)
        [:> dropdown-menu-item* {:class (stl/css :submenu-item)
@@ -952,18 +952,18 @@
                         :on-close on-close}
 
      [:> dropdown-menu-item* {:class (stl/css :submenu-item)
-                              :data-url "https://github.com/penpot/penpot"
+                              :data-url "https://github.com/penjar/penjar"
                               :on-click handle-click-url
                               :data-eventname "explore-github-repository-click"}
       (tr "labels.github-repo")]
 
      [:> dropdown-menu-item* {:class (stl/css :submenu-item)
-                              :data-url "https://community.penpot.app"
+                              :data-url "https://community.penjar.app"
                               :on-click handle-click-url
                               :data-eventname "explore-community-click"}
       (tr "labels.community")]]))
 
-(mf/defc about-penpot-menu*
+(mf/defc about-penjar-menu*
   {::mf/props :obj
    ::mf/private true}
   [{:keys [on-close]}]
@@ -996,13 +996,13 @@
       (tr "labels.version-notes" (:base version))]
 
      [:> dropdown-menu-item* {:class (stl/css :submenu-item)
-                              :data-url "https://github.com/penpot/penpot/blob/develop/CHANGES.md"
+                              :data-url "https://github.com/penjar/penjar/blob/develop/CHANGES.md"
                               :on-click handle-click-url
                               :data-eventname "explore-changelog-click"}
-      (tr "labels.penpot-changelog")]
+      (tr "labels.penjar-changelog")]
 
      [:> dropdown-menu-item* {:class (stl/css :submenu-item)
-                              :data-url "https://penpot.app/terms"
+                              :data-url "https://penjar.app/terms"
                               :on-click handle-click-url
                               :data-eventname "explore-terms-service-click"}
       (tr "auth.terms-of-service")]]))
@@ -1082,7 +1082,7 @@
         (mf/use-fn
          (fn []
            (st/emit! (ptk/event ::ev/event {::ev/name "explore-pricing-click" ::ev/origin "dashboard" :section "sidebar"}))
-           (dom/open-new-window "https://penpot.app/pricing")))]
+           (dom/open-new-window "https://penjar.app/pricing")))]
 
     [:*
      (if (contains? cf/flags :nitrate)
@@ -1097,8 +1097,8 @@
      (when (contains? cf/flags :subscriptions-old)
        [:button {:class (stl/css :upgrade-plan-section)
                  :on-click on-power-up-click}
-        [:div {:class (stl/css :penpot-free)}
-         [:span (tr "dashboard.upgrade-plan.penpot-free")]
+        [:div {:class (stl/css :penjar-free)}
+         [:span (tr "dashboard.upgrade-plan.penjar-free")]
          [:span {:class (stl/css :no-limits)}
           (tr "dashboard.upgrade-plan.no-limits")]]
         [:div {:class (stl/css :power-up)}
@@ -1163,11 +1163,11 @@
                                                (when (kbd/enter? event)
                                                  (on-menu-click event)))
                                 :on-pointer-enter on-menu-click
-                                :data-testid "about-penpot"
-                                :id          "about-penpot"}
+                                :data-testid "about-penjar"
+                                :id          "about-penjar"}
 
-        [:div {:class (stl/css :about-penpot)}
-         [:span {:class (stl/css :item-name)} (tr "labels.about-penpot")]
+        [:div {:class (stl/css :about-penjar)}
+         [:span {:class (stl/css :item-name)} (tr "labels.about-penjar")]
          [:span {:class (stl/css :menu-version) :title version} version]]
         [:> icon* {:icon-id i/arrow :class (stl/css :open-arrow)}]]
 
@@ -1192,8 +1192,8 @@
          :community-contributions
          [:> community-contributions-menu* {:on-close close-sub-menu}]
 
-         :about-penpot
-         [:> about-penpot-menu* {:on-close close-sub-menu}]
+         :about-penjar
+         [:> about-penjar-menu* {:on-close close-sub-menu}]
          nil))]))
 
 (mf/defc sidebar*

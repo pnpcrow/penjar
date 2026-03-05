@@ -1,6 +1,6 @@
-# Penpot MCP Server
+# Penjar MCP Server
 
-A Model Context Protocol (MCP) server that provides Penpot integration
+A Model Context Protocol (MCP) server that provides Penjar integration
 capabilities for AI clients supporting the model context protocol (MCP).
 
 ## Setup
@@ -26,7 +26,7 @@ and remediation hints for common bridge failures.
 HTTP status remains `200`; consume the payload `status` field to detect degraded bridge state.
 
 
-## Penpot Plugin API REPL
+## Penjar Plugin API REPL
 
-The MCP server includes a REPL interface for testing Penpot Plugin API calls.
+The MCP server includes a REPL interface for testing Penjar Plugin API calls.
 To use it, connect to the URL reported at startup.

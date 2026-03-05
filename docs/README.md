@@ -1,6 +1,6 @@
-# Penpot Docs
+# Penjar Docs
 
-Penpot documentation website.
+Penjar documentation website.
 
 ## Usage
 

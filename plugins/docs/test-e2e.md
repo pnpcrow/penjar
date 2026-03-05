@@ -7,7 +7,7 @@
    Create and populate the `apps/e2e/.env` file with a valid user mail & password:
 
    ```env
-   E2E_LOGIN_EMAIL="test@penpot.app"
+   E2E_LOGIN_EMAIL="test@penjar.app"
    E2E_LOGIN_PASSWORD="123123123"
    E2E_SCREENSHOTS="true"              # Enable/disable screenshots (default: false)
    E2E_HEADLESS="false"                # Run browser in headless mode (default: true)
@@ -44,7 +44,7 @@
    ```
 
    **Explanation**:
-   - `Agent` opens a browser, logs into Penpot, and creates a file.
+   - `Agent` opens a browser, logs into Penjar, and creates a file.
    - `runCode` executes the plugin code and returns the file state after execution.
 
 2. **Using `runCode` Method**

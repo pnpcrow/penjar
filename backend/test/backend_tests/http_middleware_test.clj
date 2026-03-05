@@ -133,6 +133,6 @@
     (t/is (= :cookie token-type))
     (t/is (= (:token session) token))
     (t/is (= "authentication" (:iss claims)))
-    (t/is (= "penpot" (:aud claims)))
+    (t/is (= "penjar" (:aud claims)))
     (t/is (= (:id session) (:sid claims)))
     (t/is (= (:id profile) (:uid claims)))))

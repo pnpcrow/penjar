@@ -74,8 +74,8 @@
 
 ;; Set initial translation loading state as globaly stored variable;
 ;; this facilitates hot reloading
-(when-not (exists? (unchecked-get globals/global "penpotTranslations"))
-  (unchecked-set globals/global "penpotTranslations" #js {}))
+(when-not (exists? (unchecked-get globals/global "penjarTranslations"))
+  (unchecked-set globals/global "penjarTranslations" #js {}))
 
 (defn- autodetect
   []
@@ -101,7 +101,7 @@
 (defn- get-translations
   "Get globaly stored mutable object with all loaded translations"
   []
-  (unchecked-get globals/global "penpotTranslations"))
+  (unchecked-get globals/global "penjarTranslations"))
 
 (defn set-translations
   "A helper for synchronously set translations data for specified locale"

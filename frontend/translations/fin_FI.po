@@ -3,7 +3,7 @@ msgstr ""
 "PO-Revision-Date: 2024-06-17 08:07+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Finnish "
-"<https://hosted.weblate.org/projects/penpot/frontend/fi/>\n"
+"<https://hosted.weblate.org/projects/penjar/frontend/fi/>\n"
 "Language: fin_FI\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -20,7 +20,7 @@ msgstr "Onko sinulla jo käyttäjä?"
 msgid "auth.check-your-email"
 msgstr ""
 "Tarkista sähköpostisi ja paina vahvistuslinkkiä käyttääksesi "
-"Penpot-ohjelmaa."
+"Penjar-ohjelmaa."
 
 #: src/app/main/ui/auth/recovery.cljs:67
 msgid "auth.confirm-password"
@@ -157,7 +157,7 @@ msgstr "Julkaise"
 
 #: src/app/main/ui/viewer/share_link.cljs:304, src/app/main/ui/viewer/share_link.cljs:315
 msgid "common.share-link.all-users"
-msgstr "Kaikki Penpotin käyttäjät"
+msgstr "Kaikki Penjarin käyttäjät"
 
 #: src/app/main/ui/viewer/share_link.cljs:204
 msgid "common.share-link.confirm-deletion-link-description"
@@ -234,7 +234,7 @@ msgstr "Ryhmän hallinta"
 #: src/app/main/ui/dashboard/projects.cljs:92
 msgid "dasboard.team-hero.text"
 msgstr ""
-"Penpot on tarkoitettu ryhmille. Kutsu jäseniä työstääksenne projekteja "
+"Penjar on tarkoitettu ryhmille. Kutsu jäseniä työstääksenne projekteja "
 "yhdessä"
 
 #: src/app/main/ui/dashboard/projects.cljs:90
@@ -245,7 +245,7 @@ msgstr "Ryhmäydy!"
 #, unused
 msgid "dasboard.tutorial-hero.info"
 msgstr ""
-"Opettele Penpotin perusteet pitämällä hauskaa tämän opastuskierroksen "
+"Opettele Penjarin perusteet pitämällä hauskaa tämän opastuskierroksen "
 "kanssa."
 
 #: src/app/main/ui/dashboard/projects.cljs
@@ -261,7 +261,7 @@ msgstr "Käytännön opastus"
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
 msgid "dasboard.walkthrough-hero.info"
-msgstr "Ota opastuskierros Penpotin erilaisista toiminnoista"
+msgstr "Ota opastuskierros Penjarin erilaisista toiminnoista"
 
 #: src/app/main/ui/auth/recovery.cljs:32
 msgid "errors.invalid-recovery-token"

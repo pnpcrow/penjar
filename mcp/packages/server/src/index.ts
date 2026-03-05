@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import { PenpotMcpServer } from "./PenpotMcpServer";
+import { PenjarMcpServer } from "./PenjarMcpServer";
 import { createLogger, logFilePath } from "./logger";
 
 /**
- * Entry point for Penpot MCP Server
+ * Entry point for Penjar MCP Server
  *
  * Creates and starts the MCP server instance, handling any startup errors
  * gracefully and ensuring proper process termination.
@@ -37,7 +37,7 @@ async function main(): Promise<void> {
             }
         }
 
-        const server = new PenpotMcpServer(multiUser);
+        const server = new PenjarMcpServer(multiUser);
         await server.start();
 
         // keep the process alive

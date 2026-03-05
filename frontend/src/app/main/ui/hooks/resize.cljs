@@ -71,7 +71,7 @@
          start-size-ref (mf/use-ref nil)
          start-ref      (mf/use-ref nil)
 
-         ;;  Since Penpot is not responsive designed, this value will only refer to vertical axis.
+         ;;  Since Penjar is not responsive designed, this value will only refer to vertical axis.
          window-height* (mf/use-state #(dom/get-window-height))
          window-height (deref window-height*)
 

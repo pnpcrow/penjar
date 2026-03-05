@@ -1,10 +1,10 @@
-import { Board, Bounds, Fill, FlexLayout, GridLayout, Page, Rectangle, Shape, Text } from "@penpot/plugin-types";
+import { Board, Bounds, Fill, FlexLayout, GridLayout, Page, Rectangle, Shape, Text } from "@penjar/plugin-types";
 
-export class PenpotUtils {
+export class PenjarUtils {
     /**
      * Generates an overview structure of the given shape,
      * providing its id, name and type, and recursively its children's attributes.
-     * The `type` field indicates the type in the Penpot API.
+     * The `type` field indicates the type in the Penjar API.
      * If the shape has a layout system (flex or grid), includes layout information.
      *
      * @param shape - The root shape to generate the structure from
@@ -91,7 +91,7 @@ export class PenpotUtils {
         };
 
         if (root === null) {
-            const pages = penpot.currentFile?.pages;
+            const pages = penjar.currentFile?.pages;
             if (pages) {
                 for (let page of pages) {
                     find(page.root);
@@ -129,7 +129,7 @@ export class PenpotUtils {
         };
 
         if (root === null) {
-            const pages = penpot.currentFile?.pages;
+            const pages = penjar.currentFile?.pages;
             if (pages) {
                 for (let page of pages) {
                     let result = find(page.root);
@@ -155,12 +155,12 @@ export class PenpotUtils {
     }
 
     public static findPage(predicate: (page: Page) => boolean): Page | null {
-        let page = penpot.currentFile!.pages.find(predicate);
+        let page = penjar.currentFile!.pages.find(predicate);
         return page || null;
     }
 
     public static getPages(): { id: string; name: string }[] {
-        return penpot.currentFile!.pages.map((page) => ({ id: page.id, name: page.name }));
+        return penjar.currentFile!.pages.map((page) => ({ id: page.id, name: page.name }));
     }
 
     public static getPageById(id: string): Page | null {
@@ -172,7 +172,7 @@ export class PenpotUtils {
     }
 
     public static getPageForShape(shape: Shape): Page | null {
-        for (const page of penpot.currentFile!.pages) {
+        for (const page of penjar.currentFile!.pages) {
             if (page.getShapeById(shape.id)) {
                 return page;
             }
@@ -185,8 +185,8 @@ export class PenpotUtils {
         if (!page) {
             throw new Error("Shape is not part of any page");
         }
-        penpot.openPage(page);
-        return penpot.generateStyle([shape], { type: "css", includeChildren: true });
+        penjar.openPage(page);
+        return penjar.generateStyle([shape], { type: "css", includeChildren: true });
     }
 
     /**
@@ -332,7 +332,7 @@ export class PenpotUtils {
     }
 
     /**
-     * Imports an image from base64 data into the Penpot design as a Rectangle shape filled with the image.
+     * Imports an image from base64 data into the Penjar design as a Rectangle shape filled with the image.
      * The rectangle has the image's original proportions by default.
      * Optionally accepts position (x, y) and dimensions (width, height) parameters.
      * If only one dimension is provided, the other is calculated to maintain the image's aspect ratio.
@@ -357,13 +357,13 @@ export class PenpotUtils {
         height: number | undefined
     ): Promise<Rectangle> {
         // convert base64 to Uint8Array
-        const bytes = PenpotUtils.base64ToByteArray(base64);
+        const bytes = PenjarUtils.base64ToByteArray(base64);
 
-        // upload the image data to Penpot
-        const imageData = await penpot.uploadMediaData(name, bytes, mimeType);
+        // upload the image data to Penjar
+        const imageData = await penjar.uploadMediaData(name, bytes, mimeType);
 
         // create a rectangle shape
-        const rect = penpot.createRectangle();
+        const rect = penjar.createRectangle();
         rect.name = name;
 
         // calculate dimensions
@@ -454,7 +454,7 @@ export class PenpotUtils {
     public static findTokensByName(name: string): any[] {
         const tokens: any[] = [];
         // @ts-ignore
-        const tokenCatalog = penpot.library.local.tokens;
+        const tokenCatalog = penjar.library.local.tokens;
 
         for (const set of tokenCatalog.sets) {
             for (const token of set.tokens) {
@@ -475,7 +475,7 @@ export class PenpotUtils {
      */
     public static findTokenByName(name: string): any | null {
         // @ts-ignore
-        const tokenCatalog = penpot.library.local.tokens;
+        const tokenCatalog = penjar.library.local.tokens;
 
         for (const set of tokenCatalog.sets) {
             for (const token of set.tokens) {
@@ -496,7 +496,7 @@ export class PenpotUtils {
      */
     public static getTokenSet(token: any): any | null {
         // @ts-ignore
-        const tokenCatalog = penpot.library.local.tokens;
+        const tokenCatalog = penjar.library.local.tokens;
 
         for (const set of tokenCatalog.sets) {
             if (set.tokens.includes(token)) {
@@ -516,7 +516,7 @@ export class PenpotUtils {
     public static tokenOverview(): Record<string, Record<string, string[]>> {
         const overview: Record<string, Record<string, string[]>> = {};
         // @ts-ignore
-        const tokenCatalog = penpot.library.local.tokens;
+        const tokenCatalog = penjar.library.local.tokens;
 
         for (const set of tokenCatalog.sets) {
             const setOverview: Record<string, string[]> = {};

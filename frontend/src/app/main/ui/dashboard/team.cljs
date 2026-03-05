@@ -534,7 +534,7 @@
     (dom/set-html-title
      (tr "title.team-members"
          (if (:is-default team)
-           (tr "dashboard.your-penpot")
+           (tr "dashboard.your-penjar")
            (:name team)))))
 
   (mf/with-effect []
@@ -980,7 +980,7 @@
     (dom/set-html-title
      (tr "title.team-invitations"
          (if (:is-default team)
-           (tr "dashboard.your-penpot")
+           (tr "dashboard.your-penjar")
            (:name team)))))
 
   (mf/with-effect []
@@ -1248,7 +1248,7 @@
       (dom/set-html-title
        (tr "title.team-webhooks"
            (if (:is-default team)
-             (tr "dashboard.your-penpot")
+             (tr "dashboard.your-penjar")
              (:name team)))))
 
     (mf/with-effect []
@@ -1295,7 +1295,7 @@
     (mf/with-effect [team]
       (dom/set-html-title (tr "title.team-settings"
                               (if (:is-default team)
-                                (tr "dashboard.your-penpot")
+                                (tr "dashboard.your-penjar")
                                 (:name team)))))
 
     (mf/with-effect []

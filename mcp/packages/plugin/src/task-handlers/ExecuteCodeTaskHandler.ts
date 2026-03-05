@@ -1,6 +1,6 @@
 import { Task, TaskHandler } from "../TaskHandler";
 import { ExecuteCodeTaskParams, ExecuteCodeTaskResultData } from "../../../common/src";
-import { PenpotUtils } from "../PenpotUtils.ts";
+import { PenjarUtils } from "../PenjarUtils.ts";
 
 /**
  * Console implementation that captures all log output for code execution.
@@ -168,19 +168,19 @@ export class ExecuteCodeTaskHandler extends TaskHandler<ExecuteCodeTaskParams> {
 
     /**
      * Persistent context object that maintains state between code executions.
-     * Contains the penpot API, storage object, and custom console implementation.
+     * Contains the penjar API, storage object, and custom console implementation.
      */
     private readonly context: any;
 
     constructor() {
         super();
 
-        // initialize context, making penpot, penpotUtils, storage and the custom console available
+        // initialize context, making penjar, penjarUtils, storage and the custom console available
         this.context = {
-            penpot: penpot,
+            penjar: penjar,
             storage: {},
             console: new ExecuteCodeTaskConsole(),
-            penpotUtils: PenpotUtils,
+            penjarUtils: PenjarUtils,
         };
     }
 
@@ -195,23 +195,23 @@ export class ExecuteCodeTaskHandler extends TaskHandler<ExecuteCodeTaskParams> {
         const context = this.context;
         const code = task.params.code;
 
-        // set the penpot.flags.naturalChildOrdering to true during code execution.
+        // set the penjar.flags.naturalChildOrdering to true during code execution.
         // NOTE: This significantly simplifies API usage (see )
-        // TODO: Remove ts-ignore once Penpot types have been updated
+        // TODO: Remove ts-ignore once Penjar types have been updated
         let originalNaturalChildOrdering: any;
         // @ts-ignore
-        if (penpot.flags) {
+        if (penjar.flags) {
             // @ts-ignore
-            originalNaturalChildOrdering = penpot.flags.naturalChildOrdering;
+            originalNaturalChildOrdering = penjar.flags.naturalChildOrdering;
             // @ts-ignore
-            penpot.flags.naturalChildOrdering = true;
+            penjar.flags.naturalChildOrdering = true;
         } else {
             // TODO: This can be removed once `flags` has been merged to PROD
             throw new Error(
-                "You are using a version of the Penpot MCP server which is incompatible " +
-                    "with the connected Penpot version. " +
+                "You are using a version of the Penjar MCP server which is incompatible " +
+                    "with the connected Penjar version. " +
                     "Read the documentation for instructions on which version to use: " +
-                    "https://github.com/penpot/penpot/tree/develop/mcp\n" +
+                    "https://github.com/penjar/penjar/tree/develop/mcp\n" +
                     "If you are an LLM, tell the user about this!"
             );
         }
@@ -224,9 +224,9 @@ export class ExecuteCodeTaskHandler extends TaskHandler<ExecuteCodeTaskParams> {
                 return fn(...Object.values(ctx));
             })(context);
         } finally {
-            // restore the original value of penpot.flags.naturalChildOrdering
+            // restore the original value of penjar.flags.naturalChildOrdering
             // @ts-ignore
-            penpot.flags.naturalChildOrdering = originalNaturalChildOrdering;
+            penjar.flags.naturalChildOrdering = originalNaturalChildOrdering;
         }
 
         console.log("Code execution result:", result);

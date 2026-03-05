@@ -39,7 +39,7 @@
 
 ## 1.0.8
 
-- Update penpot runtime
+- Update penjar runtime
 
 
 ## 1.0.7
@@ -47,7 +47,7 @@
 - Add the ability to provide refereron creating build context
 
 ```js
-const context = penpot.createBuildContext({referer:"my-referer"});
+const context = penjar.createBuildContext({referer:"my-referer"});
 ```
 
 The referer will be added as an additional field on the manifest.json
@@ -71,7 +71,7 @@ The referer will be added as an additional field on the manifest.json
 ## 1.0.3
 
 - Add missing isLocal field on file media for fix compatibility of the
-  library with penpot 2.7.xx
+  library with penjar 2.7.xx
 
 
 ## 1.0.2
@@ -79,12 +79,12 @@ The referer will be added as an additional field on the manifest.json
 - Fix incorrect boolean type assignation
 - Fix fill and stroke handling on boolean shape creation
 - Add sample-bool.js to the playground directory
-- Fix compatibility issue on file media with penpot 2.7.x
+- Fix compatibility issue on file media with penjar 2.7.x
 
 
 ## 1.0.1
 
-- Make the library generate a .penpot file compatible with penpot 2.7.x
+- Make the library generate a .penjar file compatible with penjar 2.7.x
 - Remove useless method `addComponentInstance`
 
 
@@ -92,11 +92,11 @@ The referer will be added as an additional field on the manifest.json
 
 The library entrypoint API object has been changed. From now you start creating a new
 build context, from where you can add multiple files and attach media. This change add the
-ability to build more than one file at same time and export them in an unique .penpot
+ability to build more than one file at same time and export them in an unique .penjar
 file.
 
 ```js
-const context = penpot.createBuildContext()
+const context = penjar.createBuildContext()
 
 context.addFile({name:"aa"})
 context.addPage({name:"aa"})
@@ -104,11 +104,11 @@ context.closePage()
 context.closeFile()
 
 ;; barray is instance of Uint8Array
-const barray = penpot.exportAsBytes(context);
+const barray = penjar.exportAsBytes(context);
 ```
 
 The previous `file.export()` method has been removed and several alternatives are
-added as first level functions on penpot library API entrypoint:
+added as first level functions on penjar library API entrypoint:
 
 - `exportAsBytes(BuildContext context) -> Promise<Uint8Array>`
 - `exportAsBlob(BuildContext context) -> Promise<Blob>`
@@ -140,7 +140,7 @@ A non exhaustive list of changes:
 - Remove `deleteLibraryColor` (this library is intended to build files)
 - Remove `updateLibraryTypography` (use `addLibraryTypography` if you just need to replace a typography)
 - Remove `deleteLibraryTypography` (this library is intended to build files)
-- Remove `add/update/deleteLibraryMedia` (they are no longer supported by Penpot and have been replaced by components)
+- Remove `add/update/deleteLibraryMedia` (they are no longer supported by Penjar and have been replaced by components)
 - Remove `deleteObject` (this library is intended to build files)
 - Remove `updateObject` (this library is intended to build files)
 - Remove `finishComponent` (it is no longer necessary; see below for more details on component creation changes)

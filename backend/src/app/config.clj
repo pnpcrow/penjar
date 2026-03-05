@@ -33,9 +33,9 @@
        v)})
 
 (def default
-  {:database-uri "postgresql://postgres/penpot"
-   :database-username "penpot"
-   :database-password "penpot"
+  {:database-uri "postgresql://postgres/penjar"
+   :database-username "penjar"
+   :database-password "penjar"
 
    :default-blob-version 4
 
@@ -60,8 +60,8 @@
    :auth-token-cookie-name "auth-token"
 
    :assets-path "/internal/assets/"
-   :smtp-default-reply-to "Penpot <no-reply@example.com>"
-   :smtp-default-from "Penpot <no-reply@example.com>"
+   :smtp-default-reply-to "Penjar <no-reply@example.com>"
+   :smtp-default-from "Penjar <no-reply@example.com>"
 
    :profile-complaint-max-age (ct/duration {:days 7})
    :profile-complaint-threshold 2
@@ -69,7 +69,7 @@
    :profile-bounce-max-age (ct/duration {:days 7})
    :profile-bounce-threshold 10
 
-   :telemetry-uri "https://telemetry.penpot.app/"
+   :telemetry-uri "https://telemetry.penjar.app/"
 
    :media-max-file-size (* 1024 1024 30) ; 30MiB
 
@@ -276,7 +276,7 @@
 (defn read-config
   "Reads the configuration from enviroment variables and decodes all
   known values."
-  [& {:keys [prefix default] :or {prefix "penpot"}}]
+  [& {:keys [prefix default] :or {prefix "penjar"}}]
   (->> (read-env prefix)
        (merge default)
        (decode-config)))

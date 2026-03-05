@@ -21,8 +21,8 @@ mkdir -p "$PGDATAOLD" "$PGDATANEW" \
 
 pushd /var/lib/postgresql
 
-PGDATA=$PGDATANEW gosu postgres initdb -U penpot --data-checksums
-gosu postgres pg_upgrade -U penpot
+PGDATA=$PGDATANEW gosu postgres initdb -U penjar --data-checksums
+gosu postgres pg_upgrade -U penjar
 
 cp $PGDATAOLD/pg_hba.conf $PGDATANEW/pg_hba.conf
 

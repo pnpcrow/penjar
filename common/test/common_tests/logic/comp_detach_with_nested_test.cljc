@@ -18,7 +18,7 @@
 
 (t/use-fixtures :each thi/test-fixture)
 
-;; Related .penpot file: common/test/cases/detach-with-nested.penpot
+;; Related .penjar file: common/test/cases/detach-with-nested.penjar
 (defn- setup-file
   []
   ;; {:r-ellipse} [:name Ellipse, :type :frame]                         # [Component :c-ellipse]

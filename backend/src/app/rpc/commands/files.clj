@@ -501,7 +501,7 @@
   (ct/duration {:days 30}))
 
 (def file-summary-cache-key-prefix
-  "penpot.library-summary.")
+  "penjar.library-summary.")
 
 (defn- get-file-with-summary
   "Get a file without data with a summary of its local library content"

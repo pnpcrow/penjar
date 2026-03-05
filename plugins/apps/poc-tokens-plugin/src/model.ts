@@ -1,4 +1,4 @@
-import { TokenProperty } from '@penpot/plugin-types';
+import { TokenProperty } from '@penjar/plugin-types';
 
 /**
  * This file contains the typescript interfaces for the plugin events.

@@ -1,4 +1,4 @@
-# Penpot Text Editor
+# Penjar Text Editor
 
 ## How to run it
 
@@ -27,10 +27,10 @@ pnpm run test:ui
 
 ## How to build it
 
-The editor can be built and updated inside Penpot using the following command:
+The editor can be built and updated inside Penjar using the following command:
 
 ```sh
-PENPOT_SOURCE_PATH=/path/to/penpot/repository pnpm build:update
+PENJAR_SOURCE_PATH=/path/to/penjar/repository pnpm build:update
 ```
 
 This command is going to search for the file located in `frontend/src/app/main/ui/workspace/shapes/text/new_editor/TextEditor.js` and update it.
@@ -59,7 +59,7 @@ flowchart TB
   text_span_2 --> text_2[World!]
 ```
 
-This is compatible with the way Penpot stores text content.
+This is compatible with the way Penjar stores text content.
 
 ```mermaid
 flowchart TB

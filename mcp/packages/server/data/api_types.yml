@@ -1,12 +1,12 @@
-Penpot:
+Penjar:
   overview: |-
-    Interface Penpot
+    Interface Penjar
     ================
 
-    These are methods and properties available on the `penpot` global object.
+    These are methods and properties available on the `penjar` global object.
 
     ```
-    interface Penpot {
+    interface Penjar {
         ui: {
             open: (
                 name: string,
@@ -90,7 +90,7 @@ Penpot:
     Hierarchy
 
     * Omit<Context, "addListener" | "removeListener">
-      + Penpot
+      + Penjar
   members:
     Properties:
       ui: |-
@@ -112,12 +112,12 @@ Penpot:
 
         * open: (    name: string,    url: string,    options?: { width: number; height: number; hidden: boolean },) => void
 
-          Opens the plugin UI. It is possible to develop a plugin without interface (see Palette color example) but if you need, the way to open this UI is using `penpot.ui.open`.
+          Opens the plugin UI. It is possible to develop a plugin without interface (see Palette color example) but if you need, the way to open this UI is using `penjar.ui.open`.
           There is a minimum and maximum size for this modal and a default size but it's possible to customize it anyway with the options parameter.
 
           Example
           ```
-          penpot.ui.open('Plugin name', 'url', {width: 150, height: 300});
+          penjar.ui.open('Plugin name', 'url', {width: 150, height: 300});
           ```
         * size: { width: number; height: number } | null
         * resize: (width: number, height: number) => void
@@ -126,7 +126,7 @@ Penpot:
 
           Example
           ```
-          penpot.ui.resize(300, 400);
+          penjar.ui.resize(300, 400);
           ```
         * sendMessage: (message: unknown) => void
 
@@ -142,7 +142,7 @@ Penpot:
 
           Example
           ```
-          penpot.ui.onMessage((message) => {if(message.type === 'example-type' { ...do something })});
+          penjar.ui.onMessage((message) => {if(message.type === 'example-type' { ...do something })});
           ```
       utils: |-
         ```
@@ -159,14 +159,14 @@ Penpot:
 
         Example
         ```
-        penpot.closePlugin();
+        penjar.closePlugin();
         ```
       root: |-
         ```
         readonly root: Shape | null
         ```
 
-        The root shape in the current Penpot context. Requires `content:read` permission.
+        The root shape in the current Penjar context. Requires `content:read` permission.
 
         Example
         ```
@@ -177,7 +177,7 @@ Penpot:
         readonly currentFile: File | null
         ```
 
-        Retrieves file data from the current Penpot context. Requires `content:read` permission.
+        Retrieves file data from the current Penjar context. Requires `content:read` permission.
 
         Returns
 
@@ -192,7 +192,7 @@ Penpot:
         readonly currentPage: Page | null
         ```
 
-        The current page in the Penpot context. Requires `content:read` permission.
+        The current page in the Penjar context. Requires `content:read` permission.
 
         Example
         ```
@@ -203,7 +203,7 @@ Penpot:
         readonly viewport: Viewport
         ```
 
-        The viewport settings in the Penpot context.
+        The viewport settings in the Penjar context.
 
         Example
         ```
@@ -231,7 +231,7 @@ Penpot:
         readonly library: LibraryContext
         ```
 
-        The library context in the Penpot context, including both local and connected libraries. Requires `library:read` permission.
+        The library context in the Penjar context, including both local and connected libraries. Requires `library:read` permission.
 
         Example
         ```
@@ -242,7 +242,7 @@ Penpot:
         readonly fonts: FontsContext
         ```
 
-        The fonts context in the Penpot context, providing methods to manage fonts. Requires `content:read` permission.
+        The fonts context in the Penjar context, providing methods to manage fonts. Requires `content:read` permission.
 
         Example
         ```
@@ -253,7 +253,7 @@ Penpot:
         readonly currentUser: User
         ```
 
-        The current user in the Penpot context. Requires `user:read` permission.
+        The current user in the Penjar context. Requires `user:read` permission.
 
         Example
         ```
@@ -264,7 +264,7 @@ Penpot:
         readonly activeUsers: ActiveUser[]
         ```
 
-        An array of active users in the Penpot context. Requires `user:read` permission.
+        An array of active users in the Penjar context. Requires `user:read` permission.
 
         Example
         ```
@@ -275,7 +275,7 @@ Penpot:
         readonly theme: Theme
         ```
 
-        The current theme (light or dark) in Penpot.
+        The current theme (light or dark) in Penjar.
 
         Example
         ```
@@ -292,7 +292,7 @@ Penpot:
         selection: Shape[]
         ```
 
-        The currently selected shapes in Penpot. Requires `content:read` permission.
+        The currently selected shapes in Penjar. Requires `content:read` permission.
 
         Example
         ```
@@ -318,7 +318,7 @@ Penpot:
           that will be observed. For example:
 
         ```
-        // Observe the current selected shapepenpot.on('shapechange', (shape) => console.log(shape.name), { shapeId: penpot.selection[0].id });
+        // Observe the current selected shapepenjar.on('shapechange', (shape) => console.log(shape.name), { shapeId: penjar.selection[0].id });
         ```
 
         * selectionchange: event emitted when the current selection changes. The callback will receive the list of ids for the new selection
@@ -347,7 +347,7 @@ Penpot:
 
         Example
         ```
-        penpot.on('pagechange', () => {...do something}).
+        penjar.on('pagechange', () => {...do something}).
         ```
       off: |-
         ```
@@ -366,14 +366,14 @@ Penpot:
 
         Example
         ```
-        const listenerId = penpot.on('contentsave', () => console.log("Changed"));penpot.off(listenerId);
+        const listenerId = penjar.on('contentsave', () => console.log("Changed"));penjar.off(listenerId);
         ```
       shapesColors: |-
         ```
         shapesColors(shapes: Shape[]): (Color & ColorShapeInfo)[]
         ```
 
-        Retrieves colors applied to the given shapes in Penpot. Requires `content:read` permission.
+        Retrieves colors applied to the given shapes in Penjar. Requires `content:read` permission.
 
         Parameters
 
@@ -411,7 +411,7 @@ Penpot:
         uploadMediaUrl(name: string, url: string): Promise<ImageData>
         ```
 
-        Uploads media to Penpot and retrieves its image data. Requires `content:write` permission.
+        Uploads media to Penjar and retrieves its image data. Requires `content:write` permission.
 
         Parameters
 
@@ -428,7 +428,7 @@ Penpot:
 
         Example
         ```
-        const imageData = await context.uploadMediaUrl('example', 'https://example.com/image.jpg');console.log(imageData);// to insert the image in a shape we can doconst board = penpot.createBoard();const shape = penpot.createRectangle();board.appendChild(shape);shape.fills = [{ fillOpacity: 1, fillImage: imageData }];
+        const imageData = await context.uploadMediaUrl('example', 'https://example.com/image.jpg');console.log(imageData);// to insert the image in a shape we can doconst board = penjar.createBoard();const shape = penjar.createRectangle();board.appendChild(shape);shape.fills = [{ fillOpacity: 1, fillImage: imageData }];
         ```
       uploadMediaData: |-
         ```
@@ -439,7 +439,7 @@ Penpot:
         ): Promise<ImageData>
         ```
 
-        Uploads media to penpot and retrieves the image data. Requires `content:write` permission.
+        Uploads media to penjar and retrieves the image data. Requires `content:write` permission.
 
         Parameters
 
@@ -478,7 +478,7 @@ Penpot:
 
         Example
         ```
-        const penpotShapesArray = penpot.selection;penpot.group(penpotShapesArray);
+        const penjarShapesArray = penjar.selection;penjar.group(penjarShapesArray);
         ```
       ungroup: |-
         ```
@@ -500,7 +500,7 @@ Penpot:
 
         Example
         ```
-        const penpotShapesArray = penpot.selection;// We need to make sure that something is selected, and if the selected shape is a group,if (selected.length && penpot.utils.types.isGroup(penpotShapesArray[0])) {  penpot.group(penpotShapesArray[0]);}
+        const penjarShapesArray = penjar.selection;// We need to make sure that something is selected, and if the selected shape is a group,if (selected.length && penjar.utils.types.isGroup(penjarShapesArray[0])) {  penjar.group(penjarShapesArray[0]);}
         ```
       createRectangle: |-
         ```
@@ -513,7 +513,7 @@ Penpot:
 
         Example
         ```
-        const shape = penpot.createRectangle();// just change the values like thisshape.name = "Example rectangle";// for solid colorshape.fills = [{ fillColor: "#7EFFF5" }];// for linear gradient colorshape.fills = [{ fillColorGradient: {   "type": "linear",   "startX": 0.5,   "startY": 0,   "endX": 0.5,   "endY": 1,   "width": 1,   "stops": [     {       "color": "#003ae9",       "opacity": 1,       "offset": 0     },     {       "color": "#003ae9",       "opacity": 0,       "offset": 1     }   ] }}];// for a image fillconst imageData = await context.uploadMediaUrl('example', 'https://example.com/image.jpg');shape.fills = [{ fillOpacity: 1, fillImage: imageData }];shape.borderRadius = 8;shape.strokes = [ {   strokeColor: "#2e3434",   strokeStyle: "solid",   strokeWidth: 2,   strokeAlignment: "center", },];
+        const shape = penjar.createRectangle();// just change the values like thisshape.name = "Example rectangle";// for solid colorshape.fills = [{ fillColor: "#7EFFF5" }];// for linear gradient colorshape.fills = [{ fillColorGradient: {   "type": "linear",   "startX": 0.5,   "startY": 0,   "endX": 0.5,   "endY": 1,   "width": 1,   "stops": [     {       "color": "#003ae9",       "opacity": 1,       "offset": 0     },     {       "color": "#003ae9",       "opacity": 0,       "offset": 1     }   ] }}];// for a image fillconst imageData = await context.uploadMediaUrl('example', 'https://example.com/image.jpg');shape.fills = [{ fillOpacity: 1, fillImage: imageData }];shape.borderRadius = 8;shape.strokes = [ {   strokeColor: "#2e3434",   strokeStyle: "solid",   strokeWidth: 2,   strokeAlignment: "center", },];
         ```
       createBoard: |-
         ```
@@ -522,13 +522,13 @@ Penpot:
 
         Use this method to create a board. This is the first step before anything else, the container. Requires `content:write` permission.
         Then you can add a gridlayout, flexlayout or add a shape inside the board.
-        Just a heads-up: board is a board in Penpot UI.
+        Just a heads-up: board is a board in Penjar UI.
 
         Returns Board
 
         Example
         ```
-        const board = penpot.createBoard();// to add grid layoutboard.addGridLayout();// to add flex layoutboard.addFlexLayout();// to create a shape inside the boardconst shape = penpot.createRectangle();board.appendChild(shape);
+        const board = penjar.createBoard();// to add grid layoutboard.addGridLayout();// to add flex layoutboard.addFlexLayout();// to create a shape inside the boardconst shape = penjar.createRectangle();board.appendChild(shape);
         ```
       createEllipse: |-
         ```
@@ -541,7 +541,7 @@ Penpot:
 
         Example
         ```
-        const shape = penpot.createEllipse();// just change the values like thisshape.name = "Example ellipse";// for solid colorshape.fills = [{ fillColor: "#7EFFF5" }];// for linear gradient colorshape.fills = [{ fillColorGradient: {   "type": "linear",   "startX": 0.5,   "startY": 0,   "endX": 0.5,   "endY": 1,   "width": 1,   "stops": [     {       "color": "#003ae9",       "opacity": 1,       "offset": 0     },     {       "color": "#003ae9",       "opacity": 0,       "offset": 1     }   ] }}];// for an image fillconst imageData = await context.uploadMediaUrl('example', 'https://example.com/image.jpg');shape.fills = [{ fillOpacity: 1, fillImage: imageData }];shape.strokes = [ {   strokeColor: "#2e3434",   strokeStyle: "solid",   strokeWidth: 2,   strokeAlignment: "center", },];
+        const shape = penjar.createEllipse();// just change the values like thisshape.name = "Example ellipse";// for solid colorshape.fills = [{ fillColor: "#7EFFF5" }];// for linear gradient colorshape.fills = [{ fillColorGradient: {   "type": "linear",   "startX": 0.5,   "startY": 0,   "endX": 0.5,   "endY": 1,   "width": 1,   "stops": [     {       "color": "#003ae9",       "opacity": 1,       "offset": 0     },     {       "color": "#003ae9",       "opacity": 0,       "offset": 1     }   ] }}];// for an image fillconst imageData = await context.uploadMediaUrl('example', 'https://example.com/image.jpg');shape.fills = [{ fillOpacity: 1, fillImage: imageData }];shape.strokes = [ {   strokeColor: "#2e3434",   strokeStyle: "solid",   strokeWidth: 2,   strokeAlignment: "center", },];
         ```
       createPath: |-
         ```
@@ -554,7 +554,7 @@ Penpot:
 
         Example
         ```
-        const path = penpot.createPath();path.name = "My path";// for solid colorpath.fills = [{ fillColor: "#7EFFF5" }];
+        const path = penjar.createPath();path.name = "My path";// for solid colorpath.fills = [{ fillColor: "#7EFFF5" }];
         ```
       createBoolean: |-
         ```
@@ -643,7 +643,7 @@ Penpot:
 
         Example
         ```
-        const board = penpot.createBoard();let text;text = penpot.createText();// just change the values like thistext.growType = 'auto-height';text.fontFamily = 'Work Sans';text.fontSize = '12';text.fills = [{fillColor: '#9f05ff', fillOpacity: 1}];text.strokes = [{strokeOpacity: 1, strokeStyle: 'solid', strokeWidth: 2, strokeColor: '#deabff', strokeAlignment: 'outer'}];board.appendChild(text);
+        const board = penjar.createBoard();let text;text = penjar.createText();// just change the values like thistext.growType = 'auto-height';text.fontFamily = 'Work Sans';text.fontSize = '12';text.fills = [{fillColor: '#9f05ff', fillOpacity: 1}];text.strokes = [{strokeOpacity: 1, strokeStyle: 'solid', strokeWidth: 2, strokeColor: '#deabff', strokeAlignment: 'outer'}];board.appendChild(text);
         ```
       generateMarkup: |-
         ```
@@ -704,7 +704,7 @@ Penpot:
 
         Example
         ```
-        const fontfaces = context.generateFontFaces(penpot.selection);console.log(fontfaces);
+        const fontfaces = context.generateFontFaces(penjar.selection);console.log(fontfaces);
         ```
       openViewer: |-
         ```
@@ -828,7 +828,7 @@ ActiveUser:
     Interface ActiveUser
     ====================
 
-    Represents an active user in Penpot, extending the `User` interface.
+    Represents an active user in Penjar, extending the `User` interface.
     This interface includes additional properties specific to active users.
 
     ```
@@ -848,7 +848,7 @@ ActiveUser:
     * User
       + ActiveUser
 
-    Referenced by: Context, Penpot
+    Referenced by: Context, Penjar
   members:
     Properties:
       position: |-
@@ -933,7 +933,7 @@ Blur:
     Interface Blur
     ==============
 
-    Represents blur properties in Penpot.
+    Represents blur properties in Penjar.
     This interface includes properties for defining the type and intensity of a blur effect, along with its visibility.
 
     ```
@@ -979,7 +979,7 @@ Board:
     Interface Board
     ===============
 
-    Represents a board in Penpot.
+    Represents a board in Penjar.
     This interface extends `ShapeBase` and includes properties and methods specific to board.
 
     ```
@@ -1142,7 +1142,7 @@ Board:
       + Board
         - VariantContainer
 
-    Referenced by: CloseOverlay, CommentThread, Context, ContextTypesUtils, Flow, NavigateTo, OpenOverlay, OverlayAction, Page, Penpot, RulerGuide, Shape, ToggleOverlay
+    Referenced by: CloseOverlay, CommentThread, Context, ContextTypesUtils, Flow, NavigateTo, OpenOverlay, OverlayAction, Page, Penjar, RulerGuide, Shape, ToggleOverlay
   members:
     Properties:
       type: |-
@@ -1570,7 +1570,7 @@ Board:
 
         Example
         ```
-        const board = penpot.createBoard();const flex = board.addFlexLayout();// You can change the flex properties as follows.flex.dir = "column";flex.wrap = "wrap";flex.alignItems = "center";flex.justifyContent = "center";flex.horizontalSizing = "fill";flex.verticalSizing = "fill";
+        const board = penjar.createBoard();const flex = board.addFlexLayout();// You can change the flex properties as follows.flex.dir = "column";flex.wrap = "wrap";flex.alignItems = "center";flex.justifyContent = "center";flex.horizontalSizing = "fill";flex.verticalSizing = "fill";
         ```
       addGridLayout: |-
         ```
@@ -1585,7 +1585,7 @@ Board:
 
         Example
         ```
-        const board = penpot.createBoard();const grid = board.addGridLayout();// You can change the grid properties as follows.grid.alignItems = "center";grid.justifyItems = "start";grid.rowGap = 10;grid.columnGap = 10;grid.verticalPadding = 5;grid.horizontalPadding = 5
+        const board = penjar.createBoard();const grid = board.addGridLayout();// You can change the grid properties as follows.grid.alignItems = "center";grid.justifyItems = "start";grid.rowGap = 10;grid.columnGap = 10;grid.verticalPadding = 5;grid.horizontalPadding = 5
         ```
       addRulerGuide: |-
         ```
@@ -1885,7 +1885,7 @@ Board:
         ```
 
         Combine several standard Components into a VariantComponent. Similar to doing it with the contextual menu
-        on the Penpot interface.
+        on the Penjar interface.
         The current shape must be a component main instance.
 
         Parameters
@@ -2087,7 +2087,7 @@ VariantContainer:
     Interface VariantContainer
     ==========================
 
-    Represents a VariantContainer in Penpot
+    Represents a VariantContainer in Penjar
     This interface extends `Board` and includes properties and methods specific to VariantContainer.
 
     ```
@@ -2682,7 +2682,7 @@ VariantContainer:
 
         Example
         ```
-        const board = penpot.createBoard();const flex = board.addFlexLayout();// You can change the flex properties as follows.flex.dir = "column";flex.wrap = "wrap";flex.alignItems = "center";flex.justifyContent = "center";flex.horizontalSizing = "fill";flex.verticalSizing = "fill";
+        const board = penjar.createBoard();const flex = board.addFlexLayout();// You can change the flex properties as follows.flex.dir = "column";flex.wrap = "wrap";flex.alignItems = "center";flex.justifyContent = "center";flex.horizontalSizing = "fill";flex.verticalSizing = "fill";
         ```
       addGridLayout: |-
         ```
@@ -2697,7 +2697,7 @@ VariantContainer:
 
         Example
         ```
-        const board = penpot.createBoard();const grid = board.addGridLayout();// You can change the grid properties as follows.grid.alignItems = "center";grid.justifyItems = "start";grid.rowGap = 10;grid.columnGap = 10;grid.verticalPadding = 5;grid.horizontalPadding = 5
+        const board = penjar.createBoard();const grid = board.addGridLayout();// You can change the grid properties as follows.grid.alignItems = "center";grid.justifyItems = "start";grid.rowGap = 10;grid.columnGap = 10;grid.verticalPadding = 5;grid.horizontalPadding = 5
         ```
       addRulerGuide: |-
         ```
@@ -2997,7 +2997,7 @@ VariantContainer:
         ```
 
         Combine several standard Components into a VariantComponent. Similar to doing it with the contextual menu
-        on the Penpot interface.
+        on the Penjar interface.
         The current shape must be a component main instance.
 
         Parameters
@@ -3199,7 +3199,7 @@ Boolean:
     Interface Boolean
     =================
 
-    Represents a boolean operation shape in Penpot.
+    Represents a boolean operation shape in Penjar.
     This interface extends `ShapeBase` and includes properties and methods specific to boolean operations.
 
     ```
@@ -3349,7 +3349,7 @@ Boolean:
     * ShapeBase
       + Boolean
 
-    Referenced by: Context, ContextTypesUtils, Penpot, Shape
+    Referenced by: Context, ContextTypesUtils, Penjar, Shape
   members:
     Properties:
       type: |-
@@ -4009,7 +4009,7 @@ Boolean:
         ```
 
         Combine several standard Components into a VariantComponent. Similar to doing it with the contextual menu
-        on the Penpot interface.
+        on the Penjar interface.
         The current shape must be a component main instance.
 
         Parameters
@@ -4247,7 +4247,7 @@ Color:
     Interface Color
     ===============
 
-    Represents color properties in Penpot.
+    Represents color properties in Penjar.
     This interface includes properties for defining solid colors, gradients, and image fills, along with metadata.
 
     ```
@@ -4265,7 +4265,7 @@ Color:
     }
     ```
 
-    Referenced by: Context, Penpot, Shadow
+    Referenced by: Context, Penjar, Shadow
   members:
     Properties:
       id: |-
@@ -4350,7 +4350,7 @@ ColorShapeInfo:
     }
     ```
 
-    Referenced by: Context, Penpot
+    Referenced by: Context, Penjar
   members:
     Properties:
       shapesInfo: |-
@@ -4450,7 +4450,7 @@ CommentThread:
     =======================
 
     Represents a list of comments one after the other. Usually these threads
-    are conversations the users have in Penpot.
+    are conversations the users have in Penjar.
 
     ```
     interface CommentThread {
@@ -4539,7 +4539,7 @@ CommonLayout:
     Interface CommonLayout
     ======================
 
-    CommonLayout represents a common layout interface in the Penpot application.
+    CommonLayout represents a common layout interface in the Penjar application.
     It includes various properties for alignment, spacing, padding, and sizing, as well as a method to remove the layout.
 
     ```
@@ -4740,7 +4740,7 @@ Context:
     Interface Context
     =================
 
-    Represents the context of Penpot, providing access to various Penpot functionalities and data.
+    Represents the context of Penjar, providing access to various Penjar functionalities and data.
 
     ```
     interface Context {
@@ -4817,7 +4817,7 @@ Context:
         readonly root: Shape | null
         ```
 
-        The root shape in the current Penpot context. Requires `content:read` permission.
+        The root shape in the current Penjar context. Requires `content:read` permission.
 
         Example
         ```
@@ -4828,7 +4828,7 @@ Context:
         readonly currentFile: File | null
         ```
 
-        Retrieves file data from the current Penpot context. Requires `content:read` permission.
+        Retrieves file data from the current Penjar context. Requires `content:read` permission.
 
         Returns
 
@@ -4843,7 +4843,7 @@ Context:
         readonly currentPage: Page | null
         ```
 
-        The current page in the Penpot context. Requires `content:read` permission.
+        The current page in the Penjar context. Requires `content:read` permission.
 
         Example
         ```
@@ -4854,7 +4854,7 @@ Context:
         readonly viewport: Viewport
         ```
 
-        The viewport settings in the Penpot context.
+        The viewport settings in the Penjar context.
 
         Example
         ```
@@ -4882,7 +4882,7 @@ Context:
         readonly library: LibraryContext
         ```
 
-        The library context in the Penpot context, including both local and connected libraries. Requires `library:read` permission.
+        The library context in the Penjar context, including both local and connected libraries. Requires `library:read` permission.
 
         Example
         ```
@@ -4893,7 +4893,7 @@ Context:
         readonly fonts: FontsContext
         ```
 
-        The fonts context in the Penpot context, providing methods to manage fonts. Requires `content:read` permission.
+        The fonts context in the Penjar context, providing methods to manage fonts. Requires `content:read` permission.
 
         Example
         ```
@@ -4904,7 +4904,7 @@ Context:
         readonly currentUser: User
         ```
 
-        The current user in the Penpot context. Requires `user:read` permission.
+        The current user in the Penjar context. Requires `user:read` permission.
 
         Example
         ```
@@ -4915,7 +4915,7 @@ Context:
         readonly activeUsers: ActiveUser[]
         ```
 
-        An array of active users in the Penpot context. Requires `user:read` permission.
+        An array of active users in the Penjar context. Requires `user:read` permission.
 
         Example
         ```
@@ -4926,7 +4926,7 @@ Context:
         readonly theme: Theme
         ```
 
-        The current theme (light or dark) in Penpot.
+        The current theme (light or dark) in Penjar.
 
         Example
         ```
@@ -4943,7 +4943,7 @@ Context:
         selection: Shape[]
         ```
 
-        The currently selected shapes in Penpot. Requires `content:read` permission.
+        The currently selected shapes in Penjar. Requires `content:read` permission.
 
         Example
         ```
@@ -4955,7 +4955,7 @@ Context:
         shapesColors(shapes: Shape[]): (Color & ColorShapeInfo)[]
         ```
 
-        Retrieves colors applied to the given shapes in Penpot. Requires `content:read` permission.
+        Retrieves colors applied to the given shapes in Penjar. Requires `content:read` permission.
 
         Parameters
 
@@ -4993,7 +4993,7 @@ Context:
         uploadMediaUrl(name: string, url: string): Promise<ImageData>
         ```
 
-        Uploads media to Penpot and retrieves its image data. Requires `content:write` permission.
+        Uploads media to Penjar and retrieves its image data. Requires `content:write` permission.
 
         Parameters
 
@@ -5010,7 +5010,7 @@ Context:
 
         Example
         ```
-        const imageData = await context.uploadMediaUrl('example', 'https://example.com/image.jpg');console.log(imageData);// to insert the image in a shape we can doconst board = penpot.createBoard();const shape = penpot.createRectangle();board.appendChild(shape);shape.fills = [{ fillOpacity: 1, fillImage: imageData }];
+        const imageData = await context.uploadMediaUrl('example', 'https://example.com/image.jpg');console.log(imageData);// to insert the image in a shape we can doconst board = penjar.createBoard();const shape = penjar.createRectangle();board.appendChild(shape);shape.fills = [{ fillOpacity: 1, fillImage: imageData }];
         ```
       uploadMediaData: |-
         ```
@@ -5021,7 +5021,7 @@ Context:
         ): Promise<ImageData>
         ```
 
-        Uploads media to penpot and retrieves the image data. Requires `content:write` permission.
+        Uploads media to penjar and retrieves the image data. Requires `content:write` permission.
 
         Parameters
 
@@ -5060,7 +5060,7 @@ Context:
 
         Example
         ```
-        const penpotShapesArray = penpot.selection;penpot.group(penpotShapesArray);
+        const penjarShapesArray = penjar.selection;penjar.group(penjarShapesArray);
         ```
       ungroup: |-
         ```
@@ -5082,7 +5082,7 @@ Context:
 
         Example
         ```
-        const penpotShapesArray = penpot.selection;// We need to make sure that something is selected, and if the selected shape is a group,if (selected.length && penpot.utils.types.isGroup(penpotShapesArray[0])) {  penpot.group(penpotShapesArray[0]);}
+        const penjarShapesArray = penjar.selection;// We need to make sure that something is selected, and if the selected shape is a group,if (selected.length && penjar.utils.types.isGroup(penjarShapesArray[0])) {  penjar.group(penjarShapesArray[0]);}
         ```
       createRectangle: |-
         ```
@@ -5095,7 +5095,7 @@ Context:
 
         Example
         ```
-        const shape = penpot.createRectangle();// just change the values like thisshape.name = "Example rectangle";// for solid colorshape.fills = [{ fillColor: "#7EFFF5" }];// for linear gradient colorshape.fills = [{ fillColorGradient: {   "type": "linear",   "startX": 0.5,   "startY": 0,   "endX": 0.5,   "endY": 1,   "width": 1,   "stops": [     {       "color": "#003ae9",       "opacity": 1,       "offset": 0     },     {       "color": "#003ae9",       "opacity": 0,       "offset": 1     }   ] }}];// for a image fillconst imageData = await context.uploadMediaUrl('example', 'https://example.com/image.jpg');shape.fills = [{ fillOpacity: 1, fillImage: imageData }];shape.borderRadius = 8;shape.strokes = [ {   strokeColor: "#2e3434",   strokeStyle: "solid",   strokeWidth: 2,   strokeAlignment: "center", },];
+        const shape = penjar.createRectangle();// just change the values like thisshape.name = "Example rectangle";// for solid colorshape.fills = [{ fillColor: "#7EFFF5" }];// for linear gradient colorshape.fills = [{ fillColorGradient: {   "type": "linear",   "startX": 0.5,   "startY": 0,   "endX": 0.5,   "endY": 1,   "width": 1,   "stops": [     {       "color": "#003ae9",       "opacity": 1,       "offset": 0     },     {       "color": "#003ae9",       "opacity": 0,       "offset": 1     }   ] }}];// for a image fillconst imageData = await context.uploadMediaUrl('example', 'https://example.com/image.jpg');shape.fills = [{ fillOpacity: 1, fillImage: imageData }];shape.borderRadius = 8;shape.strokes = [ {   strokeColor: "#2e3434",   strokeStyle: "solid",   strokeWidth: 2,   strokeAlignment: "center", },];
         ```
       createBoard: |-
         ```
@@ -5104,13 +5104,13 @@ Context:
 
         Use this method to create a board. This is the first step before anything else, the container. Requires `content:write` permission.
         Then you can add a gridlayout, flexlayout or add a shape inside the board.
-        Just a heads-up: board is a board in Penpot UI.
+        Just a heads-up: board is a board in Penjar UI.
 
         Returns Board
 
         Example
         ```
-        const board = penpot.createBoard();// to add grid layoutboard.addGridLayout();// to add flex layoutboard.addFlexLayout();// to create a shape inside the boardconst shape = penpot.createRectangle();board.appendChild(shape);
+        const board = penjar.createBoard();// to add grid layoutboard.addGridLayout();// to add flex layoutboard.addFlexLayout();// to create a shape inside the boardconst shape = penjar.createRectangle();board.appendChild(shape);
         ```
       createEllipse: |-
         ```
@@ -5123,7 +5123,7 @@ Context:
 
         Example
         ```
-        const shape = penpot.createEllipse();// just change the values like thisshape.name = "Example ellipse";// for solid colorshape.fills = [{ fillColor: "#7EFFF5" }];// for linear gradient colorshape.fills = [{ fillColorGradient: {   "type": "linear",   "startX": 0.5,   "startY": 0,   "endX": 0.5,   "endY": 1,   "width": 1,   "stops": [     {       "color": "#003ae9",       "opacity": 1,       "offset": 0     },     {       "color": "#003ae9",       "opacity": 0,       "offset": 1     }   ] }}];// for an image fillconst imageData = await context.uploadMediaUrl('example', 'https://example.com/image.jpg');shape.fills = [{ fillOpacity: 1, fillImage: imageData }];shape.strokes = [ {   strokeColor: "#2e3434",   strokeStyle: "solid",   strokeWidth: 2,   strokeAlignment: "center", },];
+        const shape = penjar.createEllipse();// just change the values like thisshape.name = "Example ellipse";// for solid colorshape.fills = [{ fillColor: "#7EFFF5" }];// for linear gradient colorshape.fills = [{ fillColorGradient: {   "type": "linear",   "startX": 0.5,   "startY": 0,   "endX": 0.5,   "endY": 1,   "width": 1,   "stops": [     {       "color": "#003ae9",       "opacity": 1,       "offset": 0     },     {       "color": "#003ae9",       "opacity": 0,       "offset": 1     }   ] }}];// for an image fillconst imageData = await context.uploadMediaUrl('example', 'https://example.com/image.jpg');shape.fills = [{ fillOpacity: 1, fillImage: imageData }];shape.strokes = [ {   strokeColor: "#2e3434",   strokeStyle: "solid",   strokeWidth: 2,   strokeAlignment: "center", },];
         ```
       createPath: |-
         ```
@@ -5136,7 +5136,7 @@ Context:
 
         Example
         ```
-        const path = penpot.createPath();path.name = "My path";// for solid colorpath.fills = [{ fillColor: "#7EFFF5" }];
+        const path = penjar.createPath();path.name = "My path";// for solid colorpath.fills = [{ fillColor: "#7EFFF5" }];
         ```
       createBoolean: |-
         ```
@@ -5225,7 +5225,7 @@ Context:
 
         Example
         ```
-        const board = penpot.createBoard();let text;text = penpot.createText();// just change the values like thistext.growType = 'auto-height';text.fontFamily = 'Work Sans';text.fontSize = '12';text.fills = [{fillColor: '#9f05ff', fillOpacity: 1}];text.strokes = [{strokeOpacity: 1, strokeStyle: 'solid', strokeWidth: 2, strokeColor: '#deabff', strokeAlignment: 'outer'}];board.appendChild(text);
+        const board = penjar.createBoard();let text;text = penjar.createText();// just change the values like thistext.growType = 'auto-height';text.fontFamily = 'Work Sans';text.fontSize = '12';text.fills = [{fillColor: '#9f05ff', fillOpacity: 1}];text.strokes = [{strokeOpacity: 1, strokeStyle: 'solid', strokeWidth: 2, strokeColor: '#deabff', strokeAlignment: 'outer'}];board.appendChild(text);
         ```
       generateMarkup: |-
         ```
@@ -5286,7 +5286,7 @@ Context:
 
         Example
         ```
-        const fontfaces = context.generateFontFaces(penpot.selection);console.log(fontfaces);
+        const fontfaces = context.generateFontFaces(penjar.selection);console.log(fontfaces);
         ```
       addListener: |-
         ```
@@ -5454,7 +5454,7 @@ ContextGeometryUtils:
     Interface ContextGeometryUtils
     ==============================
 
-    Utility methods for geometric calculations in Penpot.
+    Utility methods for geometric calculations in Penjar.
 
     Example
     ```
@@ -5497,7 +5497,7 @@ ContextTypesUtils:
     Interface ContextTypesUtils
     ===========================
 
-    Utility methods for determining the types of Penpot shapes.
+    Utility methods for determining the types of Penjar shapes.
 
     Example
     ```
@@ -5708,7 +5708,7 @@ ContextUtils:
     Interface ContextUtils
     ======================
 
-    Utility methods for various operations in Penpot.
+    Utility methods for various operations in Penjar.
 
     ```
     interface ContextUtils {
@@ -5717,7 +5717,7 @@ ContextUtils:
     }
     ```
 
-    Referenced by: Penpot
+    Referenced by: Penjar
   members:
     Properties:
       geometry: |-
@@ -5725,20 +5725,20 @@ ContextUtils:
         readonly geometry: ContextGeometryUtils
         ```
 
-        Geometry utility methods for Penpot.
+        Geometry utility methods for Penjar.
         Provides methods for geometric calculations, such as finding the center of a group of shapes.
 
         Example
         ```
-        const centerPoint = penpot.utils.geometry.center(shapes);console.log(centerPoint);
+        const centerPoint = penjar.utils.geometry.center(shapes);console.log(centerPoint);
         ```
       types: |-
         ```
         readonly types: ContextTypesUtils
         ```
 
-        Type utility methods for Penpot.
-        Provides methods for determining the types of various shapes in Penpot.
+        Type utility methods for Penjar.
+        Provides methods for determining the types of various shapes in Penjar.
 
         Example
         ```
@@ -5786,7 +5786,7 @@ Ellipse:
     Interface Ellipse
     =================
 
-    Represents an ellipse shape in Penpot.
+    Represents an ellipse shape in Penjar.
     This interface extends `ShapeBase` and includes properties specific to ellipses.
 
     ```
@@ -5929,7 +5929,7 @@ Ellipse:
     * ShapeBase
       + Ellipse
 
-    Referenced by: Context, ContextTypesUtils, Penpot, Shape
+    Referenced by: Context, ContextTypesUtils, Penjar, Shape
   members:
     Properties:
       type: |-
@@ -6504,7 +6504,7 @@ Ellipse:
         ```
 
         Combine several standard Components into a VariantComponent. Similar to doing it with the contextual menu
-        on the Penpot interface.
+        on the Penjar interface.
         The current shape must be a component main instance.
 
         Parameters
@@ -6706,12 +6706,12 @@ EventsMap:
     Interface EventsMap
     ===================
 
-    Represents a mapping of events to their corresponding types in Penpot.
+    Represents a mapping of events to their corresponding types in Penjar.
     This interface provides information about various events that can be triggered in the application.
 
     Example
     ```
-    penpot.on('pagechange', (event) => {  console.log(event);});
+    penjar.on('pagechange', (event) => {  console.log(event);});
     ```
 
     ```
@@ -6726,7 +6726,7 @@ EventsMap:
     }
     ```
 
-    Referenced by: Context, Penpot
+    Referenced by: Context, Penjar
   members:
     Properties:
       pagechange: |-
@@ -6778,7 +6778,7 @@ Export:
     Interface Export
     ================
 
-    Represents export settings in Penpot.
+    Represents export settings in Penjar.
     This interface includes properties for defining export configurations.
 
     ```
@@ -6822,7 +6822,7 @@ File:
     Interface File
     ==============
 
-    File represents a file in the Penpot application.
+    File represents a file in the Penjar application.
     It includes properties for the file's identifier, name, and revision number.
 
     ```
@@ -6832,7 +6832,7 @@ File:
         revn: number;
         pages: Page[];
         export(
-            exportType: "penpot" | "zip",
+            exportType: "penjar" | "zip",
             libraryExportType?: "all" | "merge" | "detach",
         ): Promise<Uint8Array<ArrayBufferLike>>;
         findVersions(criteria?: { createdBy: User }): Promise<FileVersion[]>;
@@ -6851,7 +6851,7 @@ File:
     * PluginData
       + File
 
-    Referenced by: Context, EventsMap, Penpot
+    Referenced by: Context, EventsMap, Penjar
   members:
     Properties:
       id: |-
@@ -6882,14 +6882,14 @@ File:
       export: |-
         ```
         export(
-            exportType: "penpot" | "zip",
+            exportType: "penjar" | "zip",
             libraryExportType?: "all" | "merge" | "detach",
         ): Promise<Uint8Array<ArrayBufferLike>>
         ```
 
         Parameters
 
-        * exportType: "penpot" | "zip"
+        * exportType: "penjar" | "zip"
         * libraryExportType: "all" | "merge" | "detach"
 
         Returns Promise<Uint8Array<ArrayBufferLike>>
@@ -7123,7 +7123,7 @@ Fill:
     Interface Fill
     ==============
 
-    Represents fill properties in Penpot. You can add a fill to any shape except for groups.
+    Represents fill properties in Penjar. You can add a fill to any shape except for groups.
     This interface includes properties for defining solid color fills, gradient fills, and image fills.
 
     ```
@@ -7190,7 +7190,7 @@ Flags:
     }
     ```
 
-    Referenced by: Context, Penpot
+    Referenced by: Context, Penjar
   members:
     Properties:
       naturalChildOrdering: |-
@@ -7207,7 +7207,7 @@ FlexLayout:
     Interface FlexLayout
     ====================
 
-    Represents a flexible layout configuration in Penpot.
+    Represents a flexible layout configuration in Penjar.
     This interface extends `CommonLayout` and includes properties for defining the direction,
     wrapping behavior, and child management of a flex layout.
 
@@ -7452,7 +7452,7 @@ Flow:
     Interface Flow
     ==============
 
-    Defines an interaction flow inside penpot. A flow is defined by a starting board for an interaction.
+    Defines an interaction flow inside penjar. A flow is defined by a starting board for an interaction.
 
     ```
     interface Flow {
@@ -7498,8 +7498,8 @@ Font:
     Interface Font
     ==============
 
-    Represents a font in Penpot, which includes details about the font family, variants, and styling options.
-    This interface provides properties and methods for describing and applying fonts within Penpot.
+    Represents a font in Penjar, which includes details about the font family, variants, and styling options.
+    This interface provides properties and methods for describing and applying fonts within Penjar.
 
     ```
     interface Font {
@@ -7610,7 +7610,7 @@ FontVariant:
     Interface FontVariant
     =====================
 
-    Represents a font variant in Penpot, which defines a specific style variation of a font.
+    Represents a font variant in Penjar, which defines a specific style variation of a font.
     This interface provides properties for describing the characteristics of a font variant.
 
     ```
@@ -7654,7 +7654,7 @@ FontsContext:
     Interface FontsContext
     ======================
 
-    Represents the context for managing fonts in Penpot.
+    Represents the context for managing fonts in Penjar.
     This interface provides methods to interact with fonts, such as retrieving fonts by ID or name.
 
     ```
@@ -7667,7 +7667,7 @@ FontsContext:
     }
     ```
 
-    Referenced by: Context, Penpot
+    Referenced by: Context, Penjar
   members:
     Properties:
       all: |-
@@ -7766,7 +7766,7 @@ GridLayout:
     Interface GridLayout
     ====================
 
-    GridLayout represents a grid layout in the Penpot application, extending the common layout interface.
+    GridLayout represents a grid layout in the Penjar application, extending the common layout interface.
     It includes properties and methods to manage rows, columns, and child elements within the grid.
 
     ```
@@ -8016,7 +8016,7 @@ GridLayout:
 
         Example
         ```
-        const board = penpot.createBoard();const grid = board.addGridLayout();grid.addRow("flex", 1);
+        const board = penjar.createBoard();const grid = board.addGridLayout();grid.addRow("flex", 1);
         ```
       addRowAtIndex: |-
         ```
@@ -8063,7 +8063,7 @@ GridLayout:
 
         Example
         ```
-        const board = penpot.createBoard();const grid = board.addGridLayout();grid.addColumn('percent', 50);
+        const board = penjar.createBoard();const grid = board.addGridLayout();grid.addColumn('percent', 50);
         ```
       addColumnAtIndex: |-
         ```
@@ -8208,7 +8208,7 @@ Group:
     Interface Group
     ===============
 
-    Represents a group of shapes in Penpot.
+    Represents a group of shapes in Penjar.
     This interface extends `ShapeBase` and includes properties and methods specific to groups.
 
     ```
@@ -8358,7 +8358,7 @@ Group:
     * ShapeBase
       + Group
 
-    Referenced by: Context, ContextTypesUtils, Penpot, Shape
+    Referenced by: Context, ContextTypesUtils, Penjar, Shape
   members:
     Properties:
       type: |-
@@ -9005,7 +9005,7 @@ Group:
         ```
 
         Combine several standard Components into a VariantComponent. Similar to doing it with the contextual menu
-        on the Penpot interface.
+        on the Penjar interface.
         The current shape must be a component main instance.
 
         Parameters
@@ -9207,7 +9207,7 @@ GuideColumn:
     Interface GuideColumn
     =====================
 
-    Represents a goard guide for columns in Penpot.
+    Represents a goard guide for columns in Penjar.
     This interface includes properties for defining the type, visibility, and parameters of column guides within a board.
 
     ```
@@ -9244,7 +9244,7 @@ GuideColumnParams:
     Interface GuideColumnParams
     ===========================
 
-    Represents parameters for board guide columns in Penpot.
+    Represents parameters for board guide columns in Penjar.
     This interface includes properties for defining the appearance and layout of column guides within a board.
 
     ```
@@ -9307,7 +9307,7 @@ GuideRow:
     Interface GuideRow
     ==================
 
-    Represents a board guide for rows in Penpot.
+    Represents a board guide for rows in Penjar.
     This interface includes properties for defining the type, visibility, and parameters of row guides within a board.
 
     ```
@@ -9345,7 +9345,7 @@ GuideSquare:
     Interface GuideSquare
     =====================
 
-    Represents a board guide for squares in Penpot.
+    Represents a board guide for squares in Penjar.
     This interface includes properties for defining the type, visibility, and parameters of square guides within a board.
 
     ```
@@ -9382,7 +9382,7 @@ GuideSquareParams:
     Interface GuideSquareParams
     ===========================
 
-    Represents parameters for board guide squares in Penpot.
+    Represents parameters for board guide squares in Penjar.
     This interface includes properties for defining the appearance and size of square guides within a board.
 
     ```
@@ -9421,7 +9421,7 @@ HistoryContext:
     }
     ```
 
-    Referenced by: Context, Penpot
+    Referenced by: Context, Penjar
   members:
     Methods:
       undoBlockBegin: |-
@@ -9459,7 +9459,7 @@ Image:
     Interface Image
     ===============
 
-    Represents an image shape in Penpot.
+    Represents an image shape in Penjar.
     This interface extends `ShapeBase` and includes properties specific to image shapes.
 
     ```
@@ -10177,7 +10177,7 @@ Image:
         ```
 
         Combine several standard Components into a VariantComponent. Similar to doing it with the contextual menu
-        on the Penpot interface.
+        on the Penjar interface.
         The current shape must be a component main instance.
 
         Parameters
@@ -10379,7 +10379,7 @@ Interaction:
     Interface Interaction
     =====================
 
-    Penpot allows you to prototype interactions by connecting boards, which can act as screens.
+    Penjar allows you to prototype interactions by connecting boards, which can act as screens.
 
     ```
     interface Interaction {
@@ -10432,7 +10432,7 @@ LayoutCellProperties:
     Interface LayoutCellProperties
     ==============================
 
-    Properties for defining the layout of a cell in Penpot.
+    Properties for defining the layout of a cell in Penjar.
 
     ```
     interface LayoutCellProperties {
@@ -10495,7 +10495,7 @@ LayoutChildProperties:
     Interface LayoutChildProperties
     ===============================
 
-    Properties for defining the layout of a child element in Penpot.
+    Properties for defining the layout of a child element in Penjar.
 
     ```
     interface LayoutChildProperties {
@@ -10641,7 +10641,7 @@ Library:
     Interface Library
     =================
 
-    Represents a library in Penpot, containing colors, typographies, and components.
+    Represents a library in Penjar, containing colors, typographies, and components.
 
     ```
     interface Library {
@@ -10692,7 +10692,7 @@ Library:
 
         Example
         ```
-        console.log(penpot.library.local.colors);
+        console.log(penjar.library.local.colors);
         ```
       typographies: |-
         ```
@@ -10709,7 +10709,7 @@ Library:
 
         Example
         ```
-        console.log(penpot.library.local.components
+        console.log(penjar.library.local.components
         ```
       tokens: |-
         ```
@@ -10733,7 +10733,7 @@ Library:
 
         Example
         ```
-        const newColor = penpot.library.local.createColor();console.log(newColor);
+        const newColor = penjar.library.local.createColor();console.log(newColor);
         ```
       createTypography: |-
         ```
@@ -10769,7 +10769,7 @@ Library:
 
         Example
         ```
-        const newComponent = penpot.library.local.createComponent([shape1, shape2]);
+        const newComponent = penjar.library.local.createComponent([shape1, shape2]);
         ```
       getPluginData: |-
         ```
@@ -10904,7 +10904,7 @@ LibraryColor:
     Interface LibraryColor
     ======================
 
-    Represents a color element from a library in Penpot.
+    Represents a color element from a library in Penjar.
     This interface extends `LibraryElement` and includes properties specific to color elements.
 
     ```
@@ -11148,7 +11148,7 @@ LibraryComponent:
     Interface LibraryComponent
     ==========================
 
-    Represents a component element from a library in Penpot.
+    Represents a component element from a library in Penjar.
     This interface extends `LibraryElement` and includes properties specific to component elements.
 
     ```
@@ -11242,7 +11242,7 @@ LibraryComponent:
 
         Creates a new Variant from this standard Component. It creates a VariantContainer, transform this Component into a VariantComponent, duplicates it, and creates a
         set of properties based on the component name and path.
-        Similar to doing it with the contextual menu or the shortcut on the Penpot interface
+        Similar to doing it with the contextual menu or the shortcut on the Penjar interface
 
         Returns void
       getPluginData: |-
@@ -11378,7 +11378,7 @@ LibraryVariantComponent:
     Interface LibraryVariantComponent
     =================================
 
-    Represents a component element from a library in Penpot.
+    Represents a component element from a library in Penjar.
     This interface extends `LibraryElement` and includes properties specific to component elements.
 
     ```
@@ -11495,7 +11495,7 @@ LibraryVariantComponent:
 
         Creates a new Variant from this standard Component. It creates a VariantContainer, transform this Component into a VariantComponent, duplicates it, and creates a
         set of properties based on the component name and path.
-        Similar to doing it with the contextual menu or the shortcut on the Penpot interface
+        Similar to doing it with the contextual menu or the shortcut on the Penjar interface
 
         Returns void
       addVariant: |-
@@ -11652,7 +11652,7 @@ LibraryElement:
     Interface LibraryElement
     ========================
 
-    Represents an element in a Penpot library.
+    Represents an element in a Penjar library.
     This interface provides information about a specific element in a library.
 
     ```
@@ -11837,8 +11837,8 @@ LibrarySummary:
     Interface LibrarySummary
     ========================
 
-    Represents a summary of a Penpot library.
-    This interface provides properties for summarizing various aspects of a Penpot library.
+    Represents a summary of a Penjar library.
+    This interface provides properties for summarizing various aspects of a Penjar library.
 
     ```
     interface LibrarySummary {
@@ -11888,7 +11888,7 @@ LibraryTypography:
     Interface LibraryTypography
     ===========================
 
-    Represents a typography element from a library in Penpot.
+    Represents a typography element from a library in Penjar.
     This interface extends `LibraryElement` and includes properties specific to typography elements.
 
     ```
@@ -12212,7 +12212,7 @@ LocalStorage:
     }
     ```
 
-    Referenced by: Context, Penpot
+    Referenced by: Context, Penjar
   members:
     Methods:
       getItem: |-
@@ -12518,7 +12518,7 @@ Page:
     Interface Page
     ==============
 
-    Page represents a page in the Penpot application.
+    Page represents a page in the Penjar application.
     It includes properties for the page's identifier and name, as well as methods for managing shapes on the page.
 
     ```
@@ -12572,7 +12572,7 @@ Page:
     * PluginData
       + Page
 
-    Referenced by: Context, EventsMap, File, Flow, Penpot
+    Referenced by: Context, EventsMap, File, Flow, Penjar
   members:
     Properties:
       id: |-
@@ -12624,7 +12624,7 @@ Page:
 
         Example
         ```
-        const shape = penpot.currentPage.getShapeById('shapeId');
+        const shape = penjar.currentPage.getShapeById('shapeId');
         ```
       findShapes: |-
         ```
@@ -12670,7 +12670,7 @@ Page:
 
         Example
         ```
-        const shapes = penpot.currentPage.findShapes({ name: 'exampleName' });
+        const shapes = penjar.currentPage.findShapes({ name: 'exampleName' });
         ```
       createFlow: |-
         ```
@@ -12692,7 +12692,7 @@ Page:
 
         Example
         ```
-        const flow = penpot.currentPage.createFlow('exampleFlow', board);
+        const flow = penjar.currentPage.createFlow('exampleFlow', board);
         ```
       removeFlow: |-
         ```
@@ -12920,7 +12920,7 @@ Path:
     Interface Path
     ==============
 
-    Represents a path shape in Penpot.
+    Represents a path shape in Penjar.
     This interface extends `ShapeBase` and includes properties and methods specific to paths.
 
     ```
@@ -13067,7 +13067,7 @@ Path:
     * ShapeBase
       + Path
 
-    Referenced by: Context, ContextTypesUtils, Penpot, Shape
+    Referenced by: Context, ContextTypesUtils, Penjar, Shape
   members:
     Properties:
       type: |-
@@ -13680,7 +13680,7 @@ Path:
         ```
 
         Combine several standard Components into a VariantComponent. Similar to doing it with the contextual menu
-        on the Penpot interface.
+        on the Penjar interface.
         The current shape must be a component main instance.
 
         Parameters
@@ -13882,7 +13882,7 @@ PathCommand:
     Interface PathCommand
     =====================
 
-    Represents a path command in Penpot.
+    Represents a path command in Penjar.
     This interface includes a property for defining the type of command.
 
     ```
@@ -14029,7 +14029,7 @@ PluginData:
     Interface PluginData
     ====================
 
-    Provides methods for managing plugin-specific data associated with a Penpot shape.
+    Provides methods for managing plugin-specific data associated with a Penjar shape.
 
     ```
     interface PluginData {
@@ -14251,7 +14251,7 @@ Rectangle:
     Interface Rectangle
     ===================
 
-    Represents a rectangle shape in Penpot.
+    Represents a rectangle shape in Penjar.
     This interface extends `ShapeBase` and includes properties specific to rectangles.
 
     ```
@@ -14394,7 +14394,7 @@ Rectangle:
     * ShapeBase
       + Rectangle
 
-    Referenced by: Context, ContextTypesUtils, Penpot, Shape
+    Referenced by: Context, ContextTypesUtils, Penjar, Shape
   members:
     Properties:
       type: |-
@@ -14971,7 +14971,7 @@ Rectangle:
         ```
 
         Combine several standard Components into a VariantComponent. Similar to doing it with the contextual menu
-        on the Penpot interface.
+        on the Penjar interface.
         The current shape must be a component main instance.
 
         Parameters
@@ -15211,7 +15211,7 @@ Shadow:
     Interface Shadow
     ================
 
-    Represents shadow properties in Penpot.
+    Represents shadow properties in Penjar.
     This interface includes properties for defining drop shadows and inner shadows, along with their visual attributes.
 
     ```
@@ -15287,7 +15287,7 @@ ShapeBase:
     Interface ShapeBase
     ===================
 
-    Represents the base properties and methods of a shape in Penpot.
+    Represents the base properties and methods of a shape in Penjar.
     This interface provides common properties and methods shared by all shapes.
 
     ```
@@ -16006,7 +16006,7 @@ ShapeBase:
         ```
 
         Combine several standard Components into a VariantComponent. Similar to doing it with the contextual menu
-        on the Penpot interface.
+        on the Penjar interface.
         The current shape must be a component main instance.
 
         Parameters
@@ -16266,7 +16266,7 @@ Stroke:
     Interface Stroke
     ================
 
-    Represents stroke properties in Penpot. You can add a stroke to any shape except for groups.
+    Represents stroke properties in Penjar. You can add a stroke to any shape except for groups.
     This interface includes properties for defining the color, style, width, alignment, and caps of a stroke.
 
     ```
@@ -16353,7 +16353,7 @@ SvgRaw:
     Interface SvgRaw
     ================
 
-    Represents an SVG raw shape in Penpot.
+    Represents an SVG raw shape in Penjar.
     This interface extends `ShapeBase` and includes properties specific to raw SVG shapes.
 
     ```
@@ -17070,7 +17070,7 @@ SvgRaw:
         ```
 
         Combine several standard Components into a VariantComponent. Similar to doing it with the contextual menu
-        on the Penpot interface.
+        on the Penjar interface.
         The current shape must be a component main instance.
 
         Parameters
@@ -17272,7 +17272,7 @@ Text:
     Interface Text
     ==============
 
-    Text represents a text element in the Penpot application, extending the base shape interface.
+    Text represents a text element in the Penjar application, extending the base shape interface.
     It includes various properties to define the text content and its styling attributes.
 
     ```
@@ -17434,7 +17434,7 @@ Text:
     * ShapeBase
       + Text
 
-    Referenced by: Context, ContextTypesUtils, Font, Penpot, Shape, TextRange
+    Referenced by: Context, ContextTypesUtils, Font, Penjar, Shape, TextRange
   members:
     Properties:
       id: |-
@@ -18111,7 +18111,7 @@ Text:
         ```
 
         Combine several standard Components into a VariantComponent. Similar to doing it with the contextual menu
-        on the Penpot interface.
+        on the Penjar interface.
         The current shape must be a component main instance.
 
         Parameters
@@ -18618,7 +18618,7 @@ Track:
     Interface Track
     ===============
 
-    Represents a track configuration in Penpot.
+    Represents a track configuration in Penjar.
     This interface includes properties for defining the type and value of a track used in layout configurations.
 
     ```
@@ -18655,7 +18655,7 @@ TokenBase:
     Interface TokenBase
     ===================
 
-    Represents the base properties and methods of a Design Token in Penpot, shared by
+    Represents the base properties and methods of a Design Token in Penjar, shared by
     all token types.
 
     ```
@@ -18701,7 +18701,7 @@ TokenBase:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -18823,7 +18823,7 @@ TokenBorderRadius:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -19083,7 +19083,7 @@ TokenShadow:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -19229,7 +19229,7 @@ TokenColor:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -19371,7 +19371,7 @@ TokenDimension:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -19515,7 +19515,7 @@ TokenFontFamilies:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -19662,7 +19662,7 @@ TokenFontSizes:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -19806,7 +19806,7 @@ TokenFontWeights:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -19951,7 +19951,7 @@ TokenLetterSpacing:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -20095,7 +20095,7 @@ TokenNumber:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -20239,7 +20239,7 @@ TokenOpacity:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -20384,7 +20384,7 @@ TokenRotation:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -20529,7 +20529,7 @@ TokenSizing:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -20673,7 +20673,7 @@ TokenSpacing:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -20817,7 +20817,7 @@ TokenBorderWidth:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -20961,7 +20961,7 @@ TokenTextCase:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -21106,7 +21106,7 @@ TokenTextDecoration:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -21380,7 +21380,7 @@ TokenTypography:
         readonly id: string
         ```
 
-        The unique identifier for this token, used only internally inside Penpot.
+        The unique identifier for this token, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -21491,7 +21491,7 @@ TokenCatalog:
     Interface TokenCatalog
     ======================
 
-    The collection of all tokens in a Penpot file's library.
+    The collection of all tokens in a Penjar file's library.
 
     Tokens are contained in sets, that can be marked as active
     or inactive to control the resolved value of the tokens.
@@ -21629,7 +21629,7 @@ TokenSet:
         readonly id: string
         ```
 
-        The unique identifier for this set, used only internally inside Penpot.
+        The unique identifier for this set, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       name: |-
         ```
@@ -21759,7 +21759,7 @@ TokenTheme:
         readonly id: string
         ```
 
-        The unique identifier for this theme, used only internally inside Penpot.
+        The unique identifier for this theme, used only internally inside Penjar.
         This one is not exported or synced with external Design Token sources.
       externalId: |-
         ```
@@ -21846,7 +21846,7 @@ User:
     Interface User
     ==============
 
-    Represents a user in Penpot.
+    Represents a user in Penjar.
 
     ```
     interface User {
@@ -21863,7 +21863,7 @@ User:
     * User
       + ActiveUser
 
-    Referenced by: Comment, CommentThread, Context, File, FileVersion, Penpot
+    Referenced by: Comment, CommentThread, Context, File, FileVersion, Penjar
   members:
     Properties:
       id: |-
@@ -22039,7 +22039,7 @@ Viewport:
     Interface Viewport
     ==================
 
-    Viewport represents the viewport in the Penpot application.
+    Viewport represents the viewport in the Penjar application.
     It includes the center point, zoom level, and the bounds of the viewport.
 
     ```
@@ -22053,7 +22053,7 @@ Viewport:
     }
     ```
 
-    Referenced by: Context, Penpot
+    Referenced by: Context, Penjar
   members:
     Properties:
       center: |-
@@ -22146,10 +22146,10 @@ BooleanType:
     BooleanType: "union" | "difference" | "exclude" | "intersection"
     ```
 
-    Represents the boolean operation types available in Penpot.
+    Represents the boolean operation types available in Penjar.
     These types define how shapes can be combined or modified using boolean operations.
 
-    Referenced by: Context, Penpot
+    Referenced by: Context, Penjar
   members: {}
 Bounds:
   overview: |-
@@ -22205,7 +22205,7 @@ Gradient:
     Type Alias Gradient
     ===================
 
-    Represents a gradient configuration in Penpot.
+    Represents a gradient configuration in Penjar.
     A gradient can be either linear or radial and includes properties to define its shape, position, and color stops.
 
     ```
@@ -22282,7 +22282,7 @@ Guide:
     Guide: GuideColumn | GuideRow | GuideSquare
     ```
 
-    Represents a board guide in Penpot.
+    Represents a board guide in Penjar.
     This type can be one of several specific board guide types: column, row, or square.
 
     Referenced by: Board, VariantContainer
@@ -22292,7 +22292,7 @@ ImageData:
     Type Alias ImageData
     ====================
 
-    Represents image data in Penpot.
+    Represents image data in Penjar.
     This includes properties for defining the image's dimensions, metadata, and aspect ratio handling.
 
     ```
@@ -22307,7 +22307,7 @@ ImageData:
     }
     ```
 
-    Referenced by: Color, Context, Fill, LibraryColor, Penpot
+    Referenced by: Color, Context, Fill, LibraryColor, Penjar
   members:
     Properties:
       name: |-
@@ -22361,7 +22361,7 @@ LibraryContext:
     Type Alias LibraryContext
     =========================
 
-    Represents the context of Penpot libraries, including both local and connected libraries.
+    Represents the context of Penjar libraries, including both local and connected libraries.
     This type contains references to the local library and an array of connected libraries.
 
     ```
@@ -22373,7 +22373,7 @@ LibraryContext:
     }
     ```
 
-    Referenced by: Context, Penpot
+    Referenced by: Context, Penjar
   members:
     Properties:
       local: |-
@@ -22381,7 +22381,7 @@ LibraryContext:
         readonly local: Library
         ```
 
-        The local library in the Penpot context.
+        The local library in the Penjar context.
 
         Example
         ```
@@ -22392,7 +22392,7 @@ LibraryContext:
         readonly connected: Library[]
         ```
 
-        An array of connected libraries in the Penpot context.
+        An array of connected libraries in the Penjar context.
 
         Example
         ```
@@ -22489,15 +22489,15 @@ Shape:
         | Image
     ```
 
-    Shape represents a union of various shape types used in the Penpot project.
+    Shape represents a union of various shape types used in the Penjar project.
     This type allows for different shapes to be handled under a single type umbrella.
 
     Example
     ```
-    let shape: Shape;if (penpot.utils.types.isRectangle(shape)) {  console.log(shape.type);}
+    let shape: Shape;if (penjar.utils.types.isRectangle(shape)) {  console.log(shape.type);}
     ```
 
-    Referenced by: Board, Boolean, Context, ContextGeometryUtils, ContextTypesUtils, Ellipse, EventsMap, FlexLayout, GridLayout, Group, Image, Interaction, Library, LibraryComponent, LibraryTypography, LibraryVariantComponent, OpenOverlay, OverlayAction, Page, Path, Penpot, Rectangle, ShapeBase, SvgRaw, Text, ToggleOverlay, TokenBase, TokenBorderRadius, TokenBorderWidth, TokenColor, TokenDimension, TokenFontFamilies, TokenFontSizes, TokenFontWeights, TokenLetterSpacing, TokenNumber, TokenOpacity, TokenRotation, TokenShadow, TokenSizing, TokenSpacing, TokenTextCase, TokenTextDecoration, TokenTypography, VariantContainer, Viewport
+    Referenced by: Board, Boolean, Context, ContextGeometryUtils, ContextTypesUtils, Ellipse, EventsMap, FlexLayout, GridLayout, Group, Image, Interaction, Library, LibraryComponent, LibraryTypography, LibraryVariantComponent, OpenOverlay, OverlayAction, Page, Path, Penjar, Rectangle, ShapeBase, SvgRaw, Text, ToggleOverlay, TokenBase, TokenBorderRadius, TokenBorderWidth, TokenColor, TokenDimension, TokenFontFamilies, TokenFontSizes, TokenFontWeights, TokenLetterSpacing, TokenNumber, TokenOpacity, TokenRotation, TokenShadow, TokenSizing, TokenSpacing, TokenTextCase, TokenTextDecoration, TokenTypography, VariantContainer, Viewport
   members: {}
 StrokeCap:
   overview: |-
@@ -22515,7 +22515,7 @@ StrokeCap:
         | "diamond-marker"
     ```
 
-    Represents the cap style of a stroke in Penpot.
+    Represents the cap style of a stroke in Penjar.
     This type defines various styles for the ends of a stroke.
 
     Referenced by: Stroke
@@ -22531,7 +22531,7 @@ Theme:
 
     This type specifies the possible themes: 'light' or 'dark'.
 
-    Referenced by: Context, EventsMap, Penpot
+    Referenced by: Context, EventsMap, Penjar
   members: {}
 TrackType:
   overview: |-
@@ -22542,7 +22542,7 @@ TrackType:
     TrackType: "flex" | "fixed" | "percent" | "auto"
     ```
 
-    Represents the type of track in Penpot.
+    Represents the type of track in Penjar.
     This type defines various track types that can be used in layout configurations.
 
     Referenced by: GridLayout, Track
@@ -22608,7 +22608,7 @@ Token:
         | TokenTypography
     ```
 
-    The supported Design Tokens in Penpot.
+    The supported Design Tokens in Penjar.
 
     Referenced by: Board, Boolean, Ellipse, Group, Image, Path, Rectangle, ShapeBase, SvgRaw, Text, TokenBase, TokenBorderRadius, TokenBorderWidth, TokenColor, TokenDimension, TokenFontFamilies, TokenFontSizes, TokenFontWeights, TokenLetterSpacing, TokenNumber, TokenOpacity, TokenRotation, TokenSet, TokenShadow, TokenSizing, TokenSpacing, TokenTextCase, TokenTextDecoration, TokenTypography, VariantContainer
   members: {}
@@ -22895,7 +22895,7 @@ TokenType:
         | "typography"
     ```
 
-    The supported types of Design Tokens in Penpot.
+    The supported types of Design Tokens in Penjar.
 
     Referenced by: TokenSet
   members: {}

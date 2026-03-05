@@ -5772,13 +5772,13 @@
     "~:id": "~u7b2da435-6186-815a-8007-0daa95d2f26d",
     "~:options": { "~:components-v2": true, "~:base-font-size": "16px" },
     "~:tokens-lib": {
-      "~#penpot/tokens-lib": {
+      "~#penjar/tokens-lib": {
         "~:sets": {
           "~#ordered-map": [
             [
               "S-Global",
               {
-                "~#penpot/token-set": {
+                "~#penjar/token-set": {
                   "~:id": "~u5403f14e-eb02-80be-8007-0494f09cefca",
                   "~:name": "Global",
                   "~:description": "",
@@ -5788,7 +5788,7 @@
                       [
                         "col-gap",
                         {
-                          "~#penpot/token": {
+                          "~#penjar/token": {
                             "~:id": "~u5403f14e-eb02-80be-8007-0494fe496430",
                             "~:name": "col-gap",
                             "~:type": "~:dimensions",
@@ -5801,7 +5801,7 @@
                       [
                         "font.multiplier",
                         {
-                          "~#penpot/token": {
+                          "~#penjar/token": {
                             "~:id": "~u6ce76eb4-b183-804e-8007-04b0aa8a24a7",
                             "~:name": "font.multiplier",
                             "~:type": "~:number",
@@ -5814,7 +5814,7 @@
                       [
                         "font.size",
                         {
-                          "~#penpot/token": {
+                          "~#penjar/token": {
                             "~:id": "~u6ce76eb4-b183-804e-8007-04b0c3cdd9d1",
                             "~:name": "font.size",
                             "~:type": "~:number",
@@ -5827,7 +5827,7 @@
                       [
                         "medium",
                         {
-                          "~#penpot/token": {
+                          "~#penjar/token": {
                             "~:id": "~u6ce76eb4-b183-804e-8007-04b0ec55d409",
                             "~:name": "medium",
                             "~:type": "~:font-size",
@@ -5840,7 +5840,7 @@
                       [
                         "large",
                         {
-                          "~#penpot/token": {
+                          "~#penjar/token": {
                             "~:id": "~u6ce76eb4-b183-804e-8007-04b103dc0613",
                             "~:name": "large",
                             "~:type": "~:font-size",
@@ -5853,7 +5853,7 @@
                       [
                         "body",
                         {
-                          "~#penpot/token": {
+                          "~#penjar/token": {
                             "~:id": "~u6ce76eb4-b183-804e-8007-04b1277b94f1",
                             "~:name": "body",
                             "~:type": "~:typography",
@@ -5869,7 +5869,7 @@
                       [
                         "title",
                         {
-                          "~#penpot/token": {
+                          "~#penjar/token": {
                             "~:id": "~u6ce76eb4-b183-804e-8007-04b138ad1f25",
                             "~:name": "title",
                             "~:type": "~:typography",
@@ -5885,7 +5885,7 @@
                       [
                         "primary",
                         {
-                          "~#penpot/token": {
+                          "~#penjar/token": {
                             "~:id": "~u6ce76eb4-b183-804e-8007-04b1985fc76d",
                             "~:name": "primary",
                             "~:type": "~:color",
@@ -5898,7 +5898,7 @@
                       [
                         "font.sans",
                         {
-                          "~#penpot/token": {
+                          "~#penjar/token": {
                             "~:id": "~u6ce76eb4-b183-804e-8007-04b65149e6ab",
                             "~:name": "font.sans",
                             "~:type": "~:font-family",
@@ -5911,7 +5911,7 @@
                       [
                         "bold",
                         {
-                          "~#penpot/token": {
+                          "~#penjar/token": {
                             "~:id": "~u6ce76eb4-b183-804e-8007-04b66296365e",
                             "~:name": "bold",
                             "~:type": "~:font-weight",
@@ -5924,7 +5924,7 @@
                       [
                         "radius",
                         {
-                          "~#penpot/token": {
+                          "~#penjar/token": {
                             "~:id": "~u6ce76eb4-b183-804e-8007-04b769351486",
                             "~:name": "radius",
                             "~:type": "~:border-radius",
@@ -5937,7 +5937,7 @@
                       [
                         "shadowToken",
                         {
-                          "~#penpot/token": {
+                          "~#penjar/token": {
                             "~:id": "~u63c623e4-0e89-80ce-8007-1168ea143ca8",
                             "~:name": "shadowToken",
                             "~:type": "~:shadow",
@@ -5970,11 +5970,11 @@
               {
                 "~#ordered-map": [
                   [
-                    "__PENPOT__HIDDEN__TOKEN__THEME__",
+                    "__PENJAR__HIDDEN__TOKEN__THEME__",
                     {
-                      "~#penpot/token-theme": {
+                      "~#penjar/token-theme": {
                         "~:id": "~u00000000-0000-0000-0000-000000000000",
-                        "~:name": "__PENPOT__HIDDEN__TOKEN__THEME__",
+                        "~:name": "__PENJAR__HIDDEN__TOKEN__THEME__",
                         "~:group": "",
                         "~:description": "",
                         "~:is-source": false,
@@ -5989,7 +5989,7 @@
             ]
           ]
         },
-        "~:active-themes": { "~#set": ["/__PENPOT__HIDDEN__TOKEN__THEME__"] }
+        "~:active-themes": { "~#set": ["/__PENJAR__HIDDEN__TOKEN__THEME__"] }
       }
     },
     "~:colors": {

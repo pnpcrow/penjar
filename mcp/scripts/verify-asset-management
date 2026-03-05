@@ -1,0 +1,193 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SERVER_DIR="$PROJECT_ROOT/packages/server"
+
+HEALTH_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/health"
+MCP_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/mcp"
+WS_URL="ws://127.0.0.1:${PENJAR_MCP_WEBSOCKET_PORT:-4402}"
+
+TMP_BASE="${TMPDIR:-/tmp}"
+SERVER_LOG="$TMP_BASE/penjar-mcp-asset-management-$$.log"
+TMP_IMAGE="$TMP_BASE/penjar-mcp-asset-fixture-$$.png"
+SERVER_PID=""
+
+log_step() {
+    printf "\n[ASSET-CHECK] %s\n" "$1"
+}
+
+cleanup() {
+    if [ -n "$SERVER_PID" ] && kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+        kill "$SERVER_PID" >/dev/null 2>&1 || true
+        wait "$SERVER_PID" >/dev/null 2>&1 || true
+    fi
+
+    rm -f "$SERVER_LOG" "$TMP_IMAGE"
+}
+
+trap cleanup EXIT
+
+if [ "${VERIFY_ASSET_SKIP_BUILD:-false}" = "true" ]; then
+    log_step "Skip build step (VERIFY_ASSET_SKIP_BUILD=true)"
+else
+    log_step "Build required packages for asset management probe"
+    cd "$PROJECT_ROOT"
+    pnpm --filter mcp-common run build
+    pnpm --filter mcp-server run build
+fi
+
+log_step "Create PNG fixture image"
+node -e 'require("node:fs").writeFileSync(process.argv[1], Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7+qGsAAAAASUVORK5CYII=", "base64"));' "$TMP_IMAGE"
+
+log_step "Start MCP server (single-user, timeout=2s)"
+cd "$SERVER_DIR"
+PENJAR_MCP_TASK_TIMEOUT_SECS=2 node dist/index.js >"$SERVER_LOG" 2>&1 &
+SERVER_PID="$!"
+
+log_step "Wait for /health endpoint"
+for _ in $(seq 1 20); do
+    if curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+done
+
+if ! curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+    echo "[ASSET-CHECK][FAIL] server did not become healthy."
+    echo "[ASSET-CHECK][INFO] Server log:"
+    cat "$SERVER_LOG"
+    exit 1
+fi
+
+log_step "Run asset import + resilience probe with fake plugin session"
+node --input-type=module - "$MCP_URL" "$WS_URL" "$TMP_IMAGE" <<'EOF'
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
+import WebSocket from "ws";
+
+const [mcpUrl, wsUrl, imagePath] = process.argv.slice(2);
+let mode = "success";
+let sawImportPayload = false;
+let sawRecoveryImportPayload = false;
+
+function attachPluginHandler(socket, responseShapeId) {
+  socket.on("message", (payload) => {
+    try {
+      const request = JSON.parse(payload.toString());
+      if (!request || typeof request !== "object" || request.task !== "executeCode" || !request.id) {
+        return;
+      }
+
+      const code = request.params?.code ?? "";
+      if (typeof code === "string" && code.includes("penjarUtils.importImage")) {
+        if (responseShapeId === "asset-shape-1") {
+          sawImportPayload = true;
+        } else {
+          sawRecoveryImportPayload = true;
+        }
+      }
+
+      if (mode === "timeout" && responseShapeId === "asset-shape-1") {
+        // intentionally ignore to trigger timeout
+        return;
+      }
+
+      socket.send(
+        JSON.stringify({
+          id: request.id,
+          success: true,
+          data: { result: { shapeId: responseShapeId }, log: "" },
+        })
+      );
+    } catch {
+      // ignore malformed probe payloads
+    }
+  });
+}
+
+const ws = new WebSocket(wsUrl);
+await new Promise((resolve, reject) => {
+  ws.once("open", resolve);
+  ws.once("error", reject);
+});
+attachPluginHandler(ws, "asset-shape-1");
+
+const client = new Client({ name: "asset-management-check", version: "1.0.0" }, { capabilities: {} });
+const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
+
+async function callTool(name, args) {
+  const result = await client.request(
+    { method: "tools/call", params: { name, arguments: args } },
+    CallToolResultSchema
+  );
+  const text = result.content.find((item) => item.type === "text")?.text ?? "";
+  return text;
+}
+
+try {
+  await client.connect(transport);
+
+  const importText = await callTool("import_image", { filePath: imagePath, x: 10, y: 20, width: 50, height: 50 });
+  let importPayload;
+  try {
+    importPayload = JSON.parse(importText);
+  } catch (error) {
+    throw new Error(`import_image returned non-JSON payload: ${importText}`);
+  }
+  if (importPayload?.shapeId !== "asset-shape-1") {
+    throw new Error(`import_image success flow mismatch: ${importText}`);
+  }
+  if (!sawImportPayload) {
+    throw new Error("import_image request did not reach fake plugin payload handler.");
+  }
+
+  mode = "timeout";
+  const timeoutText = await callTool("execute_code", { code: "return 'timeout-check';" });
+  if (!timeoutText.includes("[Diagnostic PLUGIN_TASK_TIMEOUT]")) {
+    throw new Error(`Expected timeout diagnostic, got: ${timeoutText}`);
+  }
+
+  ws.close();
+  await new Promise((resolve) => ws.once("close", resolve));
+
+  const disconnectedText = await callTool("execute_code", { code: "return 'disconnect-check';" });
+  if (!disconnectedText.includes("[Diagnostic PLUGIN_DISCONNECTED]")) {
+    throw new Error(`Expected disconnected diagnostic, got: ${disconnectedText}`);
+  }
+
+  mode = "recovery";
+  const wsRecovery = new WebSocket(wsUrl);
+  await new Promise((resolve, reject) => {
+    wsRecovery.once("open", resolve);
+    wsRecovery.once("error", reject);
+  });
+  attachPluginHandler(wsRecovery, "asset-shape-2");
+
+  const recoveryImportText = await callTool("import_image", { filePath: imagePath, x: 16, y: 24, width: 60, height: 60 });
+  let recoveryImportPayload;
+  try {
+    recoveryImportPayload = JSON.parse(recoveryImportText);
+  } catch (error) {
+    throw new Error(`recovery import_image returned non-JSON payload: ${recoveryImportText}`);
+  }
+  if (recoveryImportPayload?.shapeId !== "asset-shape-2") {
+    throw new Error(`Recovery import flow mismatch: ${recoveryImportText}`);
+  }
+  if (!sawRecoveryImportPayload) {
+    throw new Error("Recovery import_image request did not reach fake plugin payload handler.");
+  }
+
+  wsRecovery.close();
+  await new Promise((resolve) => wsRecovery.once("close", resolve));
+
+  console.log("[ASSET-CHECK] Verified asset import resilience + reconnect recovery");
+} finally {
+  await transport.close();
+}
+EOF
+
+log_step "Asset management probe passed"

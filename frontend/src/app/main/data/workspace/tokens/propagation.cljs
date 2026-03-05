@@ -218,7 +218,7 @@
                                  (ctob/get-tokens-in-active-sets))]
         (->> (if (contains? cf/flags :tokenscript)
                (rx/of (-> (ts/resolve-tokens tokens-tree)
-                          (d/update-vals #(update % :resolved-value ts/tokenscript-symbols->penpot-unit))))
+                          (d/update-vals #(update % :resolved-value ts/tokenscript-symbols->penjar-unit))))
                (sd/resolve-tokens tokens-tree))
              (rx/mapcat (fn [sd-tokens]
                           (let [undo-id (js/Symbol)]

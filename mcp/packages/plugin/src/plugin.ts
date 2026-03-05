@@ -13,17 +13,17 @@ declare const IS_MULTI_USER_MODE: boolean;
 const isMultiUserMode = typeof IS_MULTI_USER_MODE !== "undefined" ? IS_MULTI_USER_MODE : false;
 
 // Open the plugin UI (main.ts)
-penpot.ui.open("Penpot MCP Plugin", `?theme=${penpot.theme}&multiUser=${isMultiUserMode}`, {
+penjar.ui.open("Penjar MCP Plugin", `?theme=${penjar.theme}&multiUser=${isMultiUserMode}`, {
     width: 158,
     height: 200,
     hidden: !!mcp,
 } as any);
 
 // Handle messages
-penpot.ui.onMessage<string | { id: string; type?: string; status?: string; task: string; params: any }>((message) => {
+penjar.ui.onMessage<string | { id: string; type?: string; status?: string; task: string; params: any }>((message) => {
     // Handle plugin task requests
     if (mcp && typeof message === "object" && message.type === "ui-initialized") {
-        penpot.ui.sendMessage({
+        penjar.ui.sendMessage({
             type: "start-server",
             url: mcp?.getServerUrl(),
             token: mcp?.getToken(),
@@ -75,12 +75,12 @@ async function handlePluginTaskRequest(request: { id: string; task: string; para
 
 if (mcp) {
     mcp.on("disconnect", async () => {
-        penpot.ui.sendMessage({
+        penjar.ui.sendMessage({
             type: "stop-server",
         });
     });
     mcp.on("connect", async () => {
-        penpot.ui.sendMessage({
+        penjar.ui.sendMessage({
             type: "start-server",
             url: mcp?.getServerUrl(),
             token: mcp?.getToken(),
@@ -89,9 +89,9 @@ if (mcp) {
 }
 
 // Handle theme change in the iframe
-penpot.on("themechange", (theme) => {
-    penpot.ui.sendMessage({
-        source: "penpot",
+penjar.on("themechange", (theme) => {
+    penjar.ui.sendMessage({
+        source: "penjar",
         type: "themechange",
         theme,
     });

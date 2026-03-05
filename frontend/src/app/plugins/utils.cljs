@@ -224,13 +224,13 @@
 (defn display-not-valid
   [code value]
   (if (some? value)
-    (.error js/console (dm/str "[PENPOT PLUGIN] Value not valid: " value ". Code: " code))
-    (.error js/console (dm/str "[PENPOT PLUGIN] Value not valid. Code: " code)))
+    (.error js/console (dm/str "[PENJAR PLUGIN] Value not valid: " value ". Code: " code))
+    (.error js/console (dm/str "[PENJAR PLUGIN] Value not valid. Code: " code)))
   nil)
 
 (defn reject-not-valid
   [reject code value]
-  (let [msg (dm/str "[PENPOT PLUGIN] Value not valid: " value ". Code: " code)]
+  (let [msg (dm/str "[PENJAR PLUGIN] Value not valid: " value ". Code: " code)]
     (.error js/console msg)
     (reject msg)))
 

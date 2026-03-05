@@ -89,7 +89,7 @@
                      (swap! state* update :files mark-file-error file-id)
                      (do
                        (swap! state* update :files mark-file-success file-id)
-                       (dom/trigger-download-uri filename "application/penpot" uri))))))))
+                       (dom/trigger-download-uri filename "application/penjar" uri))))))))
 
         on-cancel
         (mf/use-fn

@@ -65,18 +65,18 @@
 
 (defn- parse-flags
   [global]
-  (let [flags (obj/get global "penpotFlags" "")
+  (let [flags (obj/get global "penjarFlags" "")
         flags (sequence (map keyword) (str/words flags))]
     (flags/parse flags/default flags)))
 
 (defn- parse-version
   [global]
-  (-> (obj/get global "penpotVersion")
+  (-> (obj/get global "penjarVersion")
       (v/parse)))
 
 (defn parse-build-date
   [global]
-  (let [date (obj/get global "penpotBuildDate")]
+  (let [date (obj/get global "penjarBuildDate")]
     (if (= date "%buildDate%")
       "unknown"
       date)))
@@ -86,7 +86,7 @@
 (def default-theme  "default")
 (def default-language "en")
 
-(def themes               (obj/get global "penpotThemes"))
+(def themes               (obj/get global "penjarThemes"))
 
 (def build-date           (parse-build-date global))
 (def flags                (parse-flags global))
@@ -95,14 +95,14 @@
 (def browser              (parse-browser))
 (def platform             (parse-platform))
 
-(def version-tag          (obj/get global "penpotVersionTag"))
-(def terms-of-service-uri (obj/get global "penpotTermsOfServiceURI"))
-(def privacy-policy-uri   (obj/get global "penpotPrivacyPolicyURI"))
-(def flex-help-uri        (obj/get global "penpotGridHelpURI" "https://help.penpot.app/user-guide/flexible-layouts/"))
-(def grid-help-uri        (obj/get global "penpotGridHelpURI" "https://help.penpot.app/user-guide/flexible-layouts/"))
-(def plugins-list-uri     (obj/get global "penpotPluginsListUri" "https://penpot.app/penpothub/plugins"))
-(def plugins-whitelist    (into #{} (obj/get global "penpotPluginsWhitelist" [])))
-(def templates-uri        (obj/get global "penpotTemplatesUri" "https://penpot.github.io/penpot-files/"))
+(def version-tag          (obj/get global "penjarVersionTag"))
+(def terms-of-service-uri (obj/get global "penjarTermsOfServiceURI"))
+(def privacy-policy-uri   (obj/get global "penjarPrivacyPolicyURI"))
+(def flex-help-uri        (obj/get global "penjarGridHelpURI" "https://help.penjar.app/user-guide/flexible-layouts/"))
+(def grid-help-uri        (obj/get global "penjarGridHelpURI" "https://help.penjar.app/user-guide/flexible-layouts/"))
+(def plugins-list-uri     (obj/get global "penjarPluginsListUri" "https://penjar.app/penjarhub/plugins"))
+(def plugins-whitelist    (into #{} (obj/get global "penjarPluginsWhitelist" [])))
+(def templates-uri        (obj/get global "penjarTemplatesUri" "https://penjar.github.io/penjar-files/"))
 
 ;; We set the current parsed flags under common for make
 ;; it available for common code without the need to pass
@@ -116,19 +116,19 @@
   (u/ensure-path-slash uri-str))
 
 (def public-uri
-  (normalize-uri (or (obj/get global "penpotPublicURI")
+  (normalize-uri (or (obj/get global "penjarPublicURI")
                      (obj/get location "origin"))))
 
 (def mcp-ws-uri
-  (or (some-> (obj/get global "penpotMcpServerURI") u/uri)
+  (or (some-> (obj/get global "penjarMcpServerURI") u/uri)
       (u/join public-uri "mcp/ws")))
 
 (def rasterizer-uri
-  (or (some-> (obj/get global "penpotRasterizerURI") normalize-uri)
+  (or (some-> (obj/get global "penjarRasterizerURI") normalize-uri)
       public-uri))
 
 (def worker-uri
-  (obj/get global "penpotWorkerURI" "/js/worker/main.js"))
+  (obj/get global "penjarWorkerURI" "/js/worker/main.js"))
 
 (defn external-feature-flag
   [flag value]
@@ -152,7 +152,7 @@
     (when (fn? f) (f))))
 
 (def mcp-server-url (-> public-uri u/ensure-path-slash (u/join "mcp/stream") str))
-(def mcp-help-center-uri "https://help.penpot.app/technical-guide/")
+(def mcp-help-center-uri "https://help.penjar.app/technical-guide/")
 
 ;; --- Helper Functions
 

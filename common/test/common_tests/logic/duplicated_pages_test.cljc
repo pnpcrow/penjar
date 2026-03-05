@@ -24,7 +24,7 @@
 
 (t/use-fixtures :each thi/test-fixture)
 
-;; Related .penpot file: common/test/cases/duplicated-pages.penpot
+;; Related .penjar file: common/test/cases/duplicated-pages.penjar
 (t/deftest test-propagation-with-anidated-components
   (letfn [(setup []
             (-> (thf/sample-file :file1 :page-label :page-1)

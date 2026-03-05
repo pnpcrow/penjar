@@ -146,7 +146,7 @@
                  "m" :minutes
                  "s" :seconds
                  "w" :weeks)
-        ::key  (str "penpot.rlimit." (cf/get :tenant) ".window." (d/name name))
+        ::key  (str "penjar.rlimit." (cf/get :tenant) ".window." (d/name name))
         ::opts opts})
      (ex/raise :type :validation
                :code :invalid-window-limit-opts
@@ -167,7 +167,7 @@
        ::interval interval
        ::opts     opts
        ::params   [(->seconds interval) rate capacity]
-       ::key      (str "penpot.rlimit." (cf/get :tenant) ".bucket." (d/name name))})
+       ::key      (str "penjar.rlimit." (cf/get :tenant) ".bucket." (d/name name))})
     (ex/raise :type :validation
               :code :invalid-bucket-limit-opts
               :hint (str/ffmt "looks like '%' does not have a valid format" opts))))

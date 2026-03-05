@@ -1,13 +1,13 @@
 ---
 title: 3.01. Architecture
-desc: Dive into architecture, backend, frontend, data models, and development environments. Contribute and self-host for free! See Penpot's technical guide.
+desc: Dive into architecture, backend, frontend, data models, and development environments. Contribute and self-host for free! See Penjar's technical guide.
 ---
 
 # Architecture
 
 This section gives an overall structure of the system.
 
-Penpot has the architecture of a typical SPA. There is a frontend application,
+Penjar has the architecture of a typical SPA. There is a frontend application,
 written in ClojureScript and using React framework, and served from a static
 web server. It talks to a backend application, that persists data on a
 PostgreSQL database.

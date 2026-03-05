@@ -36,8 +36,8 @@ importers:
         specifier: ^0.5.21
         version: 0.5.21
       svgo:
-        specifier: penpot/svgo#v3.1
-        version: https://codeload.github.com/penpot/svgo/tar.gz/a46262c12c0d967708395972c374eb2adead4180
+        specifier: penjar/svgo#v3.1
+        version: https://codeload.github.com/penjar/svgo/tar.gz/a46262c12c0d967708395972c374eb2adead4180
       undici:
         specifier: ^7.16.0
         version: 7.16.0
@@ -491,8 +491,8 @@ packages:
     resolution: {integrity: sha512-gmBGslpoQJtgnMAvOVqGZpEz9dyoKTCzy2nfz/n8aIFhN/jCE/rCmcxabB6jOOHV+0WNnylOxaxBQPSvcWklhA==}
     engines: {node: '>=12'}
 
-  svgo@https://codeload.github.com/penpot/svgo/tar.gz/a46262c12c0d967708395972c374eb2adead4180:
-    resolution: {tarball: https://codeload.github.com/penpot/svgo/tar.gz/a46262c12c0d967708395972c374eb2adead4180}
+  svgo@https://codeload.github.com/penjar/svgo/tar.gz/a46262c12c0d967708395972c374eb2adead4180:
+    resolution: {tarball: https://codeload.github.com/penjar/svgo/tar.gz/a46262c12c0d967708395972c374eb2adead4180}
     version: 4.0.0
     engines: {node: '>=16.0.0'}
 
@@ -982,7 +982,7 @@ snapshots:
     dependencies:
       ansi-regex: 6.2.2
 
-  svgo@https://codeload.github.com/penpot/svgo/tar.gz/a46262c12c0d967708395972c374eb2adead4180:
+  svgo@https://codeload.github.com/penjar/svgo/tar.gz/a46262c12c0d967708395972c374eb2adead4180:
     dependencies:
       '@trysound/sax': 0.2.0
       css-select: 5.2.2

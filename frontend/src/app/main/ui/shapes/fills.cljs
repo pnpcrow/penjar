@@ -132,7 +132,7 @@
            (when ^boolean has-image?
              [:g
               ;; We add this shape to add a padding so the patter won't repeat
-              ;; Issue: https://tree.taiga.io/project/penpot/issue/5583
+              ;; Issue: https://tree.taiga.io/project/penjar/issue/5583
               [:rect {:x 0
                       :y 0
                       :width (* width no-repeat-padding)

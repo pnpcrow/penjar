@@ -1,6 +1,6 @@
 ---
 title: 3.03. Dev environment
-desc: Dive into Penpot's development environment. Learn about self-hosting, configuration, developer tools, architecture, and more. See the Penpot Technical Guide!
+desc: Dive into Penjar's development environment. Learn about self-hosting, configuration, developer tools, architecture, and more. See the Penjar Technical Guide!
 ---
 
 # Development environment
@@ -27,7 +27,7 @@ echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo s
 
 **The interactive development environment requires some familiarity of [tmux](https://github.com/tmux/tmux/wiki).**
 
-To start it, clone penpot repository, and execute:
+To start it, clone penjar repository, and execute:
 
 ```bash
 ./manage.sh pull-devenv
@@ -62,7 +62,7 @@ current window.
 For more info: https://tmuxcheatsheet.com/
 
 It may take a minute or so, but once all of the services have started, you can
-connect to penpot by browsing to http://localhost:3449 .
+connect to penjar by browsing to http://localhost:3449 .
 
 <!-- ## Inside the tmux session -->
 
@@ -90,12 +90,12 @@ process on the frontend application. In order to do this you can split the
 window (`Ctrl+b "`) and execute:
 
 ```bash
-cd penpot/frontend
+cd penjar/frontend
 npx shadow-cljs cljs-repl main
 ```
 
 In order to have the REPL working you need to have an active browser session
-with the penpot application opened (otherwise, you will get the error
+with the penjar application opened (otherwise, you will get the error
 `No application has connected to the REPL server.`).
 
 Finally, in case you want to connect to the REPL from your IDE, you can set it
@@ -115,7 +115,7 @@ You can open the broser on http://localhost:6006/ to see it.
 
 For more information about storybook check:
 
-https://help.penpot.app/technical-guide/developer/ui/#storybook
+https://help.penjar.app/technical-guide/developer/ui/#storybook
 
 ### Exporter
 
@@ -176,7 +176,7 @@ You can register a new user manually, or create new users automatically with thi
 
 
 ```sh
-cd penpot/backend/scripts
+cd penjar/backend/scripts
 python3 manage.py create-profile
 ```
 
@@ -191,7 +191,7 @@ python3 manage.py create-profile -n "Jane Doe" -e jane@example.com -p secretpass
 
 To test a Feature Flag, you can enable or disable them by team through the `dbg` page:
 
-1. Create a new team or navigate to an existing team in Penpot.
+1. Create a new team or navigate to an existing team in Penjar.
 2. Copy the `team-id` from the URL (e.g., `?team-id=1234bd95-69dd-805c-8005-c015415436ae`). If no team is selected, the default profile team will be used.
 3. Go to [http://localhost:3449/dbg](http://localhost:3449/dbg).
 4. Open the Feature Flag panel, enter the `team-id` and the `feature` name in either the enable or disable section, and click `Submit`.

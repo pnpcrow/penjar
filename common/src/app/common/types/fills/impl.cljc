@@ -396,19 +396,19 @@
      cljs.core/IPrintWithWriter
      (-pr-writer [this writer _]
        (binding [*print-dup* true]
-         (cljs.core/-write writer (str "#penpot/fills \"" (pr-str (vec this))  "\""))))))
+         (cljs.core/-write writer (str "#penjar/fills \"" (pr-str (vec this))  "\""))))))
 
 #?(:clj
    (defmethod print-method Fills
      [o ^java.io.Writer writer]
-     (.write writer "#penpot/fills \"")
+     (.write writer "#penjar/fills \"")
      (print-dup (vec o) writer)
      (.write writer "\"")))
 
 #?(:clj
    (defmethod print-dup Fills
      [o ^java.io.Writer writer]
-     (.write writer "#penpot/fills \"")
+     (.write writer "#penjar/fills \"")
      (print-dup (vec o) writer)
      (.write writer "\"")))
 
@@ -457,7 +457,7 @@
   (instance? Fills o))
 
 (t/add-handlers!
- {:id "penpot/fills"
+ {:id "penjar/fills"
   :class Fills
   :wfn (fn [^Fills fills]
          (vec fills))

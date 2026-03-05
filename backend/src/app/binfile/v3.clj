@@ -379,10 +379,10 @@
 
     ;; Write manifest file
     (let [files  (:files @bfc/*state*)
-          params {:type "penpot/export-files"
+          params {:type "penjar/export-files"
                   :version 1
-                  :generated-by (str "penpot/" (:full cf/version))
-                  :refer "penpot"
+                  :generated-by (str "penjar/" (:full cf/version))
+                  :refer "penjar"
                   :files (vec (vals files))
                   :relations rels}]
       (write-entry! output "manifest.json" params))))
@@ -402,8 +402,8 @@
   (let [entry (get-zip-entry* input path)]
     (when-not entry
       (ex/raise :type :validation
-                :code :inconsistent-penpot-file
-                :hint "the penpot file seems corrupt, missing underlying zip entry"
+                :code :inconsistent-penjar-file
+                :hint "the penjar file seems corrupt, missing underlying zip entry"
                 :path path))
     entry))
 
@@ -426,7 +426,7 @@
       (io/reader :encoding "UTF-8")))
 
 (defn- zip-entry-storage-content
-  "Wraps a ZipFile and ZipEntry into a penpot storage compatible
+  "Wraps a ZipFile and ZipEntry into a penjar storage compatible
   object and avoid creating temporal objects"
   [input entry]
   (let [hash  (delay (->> entry
@@ -834,7 +834,7 @@
 
         (when (not= (:size object) (sto/get-size content))
           (ex/raise :type :validation
-                    :code :inconsistent-penpot-file
+                    :code :inconsistent-penjar-file
                     :hint "found corrupted storage object: size does not match"
                     :path path
                     :expected-size (:size object)
@@ -843,7 +843,7 @@
         (when-let [hash (get object :hash)]
           (when (not= hash (sto/get-hash content))
             (ex/raise :type :validation
-                      :code :inconsistent-penpot-file
+                      :code :inconsistent-penjar-file
                       :hint "found corrupted storage object: hash does not match"
                       :path path
                       :expected-hash (:hash object)
@@ -927,7 +927,7 @@
                      (assoc ::manifest manifest)
                      (assoc ::bfc/timestamp timestamp))]
 
-    (when-not (= "penpot/export-files" (:type manifest))
+    (when-not (= "penjar/export-files" (:type manifest))
       (ex/raise :type :validation
                 :code :invalid-binfile-v3-manifest
                 :hint "unexpected type on manifest"
@@ -956,7 +956,7 @@
 ;; --- PUBLIC API
 
 (defn export-files!
-  "Do the exportation of a specified file in custom penpot binary
+  "Do the exportation of a specified file in custom penjar binary
   format. There are some options available for customize the output:
 
   `::bfc/include-libraries`: additionally to the specified file, all the

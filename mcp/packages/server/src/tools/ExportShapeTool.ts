@@ -2,7 +2,7 @@ import { z } from "zod";
 import { Tool } from "../Tool";
 import { ImageContent, PNGImageContent, PNGResponse, TextContent, TextResponse, ToolResponse } from "../ToolResponse";
 import "reflect-metadata";
-import { PenpotMcpServer } from "../PenpotMcpServer";
+import { PenjarMcpServer } from "../PenjarMcpServer";
 import { ExecuteCodePluginTask } from "../tasks/ExecuteCodePluginTask";
 import { FileUtils } from "../utils/FileUtils";
 import sharp from "sharp";
@@ -46,7 +46,7 @@ export class ExportShapeArgs {
 }
 
 /**
- * Tool for executing JavaScript code in the Penpot plugin context
+ * Tool for executing JavaScript code in the Penjar plugin context
  */
 export class ExportShapeTool extends Tool<ExportShapeArgs> {
     /**
@@ -54,7 +54,7 @@ export class ExportShapeTool extends Tool<ExportShapeArgs> {
      *
      * @param mcpServer - The MCP server instance
      */
-    constructor(mcpServer: PenpotMcpServer) {
+    constructor(mcpServer: PenjarMcpServer) {
         let schema: any = ExportShapeArgs.schema;
         if (!mcpServer.isFileSystemAccessEnabled()) {
             // remove filePath key from schema
@@ -70,7 +70,7 @@ export class ExportShapeTool extends Tool<ExportShapeArgs> {
 
     public getToolDescription(): string {
         let description =
-            "Exports a shape (or a shape's image fill) from the Penpot design to a PNG or SVG image, " +
+            "Exports a shape (or a shape's image fill) from the Penjar design to a PNG or SVG image, " +
             "such that you can get an impression of what it looks like. ";
         if (this.mcpServer.isFileSystemAccessEnabled()) {
             description += "\nAlternatively, you can save it to a file.";
@@ -83,16 +83,20 @@ export class ExportShapeTool extends Tool<ExportShapeArgs> {
         if (args.filePath) {
             FileUtils.checkPathIsAbsolute(args.filePath);
         }
+        if (args.mode === "fill" && args.format !== "png") {
+            throw new Error("fill mode is not supported for svg export. Use format='png' when mode='fill'.");
+        }
 
         // create code for exporting the shape
         let shapeCode: string;
         if (args.shapeId === "selection") {
-            shapeCode = `penpot.selection[0]`;
+            shapeCode = `penjar.selection[0]`;
         } else {
-            shapeCode = `penpotUtils.findShapeById("${args.shapeId}")`;
+            shapeCode = `penjarUtils.findShapeById("${args.shapeId}")`;
         }
         const asSvg = args.format === "svg";
-        const code = `return penpotUtils.exportImage(${shapeCode}, "${args.mode}", ${asSvg});`;
+        const code = `// export_shape_operation: format=${args.format}; mode=${args.mode}; shapeId=${args.shapeId}
+return penjarUtils.exportImage(${shapeCode}, "${args.mode}", ${asSvg});`;
 
         // execute the code and obtain the image data
         const task = new ExecuteCodePluginTask({ code: code });

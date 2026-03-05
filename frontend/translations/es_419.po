@@ -3,7 +3,7 @@ msgstr ""
 "PO-Revision-Date: 2026-01-08 17:06+0000\n"
 "Last-Translator: Yessenia Villarte Vaca <yesseniavillarte@gmail.com>\n"
 "Language-Team: Spanish (Latin America) "
-"<https://hosted.weblate.org/projects/penpot/frontend/es_419/>\n"
+"<https://hosted.weblate.org/projects/penjar/frontend/es_419/>\n"
 "Language: es_419\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -20,7 +20,7 @@ msgstr "¿Ya tienes una cuenta?"
 msgid "auth.check-your-email"
 msgstr ""
 "Revise su correo electrónico y haga clic en el enlace para verificar y "
-"comenzar a usar Penpot."
+"comenzar a usar Penjar."
 
 #: src/app/main/ui/auth/recovery.cljs:67
 msgid "auth.confirm-password"
@@ -170,7 +170,7 @@ msgstr "Publicar"
 
 #: src/app/main/ui/viewer/share_link.cljs:304, src/app/main/ui/viewer/share_link.cljs:315
 msgid "common.share-link.all-users"
-msgstr "Todos los usuarios de Penpot"
+msgstr "Todos los usuarios de Penjar"
 
 #: src/app/main/ui/viewer/share_link.cljs:204
 msgid "common.share-link.confirm-deletion-link-description"
@@ -247,7 +247,7 @@ msgstr "Gestión de equipos"
 #: src/app/main/ui/dashboard/projects.cljs:92
 msgid "dasboard.team-hero.text"
 msgstr ""
-"Penpot está destinado a equipos. Invite a miembros a trabajar juntos en "
+"Penjar está destinado a equipos. Invite a miembros a trabajar juntos en "
 "proyectos y archivos"
 
 #: src/app/main/ui/dashboard/projects.cljs:90
@@ -258,7 +258,7 @@ msgstr "¡En equipo!"
 #, unused
 msgid "dasboard.tutorial-hero.info"
 msgstr ""
-"Aprenda los conceptos básicos en Penpot mientras se divierte con este "
+"Aprenda los conceptos básicos en Penjar mientras se divierte con este "
 "tutorial práctico."
 
 #: src/app/main/ui/dashboard/projects.cljs
@@ -274,7 +274,7 @@ msgstr "Tutorial práctico"
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
 msgid "dasboard.walkthrough-hero.info"
-msgstr "Date un paseo por Penpot y conoce sus principales características."
+msgstr "Date un paseo por Penjar y conoce sus principales características."
 
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
@@ -347,7 +347,7 @@ msgid "dashboard.access-tokens.personal.description"
 msgstr ""
 "Los tokens de acceso personal funcionan como una alternativa a nuestro "
 "sistema de autenticación de inicio de sesión/contraseña y pueden usarse "
-"para permitir que una aplicación acceda a la API interna de Penpot"
+"para permitir que una aplicación acceda a la API interna de Penjar"
 
 #: src/app/main/ui/settings/access_tokens.cljs:142
 msgid "dashboard.access-tokens.token-will-expire"
@@ -375,7 +375,7 @@ msgstr "Crear nuevo equipo"
 
 #: src/app/main/ui/components/context_menu_a11y.cljs:300, src/app/main/ui/dashboard/sidebar.cljs:638
 msgid "dashboard.default-team-name"
-msgstr "Tu Penpot"
+msgstr "Tu Penjar"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:495
 msgid "dashboard.delete-team"
@@ -383,7 +383,7 @@ msgstr "Eliminar equipo"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:328, src/app/main/ui/workspace/main_menu.cljs:690
 msgid "dashboard.download-binary-file"
-msgstr "Descargar el archivo Penpot (.penpot)"
+msgstr "Descargar el archivo Penjar (.penjar)"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:321, src/app/main/ui/workspace/main_menu.cljs:712
 #, unused
@@ -400,7 +400,7 @@ msgstr "Duplicar %s archivos"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:280
 msgid "dashboard.export-binary-multi"
-msgstr "Descargar %s archivos Penpot (.penpot)"
+msgstr "Descargar %s archivos Penjar (.penjar)"
 
 #: src/app/main/ui/workspace/main_menu.cljs:698
 msgid "dashboard.export-frames"
@@ -412,7 +412,7 @@ msgstr "Exportar como PDF"
 
 #, unused
 msgid "dashboard.export-multi"
-msgstr "Exportar %s archivos de Penpot"
+msgstr "Exportar %s archivos de Penjar"
 
 #: src/app/main/ui/exports/assets.cljs:108
 msgid "dashboard.export-multiple.selected"
@@ -430,7 +430,7 @@ msgstr ""
 
 #: src/app/main/ui/exports/assets.cljs:183
 msgid "dashboard.export-shapes.how-to-link"
-msgstr "Información sobre cómo configurar las exportaciones en Penpot."
+msgstr "Información sobre cómo configurar las exportaciones en Penjar."
 
 #: src/app/main/ui/exports/assets.cljs:178
 msgid "dashboard.export-shapes.no-elements"

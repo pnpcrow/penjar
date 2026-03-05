@@ -280,7 +280,7 @@
             payload (unchecked-get evdata "payload")
             scope   (unchecked-get evdata "scope")]
         (when (and (some? payload)
-                   (= scope "penpot/rasterizer"))
+                   (= scope "penjar/rasterizer"))
           (->> (render payload)
                (rx/subs! (partial send-success! id)
                          (partial send-failure! id))))))))
@@ -295,7 +295,7 @@
   [id type payload]
   (let [message #js {:id id
                      :type type
-                     :scope "penpot/rasterizer"
+                     :scope "penjar/rasterizer"
                      :payload payload}]
     (when-not (identical? js/window js/parent)
       (if (instance? js/ImageBitmap payload)

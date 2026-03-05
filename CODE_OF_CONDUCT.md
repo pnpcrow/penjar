@@ -1,3 +1,3 @@
-# Penpot's Code of Conduct
+# Penjar's Code of Conduct
 
-Check it at: https://help.penpot.app/contributing-guide/coc/
+Check it at: https://help.penjar.app/contributing-guide/coc/

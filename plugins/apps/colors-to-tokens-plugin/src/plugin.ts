@@ -5,22 +5,22 @@ const defaultSize = {
   height: 280,
 };
 
-penpot.ui.open('COLORS TO TOKENS', `?theme=${penpot.theme}`, {
+penjar.ui.open('COLORS TO TOKENS', `?theme=${penjar.theme}`, {
   width: defaultSize.width,
   height: defaultSize.height,
 });
 
-penpot.on('themechange', (theme) => {
+penjar.on('themechange', (theme) => {
   sendMessage({ type: 'theme', content: theme });
 });
 
-penpot.ui.onMessage<PluginUIEvent>((message) => {
+penjar.ui.onMessage<PluginUIEvent>((message) => {
   if (message.type === 'get-colors') {
-    const colors = penpot.library.local.colors.filter(
+    const colors = penjar.library.local.colors.filter(
       (color) => !color.gradient,
     );
 
-    const fileName = penpot.currentFile?.name ?? 'Untitled';
+    const fileName = penjar.currentFile?.name ?? 'Untitled';
 
     sendMessage({
       type: 'set-colors',
@@ -29,8 +29,8 @@ penpot.ui.onMessage<PluginUIEvent>((message) => {
     });
   } else if (message.type === 'resize') {
     if (
-      penpot.ui.size?.width === defaultSize.width &&
-      penpot.ui.size?.height === defaultSize.height
+      penjar.ui.size?.width === defaultSize.width &&
+      penjar.ui.size?.height === defaultSize.height
     ) {
       resize(message.width, message.height);
     }
@@ -40,11 +40,11 @@ penpot.ui.onMessage<PluginUIEvent>((message) => {
 });
 
 function resize(width: number, height: number) {
-  if ('resize' in penpot.ui) {
-    penpot.ui.resize(width, height);
+  if ('resize' in penjar.ui) {
+    penjar.ui.resize(width, height);
   }
 }
 
 function sendMessage(message: PluginMessageEvent) {
-  penpot.ui.sendMessage(message);
+  penjar.ui.sendMessage(message);
 }

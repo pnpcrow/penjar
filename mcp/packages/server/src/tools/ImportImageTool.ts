@@ -2,7 +2,7 @@ import { z } from "zod";
 import { Tool } from "../Tool";
 import { TextResponse, ToolResponse } from "../ToolResponse";
 import "reflect-metadata";
-import { PenpotMcpServer } from "../PenpotMcpServer";
+import { PenjarMcpServer } from "../PenjarMcpServer";
 import { ExecuteCodePluginTask } from "../tasks/ExecuteCodePluginTask";
 import { FileUtils } from "../utils/FileUtils";
 import * as fs from "fs";
@@ -44,7 +44,7 @@ export class ImportImageArgs {
 }
 
 /**
- * Tool for importing a raster image from the local file system into Penpot
+ * Tool for importing a raster image from the local file system into Penjar
  */
 export class ImportImageTool extends Tool<ImportImageArgs> {
     /**
@@ -63,7 +63,7 @@ export class ImportImageTool extends Tool<ImportImageArgs> {
      *
      * @param mcpServer - The MCP server instance
      */
-    constructor(mcpServer: PenpotMcpServer) {
+    constructor(mcpServer: PenjarMcpServer) {
         super(mcpServer, ImportImageArgs.schema);
     }
 
@@ -73,7 +73,7 @@ export class ImportImageTool extends Tool<ImportImageArgs> {
 
     public getToolDescription(): string {
         return (
-            "Imports a pixel image from the local file system into Penpot by creating a Rectangle instance " +
+            "Imports a pixel image from the local file system into Penjar by creating a Rectangle instance " +
             "that uses the image as a fill. The rectangle has the image's original proportions by default. " +
             "Optionally accepts position (x, y) and dimensions (width, height) parameters. " +
             "If only one dimension is provided, the other is calculated to maintain the image's aspect ratio. " +
@@ -109,7 +109,7 @@ export class ImportImageTool extends Tool<ImportImageArgs> {
         const escapedBase64 = base64Data.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
         const escapedFileName = fileName.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
         const code = `
-            const rectangle = await penpotUtils.importImage(
+            const rectangle = await penjarUtils.importImage(
                 '${escapedBase64}', '${mimeType}', '${escapedFileName}', 
                 ${args.x ?? "undefined"}, ${args.y ?? "undefined"}, 
                 ${args.width ?? "undefined"}, ${args.height ?? "undefined"});

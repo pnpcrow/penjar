@@ -141,9 +141,9 @@
 
 (declare convert-to-path)
 
-;; FIXME: this looks unnecesary because penpot already normalizes all
+;; FIXME: this looks unnecesary because penjar already normalizes all
 ;; path content to be absolute. There are no relative segments on
-;; penpot.
+;; penjar.
 (defn- fix-first-relative
   "Fix an issue with the simplify commands not changing the first relative"
   [content]

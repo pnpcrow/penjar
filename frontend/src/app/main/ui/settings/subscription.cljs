@@ -401,13 +401,13 @@
         (-> route :params :query :subscription)
 
         show-trial-subscription-modal?
-        (or (= params-subscription "subscription-to-penpot-unlimited")
-            (= params-subscription "subscription-to-penpot-enterprise"))
+        (or (= params-subscription "subscription-to-penjar-unlimited")
+            (= params-subscription "subscription-to-penjar-enterprise"))
 
         show-subscription-success-modal?
-        (or (= params-subscription "subscribed-to-penpot-unlimited")
-            (= params-subscription "subscribed-to-penpot-enterprise")
-            (= params-subscription "subscribed-to-penpot-nitrate"))
+        (or (= params-subscription "subscribed-to-penjar-unlimited")
+            (= params-subscription "subscribed-to-penjar-enterprise")
+            (= params-subscription "subscribed-to-penjar-nitrate"))
 
         success-modal-is-trial?
         (-> route :params :query :trial)
@@ -438,7 +438,7 @@
            (st/emit! (ev/event {::ev/name "explore-pricing-click"
                                 ::ev/origin "settings"
                                 :section "subscription"}))
-           (dom/open-new-window "https://penpot.app/pricing")))
+           (dom/open-new-window "https://penjar.app/pricing")))
 
         go-to-payments
         (mf/use-fn
@@ -481,7 +481,7 @@
            (ptk/event ::ev/event {::ev/name "open-subscription-modal"
                                   ::ev/origin "settings:from-pricing-page"})
            (modal/show :management-dialog
-                       {:subscription-type (if (= params-subscription "subscription-to-penpot-unlimited")
+                       {:subscription-type (if (= params-subscription "subscription-to-penjar-unlimited")
                                              "unlimited"
                                              "enterprise")
                         :current-subscription subscription
@@ -491,10 +491,10 @@
 
           ^boolean show-subscription-success-modal?
           (st/emit!
-           (if (= params-subscription "subscribed-to-penpot-nitrate")
+           (if (= params-subscription "subscribed-to-penjar-nitrate")
              (modal/show :nitrate-success {})
              (modal/show :subscription-success
-                         {:subscription-name (if (= params-subscription "subscribed-to-penpot-unlimited")
+                         {:subscription-name (if (= params-subscription "subscribed-to-penjar-unlimited")
                                                (if (= success-modal-is-trial? "true")
                                                  (tr "subscription.settings.unlimited-trial")
                                                  (tr "subscription.settings.unlimited"))
@@ -585,7 +585,7 @@
             (tr "subscription.settings.support-us-since" subscribed-since)]])
 
         [:div {:class (stl/css :membership)}
-         [:> icon* {:class (stl/css :penpot-member)
+         [:> icon* {:class (stl/css :penjar-member)
                     :icon-id "user"
                     :size "m"}]
          [:span {:class (stl/css :membership-date)}
@@ -643,7 +643,7 @@
                          :price-value "$25"
                          :price-period "org member"
                          :benefits-title (tr "subscription.settings.benefits.all-unlimited-benefits")
-                         :benefits ["Crea organizaciones y añade personas, que usarán Penpot con las reglas que configures."
+                         :benefits ["Crea organizaciones y añade personas, que usarán Penjar con las reglas que configures."
                                     "Acceso exclusivo al Control Center"
                                     "Lorem ipsum"]
                          :cta-text (tr "subscription.settings.subscribe")
@@ -681,7 +681,7 @@
                                (rt/get-current-href)
                                "?"
                                (u/map->query-string
-                                {:subscription "subscribed-to-penpot-nitrate"}))]
+                                {:subscription "subscribed-to-penjar-nitrate"}))]
              (dnt/go-to-buy-nitrate-license subscription return-url))))]
 
     [:div {:class (stl/css :modal-overlay)}
@@ -735,8 +735,8 @@
          [:div {:class (stl/css :modal-text)}
           "Contact us to upgrade to Nitrate:"]
          [:div {:class (stl/css :modal-text)}
-          [:a {:class (stl/css :link) :href "mailto:sales@penpot.app"}
-           "sales@penpot.app"]]])]]))
+          [:a {:class (stl/css :link) :href "mailto:sales@penjar.app"}
+           "sales@penjar.app"]]])]]))
 
 
 

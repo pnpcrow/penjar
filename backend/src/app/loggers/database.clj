@@ -179,7 +179,7 @@
   [_ cfg]
   (let [input  (sp/chan :buf (sp/sliding-buffer 256))
         thread (px/thread
-                 {:name "penpot/reporter/database"}
+                 {:name "penjar/reporter/database"}
                  (l/info :hint "initializing database error persistence")
                  (try
                    (loop []

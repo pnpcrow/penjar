@@ -5,7 +5,7 @@
 ;; Copyright (c) KALEIDOS INC
 
 (ns lib.export
-  "A .penpot export implementation"
+  "A .penjar export implementation"
   (:require
    [app.common.data :as d]
    [app.common.files.builder :as fb]
@@ -189,9 +189,9 @@
                             {:id file-id
                              :name (:name file)
                              :features (:features file)})))
-        params {:type "penpot/export-files"
+        params {:type "penjar/export-files"
                 :version 1
-                :generated-by "penpot-library/%version%"
+                :generated-by "penjar-library/%version%"
                 :referer (get opts :referer)
                 :files files
                 :relations (->> (:relations state)

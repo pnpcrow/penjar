@@ -1,8 +1,8 @@
-import * as penpot from "#self";
+import * as penjar from "#self";
 import { writeFile, readFile } from "fs/promises";
 
 (async function () {
-  const context = penpot.createBuildContext();
+  const context = penjar.createBuildContext();
 
   {
     const file1 = context.addFile({ name: "Test File 1" });
@@ -12,7 +12,7 @@ import { writeFile, readFile } from "fs/promises";
   }
 
   {
-    let result = await penpot.exportAsBytes(context);
+    let result = await penjar.exportAsBytes(context);
     await writeFile("sample-relations.zip", result);
   }
 })()

@@ -602,10 +602,10 @@
     (let [request (upsert-team-access-request cfg team-id profile-id)
           factory (cond
                     (and (some? file) (:is-default team) is-viewer)
-                    eml/request-file-access-yourpenpot-view
+                    eml/request-file-access-yourpenjar-view
 
                     (and (some? file) (:is-default team))
-                    eml/request-file-access-yourpenpot
+                    eml/request-file-access-yourpenjar
 
                     (some? file)
                     eml/request-file-access

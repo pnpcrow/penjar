@@ -50,7 +50,7 @@
      [:button
       {:class (stl/css :exception-header)
        :on-click on-nav-root}
-      [:> raw-svg* {:id "penpot-logo-icon" :class (stl/css :penpot-logo)}]
+      [:> raw-svg* {:id "penjar-logo-icon" :class (stl/css :penjar-logo)}]
       (when profile-id
         [:div {:class (stl/css :go-back-wrapper)}
          [:> icon* {:icon-id i/arrow :class (stl/css :back-arrow)}] [:span (tr "not-found.no-permission.go-dashboard")]])]
@@ -493,7 +493,7 @@
        deprecated-icon/logo-icon
        [:div
         [:div {:class (stl/css :project-name)} (tr "not-found.no-permission.project-name")]
-        [:div {:class (stl/css :file-name)} (tr "not-found.no-permission.penpot-file")]]]
+        [:div {:class (stl/css :file-name)} (tr "not-found.no-permission.penjar-file")]]]
       [:div {:class (stl/css :workspace-right)}]]
 
      is-viewer
@@ -506,7 +506,7 @@
       [:& viewer.header/header {:project
                                 {:name (tr "not-found.no-permission.project-name")}
                                 :index 0
-                                :file {:name (tr "not-found.no-permission.penpot-file")}
+                                :file {:name (tr "not-found.no-permission.penjar-file")}
                                 :page nil
                                 :frame nil
                                 :permissions {:is-logged true}

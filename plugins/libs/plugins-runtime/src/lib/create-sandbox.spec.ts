@@ -38,7 +38,7 @@ describe('createSandbox', () => {
     } as unknown as Awaited<ReturnType<typeof createPluginManager>>;
 
     vi.mocked(createApi).mockReturnValue({
-      penpot: {
+      penjar: {
         closePlugin: vi.fn(),
       },
     } as unknown as ReturnType<typeof createApi>);
@@ -150,14 +150,14 @@ describe('createSandbox', () => {
     ).toBe(0);
   });
 
-  it('should return safe values for penpot methods via proxy', () => {
+  it('should return safe values for penjar methods via proxy', () => {
     const sandbox = createSandbox(mockPlugin);
-    const mockPenpotMethod = vi.fn().mockReturnValue('penpot result');
-    sandbox.compartment.globalThis['penpot'].mockMethod = mockPenpotMethod;
+    const mockPenjarMethod = vi.fn().mockReturnValue('penjar result');
+    sandbox.compartment.globalThis['penjar'].mockMethod = mockPenjarMethod;
 
-    const result = sandbox.compartment.globalThis['penpot'].mockMethod();
+    const result = sandbox.compartment.globalThis['penjar'].mockMethod();
 
-    expect(ses.safeReturn).toHaveBeenCalledWith('penpot result');
-    expect(result).toBe('penpot result');
+    expect(ses.safeReturn).toHaveBeenCalledWith('penjar result');
+    expect(result).toBe('penjar result');
   });
 });

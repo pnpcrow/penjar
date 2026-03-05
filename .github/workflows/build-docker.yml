@@ -18,8 +18,8 @@ on:
 
 jobs:
   build-and-push:
-    name: Build and Push Penpot Docker Images
-    runs-on: penpot-runner-02
+    name: Build and Push Penjar Docker Images
+    runs-on: penjar-runner-02
 
     steps:
       - name: Set common environment variables
@@ -38,10 +38,10 @@ jobs:
         run: |
           echo "gh_ref=${{ inputs.gh_ref || github.ref_name }}" >> $GITHUB_OUTPUT
 
-      - name: Download Penpot Bundles
+      - name: Download Penjar Bundles
         id: bundles
         env:
-          FILE_NAME: penpot-${{ steps.vars.outputs.gh_ref }}.zip
+          FILE_NAME: penjar-${{ steps.vars.outputs.gh_ref }}.zip
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
@@ -55,11 +55,11 @@ jobs:
           pushd docker/images
           aws s3 cp s3://${{ secrets.S3_BUCKET }}/$FILE_NAME .
           unzip $FILE_NAME > /dev/null
-          mv penpot/backend bundle-backend
-          mv penpot/frontend bundle-frontend
-          mv penpot/exporter bundle-exporter
-          mv penpot/storybook bundle-storybook
-          mv penpot/mcp bundle-mcp
+          mv penjar/backend bundle-backend
+          mv penjar/frontend bundle-frontend
+          mv penjar/exporter bundle-exporter
+          mv penjar/storybook bundle-storybook
+          mv penjar/mcp bundle-mcp
           popd
 
       - name: Set up Docker Buildx
@@ -176,7 +176,7 @@ jobs:
           MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK }}
           MATTERMOST_CHANNEL: bot-alerts-cicd
           TEXT: |
-            ❌ 🐳 *[PENPOT] Error building penpot docker images.*
+            ❌ 🐳 *[PENJAR] Error building penjar docker images.*
             📄 Triggered from ref: `${{ steps.vars.outputs.gh_ref }}`
             📦 Bundle: `${{ steps.bundles.outputs.bundle_version }}`
             🔗 Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}

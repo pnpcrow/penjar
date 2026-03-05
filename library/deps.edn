@@ -1,9 +1,9 @@
 {:paths ["src"]
  :deps
- {penpot/common
+ {penjar/common
   {:local/root "../common"}
 
-  penpot/frontend
+  penjar/frontend
   {:local/root "../frontend"}
   }
 

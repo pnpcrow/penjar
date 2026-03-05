@@ -615,7 +615,7 @@
 (def font-weight-values (into #{} (keys font-weight-aliases)))
 
 (def font-weight-map
-  "A map of font-weight aliases that map to their number equivalent used by penpot fonts per `:weight`."
+  "A map of font-weight aliases that map to their number equivalent used by penjar fonts per `:weight`."
   (->> font-weight-aliases
        (reduce (fn [acc [k vs]]
                  (into acc (zipmap vs (repeat k)))) {})))

@@ -1,14 +1,14 @@
 # Contributing Guide #
 
-Thank you for your interest in contributing to Penpot. This is a
+Thank you for your interest in contributing to Penjar. This is a
 generic guide that details how to contribute to the project in a way that
 is efficient for everyone. If you are looking for specific documentation on
 different parts of the platform, please refer to the `docs/` directory,
-or the rendered version at the [Help Center](https://help.penpot.app/).
+or the rendered version at the [Help Center](https://help.penjar.app/).
 
 ## Reporting Bugs ##
 
-We are using [GitHub Issues](https://github.com/penpot/penpot/issues)
+We are using [GitHub Issues](https://github.com/penjar/penjar/issues)
 for our public bugs. We keep a close eye on them and try to make it
 clear when we have an internal fix in progress. Before filing a new
 task, try to make sure your problem doesn't already exist.
@@ -21,7 +21,7 @@ If you found a bug, please report it, as far as possible, with:
 
 If you found a bug which you think is better to discuss in private (for
 example, security bugs), consider first sending an email to
-`support@penpot.app`.
+`support@penjar.app`.
 
 **We don't have a formal bug bounty program for security reports; this
 is an open source application, and your contribution will be recognized

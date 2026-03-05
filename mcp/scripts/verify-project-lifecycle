@@ -1,0 +1,275 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SERVER_DIR="$PROJECT_ROOT/packages/server"
+
+HEALTH_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/health"
+MCP_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/mcp"
+WS_URL="ws://127.0.0.1:${PENJAR_MCP_WEBSOCKET_PORT:-4402}"
+
+TMP_BASE="${TMPDIR:-/tmp}"
+SERVER_LOG="$TMP_BASE/penjar-mcp-project-lifecycle-$$.log"
+SERVER_PID=""
+
+log_step() {
+    printf "\n[PROJECT-CHECK] %s\n" "$1"
+}
+
+cleanup() {
+    if [ -n "$SERVER_PID" ] && kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+        kill "$SERVER_PID" >/dev/null 2>&1 || true
+        wait "$SERVER_PID" >/dev/null 2>&1 || true
+    fi
+
+    rm -f "$SERVER_LOG"
+}
+
+trap cleanup EXIT
+
+if [ "${VERIFY_PROJECT_SKIP_BUILD:-false}" = "true" ]; then
+    log_step "Skip build step (VERIFY_PROJECT_SKIP_BUILD=true)"
+else
+    log_step "Build required packages for project lifecycle probe"
+    cd "$PROJECT_ROOT"
+    pnpm --filter mcp-common run build
+    pnpm --filter mcp-server run build
+fi
+
+log_step "Start MCP server (single-user)"
+cd "$SERVER_DIR"
+node dist/index.js >"$SERVER_LOG" 2>&1 &
+SERVER_PID="$!"
+
+log_step "Wait for /health endpoint"
+for _ in $(seq 1 20); do
+    if curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+done
+
+if ! curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+    echo "[PROJECT-CHECK][FAIL] server did not become healthy."
+    echo "[PROJECT-CHECK][INFO] Server log:"
+    cat "$SERVER_LOG"
+    exit 1
+fi
+
+log_step "Run active_design_context E2E probe with fake plugin session"
+node --input-type=module - "$MCP_URL" "$WS_URL" <<'EOF_JS'
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
+import WebSocket from "ws";
+
+const [mcpUrl, wsUrl] = process.argv.slice(2);
+let executeCodeRequestObserved = false;
+let contextResponseStep = 0;
+let permissionDeniedObserved = false;
+
+const ws = new WebSocket(wsUrl);
+await new Promise((resolve, reject) => {
+  ws.once("open", resolve);
+  ws.once("error", reject);
+});
+
+ws.on("message", (payload) => {
+  try {
+    const request = JSON.parse(payload.toString());
+    if (!request || typeof request !== "object" || request.task !== "executeCode" || !request.id) {
+      return;
+    }
+
+    const code = request.params?.code ?? "";
+    if (
+      typeof code === "string" &&
+      code.includes("penjar.currentPage") &&
+      code.includes("penjar.file") &&
+      code.includes("penjar.selection")
+    ) {
+      executeCodeRequestObserved = true;
+    }
+
+    contextResponseStep += 1;
+    let result;
+    if (contextResponseStep === 1) {
+      result = {
+        file: { id: "file-1", name: "project-context-a", pageCount: 3 },
+        currentPage: { id: "page-1", name: "Cover" },
+        selection: { count: 0, ids: [], names: [] },
+      };
+    } else if (contextResponseStep === 2) {
+      result = {
+        file: { id: "file-1", name: "project-context-a", pageCount: 3 },
+        currentPage: { id: "page-2", name: "Landing" },
+        selection: { count: 1, ids: ["shape-9"], names: ["Primary CTA"] },
+      };
+    } else if (contextResponseStep === 3) {
+      result = {
+        file: { id: "file-2", name: "project-context-b", pageCount: 2 },
+        currentPage: { id: "page-8", name: "Overview" },
+        selection: { count: 0, ids: [], names: [] },
+      };
+    } else if (contextResponseStep === 4) {
+      result = {
+        file: null,
+        currentPage: null,
+        selection: { count: 0, ids: [], names: [] },
+      };
+    } else {
+      permissionDeniedObserved = true;
+      ws.send(
+        JSON.stringify({
+          id: request.id,
+          success: false,
+          error: "Permission denied: content:read permission is required for active_design_context",
+        })
+      );
+      return;
+    }
+
+    ws.send(JSON.stringify({ id: request.id, success: true, data: { result, log: "" } }));
+  } catch {
+    // no-op for malformed payloads in probe mode
+  }
+});
+
+const client = new Client({ name: "project-context-check", version: "1.0.0" }, { capabilities: {} });
+const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
+
+async function callActiveDesignContext() {
+  const result = await client.request(
+    {
+      method: "tools/call",
+      params: {
+        name: "active_design_context",
+        arguments: {},
+      },
+    },
+    CallToolResultSchema
+  );
+
+  const text = result.content.find((item) => item.type === "text")?.text ?? "";
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(`active_design_context returned non-JSON payload: ${text}`);
+  }
+}
+
+function assertSelectionContract(selection, contextLabel) {
+  if (!selection || typeof selection !== "object") {
+    throw new Error(`${contextLabel}: selection must be an object: ${JSON.stringify(selection)}`);
+  }
+  if (typeof selection.count !== "number" || selection.count < 0) {
+    throw new Error(`${contextLabel}: selection.count mismatch: ${JSON.stringify(selection)}`);
+  }
+  if (!Array.isArray(selection.ids) || !Array.isArray(selection.names)) {
+    throw new Error(`${contextLabel}: selection ids/names must be arrays: ${JSON.stringify(selection)}`);
+  }
+  if (selection.ids.length !== selection.names.length || selection.ids.length !== selection.count) {
+    throw new Error(`${contextLabel}: selection cardinality mismatch: ${JSON.stringify(selection)}`);
+  }
+}
+
+function assertContextContract(context, expectation) {
+  if (!context || typeof context !== "object") {
+    throw new Error(`${expectation.label}: context must be an object: ${JSON.stringify(context)}`);
+  }
+
+  if (expectation.expectDetached) {
+    if (context.file !== null || context.currentPage !== null) {
+      throw new Error(`${expectation.label}: detached context mismatch: ${JSON.stringify(context)}`);
+    }
+  } else {
+    if (!context.file || typeof context.file !== "object") {
+      throw new Error(`${expectation.label}: file contract mismatch: ${JSON.stringify(context)}`);
+    }
+    if (context.file.id !== expectation.fileId || typeof context.file.pageCount !== "number") {
+      throw new Error(`${expectation.label}: file values mismatch: ${JSON.stringify(context)}`);
+    }
+    if (!context.currentPage || typeof context.currentPage !== "object") {
+      throw new Error(`${expectation.label}: currentPage contract mismatch: ${JSON.stringify(context)}`);
+    }
+    if (context.currentPage.id !== expectation.pageId) {
+      throw new Error(`${expectation.label}: currentPage value mismatch: ${JSON.stringify(context)}`);
+    }
+  }
+
+  assertSelectionContract(context.selection, expectation.label);
+}
+
+try {
+  await client.connect(transport);
+
+  const initialContext = await callActiveDesignContext();
+  assertContextContract(initialContext, {
+    label: "initial context",
+    fileId: "file-1",
+    pageId: "page-1",
+    expectDetached: false,
+  });
+
+  const pageTransitionContext = await callActiveDesignContext();
+  assertContextContract(pageTransitionContext, {
+    label: "page transition context",
+    fileId: "file-1",
+    pageId: "page-2",
+    expectDetached: false,
+  });
+  if (pageTransitionContext?.selection?.count !== 1 || pageTransitionContext?.selection?.ids?.[0] !== "shape-9") {
+    throw new Error(`Page transition selection mismatch: ${JSON.stringify(pageTransitionContext)}`);
+  }
+
+  const fileTransitionContext = await callActiveDesignContext();
+  assertContextContract(fileTransitionContext, {
+    label: "file transition context",
+    fileId: "file-2",
+    pageId: "page-8",
+    expectDetached: false,
+  });
+
+  const detachedContext = await callActiveDesignContext();
+  assertContextContract(detachedContext, {
+    label: "detached context",
+    expectDetached: true,
+  });
+
+  const deniedText = await client
+    .request(
+      {
+        method: "tools/call",
+        params: {
+          name: "active_design_context",
+          arguments: {},
+        },
+      },
+      CallToolResultSchema
+    )
+    .then((result) => result.content.find((item) => item.type === "text")?.text ?? "");
+  if (!deniedText.includes("[Diagnostic PERMISSION_DENIED]")) {
+    throw new Error(`Expected permission denied diagnostic, got: ${deniedText}`);
+  }
+
+  if (!executeCodeRequestObserved) {
+    throw new Error("active_design_context probe did not observe expected executeCode payload.");
+  }
+  if (contextResponseStep !== 5) {
+    throw new Error(`Expected five project lifecycle probe snapshots, observed ${contextResponseStep}.`);
+  }
+  if (!permissionDeniedObserved) {
+    throw new Error("active_design_context probe did not observe permission denied scenario.");
+  }
+
+  console.log("[PROJECT-CHECK] Verified active_design_context lifecycle contract + permission diagnostics flow");
+} finally {
+  await transport.close();
+  ws.close();
+  await new Promise((resolve) => ws.once("close", resolve));
+}
+EOF_JS
+
+log_step "Project lifecycle probe passed"

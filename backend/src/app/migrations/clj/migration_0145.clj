@@ -14,25 +14,25 @@
 
 (def ^:private replacements
   {"https://colors-to-tokens-plugin.pages.dev"
-   "https://colors-to-tokens.plugins.penpot.app"
+   "https://colors-to-tokens.plugins.penjar.app"
 
-   "https://contrast-penpot-plugin.pages.dev"
-   "https://contrast.plugins.penpot.app"
+   "https://contrast-penjar-plugin.pages.dev"
+   "https://contrast.plugins.penjar.app"
 
-   "https://create-palette-penpot-plugin.pages.dev"
-   "https://create-palette.plugins.penpot.app"
+   "https://create-palette-penjar-plugin.pages.dev"
+   "https://create-palette.plugins.penjar.app"
 
-   "https://icons-penpot-plugin.pages.dev"
-   "https://icons.plugins.penpot.app"
+   "https://icons-penjar-plugin.pages.dev"
+   "https://icons.plugins.penjar.app"
 
-   "https://lorem-ipsum-penpot-plugin.pages.dev"
-   "https://lorem-ipsum.plugins.penpot.app"
+   "https://lorem-ipsum-penjar-plugin.pages.dev"
+   "https://lorem-ipsum.plugins.penjar.app"
 
-   "https://rename-layers-penpot-plugin.pages.dev"
-   "https://rename-layers.plugins.penpot.app"
+   "https://rename-layers-penjar-plugin.pages.dev"
+   "https://rename-layers.plugins.penjar.app"
 
-   "https://table-penpot-plugin.pages.dev"
-   "https://table.plugins.penpot.app"})
+   "https://table-penjar-plugin.pages.dev"
+   "https://table.plugins.penjar.app"})
 
 (defn- fix-url
   [url]

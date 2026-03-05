@@ -328,7 +328,7 @@
         show-team-hero* (mf/use-state #(get storage/global ::show-team-hero true))
         show-team-hero? (deref show-team-hero*)
 
-        my-penpot?      (= (:default-team-id profile) team-id)
+        my-penjar?      (= (:default-team-id profile) team-id)
         default-team?   (:is-default team)
 
         show-deleted?   (:can-edit permisions)
@@ -352,7 +352,7 @@
 
     (mf/with-effect [team]
       (let [tname (if (:is-default team)
-                    (tr "dashboard.your-penpot")
+                    (tr "dashboard.your-penjar")
                     (:name team))]
         (dom/set-html-title (tr "title.dashboard.projects" tname))))
 
@@ -375,7 +375,7 @@
          [:div {:class (stl/css-case :dashboard-container true
                                      :no-bg true
                                      :dashboard-projects true
-                                     :with-team-hero (and (not my-penpot?)
+                                     :with-team-hero (and (not my-penjar?)
                                                           (not default-team?)
                                                           show-team-hero?
                                                           can-invite))}

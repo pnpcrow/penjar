@@ -3,7 +3,7 @@
 ## Development Commands
 ```bash
 # Navigate to MCP server directory
-cd penpot/mcp/server
+cd penjar/mcp/server
 
 # Install dependencies
 pnpm install
@@ -30,7 +30,7 @@ pnpx tsc --noEmit
 ## Windows-Specific Commands
 ```cmd
 # Directory navigation
-cd penpot/mcp/server
+cd penjar/mcp/server
 dir                    # List directory contents
 type package.json      # Display file contents
 
@@ -50,10 +50,10 @@ rmdir /s directory                 # Remove directory recursively
 ## Project Structure Navigation
 ```bash
 # Key directories
-cd penpot/mcp/server/src              # Source code
-cd penpot/mcp/server/src/tools        # Tool implementations
-cd penpot/mcp/server/src/interfaces   # Type definitions
-cd penpot/mcp/server/dist             # Compiled output
+cd penjar/mcp/server/src              # Source code
+cd penjar/mcp/server/src/tools        # Tool implementations
+cd penjar/mcp/server/src/interfaces   # Type definitions
+cd penjar/mcp/server/dist             # Compiled output
 ```
 
 ## Common Utilities

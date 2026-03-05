@@ -64,7 +64,7 @@
     "image/svg+xml"            ".svg"
     "image/webp"               ".webp"
     "application/zip"          ".zip"
-    "application/penpot"       ".penpot"
+    "application/penjar"       ".penjar"
     "application/pdf"          ".pdf"
     "text/plain"               ".txt"
     "font/woff"                ".woff"

@@ -229,7 +229,7 @@
                 "~:rotation": 0,
                 "~:grow-type": "~:fixed",
                 "~:content": {
-                  "~#penpot/path-data": "~bAQAAAAAAAAAAAAAAAAAAAAAAAAD/f5dEM2EsRAIAAAAAAAAAAAAAAAAAAAAAAAAAUhmnRABACkQCAAAAAAAAAAAAAAAAAAAAAAAAAP8/vET//01EAgAAAAAAAAAAAAAAAAAAAAAAAAD/f5dEM2EsRA=="
+                  "~#penjar/path-data": "~bAQAAAAAAAAAAAAAAAAAAAAAAAAD/f5dEM2EsRAIAAAAAAAAAAAAAAAAAAAAAAAAAUhmnRABACkQCAAAAAAAAAAAAAAAAAAAAAAAAAP8/vET//01EAgAAAAAAAAAAAAAAAAAAAAAAAAD/f5dEM2EsRA=="
                 },
                 "~:name": "Path",
                 "~:width": null,

@@ -3,7 +3,7 @@ msgstr ""
 "PO-Revision-Date: 2026-02-16 08:35+0000\n"
 "Last-Translator: Alejandro Alonso <alejandro.alonso@kaleidos.net>\n"
 "Language-Team: Yoruba "
-"<https://hosted.weblate.org/projects/penpot/frontend/yo/>\n"
+"<https://hosted.weblate.org/projects/penjar/frontend/yo/>\n"
 "Language: yo\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -357,7 +357,7 @@ msgstr "pa ẹgbẹ́ rẹ́"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:328, src/app/main/ui/workspace/main_menu.cljs:690
 msgid "dashboard.download-binary-file"
-msgstr "sọ fáìlí pẹ́ńpọtì kalẹ̀ (.penpot)"
+msgstr "sọ fáìlí pẹ́ńpọtì kalẹ̀ (.penjar)"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:321, src/app/main/ui/workspace/main_menu.cljs:712
 #, unused
@@ -747,7 +747,7 @@ msgid "dashboard.your-name"
 msgstr "ímeèlì rẹ"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:40, src/app/main/ui/dashboard/fonts.cljs:42, src/app/main/ui/dashboard/libraries.cljs:56, src/app/main/ui/dashboard/projects.cljs:355, src/app/main/ui/dashboard/search.cljs:48, src/app/main/ui/dashboard/sidebar.cljs:312, src/app/main/ui/dashboard/team.cljs:537, src/app/main/ui/dashboard/team.cljs:983, src/app/main/ui/dashboard/team.cljs:1251, src/app/main/ui/dashboard/team.cljs:1298
-msgid "dashboard.your-penpot"
+msgid "dashboard.your-penjar"
 msgstr "pẹ́ńpọtì rẹ"
 
 #: src/app/main/ui/alert.cljs:35
@@ -1338,7 +1338,7 @@ msgid "labels.continue-with"
 msgstr "Tẹ̀ síwájú pẹ̀lú"
 
 #: src/app/main/ui/viewer/login.cljs:69
-msgid "labels.continue-with-penpot"
+msgid "labels.continue-with-penjar"
 msgstr "O lè tẹ̀ síwájú pẹ̀lú àkáúnti pẹ́ńpọtì"
 
 #: src/app/main/ui/dashboard/team.cljs:650
@@ -2337,7 +2337,7 @@ msgstr "Ṣẹ̀dá ẹgbẹ́ kan"
 #: src/app/main/ui/onboarding/team_choice.cljs:31
 msgid "onboarding.team-modal.create-team-desc"
 msgstr ""
-"A team allows you to collaborate with other Penpot users working in the "
+"A team allows you to collaborate with other Penjar users working in the "
 "Ẹgbẹ́ kan yí ó gbà ọ́ láyè láti lè siṣẹ́pọ̀ pẹ̀lú àwọn onílò pẹ́ńpọti tí ó "
 "siṣẹ́ nínú  àwọn fáìlì àti àwọn iṣẹ́ àgbéṣe kan náà ."
 
@@ -2925,27 +2925,27 @@ msgstr "Yiyan pelu sun-un"
 
 #: src/app/main/ui/dashboard/files.cljs:181
 msgid "title.dashboard.files"
-msgstr "%s - Penpot"
+msgstr "%s - Penjar"
 
 #: src/app/main/ui/dashboard/fonts.cljs:46
 msgid "title.dashboard.font-providers"
-msgstr "Pipese oniru fọnti - %s - Penpot"
+msgstr "Pipese oniru fọnti - %s - Penjar"
 
 #: src/app/main/ui/dashboard/fonts.cljs:45
 msgid "title.dashboard.fonts"
-msgstr "Fọnti - %s - Penpot"
+msgstr "Fọnti - %s - Penjar"
 
 #: src/app/main/ui/dashboard/projects.cljs:357
 msgid "title.dashboard.projects"
-msgstr "Awọn ísè agbèsè - %s - Penpot"
+msgstr "Awọn ísè agbèsè - %s - Penjar"
 
 #: src/app/main/ui/dashboard/search.cljs:50
 msgid "title.dashboard.search"
-msgstr "Wà - %s - Penpot"
+msgstr "Wà - %s - Penjar"
 
 #: src/app/main/ui/auth/verify_token.cljs:70, src/app/main/ui/auth.cljs:34
 msgid "title.default"
-msgstr "Penpot – Se onìrú òmínìra fun awọ̀n ẹ̀gbẹ̀"
+msgstr "Penjar – Se onìrú òmínìra fun awọ̀n ẹ̀gbẹ̀"
 
 #: src/app/main/ui/settings/access_tokens.cljs:278
 msgid "title.settings.access-tokens"
@@ -2953,43 +2953,43 @@ msgstr "Profaili – Aami wiwọle"
 
 #: src/app/main/ui/settings/feedback.cljs:161
 msgid "title.settings.feedback"
-msgstr "Fi esi- Penpot"
+msgstr "Fi esi- Penjar"
 
 #: src/app/main/ui/settings/options.cljs:83
 msgid "title.settings.options"
-msgstr "Awon eto - Penpot"
+msgstr "Awon eto - Penjar"
 
 #: src/app/main/ui/settings/password.cljs:105
 msgid "title.settings.password"
-msgstr "Ọrọigbaníwólé - Penpot"
+msgstr "Ọrọigbaníwólé - Penjar"
 
 #: src/app/main/ui/settings/profile.cljs:124
 msgid "title.settings.profile"
-msgstr "Profaili - Penpot"
+msgstr "Profaili - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:981
 msgid "title.team-invitations"
-msgstr "Ifíwẹ́pe - %s - Penpot"
+msgstr "Ifíwẹ́pe - %s - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:535
 msgid "title.team-members"
-msgstr "Ọ́́mọ̀ ẹgbẹ - %s - Penpot"
+msgstr "Ọ́́mọ̀ ẹgbẹ - %s - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:1296
 msgid "title.team-settings"
-msgstr "Awọn eto - %s - Penpot"
+msgstr "Awọn eto - %s - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:1249
 msgid "title.team-webhooks"
-msgstr "Webhooks - %s - Penpot"
+msgstr "Webhooks - %s - Penjar"
 
 #: src/app/main/ui/viewer.cljs:423
 msgid "title.viewer"
-msgstr "%s –Ipo wíwò - Penpot"
+msgstr "%s –Ipo wíwò - Penjar"
 
 #: src/app/main/ui/workspace.cljs:237
 msgid "title.workspace"
-msgstr "%s - Penpot"
+msgstr "%s - Penjar"
 
 #: src/app/main/ui/viewer.cljs:573
 msgid "viewer.empty-state"

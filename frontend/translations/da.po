@@ -3,7 +3,7 @@ msgstr ""
 "PO-Revision-Date: 2024-06-17 08:07+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Danish "
-"<https://hosted.weblate.org/projects/penpot/frontend/da/>\n"
+"<https://hosted.weblate.org/projects/penjar/frontend/da/>\n"
 "Language: da\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -20,7 +20,7 @@ msgstr "Har du allerede en konto?"
 msgid "auth.check-your-email"
 msgstr ""
 "Tjek din mail og klik på linket for at bekræfte og starte med at bruge "
-"Penpot."
+"Penjar."
 
 #: src/app/main/ui/auth/recovery.cljs:67
 msgid "auth.confirm-password"
@@ -161,7 +161,7 @@ msgstr "Opret nyt team"
 
 #: src/app/main/ui/components/context_menu_a11y.cljs:300, src/app/main/ui/dashboard/sidebar.cljs:638
 msgid "dashboard.default-team-name"
-msgstr "Dit Penpot"
+msgstr "Dit Penjar"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:495
 msgid "dashboard.delete-team"
@@ -190,7 +190,7 @@ msgstr ""
 msgid "dashboard.fonts.hero-text2"
 msgstr ""
 "Du bør kun uploade skrifttyper som du ejer eller har licens til at bruge i "
-"Penpot. Find ud af mere i sektionen om indholdsrettigheder i [Penpot's "
+"Penjar. Find ud af mere i sektionen om indholdsrettigheder i [Penjar's "
 "Terms of Service] (%s). Du kan også læse om [font licensing](2)."
 
 #: src/app/main/ui/dashboard/team.cljs:122, src/app/main/ui/dashboard/team.cljs:744
@@ -375,8 +375,8 @@ msgid "dashboard.your-name"
 msgstr "Dit navn"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:40, src/app/main/ui/dashboard/fonts.cljs:42, src/app/main/ui/dashboard/libraries.cljs:56, src/app/main/ui/dashboard/projects.cljs:355, src/app/main/ui/dashboard/search.cljs:48, src/app/main/ui/dashboard/sidebar.cljs:312, src/app/main/ui/dashboard/team.cljs:537, src/app/main/ui/dashboard/team.cljs:983, src/app/main/ui/dashboard/team.cljs:1251, src/app/main/ui/dashboard/team.cljs:1298
-msgid "dashboard.your-penpot"
-msgstr "Dit Penpot"
+msgid "dashboard.your-penjar"
+msgstr "Dit Penjar"
 
 #: src/app/main/ui/comments.cljs:674, src/app/main/ui/confirm.cljs:37, src/app/main/ui/settings/subscription.cljs:273, src/app/main/ui/settings/subscription.cljs:306, src/app/main/ui/workspace/plugins.cljs:334, src/app/main/ui/workspace/plugins.cljs:388
 msgid "ds.confirm-cancel"
@@ -450,8 +450,8 @@ msgstr "Sletter skrifttype"
 
 #: src/app/main/ui/dashboard/fonts.cljs:46
 msgid "title.dashboard.font-providers"
-msgstr "Skrifttype Udbydere - %s - Penpot"
+msgstr "Skrifttype Udbydere - %s - Penjar"
 
 #: src/app/main/ui/dashboard/fonts.cljs:45
 msgid "title.dashboard.fonts"
-msgstr "Skrifttyper - %s - Penpot"
+msgstr "Skrifttyper - %s - Penjar"

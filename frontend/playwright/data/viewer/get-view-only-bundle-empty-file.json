@@ -47,7 +47,7 @@
             ],
             "~:pages-index": {
                 "~uc7ce0794-0992-8105-8004-38f28044384a": {
-                    "~#penpot/pointer": [
+                    "~#penjar/pointer": [
                         "~u0515a066-e303-8169-8004-73eb58e899c2",
                         {
                             "~:created-at": "~m1717493890978"

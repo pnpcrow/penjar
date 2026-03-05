@@ -52,104 +52,104 @@
 
 (def default-metrics
   {:update-file-changes
-   {::mdef/name "penpot_rpc_update_file_changes_total"
+   {::mdef/name "penjar_rpc_update_file_changes_total"
     ::mdef/help "A total number of changes submitted to update-file."
     ::mdef/type :counter}
 
    :update-file-bytes-processed
-   {::mdef/name "penpot_rpc_update_file_bytes_processed_total"
+   {::mdef/name "penjar_rpc_update_file_bytes_processed_total"
     ::mdef/help "A total number of bytes processed by update-file."
     ::mdef/type :counter}
 
    :rpc-mutation-timing
-   {::mdef/name "penpot_rpc_mutation_timing"
+   {::mdef/name "penjar_rpc_mutation_timing"
     ::mdef/help "RPC mutation method call timing."
     ::mdef/labels ["name"]
     ::mdef/type :histogram}
 
    :rpc-command-timing
-   {::mdef/name "penpot_rpc_command_timing"
+   {::mdef/name "penjar_rpc_command_timing"
     ::mdef/help "RPC command method call timing."
     ::mdef/labels ["name"]
     ::mdef/type :histogram}
 
    :rpc-query-timing
-   {::mdef/name "penpot_rpc_query_timing"
+   {::mdef/name "penjar_rpc_query_timing"
     ::mdef/help "RPC query method call timing."
     ::mdef/labels ["name"]
     ::mdef/type :histogram}
 
    :websocket-active-connections
-   {::mdef/name "penpot_websocket_active_connections"
+   {::mdef/name "penjar_websocket_active_connections"
     ::mdef/help "Active websocket connections gauge"
     ::mdef/type :gauge}
 
    :websocket-messages-total
-   {::mdef/name "penpot_websocket_message_total"
+   {::mdef/name "penjar_websocket_message_total"
     ::mdef/help "Counter of processed messages."
     ::mdef/labels ["op"]
     ::mdef/type :counter}
 
    :websocket-session-timing
-   {::mdef/name "penpot_websocket_session_timing"
+   {::mdef/name "penjar_websocket_session_timing"
     ::mdef/help "Websocket session timing (seconds)."
     ::mdef/type :summary}
 
    :session-update-total
-   {::mdef/name "penpot_http_session_update_total"
+   {::mdef/name "penjar_http_session_update_total"
     ::mdef/help "A counter of session update batch events."
     ::mdef/type :counter}
 
    :tasks-timing
-   {::mdef/name "penpot_tasks_timing"
+   {::mdef/name "penjar_tasks_timing"
     ::mdef/help "Background tasks timing (milliseconds)."
     ::mdef/labels ["name"]
     ::mdef/type :histogram}
 
    :redis-eval-timing
-   {::mdef/name "penpot_redis_eval_timing"
+   {::mdef/name "penjar_redis_eval_timing"
     ::mdef/help "Redis EVAL commands execution timings (ms)"
     ::mdef/labels ["name"]
     ::mdef/type :histogram}
 
    :rpc-climit-queue
-   {::mdef/name "penpot_rpc_climit_queue"
+   {::mdef/name "penjar_rpc_climit_queue"
     ::mdef/help "Current number of queued submissions."
     ::mdef/labels ["name"]
     ::mdef/type :gauge}
 
    :rpc-climit-permits
-   {::mdef/name "penpot_rpc_climit_permits"
+   {::mdef/name "penjar_rpc_climit_permits"
     ::mdef/help "Current number of available permits"
     ::mdef/labels ["name"]
     ::mdef/type :gauge}
 
    :rpc-climit-timing
-   {::mdef/name "penpot_rpc_climit_timing"
+   {::mdef/name "penjar_rpc_climit_timing"
     ::mdef/help "Summary of the time between queuing and executing on the CLIMIT"
     ::mdef/labels ["name"]
     ::mdef/type :histogram}
 
    :audit-http-handler-queue-size
-   {::mdef/name "penpot_audit_http_handler_queue_size"
+   {::mdef/name "penjar_audit_http_handler_queue_size"
     ::mdef/help "Current number of queued submissions on the audit log http handler"
     ::mdef/labels []
     ::mdef/type :gauge}
 
    :audit-http-handler-concurrency
-   {::mdef/name "penpot_audit_http_handler_concurrency"
+   {::mdef/name "penjar_audit_http_handler_concurrency"
     ::mdef/help "Current number of used concurrency capacity on the audit log http handler"
     ::mdef/labels []
     ::mdef/type :gauge}
 
    :audit-http-handler-timing
-   {::mdef/name "penpot_audit_http_handler_timing"
+   {::mdef/name "penjar_audit_http_handler_timing"
     ::mdef/help "Summary of the time between queuing and executing on the audit log http handler"
     ::mdef/labels []
     ::mdef/type :histogram}
 
    :http-server-dispatch-timing
-   {::mdef/name "penpot_http_server_dispatch_timing"
+   {::mdef/name "penjar_http_server_dispatch_timing"
     ::mdef/help "Histogram of dispatch handler"
     ::mdef/labels []
     ::mdef/type :histogram}})
@@ -528,33 +528,33 @@
    {::wrk/registry            (ig/ref ::wrk/registry)
     ::db/pool                 (ig/ref ::db/pool)
     ::wrk/entries
-    [{:cron #penpot/cron "0 0 0 * * ?" ;; daily
+    [{:cron #penjar/cron "0 0 0 * * ?" ;; daily
       :task :session-gc}
 
-     {:cron #penpot/cron "0 0 0 * * ?" ;; daily
+     {:cron #penjar/cron "0 0 0 * * ?" ;; daily
       :task :objects-gc}
 
-     {:cron #penpot/cron "0 0 0 * * ?" ;; daily
+     {:cron #penjar/cron "0 0 0 * * ?" ;; daily
       :task :storage-gc-deleted}
 
-     {:cron #penpot/cron "0 0 0 * * ?" ;; daily
+     {:cron #penjar/cron "0 0 0 * * ?" ;; daily
       :task :storage-gc-touched}
 
-     {:cron #penpot/cron "0 0 0 * * ?" ;; daily
+     {:cron #penjar/cron "0 0 0 * * ?" ;; daily
       :task :tasks-gc}
 
-     {:cron #penpot/cron "0 0 2 * * ?" ;; daily
+     {:cron #penjar/cron "0 0 2 * * ?" ;; daily
       :task :file-gc-scheduler}
 
-     {:cron #penpot/cron "0 30 */3,23 * * ?"
+     {:cron #penjar/cron "0 30 */3,23 * * ?"
       :task :telemetry}
 
      (when (contains? cf/flags :audit-log-archive)
-       {:cron #penpot/cron "0 */5 * * * ?" ;; every 5m
+       {:cron #penjar/cron "0 */5 * * * ?" ;; every 5m
         :task :audit-log-archive})
 
      (when (contains? cf/flags :audit-log-gc)
-       {:cron #penpot/cron "30 */5 * * * ?" ;; every 5m
+       {:cron #penjar/cron "30 */5 * * * ?" ;; every 5m
         :task :audit-log-gc})]}
 
    ::wrk/dispatcher
@@ -595,7 +595,7 @@
                                    (merge worker-config))
                                  (ig/expand)
                                  (ig/init))))
-  (l/inf :hint "welcome to penpot"
+  (l/inf :hint "welcome to penjar"
          :flags (str/join "," (map name cf/flags))
          :worker? (contains? cf/flags :backend-worker)
          :version (:full cf/version)))

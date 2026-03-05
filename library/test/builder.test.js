@@ -4,19 +4,19 @@ import * as fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import * as penpot  from "#self";
+import * as penjar  from "#self";
 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 test("create empty context", () => {
-  const context = penpot.createBuildContext();
+  const context = penjar.createBuildContext();
   assert.ok(context);
 });
 
 test("create context with single file", () => {
-  const context = penpot.createBuildContext();
+  const context = penjar.createBuildContext();
   context.addFile({name: "sample"});
 
   const internalState = context.getInternalState();
@@ -32,7 +32,7 @@ test("create context with single file", () => {
 });
 
 test("create context with two file", () => {
-  const context = penpot.createBuildContext();
+  const context = penjar.createBuildContext();
 
   const fileId_1 = context.addFile({name: "sample 1"});
   const fileId_2 = context.addFile({name: "sample 2"});
@@ -55,7 +55,7 @@ test("create context with two file", () => {
 });
 
 test("create context with two file and relation between", () => {
-  const context = penpot.createBuildContext();
+  const context = penjar.createBuildContext();
 
   const fileId_1 = context.addFile({name: "sample 1"});
   const fileId_2 = context.addFile({name: "sample 2"});
@@ -82,7 +82,7 @@ test("create context with two file and relation between", () => {
 
 
 test("create context with file and page", () => {
-  const context = penpot.createBuildContext();
+  const context = penjar.createBuildContext();
 
   const fileId = context.addFile({name: "file 1"});
   const pageId = context.addPage({name: "page 1"});
@@ -111,7 +111,7 @@ test("create context with file and page", () => {
 });
 
 test("create context with color", () => {
-  const context = penpot.createBuildContext();
+  const context = penjar.createBuildContext();
 
   const fileId = context.addFile({name: "file 1"});
   const pageId = context.addPage({name: "page 1"});
@@ -155,7 +155,7 @@ test("create context with color", () => {
 
 
 test("create context with tokens lib as json", () => {
-  const context = penpot.createBuildContext();
+  const context = penjar.createBuildContext();
 
   const fileId = context.addFile({name: "file 1"});
   const pageId = context.addPage({name: "page 1"});
@@ -177,7 +177,7 @@ test("create context with tokens lib as json", () => {
 });
 
 test("create context with tokens lib as json 2", () => {
-  const context = penpot.createBuildContext();
+  const context = penjar.createBuildContext();
 
   const fileId = context.addFile({name: "file 1"});
   const pageId = context.addPage({name: "page 1"});
@@ -198,7 +198,7 @@ test("create context with tokens lib as json 2", () => {
 });
 
 test("create context with tokens lib as obj", () => {
-  const context = penpot.createBuildContext();
+  const context = penjar.createBuildContext();
 
   const fileId = context.addFile({name: "file 1"});
   const pageId = context.addPage({name: "page 1"});

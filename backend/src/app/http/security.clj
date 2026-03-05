@@ -39,7 +39,7 @@
                 wrap-sec-fetch-metadata))})
 
 (defn- wrap-client-header-check
-  "Check for a penpot custom header to be present as additional CSRF
+  "Check for a penjar custom header to be present as additional CSRF
   protection"
   [handler]
   (fn [request]

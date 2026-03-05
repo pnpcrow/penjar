@@ -33,7 +33,7 @@
   Setup transforms from tokens-studio used to parse and resolved token values."
   (do
     (sd-transforms/register sd)
-    (.registerTransformGroup sd #js {:name "penpot"
+    (.registerTransformGroup sd #js {:name "penjar"
                                      :transforms
                                      ;; Rebuild sd-transforms without "ts/typography/compose/shorthand" (we need to keep a typography map)
                                      (.concat (sd-transforms/getTransforms)
@@ -47,9 +47,9 @@
 
 (def default-config
   {:platforms {:json
-               {:transformGroup "penpot"
+               {:transformGroup "penjar"
                 ;; Required: The StyleDictionary API is focused on files even when working in the browser
-                :files [{:format "custom/json" :destination "penpot"}]}}
+                :files [{:format "custom/json" :destination "penjar"}]}}
    :preprocessors ["tokens-studio"]
    ;; Silences style dictionary logs and errors
    ;; We handle token errors in the UI
@@ -446,7 +446,7 @@
 (defn process-sd-tokens
   "Converts a StyleDictionary dictionary with resolved tokens (aka `sd-tokens`) back to clojure.
   The `get-origin-token` argument should be a function that takes an
-  `sd-token` and returns the original penpot token, so we can merge
+  `sd-token` and returns the original penjar token, so we can merge
   the resolved attributes back in.
 
   The `sd-token` will have references in `value` replaced with the computed value as a string.
@@ -458,7 +458,7 @@
     type:  'border-radius',
     path: ['token', 'with', 'reference'],
 
-    // The penpot origin token converted to a js object
+    // The penjar origin token converted to a js object
     original: {
         name:  'token.with.reference',
         value: '{referenced.token}',
@@ -467,7 +467,7 @@
   }
   ```
 
-  We also convert `sd-token` value string into a unit that can be used as penpot shape attributes.
+  We also convert `sd-token` value string into a unit that can be used as penjar shape attributes.
     - Dimensions like '12px' will be converted into numbers
     - Colors will be validated & converted to hex
 

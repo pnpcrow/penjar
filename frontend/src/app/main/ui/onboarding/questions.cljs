@@ -241,17 +241,17 @@
                          :value "" :key "questions:what-brings-you-here"
                          :disabled true}
                         {:label (tr "onboarding.questions.reasons.exploring")
-                         :value "discover-more-about-penpot"
-                         :key "discover-more-about-penpot"}
+                         :value "discover-more-about-penjar"
+                         :key "discover-more-about-penjar"}
                         {:label (tr "onboarding.questions.reasons.fit")
-                         :value "test-penpot-to-see-if-its-a-fit-for-team"
-                         :key "test-penpot-to-see-if-its-a-fit-for-team"}
+                         :value "test-penjar-to-see-if-its-a-fit-for-team"
+                         :key "test-penjar-to-see-if-its-a-fit-for-team"}
                         {:label (tr "onboarding.questions.reasons.alternative")
                          :value "alternative-to-figma"
                          :key "alternative-to-figma"}
                         {:label (tr "onboarding.questions.reasons.testing")
-                         :value "try-out-before-using-penpot-on-premise"
-                         :key "try-out-before-using-penpot-on-premise"}])
+                         :value "try-out-before-using-penjar-on-premise"
+                         :key "try-out-before-using-penjar-on-premise"}])
               (conj {:label (tr "labels.other-short") :value "other"})))
 
         current-planning

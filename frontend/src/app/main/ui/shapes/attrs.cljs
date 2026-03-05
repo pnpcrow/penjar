@@ -212,7 +212,7 @@
        ;; inherited by child nodes, and is for emulating the
        ;; behavior of standard SVG, in that a node that has no
        ;; explicit fill has a default fill of black. This may be
-       ;; reset to normal if a Penpot frame shape appears below
+       ;; reset to normal if a Penjar frame shape appears below
        ;; (see main.ui.shapes.frame/frame-container).
        (and ^boolean (contains? shape :svg-attrs)
             ^boolean (or ^boolean (= :svg-raw shape-type)

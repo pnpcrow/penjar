@@ -3,7 +3,7 @@ msgstr ""
 "PO-Revision-Date: 2026-02-16 08:35+0000\n"
 "Last-Translator: AlexTECPlayz <alextecplayz@vantainteractive.com>\n"
 "Language-Team: Romanian "
-"<https://hosted.weblate.org/projects/penpot/frontend/ro/>\n"
+"<https://hosted.weblate.org/projects/penjar/frontend/ro/>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -25,7 +25,7 @@ msgstr "Verifică-ți e-mailul"
 msgid "auth.check-your-email"
 msgstr ""
 "Verifică-ți adresa de e-mail, fă clic pe link-ul de verificare și începe să "
-"utilizezi Penpot."
+"utilizezi Penjar."
 
 #: src/app/main/ui/auth/recovery.cljs:67
 msgid "auth.confirm-password"
@@ -70,7 +70,7 @@ msgstr "Intră în cont"
 #: src/app/main/ui/auth/login.cljs:274
 msgid "auth.login-tagline"
 msgstr ""
-"Penpot este unealta gratuită cu cod sursă liber pentru colaborare în design "
+"Penjar este unealta gratuită cu cod sursă liber pentru colaborare în design "
 "și cod"
 
 #: src/app/main/ui/auth/login.cljs:231
@@ -165,7 +165,7 @@ msgstr "Creează un cont"
 #, unused
 msgid "auth.register-tagline"
 msgstr ""
-"Cu un cont Penpot gratuit, poți crea echipe nelimitate și colabora cu alți "
+"Cu un cont Penjar gratuit, poți crea echipe nelimitate și colabora cu alți "
 "designeri și dezvoltatori în oricâte proiecte dorești. "
 
 #: src/app/main/ui/auth/register.cljs:206
@@ -227,7 +227,7 @@ msgstr "Publică"
 
 #: src/app/main/ui/viewer/share_link.cljs:304, src/app/main/ui/viewer/share_link.cljs:315
 msgid "common.share-link.all-users"
-msgstr "Toți utilizatorii Penpot"
+msgstr "Toți utilizatorii Penjar"
 
 #: src/app/main/ui/viewer/share_link.cljs:204
 msgid "common.share-link.confirm-deletion-link-description"
@@ -305,7 +305,7 @@ msgstr "Managementul echipei"
 #: src/app/main/ui/dashboard/projects.cljs:92
 msgid "dasboard.team-hero.text"
 msgstr ""
-"Penpot este destinat echipelor. Invită membrii să lucrați împreună la "
+"Penjar este destinat echipelor. Invită membrii să lucrați împreună la "
 "proiecte și fișiere"
 
 #: src/app/main/ui/dashboard/projects.cljs:90
@@ -316,7 +316,7 @@ msgstr "Faceți echipă!"
 #, unused
 msgid "dasboard.tutorial-hero.info"
 msgstr ""
-"Învață elementele de bază la Penpot în timp ce te distrezi puțin cu acest "
+"Învață elementele de bază la Penjar în timp ce te distrezi puțin cu acest "
 "tutorial practic."
 
 #: src/app/main/ui/dashboard/projects.cljs
@@ -332,7 +332,7 @@ msgstr "Tutorial practic"
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
 msgid "dasboard.walkthrough-hero.info"
-msgstr "Fă o plimbare prin Penpot și cunoaște-i principalele caracteristici."
+msgstr "Fă o plimbare prin Penjar și cunoaște-i principalele caracteristici."
 
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
@@ -405,7 +405,7 @@ msgid "dashboard.access-tokens.personal.description"
 msgstr ""
 "Token-urile de acces personal funcționează ca o alternativă la sistemul "
 "nostru de autentificare prin login/parolă și poate fi folosit pentru a "
-"permite unei aplicații să acceseze API-ul intern Penpot"
+"permite unei aplicații să acceseze API-ul intern Penjar"
 
 #: src/app/main/ui/settings/access_tokens.cljs:142
 msgid "dashboard.access-tokens.token-will-expire"
@@ -441,7 +441,7 @@ msgstr "Fixează această versiune"
 
 #: src/app/main/ui/components/context_menu_a11y.cljs:300, src/app/main/ui/dashboard/sidebar.cljs:638
 msgid "dashboard.default-team-name"
-msgstr "Contul Penpot"
+msgstr "Contul Penjar"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:495
 msgid "dashboard.delete-team"
@@ -449,7 +449,7 @@ msgstr "Șterge echipa"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:328, src/app/main/ui/workspace/main_menu.cljs:690
 msgid "dashboard.download-binary-file"
-msgstr "Descarcă fișierul Penpot (.penpot)"
+msgstr "Descarcă fișierul Penjar (.penjar)"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:321, src/app/main/ui/workspace/main_menu.cljs:712
 #, unused
@@ -486,7 +486,7 @@ msgid "dashboard.empty-placeholder-libraries"
 msgstr ""
 "Bibliotecile adăugate la proiect vor apărea aici. Încearcă să partajezi "
 "fișierele sau adaugă din [Biblioteci și "
-"șabloane](https://penpot.app/libraries-templates)."
+"șabloane](https://penjar.app/libraries-templates)."
 
 #: src/app/main/ui/dashboard/placeholder.cljs
 #, markdown, unused
@@ -494,7 +494,7 @@ msgid "dashboard.empty-placeholder-libraries-subtitle"
 msgstr ""
 "Bibliotecile adăugate la proiect vor apărea aici. Încearcă să partajezi "
 "fișierele sau adaugă din [Biblioteci și "
-"șabloane](https://penpot.app/libraries-templates)."
+"șabloane](https://penjar.app/libraries-templates)."
 
 #: src/app/main/ui/dashboard/placeholder.cljs:114
 msgid "dashboard.empty-placeholder-libraries-subtitle-viewer-role"
@@ -525,8 +525,8 @@ msgid "dashboard.empty-project.import"
 msgstr "Importă un fișier"
 
 #: src/app/main/ui/dashboard/placeholder.cljs:53
-msgid "dashboard.empty-project.import-penpot"
-msgstr "Importă un fișier .penpot"
+msgid "dashboard.empty-project.import-penjar"
+msgstr "Importă un fișier .penjar"
 
 #: src/app/main/ui/dashboard/placeholder.cljs:45
 msgid "dashboard.empty-project.start"
@@ -534,7 +534,7 @@ msgstr "Începe să creezi lucruri uimitoare"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:280
 msgid "dashboard.export-binary-multi"
-msgstr "Descarcă %s fișiere Penpot (.penpot)"
+msgstr "Descarcă %s fișiere Penjar (.penjar)"
 
 #: src/app/main/ui/workspace/main_menu.cljs:698
 msgid "dashboard.export-frames"
@@ -546,7 +546,7 @@ msgstr "Exportă ca PDF"
 
 #, unused
 msgid "dashboard.export-multi"
-msgstr "Exportă %s fișiere Penpot"
+msgstr "Exportă %s fișiere Penjar"
 
 #: src/app/main/ui/exports/assets.cljs:108
 msgid "dashboard.export-multiple.selected"
@@ -564,7 +564,7 @@ msgstr ""
 
 #: src/app/main/ui/exports/assets.cljs:183
 msgid "dashboard.export-shapes.how-to-link"
-msgstr "Informații despre cum să setezi exporturile în Penpot."
+msgstr "Informații despre cum să setezi exporturile în Penjar."
 
 #: src/app/main/ui/exports/assets.cljs:178
 msgid "dashboard.export-shapes.no-elements"
@@ -630,7 +630,7 @@ msgid "dashboard.fonts.hero-text2"
 msgstr ""
 "Ar trebui să încarci doar fonturi la care ai drept de folosință sau fonturi "
 "personale. Află mai multe despre Dreptul de conținut la secțiunea [Termenii "
-"și Condițiile Penpot](%s). De asemenea, îți recomandăm să citești și despre "
+"și Condițiile Penjar](%s). De asemenea, îți recomandăm să citești și despre "
 "[licențierea fonturilor](https://www.typography.com/faq)."
 
 #: src/app/main/ui/dashboard/fonts.cljs:214
@@ -650,7 +650,7 @@ msgstr ""
 
 #: src/app/main/ui/dashboard/import.cljs:464, src/app/main/ui/dashboard/project_menu.cljs:109
 msgid "dashboard.import"
-msgstr "Importă fișiere Penpot"
+msgstr "Importă fișiere Penjar"
 
 #: src/app/main/ui/dashboard/import.cljs:293, src/app/worker/import.cljs:121, src/app/worker/import.cljs:124
 msgid "dashboard.import.analyze-error"
@@ -942,11 +942,11 @@ msgstr "Selectează o temă"
 
 #: src/app/main/ui/settings/options.cljs:68
 msgid "dashboard.select-ui-theme.dark"
-msgstr "Penpot Întunecat (implicit)"
+msgstr "Penjar Întunecat (implicit)"
 
 #: src/app/main/ui/settings/options.cljs:69
 msgid "dashboard.select-ui-theme.light"
-msgstr "Penpot Luminos"
+msgstr "Penjar Luminos"
 
 #: src/app/main/ui/settings/options.cljs:70
 msgid "dashboard.select-ui-theme.system"
@@ -1095,8 +1095,8 @@ msgid "dashboard.upgrade-plan.no-limits"
 msgstr "Fără limite pentru creativitate"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:1069
-msgid "dashboard.upgrade-plan.penpot-free"
-msgstr "Penpot Gratuit"
+msgid "dashboard.upgrade-plan.penjar-free"
+msgstr "Penjar Gratuit"
 
 #: src/app/main/ui/dashboard/team.cljs:1115
 msgid "dashboard.webhooks.active"
@@ -1127,7 +1127,7 @@ msgid "dashboard.webhooks.description"
 msgstr ""
 "Webhook-urile sunt o modalitate simplă de a permite altor site-uri web și "
 "aplicații să fie notificate atunci când au loc anumite evenimente la "
-"Penpot. Vom trimite o solicitare POST la fiecare dintre adresele URL pe "
+"Penjar. Vom trimite o solicitare POST la fiecare dintre adresele URL pe "
 "care le furnizezi."
 
 #: src/app/main/ui/dashboard/team.cljs:1265
@@ -1155,8 +1155,8 @@ msgid "dashboard.your-name"
 msgstr "Numele tău"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:40, src/app/main/ui/dashboard/fonts.cljs:42, src/app/main/ui/dashboard/libraries.cljs:56, src/app/main/ui/dashboard/projects.cljs:355, src/app/main/ui/dashboard/search.cljs:48, src/app/main/ui/dashboard/sidebar.cljs:312, src/app/main/ui/dashboard/team.cljs:537, src/app/main/ui/dashboard/team.cljs:983, src/app/main/ui/dashboard/team.cljs:1251, src/app/main/ui/dashboard/team.cljs:1298
-msgid "dashboard.your-penpot"
-msgstr "Contul Penpot"
+msgid "dashboard.your-penjar"
+msgstr "Contul Penjar"
 
 #: src/app/main/ui/alert.cljs:35
 msgid "ds.alert-ok"
@@ -1246,7 +1246,7 @@ msgstr "A apărut o eroare în urma acestui comentariu"
 msgid "errors.deprecated"
 msgstr ""
 "Ne pare rău! Acesta este un fișier vechi care folosește un tip de obiecte "
-"Penpot vechi și nu îl poți deschide."
+"Penjar vechi și nu îl poți deschide."
 
 #: src/app/main/errors.cljs:305
 msgid "errors.deprecated.contact.after"
@@ -1254,7 +1254,7 @@ msgstr "pentru a te putea ajuta."
 
 #: src/app/main/errors.cljs:303
 msgid "errors.deprecated.contact.before"
-msgstr "Deși Penpot nu mai suportă acest tip de obiecte, poți"
+msgstr "Deși Penjar nu mai suportă acest tip de obiecte, poți"
 
 #: src/app/main/errors.cljs:304
 msgid "errors.deprecated.contact.text"
@@ -1296,7 +1296,7 @@ msgstr "E-mailul «%s» a fost raportat ca spam sau respins permanent."
 msgid "errors.feature-mismatch"
 msgstr ""
 "Se pare că vrei să deschizi un fișier care are activată funcția \"%s\", dar "
-"versiunea curentă a Penpot nu o acceptă sau o are dezactivată."
+"versiunea curentă a Penjar nu o acceptă sau o are dezactivată."
 
 #: src/app/main/errors.cljs:283, src/app/main/errors.cljs:297
 msgid "errors.feature-not-supported"
@@ -1556,7 +1556,7 @@ msgstr ""
 
 #: src/app/main/ui/settings/feedback.cljs:149
 msgid "feedback.discourse-title"
-msgstr "Comunitatea Penpot"
+msgstr "Comunitatea Penjar"
 
 #: src/app/main/ui/settings/feedback.cljs:105
 msgid "feedback.subject"
@@ -1819,7 +1819,7 @@ msgstr "Proprietățile variantelor"
 msgid "inspect.empty.help"
 msgstr ""
 "Dacă dorești să afli mai multe despre inspectorul de design, vizitează "
-"centrul de ajutor Penpot"
+"centrul de ajutor Penjar"
 
 #: src/app/main/ui/inspect/right_sidebar.cljs:232
 msgid "inspect.empty.select"
@@ -1929,8 +1929,8 @@ msgid "label.shortcuts"
 msgstr "Comenzi rapide"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:1138
-msgid "labels.about-penpot"
-msgstr "Despre Penpot"
+msgid "labels.about-penjar"
+msgstr "Despre Penjar"
 
 #: src/app/main/data/common.cljs:90, src/app/main/ui/dashboard/import.cljs:530
 msgid "labels.accept"
@@ -2050,8 +2050,8 @@ msgid "labels.continue-with"
 msgstr "Continuă cu"
 
 #: src/app/main/ui/viewer/login.cljs:69
-msgid "labels.continue-with-penpot"
-msgstr "Poți continua cu un cont Penpot"
+msgid "labels.continue-with-penjar"
+msgstr "Poți continua cu un cont Penjar"
 
 #: src/app/main/ui/components/copy_button.cljs:41
 msgid "labels.copy"
@@ -2413,12 +2413,12 @@ msgid "labels.pending-invitation"
 msgstr "În curs"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:973
-msgid "labels.penpot-changelog"
-msgstr "Registrul de schimbări ale Penpot"
+msgid "labels.penjar-changelog"
+msgstr "Registrul de schimbări ale Penjar"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:899
-msgid "labels.penpot-hub"
-msgstr "Hub-ul Penpot"
+msgid "labels.penjar-hub"
+msgstr "Hub-ul Penjar"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:846
 msgid "labels.pinned-projects"
@@ -2778,7 +2778,7 @@ msgstr "Prototipuri interactive"
 
 #: src/app/main/ui/ds/product/loader.cljs:33
 msgid "loader.tips.07.message"
-msgstr "Penpot folosește SVG și CSS pentru o dezvoltare fluidă."
+msgstr "Penjar folosește SVG și CSS pentru o dezvoltare fluidă."
 
 #: src/app/main/ui/ds/product/loader.cljs:32
 msgid "loader.tips.07.title"
@@ -2805,7 +2805,7 @@ msgstr "Mod Întunecat și Luminos"
 #: src/app/main/ui/ds/product/loader.cljs:39
 msgid "loader.tips.10.message"
 msgstr ""
-"Extinde Penpot cu extensii construite de către comunitate pentru extra "
+"Extinde Penjar cu extensii construite de către comunitate pentru extra "
 "funcționalitate."
 
 #: src/app/main/ui/ds/product/loader.cljs:38
@@ -3349,7 +3349,7 @@ msgstr "Eroare 404"
 #: src/app/main/ui/static.cljs:138
 msgid "not-found.login.free"
 msgstr ""
-"Penpot este o unealtă de design gratuită cu cod sursă deschis pentru "
+"Penjar este o unealtă de design gratuită cu cod sursă deschis pentru "
 "colaborare între design și cod"
 
 #: src/app/main/ui/auth/recovery_request.cljs:114
@@ -3368,7 +3368,7 @@ msgstr "Înscrie-te gratuit"
 
 #: src/app/main/ui/static.cljs:153
 msgid "not-found.login.start-using"
-msgstr "Și începe să folosești Penpot în secunde!"
+msgstr "Și începe să folosești Penjar în secunde!"
 
 #: src/app/main/ui/static.cljs:69
 msgid "not-found.made-with-love"
@@ -3412,15 +3412,15 @@ msgstr "Nu ai acces la acest fișier."
 
 #: src/app/main/ui/static.cljs:56, src/app/main/ui/static.cljs:244, src/app/main/ui/static.cljs:250, src/app/main/ui/static.cljs:256, src/app/main/ui/static.cljs:262, src/app/main/ui/static.cljs:271, src/app/main/ui/static.cljs:280
 msgid "not-found.no-permission.go-dashboard"
-msgstr "Du te la pagina ta de acasă în Penpot"
+msgstr "Du te la pagina ta de acasă în Penjar"
 
 #: src/app/main/ui/static.cljs:268, src/app/main/ui/static.cljs:277
 msgid "not-found.no-permission.if-approves"
 msgstr "Dacă proprietarul acceptă, vei fi invitat în echipă."
 
 #: src/app/main/ui/static.cljs:496, src/app/main/ui/static.cljs:509
-msgid "not-found.no-permission.penpot-file"
-msgstr "Fișier Penpot"
+msgid "not-found.no-permission.penjar-file"
+msgstr "Fișier Penjar"
 
 #: src/app/main/ui/static.cljs:243, src/app/main/ui/static.cljs:275
 msgid "not-found.no-permission.project"
@@ -3476,13 +3476,13 @@ msgstr "Un e-mail de verificare a fost trimis la %s. Verifică-ţi adresa de e-m
 msgid "onboarding-v2.before-start.desc1"
 msgstr ""
 "Trebuie să știi că există o mulțime de resurse disponibile pentru a te "
-"ajuta să începi cu Penpot, cum ar fi Ghidul utilizatorului și canalul "
+"ajuta să începi cu Penjar, cum ar fi Ghidul utilizatorului și canalul "
 "nostru de Youtube."
 
 #, unused
 msgid "onboarding-v2.before-start.desc2"
 msgstr ""
-"Informații detaliate despre cum să utilizezi Penpot. De la prototipare la "
+"Informații detaliate despre cum să utilizezi Penjar. De la prototipare la "
 "organizarea sau partajarea design-urilor."
 
 #, unused
@@ -3506,13 +3506,13 @@ msgstr "Înainte de a începe"
 #: src/app/main/ui/onboarding/newsletter.cljs:68
 msgid "onboarding-v2.newsletter.desc"
 msgstr ""
-"Abonează-te la newsletter-ul Penpot pentru a fi la curent cu progresul și "
+"Abonează-te la newsletter-ul Penjar pentru a fi la curent cu progresul și "
 "noutățile dezvoltării produsului."
 
 #: src/app/main/ui/onboarding/newsletter.cljs:88
 msgid "onboarding-v2.newsletter.news"
 msgstr ""
-"Trimite-mi noutăți despre Penpot (postări pe blog, tutoriale video, "
+"Trimite-mi noutăți despre Penjar (postări pe blog, tutoriale video, "
 "streaming...)."
 
 #: src/app/main/ui/onboarding/newsletter.cljs:96
@@ -3532,15 +3532,15 @@ msgstr "Trimite-mi actualizări de produse (funcții noi, lansări, remedieri...
 #, unused
 msgid "onboarding-v2.welcome.desc1"
 msgstr ""
-"Penpot este Open Source și este făcut de Kaleidos, precum și de comunitate, "
+"Penjar este Open Source și este făcut de Kaleidos, precum și de comunitate, "
 "unde mulți oameni deja se ajută reciproc. Toată lumea poate colabora prin:"
 
 #, unused
 msgid "onboarding-v2.welcome.desc2"
 msgstr ""
-"Un spațiu public pentru a învăța, a împărtăși și a discuta despre Penpot, "
+"Un spațiu public pentru a învăța, a împărtăși și a discuta despre Penjar, "
 "prezentul și viitorul său cu întreaga comunitate și echipa principală "
-"Penpot."
+"Penjar."
 
 #, unused
 msgid "onboarding-v2.welcome.desc2.title"
@@ -3558,7 +3558,7 @@ msgstr "Ghid de contribuție"
 
 #: src/app/main/ui/onboarding/team_choice.cljs:241
 msgid "onboarding-v2.welcome.title"
-msgstr "Bun venit la Penpot!"
+msgstr "Bun venit la Penjar!"
 
 #: src/app/main/ui/onboarding/team_choice.cljs:254
 #, unused
@@ -3635,7 +3635,7 @@ msgstr "Politica de Confidențialitate."
 
 #: src/app/main/ui/onboarding/newsletter.cljs:65
 msgid "onboarding.newsletter.title"
-msgstr "Vrei să primești știri Penpot?"
+msgstr "Vrei să primești știri Penjar?"
 
 #: src/app/main/ui/onboarding/questions.cljs:108
 msgid "onboarding.questions.lets-get-started"
@@ -3651,7 +3651,7 @@ msgstr "Doar explorez"
 
 #: src/app/main/ui/onboarding/questions.cljs:246
 msgid "onboarding.questions.reasons.fit"
-msgstr "Doresc să văd dacă Penpot ar fi bun pentru echipa mea"
+msgstr "Doresc să văd dacă Penjar ar fi bun pentru echipa mea"
 
 #: src/app/main/ui/onboarding/questions.cljs:252
 msgid "onboarding.questions.reasons.testing"
@@ -3694,16 +3694,16 @@ msgstr "Wireframing"
 
 #: src/app/main/ui/onboarding/questions.cljs:116
 msgid "onboarding.questions.step1.question1"
-msgstr "Pentru ce vei folosi Penpot?"
+msgstr "Pentru ce vei folosi Penjar?"
 
 #: src/app/main/ui/onboarding/questions.cljs:273
 msgid "onboarding.questions.step1.question2"
-msgstr "Ce te aduce la Penpot azi?"
+msgstr "Ce te aduce la Penjar azi?"
 
 #: src/app/main/ui/onboarding/questions.cljs:112
 msgid "onboarding.questions.step1.subtitle"
 msgstr ""
-"Spune-ne puțin despre tine pentru a ne ajuta să facem Penpot să se adapteze "
+"Spune-ne puțin despre tine pentru a ne ajuta să facem Penjar să se adapteze "
 "pentru tine. Răspunsurile tale ne vor ajuta să prioritizăm funcționalități "
 "noi și să te îndreptăm în direcția bună pentru a începe."
 
@@ -3739,7 +3739,7 @@ msgstr "Unde ai vrea să începi?"
 #: src/app/main/ui/onboarding/questions.cljs:428
 #, unused
 msgid "onboarding.questions.step5.title"
-msgstr "Cum ai auzit despre Penpot?"
+msgstr "Cum ai auzit despre Penjar?"
 
 #: src/app/main/ui/onboarding/questions.cljs:233
 msgid "onboarding.questions.team-size.11-30"
@@ -3784,7 +3784,7 @@ msgstr "Creează o echipă"
 #: src/app/main/ui/onboarding/team_choice.cljs:31
 msgid "onboarding.team-modal.create-team-desc"
 msgstr ""
-"O echipă îți permite să colaborezi cu alți utilizatori Penpot care lucrează "
+"O echipă îți permite să colaborezi cu alți utilizatori Penjar care lucrează "
 "în aceleași fișiere și proiecte."
 
 #: src/app/main/ui/onboarding/team_choice.cljs:36
@@ -3821,7 +3821,7 @@ msgstr "Începe să proiectezi"
 
 #, unused
 msgid "onboarding.welcome.alt"
-msgstr "Penpot"
+msgstr "Penjar"
 
 #: src/app/main/ui/auth/recovery.cljs:88
 msgid "profile.recovery.go-to-login"
@@ -4690,7 +4690,7 @@ msgstr ""
 
 #: src/app/main/ui/settings/subscription.cljs:533
 msgid "subscription.settings.member-since"
-msgstr "Membru Penpot din: %s"
+msgstr "Membru Penjar din: %s"
 
 #: src/app/main/ui/settings/subscription.cljs:546, src/app/main/ui/settings/subscription.cljs:560, src/app/main/ui/settings/subscription.cljs:576
 msgid "subscription.settings.more-information"
@@ -4698,7 +4698,7 @@ msgstr "Mai multe informații"
 
 #: src/app/main/ui/settings/subscription.cljs:536
 msgid "subscription.settings.other-plans"
-msgstr "Alte abonamente Penpot"
+msgstr "Alte abonamente Penjar"
 
 #: src/app/main/ui/settings/subscription.cljs:540, src/app/main/ui/settings/subscription.cljs:553
 msgid "subscription.settings.price-editor-month"
@@ -4744,7 +4744,7 @@ msgstr ""
 
 #: src/app/main/ui/settings/subscription.cljs:343
 msgid "subscription.settings.success.dialog.thanks"
-msgstr "Mulțumim pentru că ai ales planul Penpot %s!"
+msgstr "Mulțumim pentru că ai ales planul Penjar %s!"
 
 #: src/app/main/ui/settings/subscription.cljs:347
 msgid "subscription.settings.sucess.dialog.footer"
@@ -4806,31 +4806,31 @@ msgstr "Dacă vrei să crești această limită, [schimbă-ți abonamentul|targe
 
 #: src/app/main/ui/dashboard/files.cljs:181
 msgid "title.dashboard.files"
-msgstr "%s - Penpot"
+msgstr "%s - Penjar"
 
 #: src/app/main/ui/dashboard/fonts.cljs:46
 msgid "title.dashboard.font-providers"
-msgstr "Furnizori de Fonturi - %s - Penpot"
+msgstr "Furnizori de Fonturi - %s - Penjar"
 
 #: src/app/main/ui/dashboard/fonts.cljs:45
 msgid "title.dashboard.fonts"
-msgstr "Fonturi - %s - Penpot"
+msgstr "Fonturi - %s - Penjar"
 
 #: src/app/main/ui/dashboard/projects.cljs:357
 msgid "title.dashboard.projects"
-msgstr "Proiecte - %s - Penpot"
+msgstr "Proiecte - %s - Penjar"
 
 #: src/app/main/ui/dashboard/search.cljs:50
 msgid "title.dashboard.search"
-msgstr "Caută - %s - Penpot"
+msgstr "Caută - %s - Penjar"
 
 #: src/app/main/ui/dashboard/libraries.cljs:58
 msgid "title.dashboard.shared-libraries"
-msgstr "Biblioteci Distribuite - %s - Penpot"
+msgstr "Biblioteci Distribuite - %s - Penjar"
 
 #: src/app/main/ui/auth/verify_token.cljs:70, src/app/main/ui/auth.cljs:34
 msgid "title.default"
-msgstr "Penpot - Libertate în Design pentru Echipe"
+msgstr "Penjar - Libertate în Design pentru Echipe"
 
 #: src/app/main/ui/settings/access_tokens.cljs:278
 msgid "title.settings.access-tokens"
@@ -4838,47 +4838,47 @@ msgstr "Profil - Token-uri acces"
 
 #: src/app/main/ui/settings/feedback.cljs:161
 msgid "title.settings.feedback"
-msgstr "Oferă feedback - Penpot"
+msgstr "Oferă feedback - Penjar"
 
 #: src/app/main/ui/settings/notifications.cljs:45
 msgid "title.settings.notifications"
-msgstr "Notificări - Penpot"
+msgstr "Notificări - Penjar"
 
 #: src/app/main/ui/settings/options.cljs:83
 msgid "title.settings.options"
-msgstr "Setări - Penpot"
+msgstr "Setări - Penjar"
 
 #: src/app/main/ui/settings/password.cljs:105
 msgid "title.settings.password"
-msgstr "Parolă - Penpot"
+msgstr "Parolă - Penjar"
 
 #: src/app/main/ui/settings/profile.cljs:124
 msgid "title.settings.profile"
-msgstr "Profil - Penpot"
+msgstr "Profil - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:981
 msgid "title.team-invitations"
-msgstr "Invitații -%s - Penpot"
+msgstr "Invitații -%s - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:535
 msgid "title.team-members"
-msgstr "Membri - %s - Penpot"
+msgstr "Membri - %s - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:1296
 msgid "title.team-settings"
-msgstr "Setări - %s - Penpot"
+msgstr "Setări - %s - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:1249
 msgid "title.team-webhooks"
-msgstr "Webhooks - %s - Penpot"
+msgstr "Webhooks - %s - Penjar"
 
 #: src/app/main/ui/viewer.cljs:423
 msgid "title.viewer"
-msgstr "%s - Vizualizare - Penpot"
+msgstr "%s - Vizualizare - Penjar"
 
 #: src/app/main/ui/workspace.cljs:237
 msgid "title.workspace"
-msgstr "%s - Penpot"
+msgstr "%s - Penjar"
 
 #: src/app/main/ui.cljs:138
 #, unused
@@ -5815,7 +5815,7 @@ msgstr "Încearcă să folosești următoarea structură:"
 #: src/app/main/ui/workspace/sidebar/options/menus/variants_help_modal.cljs:54
 msgid "workspace.options.component.variants-help-modal.intro"
 msgstr ""
-"Pentru a reține schimbările când comuți între variante, Penpot conectează "
+"Pentru a reține schimbările când comuți între variante, Penjar conectează "
 "straturi care:"
 
 #: src/app/main/ui/workspace/sidebar/options/menus/variants_help_modal.cljs:91
@@ -8298,7 +8298,7 @@ msgstr "Deschide meniul de versiuni"
 #: src/app/main/ui/workspace/sidebar/versions.cljs:60
 #, markdown
 msgid "workspace.versions.warning.subtext"
-msgstr "Dacă dorești să crești această limită, scrie-ne la [support@penpot.app](%s)"
+msgstr "Dacă dorești să crești această limită, scrie-ne la [support@penjar.app](%s)"
 
 #: src/app/main/ui/workspace/sidebar/versions.cljs:431
 msgid "workspace.versions.warning.text"

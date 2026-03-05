@@ -404,15 +404,15 @@
 
     (let [profile (some-> (th/db-get :profile {:email "user@example.com"})
                           (profile/decode-row))]
-      (t/is (= "penpot" (:auth-backend profile)))
+      (t/is (= "penjar" (:auth-backend profile)))
       (t/is (= "foobar" (:fullname profile)))
       (t/is (false? (:is-active profile)))
       (t/is (uuid? (:default-team-id profile)))
       (t/is (uuid? (:default-project-id profile)))
 
       (let [props (:props profile)]
-        (t/is (= "utma" (:penpot/utm-campaign props)))
-        (t/is (= "mtma" (:penpot/mtm-campaign props)))))))
+        (t/is (= "utma" (:penjar/utm-campaign props)))
+        (t/is (= "mtma" (:penjar/mtm-campaign props)))))))
 
 (t/deftest prepare-register-and-register-profile-2
   (with-mocks [mock {:target 'app.email/send! :return nil}]

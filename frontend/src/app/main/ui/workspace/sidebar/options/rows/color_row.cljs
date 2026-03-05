@@ -328,7 +328,7 @@
         [dprops dref]
         (if (some? on-reorder)
           (h/use-sortable
-           :data-type "penpot/color-row"
+           :data-type "penjar/color-row"
            :on-drop on-drop
            :disabled disable-drag
            :detect-center? false

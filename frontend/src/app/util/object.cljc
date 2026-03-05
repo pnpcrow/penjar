@@ -456,7 +456,7 @@
 
 #?(:cljs
    (def type-symbol
-     (js/Symbol.for "penpot.reify:type")))
+     (js/Symbol.for "penjar.reify:type")))
 
 #?(:cljs
    (defn type-of?
@@ -494,7 +494,7 @@
                         {:name ~'js/Symbol.toStringTag
                          :enumerable false
                          :get ~f-sym}
-                        {:name (js/Symbol.for "penpot.reify:type")
+                        {:name (js/Symbol.for "penjar.reify:type")
                          :enumerable false
                          :get ~f-sym}
                         ~@properties)

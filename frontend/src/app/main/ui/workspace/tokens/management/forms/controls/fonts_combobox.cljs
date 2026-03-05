@@ -53,7 +53,7 @@
 (defn- resolve-value
   [tokens prev-token _token-name value]
   (let [tmp-value (cto/split-font-family value)
-        tmp-name  "__PENPOT__FONT_FAMILY__PLACEHOLDER__"
+        tmp-name  "__PENJAR__FONT_FAMILY__PLACEHOLDER__"
 
         ;; Create a temporary font-family token to validate the value
         token
@@ -73,7 +73,7 @@
           (fn [resolved-tokens]
             (let [{:keys [errors resolved-value] :as resolved-token} (get resolved-tokens (:name token))
                   resolved-value (if (contains? cf/flags :tokenscript)
-                                   (ts/tokenscript-symbols->penpot-unit resolved-value)
+                                   (ts/tokenscript-symbols->penjar-unit resolved-value)
                                    resolved-value)]
               (if resolved-value
                 (rx/of {:value resolved-value})

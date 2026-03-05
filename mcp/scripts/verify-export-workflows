@@ -1,0 +1,290 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SERVER_DIR="$PROJECT_ROOT/packages/server"
+
+HEALTH_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/health"
+MCP_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/mcp"
+WS_URL="ws://127.0.0.1:${PENJAR_MCP_WEBSOCKET_PORT:-4402}"
+
+TMP_BASE="${TMPDIR:-/tmp}"
+EXPORT_TMP_DIR="$TMP_BASE/penjar-mcp-export-workflows-$$"
+SERVER_LOG="$TMP_BASE/penjar-mcp-export-workflows-$$.log"
+SERVER_PID=""
+
+log_step() {
+    printf "\n[EXPORT-CHECK] %s\n" "$1"
+}
+
+cleanup() {
+    if [ -n "$SERVER_PID" ] && kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+        kill "$SERVER_PID" >/dev/null 2>&1 || true
+        wait "$SERVER_PID" >/dev/null 2>&1 || true
+    fi
+
+    rm -rf "$EXPORT_TMP_DIR"
+    rm -f "$SERVER_LOG"
+}
+
+trap cleanup EXIT
+
+if [ "${VERIFY_EXPORT_SKIP_BUILD:-false}" = "true" ]; then
+    log_step "Skip build step (VERIFY_EXPORT_SKIP_BUILD=true)"
+else
+    log_step "Build required packages for export workflows probe"
+    cd "$PROJECT_ROOT"
+    pnpm --filter mcp-common run build
+    pnpm --filter mcp-server run build
+fi
+
+mkdir -p "$EXPORT_TMP_DIR"
+
+log_step "Start MCP server (single-user)"
+cd "$SERVER_DIR"
+node dist/index.js >"$SERVER_LOG" 2>&1 &
+SERVER_PID="$!"
+
+log_step "Wait for /health endpoint"
+for _ in $(seq 1 20); do
+    if curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+done
+
+if ! curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+    echo "[EXPORT-CHECK][FAIL] server did not become healthy."
+    echo "[EXPORT-CHECK][INFO] Server log:"
+    cat "$SERVER_LOG"
+    exit 1
+fi
+
+log_step "Run export_shape format-matrix + diagnostics probe with fake plugin session"
+node --input-type=module - "$MCP_URL" "$WS_URL" "$EXPORT_TMP_DIR" <<'EOF_JS'
+import fs from "node:fs";
+import path from "node:path";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
+import WebSocket from "ws";
+
+const [mcpUrl, wsUrl, exportTmpDir] = process.argv.slice(2);
+const observedOps = new Set();
+let unsupportedFillSvgPluginCall = false;
+
+const pngBytes = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO6Xf9sAAAAASUVORK5CYII=",
+    "base64"
+);
+const pngByteObject = Object.fromEntries(Array.from(pngBytes).map((value, index) => [index, value]));
+
+const ws = new WebSocket(wsUrl);
+await new Promise((resolve, reject) => {
+    ws.once("open", resolve);
+    ws.once("error", reject);
+});
+
+ws.on("message", (payload) => {
+    try {
+        const request = JSON.parse(payload.toString());
+        if (!request || typeof request !== "object" || request.task !== "executeCode" || !request.id) {
+            return;
+        }
+
+        const code = request.params?.code ?? "";
+        if (typeof code !== "string" || !code.includes("export_shape_operation:")) {
+            ws.send(JSON.stringify({ id: request.id, success: false, error: "Unknown export probe payload" }));
+            return;
+        }
+
+        if (code.includes("shapeId=missing-shape")) {
+            observedOps.add("missing_shape");
+            ws.send(
+                JSON.stringify({
+                    id: request.id,
+                    success: false,
+                    error: "Shape was not found.",
+                })
+            );
+            return;
+        }
+
+        if (code.includes("shapeId=locked-shape")) {
+            observedOps.add("permission_denied_shape");
+            ws.send(
+                JSON.stringify({
+                    id: request.id,
+                    success: false,
+                    error: "Permission denied: content:read permission is required to export this shape.",
+                })
+            );
+            return;
+        }
+
+        if (code.includes("format=svg") && code.includes("mode=fill")) {
+            unsupportedFillSvgPluginCall = true;
+            ws.send(
+                JSON.stringify({
+                    id: request.id,
+                    success: false,
+                    error: "fill+svg path unexpectedly reached plugin runtime",
+                })
+            );
+            return;
+        }
+
+        if (code.includes("format=svg")) {
+            observedOps.add("svg_shape");
+            ws.send(
+                JSON.stringify({
+                    id: request.id,
+                    success: true,
+                    data: {
+                        result: '<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"><rect width="2" height="2" fill="#0ea5e9"/></svg>',
+                        log: "",
+                    },
+                })
+            );
+            return;
+        }
+
+        if (code.includes("mode=fill")) {
+            observedOps.add("png_fill");
+            ws.send(JSON.stringify({ id: request.id, success: true, data: { result: pngByteObject, log: "" } }));
+            return;
+        }
+
+        observedOps.add("png_shape");
+        ws.send(JSON.stringify({ id: request.id, success: true, data: { result: pngByteObject, log: "" } }));
+    } catch {
+        // ignore malformed messages in probe mode
+    }
+});
+
+const client = new Client({ name: "export-workflows-check", version: "1.0.0" }, { capabilities: {} });
+const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
+
+async function callTool(name, args) {
+    return client.request({ method: "tools/call", params: { name, arguments: args } }, CallToolResultSchema);
+}
+
+function firstText(result) {
+    return result.content.find((item) => item.type === "text")?.text ?? "";
+}
+
+try {
+    await client.connect(transport);
+
+    const pngShape = await callTool("export_shape", {
+        shapeId: "shape-1",
+        mode: "shape",
+        format: "png",
+    });
+    const pngShapeImage = pngShape.content[0];
+    if (
+        pngShapeImage?.type !== "image" ||
+        pngShapeImage?.mimeType !== "image/png" ||
+        typeof pngShapeImage?.data !== "string" ||
+        pngShapeImage.data.length === 0
+    ) {
+        throw new Error(`PNG shape export payload mismatch: ${JSON.stringify(pngShape)}`);
+    }
+
+    const svgShape = await callTool("export_shape", {
+        shapeId: "shape-1",
+        mode: "shape",
+        format: "svg",
+    });
+    const svgShapeText = firstText(svgShape);
+    if (!svgShapeText.includes("<svg")) {
+        throw new Error(`SVG shape export payload mismatch: ${JSON.stringify(svgShape)}`);
+    }
+
+    const pngFill = await callTool("export_shape", {
+        shapeId: "shape-with-fill",
+        mode: "fill",
+        format: "png",
+    });
+    const pngFillImage = pngFill.content[0];
+    if (
+        pngFillImage?.type !== "image" ||
+        pngFillImage?.mimeType !== "image/png" ||
+        typeof pngFillImage?.data !== "string" ||
+        pngFillImage.data.length === 0
+    ) {
+        throw new Error(`PNG fill export payload mismatch: ${JSON.stringify(pngFill)}`);
+    }
+
+    const unsupportedText = firstText(
+        await callTool("export_shape", {
+            shapeId: "shape-with-fill",
+            mode: "fill",
+            format: "svg",
+        })
+    );
+    if (!unsupportedText.includes("[Diagnostic UNSUPPORTED_OPERATION]")) {
+        throw new Error(`Expected unsupported-operation diagnostic for fill+svg, got: ${unsupportedText}`);
+    }
+
+    const notFoundText = firstText(
+        await callTool("export_shape", {
+            shapeId: "missing-shape",
+            mode: "shape",
+            format: "png",
+        })
+    );
+    if (!notFoundText.includes("[Diagnostic RESOURCE_NOT_FOUND]")) {
+        throw new Error(`Expected resource-not-found diagnostic for missing shape, got: ${notFoundText}`);
+    }
+
+    const deniedText = firstText(
+        await callTool("export_shape", {
+            shapeId: "locked-shape",
+            mode: "shape",
+            format: "png",
+        })
+    );
+    if (!deniedText.includes("[Diagnostic PERMISSION_DENIED]")) {
+        throw new Error(`Expected permission-denied diagnostic for locked shape, got: ${deniedText}`);
+    }
+
+    const svgExportPath = path.join(exportTmpDir, "shape-export.svg");
+    const saveText = firstText(
+        await callTool("export_shape", {
+            shapeId: "shape-1",
+            mode: "shape",
+            format: "svg",
+            filePath: svgExportPath,
+        })
+    );
+    if (!saveText.includes(svgExportPath) || !fs.existsSync(svgExportPath)) {
+        throw new Error(`Expected svg file export at ${svgExportPath}, got response: ${saveText}`);
+    }
+    const savedSvg = fs.readFileSync(svgExportPath, "utf8");
+    if (!savedSvg.includes("<svg")) {
+        throw new Error(`Saved SVG file content mismatch: ${savedSvg}`);
+    }
+
+    const requiredOps = ["png_shape", "svg_shape", "png_fill", "missing_shape", "permission_denied_shape"];
+    for (const op of requiredOps) {
+        if (!observedOps.has(op)) {
+            throw new Error(`Expected export workflow scenario ${op} to be observed by fake plugin.`);
+        }
+    }
+
+    if (unsupportedFillSvgPluginCall) {
+        throw new Error("fill+svg unsupported path unexpectedly reached plugin runtime.");
+    }
+
+    console.log("[EXPORT-CHECK] Verified export_shape format matrix + diagnostics");
+} finally {
+    await transport.close();
+    ws.close();
+    await new Promise((resolve) => ws.once("close", resolve));
+}
+EOF_JS
+
+log_step "Export workflows probe passed"

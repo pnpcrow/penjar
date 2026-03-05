@@ -1,15 +1,15 @@
 ---
 title: Assets storage
-desc: Learn about assets storage, API, object buckets, sharing, and garbage collection. See Penpot's technical guide for developers. Try Penpot - It's free.
+desc: Learn about assets storage, API, object buckets, sharing, and garbage collection. See Penjar's technical guide for developers. Try Penjar - It's free.
 ---
 
 # Assets storage
 
-The [storage.clj](https://github.com/penpot/penpot/blob/develop/backend/src/app/storage.clj)
+The [storage.clj](https://github.com/penjar/penjar/blob/develop/backend/src/app/storage.clj)
 is a module that manages storage of binary objects. It's a generic utility
 that may be used for any kind of user uploaded files. Currently:
 
- * Image assets in Penpot files.
+ * Image assets in Penjar files.
  * Uploaded fonts.
  * Profile photos of users and teams.
 
@@ -57,7 +57,7 @@ representing that the object may be being used in other files.
 
 ## Serving objects
 
-Stored objects are always served by Penpot (even if they have a public URL,
+Stored objects are always served by Penjar (even if they have a public URL,
 like when <code class="language-clojure">:s3</code> storage are used). We have an endpoint <code class="language-text">/assets</code> with three
 variants:
 
@@ -77,7 +77,7 @@ This is the same in all environments (devenv, production or on premise).
 ## Object buckets
 
 Obects may be organized in **buckets**, that are a kind of "intelligent" folders
-(not related to AWS-S3 buckets, this is a Penpot internal concept).
+(not related to AWS-S3 buckets, this is a Penjar internal concept).
 
 The storage module may use the bucket (hardcoded) to make special treatment to
 object, such as storing in a different path, or guessing how to know if an object

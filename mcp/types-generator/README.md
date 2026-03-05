@@ -1,8 +1,8 @@
 # Types Generator
 
 This subproject contains helper scripts used in the development of the
-Penpot MCP server, specifically for the generation of a YAML file containing 
-Penpot plugin API types and their documentation.
+Penjar MCP server, specifically for the generation of a YAML file containing 
+Penjar plugin API types and their documentation.
 
 ## Setup
 
@@ -29,10 +29,10 @@ Running the script:
 
 You can alternatively run `./build <url>`, which additionally performs pixi environment installation. 
 
-For example, to generate the API documentation based on the current PROD Penpot API documentation,
+For example, to generate the API documentation based on the current PROD Penjar API documentation,
 use the URL
 
-    https://doc.plugins.penpot.app
+    https://doc.plugins.penjar.app
 
 ### Generating the YAML File Based on the Current Documentation in the Repository  
 

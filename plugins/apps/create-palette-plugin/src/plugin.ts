@@ -2,11 +2,11 @@ main();
 
 function main() {
   createPalette();
-  penpot.closePlugin();
+  penjar.closePlugin();
 }
 
 function createPalette() {
-  const colors = penpot.library.local.colors.sort((a, b) =>
+  const colors = penjar.library.local.colors.sort((a, b) =>
     a.name.toLowerCase() > b.name.toLowerCase()
       ? 1
       : a.name.toLowerCase() < b.name.toLowerCase()
@@ -20,10 +20,10 @@ function createPalette() {
   const width = cols * 200 + Math.max(0, cols - 1) * 10 + 20;
   const height = rows * 100 + Math.max(0, rows - 1) * 10 + 20;
 
-  const board = penpot.createBoard();
+  const board = penjar.createBoard();
   board.name = 'Palette';
 
-  const viewport = penpot.viewport;
+  const viewport = penjar.viewport;
   board.x = viewport.center.x - width / 2;
   board.y = viewport.center.y - height / 2;
 
@@ -67,7 +67,7 @@ function createPalette() {
         return;
       }
 
-      const board = penpot.createBoard();
+      const board = penjar.createBoard();
       grid.appendChild(board, row + 1, col + 1);
       board.fills = [color.asFill()];
       board.strokes = [
@@ -85,7 +85,7 @@ function createPalette() {
       flex.verticalPadding = 8;
       flex.horizontalPadding = 8;
 
-      const text = penpot.createText(color.name);
+      const text = penjar.createText(color.name);
       text.fontWeight = 'bold';
       text.fontVariantId = 'bold';
       text.growType = 'auto-width';

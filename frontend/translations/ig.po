@@ -3,7 +3,7 @@ msgstr ""
 "PO-Revision-Date: 2025-12-22 15:34+0000\n"
 "Last-Translator: Alejandro Alonso <alejandro.alonso@kaleidos.net>\n"
 "Language-Team: Igbo "
-"<https://hosted.weblate.org/projects/penpot/frontend/ig/>\n"
+"<https://hosted.weblate.org/projects/penjar/frontend/ig/>\n"
 "Language: ig\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -341,7 +341,7 @@ msgstr "kacha otu"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:328, src/app/main/ui/workspace/main_menu.cljs:690
 msgid "dashboard.download-binary-file"
-msgstr "Butuo ederede ite mkpịsị (.penpot)"
+msgstr "Butuo ederede ite mkpịsị (.penjar)"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:321, src/app/main/ui/workspace/main_menu.cljs:712
 #, unused
@@ -358,7 +358,7 @@ msgstr "Mee o yiri  %s ederede"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:280
 msgid "dashboard.export-binary-multi"
-msgstr "Butuo %s ederede ite mkpịsị (.penpot)"
+msgstr "Butuo %s ederede ite mkpịsị (.penjar)"
 
 #: src/app/main/ui/workspace/main_menu.cljs:698
 msgid "dashboard.export-frames"
@@ -684,7 +684,7 @@ msgid "dashboard.your-email"
 msgstr "Ozi-n"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:40, src/app/main/ui/dashboard/fonts.cljs:42, src/app/main/ui/dashboard/libraries.cljs:56, src/app/main/ui/dashboard/projects.cljs:355, src/app/main/ui/dashboard/search.cljs:48, src/app/main/ui/dashboard/sidebar.cljs:312, src/app/main/ui/dashboard/team.cljs:537, src/app/main/ui/dashboard/team.cljs:983, src/app/main/ui/dashboard/team.cljs:1251, src/app/main/ui/dashboard/team.cljs:1298
-msgid "dashboard.your-penpot"
+msgid "dashboard.your-penjar"
 msgstr "Ite mkpịsị. gị"
 
 #: src/app/main/ui/alert.cljs:35
@@ -1221,7 +1221,7 @@ msgid "labels.continue-with"
 msgstr "Gaa n'ihu"
 
 #: src/app/main/ui/viewer/login.cljs:69
-msgid "labels.continue-with-penpot"
+msgid "labels.continue-with-penjar"
 msgstr "I Nwere Ike ịganihu"
 
 #: src/app/main/ui/dashboard/team.cljs:650

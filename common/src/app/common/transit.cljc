@@ -143,7 +143,7 @@
             :cljs (new js/Date (js/parseInt v 10))))
   :wfn (comp str inst-ms)}
 
- {:id "penpot/pointer"
+ {:id "penjar/pointer"
   :class Pointer
   :rfn (fn [[id meta]]
          (Pointer. id meta))}

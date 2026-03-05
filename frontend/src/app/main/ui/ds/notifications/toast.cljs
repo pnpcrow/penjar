@@ -53,7 +53,7 @@
 
 
      ;; TODO: this should be a buttom from the DS, but this variant is not designed yet.
-     ;; https://tree.taiga.io/project/penpot/task/8492
+     ;; https://tree.taiga.io/project/penjar/task/8492
      [:> "button" {:on-click on-close
                    :aria-label "Close"
                    :class (stl/css-case :close-button true

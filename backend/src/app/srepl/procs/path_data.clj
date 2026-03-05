@@ -17,10 +17,10 @@
 
 (defn disable
   "A script responsible for remove the path data type from file data and
-  allow file to be open in older penpot versions.
+  allow file to be open in older penjar versions.
 
   Should be used only in cases when you want to downgrade to an older
-  penpot version for some reason."
+  penjar version for some reason."
   {:query sql:get-files-with-path-data}
   [cfg {:keys [id]} & {:as options}]
 

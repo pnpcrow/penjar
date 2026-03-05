@@ -6,7 +6,7 @@
 
 (ns app.common.files.builder
   "Internal implementation of file builder. Mainly used as base impl
-  for penpot library"
+  for penjar library"
   (:require
    ;; [app.common.features :as cfeat]
    [app.common.data :as d]

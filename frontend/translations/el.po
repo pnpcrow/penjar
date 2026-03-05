@@ -3,7 +3,7 @@ msgstr ""
 "PO-Revision-Date: 2025-10-13 09:26+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Greek "
-"<https://hosted.weblate.org/projects/penpot/frontend/el/>\n"
+"<https://hosted.weblate.org/projects/penjar/frontend/el/>\n"
 "Language: el\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -20,7 +20,7 @@ msgstr "Δημιουργία λογαριασμού επίδειξης"
 msgid "auth.check-your-email"
 msgstr ""
 "Ελέγξτε το email σας και κάντε κλικ στον σύνδεσμο για επαλήθευση και έναρξη "
-"χρήσης του Penpot."
+"χρήσης του Penjar."
 
 #: src/app/main/ui/auth/recovery.cljs:67
 msgid "auth.confirm-password"
@@ -159,7 +159,7 @@ msgstr "Δημιουργία νέας ομάδας"
 
 #: src/app/main/ui/components/context_menu_a11y.cljs:300, src/app/main/ui/dashboard/sidebar.cljs:638
 msgid "dashboard.default-team-name"
-msgstr "Το Penpot σας"
+msgstr "Το Penjar σας"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:495
 msgid "dashboard.delete-team"
@@ -335,8 +335,8 @@ msgid "dashboard.your-name"
 msgstr "Το όνομα σου"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:40, src/app/main/ui/dashboard/fonts.cljs:42, src/app/main/ui/dashboard/libraries.cljs:56, src/app/main/ui/dashboard/projects.cljs:355, src/app/main/ui/dashboard/search.cljs:48, src/app/main/ui/dashboard/sidebar.cljs:312, src/app/main/ui/dashboard/team.cljs:537, src/app/main/ui/dashboard/team.cljs:983, src/app/main/ui/dashboard/team.cljs:1251, src/app/main/ui/dashboard/team.cljs:1298
-msgid "dashboard.your-penpot"
-msgstr "Το Penpot σας"
+msgid "dashboard.your-penjar"
+msgstr "Το Penjar σας"
 
 #: src/app/main/ui/comments.cljs:674, src/app/main/ui/confirm.cljs:37, src/app/main/ui/settings/subscription.cljs:273, src/app/main/ui/settings/subscription.cljs:306, src/app/main/ui/workspace/plugins.cljs:334, src/app/main/ui/workspace/plugins.cljs:388
 msgid "ds.confirm-cancel"

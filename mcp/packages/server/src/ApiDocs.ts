@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 /**
- * Represents a single type/interface defined in the Penpot API
+ * Represents a single type/interface defined in the Penjar API
  */
 export class ApiType {
     private readonly name: string;

@@ -1,6 +1,6 @@
 ---
 title: 3.06. Backend Guide
-desc: "Penpot Technical Guide: Backend basics - REPL setup, loading fixtures, database migrations, and clj-kondo linting to speed development workflows."
+desc: "Penjar Technical Guide: Backend basics - REPL setup, loading fixtures, database migrations, and clj-kondo linting to speed development workflows."
 ---
 
 # Backend guide #
@@ -114,7 +114,7 @@ repository already comes with base configuration.
 You can run **clj-kondo** as-is (is included in the devenv image):
 
 ```bash
-cd penpot/backend;
+cd penjar/backend;
 clj-kondo --lint src
 ```
 

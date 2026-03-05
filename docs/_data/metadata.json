@@ -1,21 +1,21 @@
 {
   "title": "Help center",
-  "url": "https://docs.penpot.app/",
+  "url": "https://docs.penjar.app/",
   "description": "Design freedom for teams.",
   "feed": {
-    "subtitle": "Penpot: design freedom for teams.",
+    "subtitle": "Penjar: design freedom for teams.",
     "filename": "feed.xml",
     "path": "/feed/feed.xml",
-    "id": "https://docs.penpot.app/"
+    "id": "https://docs.penjar.app/"
   },
   "jsonfeed": {
     "path": "/feed/feed.json",
-    "url": "https://docs.penpot.app/feed/feed.json"
+    "url": "https://docs.penjar.app/feed/feed.json"
   },
   "author": {
-    "name": "Penpot",
-    "email": "hello@penpot.app",
-    "url": "https://penpot.app"
+    "name": "Penjar",
+    "email": "hello@penjar.app",
+    "url": "https://penjar.app"
   },
-  "twitter": "@penpotapp"
+  "twitter": "@penjarapp"
 }

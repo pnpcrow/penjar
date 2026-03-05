@@ -1,10 +1,10 @@
 export default function () {
-  const rectangle = penpot.createRectangle();
-  rectangle.x = penpot.viewport.center.x;
-  rectangle.y = penpot.viewport.center.y;
+  const rectangle = penjar.createRectangle();
+  rectangle.x = penjar.viewport.center.x;
+  rectangle.y = penjar.viewport.center.y;
 
-  const shape = penpot.currentPage?.getShapeById(rectangle.id);
+  const shape = penjar.currentPage?.getShapeById(rectangle.id);
   if (shape) {
-    penpot.library.local.createComponent([shape]);
+    penjar.library.local.createComponent([shape]);
   }
 }

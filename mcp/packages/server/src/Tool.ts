@@ -2,7 +2,7 @@ import { z } from "zod";
 import "reflect-metadata";
 import { buildBridgeDiagnostic, formatBridgeDiagnostic, getErrorMessage } from "./BridgeDiagnostics";
 import { TextResponse, ToolResponse } from "./ToolResponse";
-import type { PenpotMcpServer, SessionContext } from "./PenpotMcpServer";
+import type { PenjarMcpServer, SessionContext } from "./PenjarMcpServer";
 import { createLogger } from "./logger";
 
 /**
@@ -27,7 +27,7 @@ export abstract class Tool<TArgs extends object> {
     private static executionCounter = 0;
 
     protected constructor(
-        protected mcpServer: PenpotMcpServer,
+        protected mcpServer: PenjarMcpServer,
         private inputSchema: z.ZodRawShape
     ) {}
 

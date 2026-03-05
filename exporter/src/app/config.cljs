@@ -26,7 +26,7 @@
    :host "localhost"
    :http-server-port 6061
    :http-server-host "0.0.0.0"
-   :tempdir "/tmp/penpot"
+   :tempdir "/tmp/penjar"
    :redis-uri "redis://redis/0"})
 
 (def ^:private schema:config
@@ -72,7 +72,7 @@
 
 (defn- prepare-config
   []
-  (let [env  (read-env "penpot")
+  (let [env  (read-env "penjar")
         env  (d/without-nils env)
         data (merge defaults env)
         data (decode-config data)]

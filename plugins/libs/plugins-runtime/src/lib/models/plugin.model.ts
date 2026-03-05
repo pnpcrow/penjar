@@ -1,4 +1,4 @@
-import { EventsMap } from '@penpot/plugin-types';
+import { EventsMap } from '@penjar/plugin-types';
 
 export type RegisterListener = <K extends keyof EventsMap>(
   type: K,

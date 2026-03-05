@@ -3,7 +3,7 @@ msgstr ""
 "PO-Revision-Date: 2026-02-16 08:35+0000\n"
 "Last-Translator: Alejandro Alonso <alejandro.alonso@kaleidos.net>\n"
 "Language-Team: Arabic "
-"<https://hosted.weblate.org/projects/penpot/frontend/ar/>\n"
+"<https://hosted.weblate.org/projects/penjar/frontend/ar/>\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -19,7 +19,7 @@ msgstr "هل لديك حساب؟"
 #: src/app/main/ui/auth/register.cljs:277
 #, unused
 msgid "auth.check-your-email"
-msgstr "تحقق من بريدك الإلكتروني وانقر على الرابط للتحقق والبدء في استخدام Penpot."
+msgstr "تحقق من بريدك الإلكتروني وانقر على الرابط للتحقق والبدء في استخدام Penjar."
 
 #: src/app/main/ui/auth/recovery.cljs:67
 msgid "auth.confirm-password"
@@ -61,7 +61,7 @@ msgstr "لِج"
 
 #: src/app/main/ui/auth/login.cljs:274
 msgid "auth.login-tagline"
-msgstr "Penpot هو أداة تصميم مجانية ومفتوحة المصدر للتعاون بين التصميم والبرمجة"
+msgstr "Penjar هو أداة تصميم مجانية ومفتوحة المصدر للتعاون بين التصميم والبرمجة"
 
 #: src/app/main/ui/auth/login.cljs:231
 msgid "auth.login-with-github-submit"
@@ -171,7 +171,7 @@ msgstr "انشر"
 
 #: src/app/main/ui/viewer/share_link.cljs:304, src/app/main/ui/viewer/share_link.cljs:315
 msgid "common.share-link.all-users"
-msgstr "جميع مستخدمي Penpot"
+msgstr "جميع مستخدمي Penjar"
 
 #: src/app/main/ui/viewer/share_link.cljs:204
 msgid "common.share-link.confirm-deletion-link-description"
@@ -249,7 +249,7 @@ msgstr "إدارة الفريق"
 
 #: src/app/main/ui/dashboard/projects.cljs:92
 msgid "dasboard.team-hero.text"
-msgstr "Penpot صُمّم للفِرق. أدعُ زملاءك للعمل سوياَ على المشاريع والملفات"
+msgstr "Penjar صُمّم للفِرق. أدعُ زملاءك للعمل سوياَ على المشاريع والملفات"
 
 #: src/app/main/ui/dashboard/projects.cljs:90
 msgid "dasboard.team-hero.title"
@@ -258,7 +258,7 @@ msgstr "إعمل فريق!"
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
 msgid "dasboard.tutorial-hero.info"
-msgstr "تعلم أساسيات برنامج Penpot بينما تستمع بتجربته في هذه الدورة التعليمية."
+msgstr "تعلم أساسيات برنامج Penjar بينما تستمع بتجربته في هذه الدورة التعليمية."
 
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
@@ -319,7 +319,7 @@ msgstr "أنشئ فريق جديد"
 
 #: src/app/main/ui/components/context_menu_a11y.cljs:300, src/app/main/ui/dashboard/sidebar.cljs:638
 msgid "dashboard.default-team-name"
-msgstr "Penpot الخاص بك"
+msgstr "Penjar الخاص بك"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:495
 msgid "dashboard.delete-team"
@@ -327,7 +327,7 @@ msgstr "حذف الفريق"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:328, src/app/main/ui/workspace/main_menu.cljs:690
 msgid "dashboard.download-binary-file"
-msgstr "تنزيل ملف Penpot (.penpot)"
+msgstr "تنزيل ملف Penjar (.penjar)"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:321, src/app/main/ui/workspace/main_menu.cljs:712
 #, unused
@@ -348,7 +348,7 @@ msgstr "أنشئ ملف جديد"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:280
 msgid "dashboard.export-binary-multi"
-msgstr "تنزيل ملفات ٪s Penpot (.penpot)"
+msgstr "تنزيل ملفات ٪s Penjar (.penjar)"
 
 #: src/app/main/ui/workspace/main_menu.cljs:698
 msgid "dashboard.export-frames"
@@ -360,7 +360,7 @@ msgstr "صدّر ك PDF"
 
 #, unused
 msgid "dashboard.export-multi"
-msgstr "صدّر ملفات Penpot %s"
+msgstr "صدّر ملفات Penjar %s"
 
 #: src/app/main/ui/exports/assets.cljs:108
 msgid "dashboard.export-multiple.selected"
@@ -378,7 +378,7 @@ msgstr ""
 
 #: src/app/main/ui/exports/assets.cljs:183
 msgid "dashboard.export-shapes.how-to-link"
-msgstr "معلومات عن كيفية إعداد التصديرات في Penpot."
+msgstr "معلومات عن كيفية إعداد التصديرات في Penjar."
 
 #: src/app/main/ui/exports/assets.cljs:178
 msgid "dashboard.export-shapes.no-elements"
@@ -435,8 +435,8 @@ msgstr ""
 #, markdown
 msgid "dashboard.fonts.hero-text2"
 msgstr ""
-"يجب عليك فقط تحميل الخطوط التي تمتلكها أو لديك ترخيص لاستخدامها في Penpot. "
-"اكتشف المزيد في قسم حقوق المحتوى في [شروط خدمة Penpot](%s). قد ترغب أيضًا "
+"يجب عليك فقط تحميل الخطوط التي تمتلكها أو لديك ترخيص لاستخدامها في Penjar. "
+"اكتشف المزيد في قسم حقوق المحتوى في [شروط خدمة Penjar](%s). قد ترغب أيضًا "
 "في القراءة عن [ترخيص الخطوط](https://www.typography.com/faq).."
 
 #: src/app/main/ui/dashboard/fonts.cljs:214
@@ -455,7 +455,7 @@ msgstr ""
 
 #: src/app/main/ui/dashboard/import.cljs:464, src/app/main/ui/dashboard/project_menu.cljs:109
 msgid "dashboard.import"
-msgstr "استورد ملفات Penpot"
+msgstr "استورد ملفات Penjar"
 
 #: src/app/main/ui/dashboard/import.cljs:293, src/app/worker/import.cljs:121, src/app/worker/import.cljs:124
 msgid "dashboard.import.analyze-error"
@@ -728,8 +728,8 @@ msgid "dashboard.your-name"
 msgstr "اسمك"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:40, src/app/main/ui/dashboard/fonts.cljs:42, src/app/main/ui/dashboard/libraries.cljs:56, src/app/main/ui/dashboard/projects.cljs:355, src/app/main/ui/dashboard/search.cljs:48, src/app/main/ui/dashboard/sidebar.cljs:312, src/app/main/ui/dashboard/team.cljs:537, src/app/main/ui/dashboard/team.cljs:983, src/app/main/ui/dashboard/team.cljs:1251, src/app/main/ui/dashboard/team.cljs:1298
-msgid "dashboard.your-penpot"
-msgstr "Penpot الخاص بك"
+msgid "dashboard.your-penjar"
+msgstr "Penjar الخاص بك"
 
 #: src/app/main/ui/alert.cljs:35
 msgid "ds.alert-ok"
@@ -798,7 +798,7 @@ msgstr "بُلّغ عن البريد الإلكتروني «%s» كبريد عش
 #: src/app/main/errors.cljs:279
 msgid "errors.feature-mismatch"
 msgstr ""
-"يبدو أنك تفتح ملفًا فُعّل الميزة \"%s\" فيه ولكن الواجهة الأمامية لـ penpot "
+"يبدو أنك تفتح ملفًا فُعّل الميزة \"%s\" فيه ولكن الواجهة الأمامية لـ penjar "
 "لا تدعمه أو عُطّل."
 
 #: src/app/main/errors.cljs:283, src/app/main/errors.cljs:297
@@ -938,7 +938,7 @@ msgstr "يسعدنا وجودك هنا. إذا كنت بحاجة إلى مساع
 
 #: src/app/main/ui/settings/feedback.cljs:149
 msgid "feedback.discourse-title"
-msgstr "مجتمع Penpot"
+msgstr "مجتمع Penjar"
 
 #: src/app/main/ui/settings/feedback.cljs:105
 msgid "feedback.subject"
@@ -1171,7 +1171,7 @@ msgstr "الأحرف الكبيرة"
 
 #: src/app/main/ui/inspect/right_sidebar.cljs:234
 msgid "inspect.empty.help"
-msgstr "إذا كنت تريد معرفة المزيد عن فحص التصميم ، فتفضل بزيارة مركز مساعدة لPenpot"
+msgstr "إذا كنت تريد معرفة المزيد عن فحص التصميم ، فتفضل بزيارة مركز مساعدة لPenjar"
 
 #: src/app/main/ui/inspect/right_sidebar.cljs:137
 msgid "inspect.multiple-selected"
@@ -1293,8 +1293,8 @@ msgid "labels.continue-with"
 msgstr "تابع مع"
 
 #: src/app/main/ui/viewer/login.cljs:69
-msgid "labels.continue-with-penpot"
-msgstr "يمكنك المتابعة مع حساب Penpot"
+msgid "labels.continue-with-penjar"
+msgstr "يمكنك المتابعة مع حساب Penjar"
 
 #: src/app/main/ui/workspace/sidebar/assets/groups.cljs:167, src/app/main/ui/workspace/sidebar/options/menus/component.cljs:203
 msgid "labels.create"
@@ -1961,12 +1961,12 @@ msgstr "أُرسل رسالة التحقق إلى %s. راجع بريدك الا
 msgid "onboarding-v2.before-start.desc1"
 msgstr ""
 "يجب أن تعلم أن هناك الكثير من الموارد المتاحة لمساعدتك في بدء استخدام "
-"Penpot ، مثل دليل المستخدم وقناة Youtube الخاصة بنا."
+"Penjar ، مثل دليل المستخدم وقناة Youtube الخاصة بنا."
 
 #, unused
 msgid "onboarding-v2.before-start.desc2"
 msgstr ""
-"معلومات مفصلة حول كيفية استخدام Penpot. من النماذج الأولية إلى تنظيم أو "
+"معلومات مفصلة حول كيفية استخدام Penjar. من النماذج الأولية إلى تنظيم أو "
 "مشاركة التصاميم."
 
 #, unused
@@ -1988,14 +1988,14 @@ msgstr "قبل ان تبدا"
 #, unused
 msgid "onboarding-v2.welcome.desc1"
 msgstr ""
-"Penpot هو برنامج مفتوح المصدر وهو من صنع Kaleidos وكذلك المجتمع، حيث يساعد "
+"Penjar هو برنامج مفتوح المصدر وهو من صنع Kaleidos وكذلك المجتمع، حيث يساعد "
 "الكثير من الناس بعضهم البعض بالفعل. يمكن للجميع التعاون من خلال:"
 
 #, unused
 msgid "onboarding-v2.welcome.desc2"
 msgstr ""
-"مساحة عامة للتعلم والمشاركة والمناقشة حول Penpot وحاضرها ومستقبلها مع "
-"المجتمع بأكمله وفريق Penpot الأساسي."
+"مساحة عامة للتعلم والمشاركة والمناقشة حول Penjar وحاضرها ومستقبلها مع "
+"المجتمع بأكمله وفريق Penjar الأساسي."
 
 #, unused
 msgid "onboarding-v2.welcome.desc2.title"
@@ -2013,7 +2013,7 @@ msgstr "دليل المساهمة"
 
 #: src/app/main/ui/onboarding/team_choice.cljs:241
 msgid "onboarding-v2.welcome.title"
-msgstr "مرحبًا بك في Penpot!"
+msgstr "مرحبًا بك في Penjar!"
 
 #: src/app/main/ui/onboarding/team_choice.cljs:177
 msgid "onboarding.choice.team-up.create-team-desc"
@@ -2049,7 +2049,7 @@ msgstr "سياسة الخصوصية."
 
 #: src/app/main/ui/onboarding/newsletter.cljs:65
 msgid "onboarding.newsletter.title"
-msgstr "هل تريد تلقي أخبار Penpot؟"
+msgstr "هل تريد تلقي أخبار Penjar؟"
 
 #: src/app/main/ui/onboarding/team_choice.cljs:175
 msgid "onboarding.team-modal.create-team"
@@ -2058,7 +2058,7 @@ msgstr "أنشئ فريقًا"
 #: src/app/main/ui/onboarding/team_choice.cljs:31
 msgid "onboarding.team-modal.create-team-desc"
 msgstr ""
-"يسمح لك الفريق بالتعاون مع مستخدمي Penpot الآخرين الذين يعملون في نفس "
+"يسمح لك الفريق بالتعاون مع مستخدمي Penjar الآخرين الذين يعملون في نفس "
 "الملفات والمشاريع."
 
 #: src/app/main/ui/onboarding/team_choice.cljs:36
@@ -2091,7 +2091,7 @@ msgstr "ابدأ التصميم"
 
 #, unused
 msgid "onboarding.welcome.alt"
-msgstr "Penpot"
+msgstr "Penjar"
 
 #: src/app/main/ui/auth/recovery.cljs:88
 msgid "profile.recovery.go-to-login"
@@ -2541,31 +2541,31 @@ msgstr "كبر المحدد"
 
 #: src/app/main/ui/dashboard/files.cljs:181
 msgid "title.dashboard.files"
-msgstr "%s - Penpot"
+msgstr "%s - Penjar"
 
 #: src/app/main/ui/dashboard/fonts.cljs:46
 msgid "title.dashboard.font-providers"
-msgstr "مزودي الخط - %s - Penpot"
+msgstr "مزودي الخط - %s - Penjar"
 
 #: src/app/main/ui/dashboard/fonts.cljs:45
 msgid "title.dashboard.fonts"
-msgstr "الخطوط - %s - Penpot"
+msgstr "الخطوط - %s - Penjar"
 
 #: src/app/main/ui/dashboard/projects.cljs:357
 msgid "title.dashboard.projects"
-msgstr "المشاريع - %s - Penpot"
+msgstr "المشاريع - %s - Penjar"
 
 #: src/app/main/ui/dashboard/search.cljs:50
 msgid "title.dashboard.search"
-msgstr "البحث - %s - Penpot"
+msgstr "البحث - %s - Penjar"
 
 #: src/app/main/ui/dashboard/libraries.cljs:58
 msgid "title.dashboard.shared-libraries"
-msgstr "المكاتب المشتركة - %s - Penpot"
+msgstr "المكاتب المشتركة - %s - Penjar"
 
 #: src/app/main/ui/auth/verify_token.cljs:70, src/app/main/ui/auth.cljs:34
 msgid "title.default"
-msgstr "Penpot - صمّم حرية للفرق"
+msgstr "Penjar - صمّم حرية للفرق"
 
 #: src/app/main/ui/settings/access_tokens.cljs:278
 msgid "title.settings.access-tokens"
@@ -2573,43 +2573,43 @@ msgstr "ملف التعريف - رموز الوصول"
 
 #: src/app/main/ui/settings/feedback.cljs:161
 msgid "title.settings.feedback"
-msgstr "أرسل انطباعك - Penpot"
+msgstr "أرسل انطباعك - Penjar"
 
 #: src/app/main/ui/settings/options.cljs:83
 msgid "title.settings.options"
-msgstr "إعدادات - Penpot"
+msgstr "إعدادات - Penjar"
 
 #: src/app/main/ui/settings/password.cljs:105
 msgid "title.settings.password"
-msgstr "كلمة السر - Penpot"
+msgstr "كلمة السر - Penjar"
 
 #: src/app/main/ui/settings/profile.cljs:124
 msgid "title.settings.profile"
-msgstr "ملف التعريف - Penpot"
+msgstr "ملف التعريف - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:981
 msgid "title.team-invitations"
-msgstr "الدعوات - %s - Penpot"
+msgstr "الدعوات - %s - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:535
 msgid "title.team-members"
-msgstr "الأعضاء - %s - Penpot"
+msgstr "الأعضاء - %s - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:1296
 msgid "title.team-settings"
-msgstr "إعدادات - %s - Penpot"
+msgstr "إعدادات - %s - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:1249
 msgid "title.team-webhooks"
-msgstr "خطافات الويب - %s - Penpot"
+msgstr "خطافات الويب - %s - Penjar"
 
 #: src/app/main/ui/viewer.cljs:423
 msgid "title.viewer"
-msgstr "%s - وضع العرض - Penpot"
+msgstr "%s - وضع العرض - Penjar"
 
 #: src/app/main/ui/workspace.cljs:237
 msgid "title.workspace"
-msgstr "%s - Penpot"
+msgstr "%s - Penjar"
 
 #: src/app/main/ui.cljs:138
 #, unused

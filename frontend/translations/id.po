@@ -3,7 +3,7 @@ msgstr ""
 "PO-Revision-Date: 2026-02-16 08:35+0000\n"
 "Last-Translator: Linerly <linerly@proton.me>\n"
 "Language-Team: Indonesian "
-"<https://hosted.weblate.org/projects/penpot/frontend/id/>\n"
+"<https://hosted.weblate.org/projects/penjar/frontend/id/>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -24,7 +24,7 @@ msgstr "Periksa surel Anda"
 msgid "auth.check-your-email"
 msgstr ""
 "Periksa surel Anda dan klik pada tautan tersebut untuk memverifikasi dan "
-"mulai menggunakan Penpot."
+"mulai menggunakan Penjar."
 
 #: src/app/main/ui/auth/recovery.cljs:67
 msgid "auth.confirm-password"
@@ -69,7 +69,7 @@ msgstr "Masuk"
 #: src/app/main/ui/auth/login.cljs:274
 msgid "auth.login-tagline"
 msgstr ""
-"Penpot adalah peralatan desain bebas & bersumber terbuka untuk kolaborasi "
+"Penjar adalah peralatan desain bebas & bersumber terbuka untuk kolaborasi "
 "Desain dan Kode"
 
 #: src/app/main/ui/auth/login.cljs:231
@@ -162,7 +162,7 @@ msgstr "Buat akun baru"
 #, unused
 msgid "auth.register-tagline"
 msgstr ""
-"Dengan akun Penpot gratis, Anda dapat membuat tim tanpa batas dan "
+"Dengan akun Penjar gratis, Anda dapat membuat tim tanpa batas dan "
 "berkolaborasi dengan desainer dan pengembang lain pada proyek sebanyak yang "
 "Anda inginkan. "
 
@@ -213,7 +213,7 @@ msgstr "Terbitkan"
 
 #: src/app/main/ui/viewer/share_link.cljs:304, src/app/main/ui/viewer/share_link.cljs:315
 msgid "common.share-link.all-users"
-msgstr "Semua pengguna Penpot"
+msgstr "Semua pengguna Penjar"
 
 #: src/app/main/ui/viewer/share_link.cljs:204
 msgid "common.share-link.confirm-deletion-link-description"
@@ -289,7 +289,7 @@ msgstr "Pengelolaan tim"
 #: src/app/main/ui/dashboard/projects.cljs:92
 msgid "dasboard.team-hero.text"
 msgstr ""
-"Penpot dimaksud untuk tim. Undang anggota untuk bekerja bersama pada "
+"Penjar dimaksud untuk tim. Undang anggota untuk bekerja bersama pada "
 "berbagai proyek dan berkas"
 
 #: src/app/main/ui/dashboard/projects.cljs:90
@@ -300,7 +300,7 @@ msgstr "Bersekutu!"
 #, unused
 msgid "dasboard.tutorial-hero.info"
 msgstr ""
-"Pelajari dasarnya di Penpot sambil bersenang-senang dengan tutorial "
+"Pelajari dasarnya di Penjar sambil bersenang-senang dengan tutorial "
 "langsung ini."
 
 #: src/app/main/ui/dashboard/projects.cljs
@@ -316,7 +316,7 @@ msgstr "Tutorial Langsung"
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
 msgid "dasboard.walkthrough-hero.info"
-msgstr "Lihat sekitar Penpot dan ketahui fitur utamanya."
+msgstr "Lihat sekitar Penjar dan ketahui fitur utamanya."
 
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
@@ -389,7 +389,7 @@ msgid "dashboard.access-tokens.personal.description"
 msgstr ""
 "Token akses pribadi berfungsi sebagai alternatif sistem autentikasi nama "
 "pengguna dan kata sandi dan dapat digunakan untuk memperbolehkan sebuah "
-"aplikasi untuk mengakses API Penpot internal"
+"aplikasi untuk mengakses API Penjar internal"
 
 #: src/app/main/ui/settings/access_tokens.cljs:142
 msgid "dashboard.access-tokens.token-will-expire"
@@ -425,7 +425,7 @@ msgstr "Sematkan versi ini"
 
 #: src/app/main/ui/components/context_menu_a11y.cljs:300, src/app/main/ui/dashboard/sidebar.cljs:638
 msgid "dashboard.default-team-name"
-msgstr "Penpot Anda"
+msgstr "Penjar Anda"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:495
 msgid "dashboard.delete-team"
@@ -433,7 +433,7 @@ msgstr "Hapus tim"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:328, src/app/main/ui/workspace/main_menu.cljs:690
 msgid "dashboard.download-binary-file"
-msgstr "Unduh berkas Penpot (.penpot)"
+msgstr "Unduh berkas Penjar (.penjar)"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:321, src/app/main/ui/workspace/main_menu.cljs:712
 #, unused
@@ -470,7 +470,7 @@ msgid "dashboard.empty-placeholder-libraries"
 msgstr ""
 "Pustaka yang ditambahkan ke proyek akan muncul di sini. Coba membagikan "
 "berkas Anda atau tambahkan dari [Pustaka dan tempat] "
-"(https://penpot.app/libraries-templates) kami."
+"(https://penjar.app/libraries-templates) kami."
 
 #: src/app/main/ui/dashboard/placeholder.cljs
 #, markdown, unused
@@ -478,7 +478,7 @@ msgid "dashboard.empty-placeholder-libraries-subtitle"
 msgstr ""
 "Pustaka yang ditambahkan ke proyek akan muncul di sini. Coba membagikan "
 "berkas Anda atau tambahkan dari [Pustaka dan tempat] "
-"(https://penpot.app/libraries-templates) kami."
+"(https://penjar.app/libraries-templates) kami."
 
 #: src/app/main/ui/dashboard/placeholder.cljs:114
 msgid "dashboard.empty-placeholder-libraries-subtitle-viewer-role"
@@ -509,8 +509,8 @@ msgid "dashboard.empty-project.import"
 msgstr "Impor berkas"
 
 #: src/app/main/ui/dashboard/placeholder.cljs:53
-msgid "dashboard.empty-project.import-penpot"
-msgstr "Impor berkas .penpot"
+msgid "dashboard.empty-project.import-penjar"
+msgstr "Impor berkas .penjar"
 
 #: src/app/main/ui/dashboard/placeholder.cljs:45
 msgid "dashboard.empty-project.start"
@@ -518,7 +518,7 @@ msgstr "Mulai membuat hal-hal yang hebat"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:280
 msgid "dashboard.export-binary-multi"
-msgstr "Unduh %s berkas Penpot (.penpot)"
+msgstr "Unduh %s berkas Penjar (.penjar)"
 
 #: src/app/main/ui/workspace/main_menu.cljs:698
 msgid "dashboard.export-frames"
@@ -530,7 +530,7 @@ msgstr "Ekspor sebagai PDF"
 
 #, unused
 msgid "dashboard.export-multi"
-msgstr "Ekspor %s berkas Penpot"
+msgstr "Ekspor %s berkas Penjar"
 
 #: src/app/main/ui/exports/assets.cljs:108
 msgid "dashboard.export-multiple.selected"
@@ -548,7 +548,7 @@ msgstr ""
 
 #: src/app/main/ui/exports/assets.cljs:183
 msgid "dashboard.export-shapes.how-to-link"
-msgstr "Info bagaimana menetapkan pengeksporan di Penpot."
+msgstr "Info bagaimana menetapkan pengeksporan di Penjar."
 
 #: src/app/main/ui/exports/assets.cljs:178
 msgid "dashboard.export-shapes.no-elements"
@@ -610,8 +610,8 @@ msgstr ""
 msgid "dashboard.fonts.hero-text2"
 msgstr ""
 "Anda seharusnya hanya mengunggah fon yang Anda miliki atau memiliki izin "
-"untuk menggunakannya dalam Penpot. Ketahui lebih lanjut dalam bagian Hak "
-"konten (Content rights) dari [Ketentuan Layanan Penpot](%s). Anda mungkin "
+"untuk menggunakannya dalam Penjar. Ketahui lebih lanjut dalam bagian Hak "
+"konten (Content rights) dari [Ketentuan Layanan Penjar](%s). Anda mungkin "
 "juga ingin membaca tentang [lisensi fon](https://www.typography.com/faq)."
 
 #: src/app/main/ui/dashboard/fonts.cljs:214
@@ -631,7 +631,7 @@ msgstr ""
 
 #: src/app/main/ui/dashboard/import.cljs:464, src/app/main/ui/dashboard/project_menu.cljs:109
 msgid "dashboard.import"
-msgstr "Impor berkas Penpot"
+msgstr "Impor berkas Penjar"
 
 #: src/app/main/ui/dashboard/import.cljs:293, src/app/worker/import.cljs:121, src/app/worker/import.cljs:124
 msgid "dashboard.import.analyze-error"
@@ -1021,8 +1021,8 @@ msgid "dashboard.upgrade-plan.no-limits"
 msgstr "Tanpa batasan kreativitas"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:1069
-msgid "dashboard.upgrade-plan.penpot-free"
-msgstr "Penpot Gratis"
+msgid "dashboard.upgrade-plan.penjar-free"
+msgstr "Penjar Gratis"
 
 #: src/app/main/ui/dashboard/team.cljs:1115
 msgid "dashboard.webhooks.active"
@@ -1053,7 +1053,7 @@ msgid "dashboard.webhooks.description"
 msgstr ""
 "Kaitan web (webhook) adalah cara yang sederhana untuk memperbolehkan situs "
 "web dan aplikasi lain untuk diberi tahu ketika beberapa peristiwa terjadi "
-"di Penpot. Kami mengirim permintaan POST untuk setiap URL yang Anda "
+"di Penjar. Kami mengirim permintaan POST untuk setiap URL yang Anda "
 "sediakan."
 
 #: src/app/main/ui/dashboard/team.cljs:1265
@@ -1081,8 +1081,8 @@ msgid "dashboard.your-name"
 msgstr "Nama Anda"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:40, src/app/main/ui/dashboard/fonts.cljs:42, src/app/main/ui/dashboard/libraries.cljs:56, src/app/main/ui/dashboard/projects.cljs:355, src/app/main/ui/dashboard/search.cljs:48, src/app/main/ui/dashboard/sidebar.cljs:312, src/app/main/ui/dashboard/team.cljs:537, src/app/main/ui/dashboard/team.cljs:983, src/app/main/ui/dashboard/team.cljs:1251, src/app/main/ui/dashboard/team.cljs:1298
-msgid "dashboard.your-penpot"
-msgstr "Penpot Anda"
+msgid "dashboard.your-penjar"
+msgstr "Penjar Anda"
 
 #: src/app/main/ui/alert.cljs:35
 msgid "ds.alert-ok"
@@ -1176,7 +1176,7 @@ msgstr "Surel “%s” telah dilaporkan sebagai spam atau lompatan permanen."
 msgid "errors.feature-mismatch"
 msgstr ""
 "Sepertinya Anda membuka berkas yang memiliki fitur '%s' aktif tetapi "
-"frontend Penpot Anda tidak mendukungnya atau menonaktifkannya."
+"frontend Penjar Anda tidak mendukungnya atau menonaktifkannya."
 
 #: src/app/main/errors.cljs:283, src/app/main/errors.cljs:297
 msgid "errors.feature-not-supported"
@@ -1400,7 +1400,7 @@ msgstr ""
 
 #: src/app/main/ui/settings/feedback.cljs:149
 msgid "feedback.discourse-title"
-msgstr "Komunitas Penpot"
+msgstr "Komunitas Penjar"
 
 #: src/app/main/ui/settings/feedback.cljs:105
 msgid "feedback.subject"
@@ -1650,7 +1650,7 @@ msgstr "Properti varian"
 msgid "inspect.empty.help"
 msgstr ""
 "Jika Anda ingin mengetahui lebih lanjut tentang inspeksi desain kunjungi "
-"pusat bantuan Penpot"
+"pusat bantuan Penjar"
 
 #: src/app/main/ui/inspect/right_sidebar.cljs:232
 msgid "inspect.empty.select"
@@ -1824,8 +1824,8 @@ msgid "labels.continue-with"
 msgstr "Lanjutkan dengan"
 
 #: src/app/main/ui/viewer/login.cljs:69
-msgid "labels.continue-with-penpot"
-msgstr "Anda dapat melanjutkan dengan sebuah akun Penpot"
+msgid "labels.continue-with-penjar"
+msgstr "Anda dapat melanjutkan dengan sebuah akun Penjar"
 
 #: src/app/main/ui/components/copy_button.cljs:41
 msgid "labels.copy"
@@ -2444,7 +2444,7 @@ msgstr "Prototipe Interaktif"
 
 #: src/app/main/ui/ds/product/loader.cljs:33
 msgid "loader.tips.07.message"
-msgstr "Penpot menggunakan SVG dan CSS untuk pengembangan tanpa hambatan."
+msgstr "Penjar menggunakan SVG dan CSS untuk pengembangan tanpa hambatan."
 
 #: src/app/main/ui/ds/product/loader.cljs:32
 msgid "loader.tips.07.title"
@@ -2470,7 +2470,7 @@ msgstr "Mode Gelap & Terang"
 
 #: src/app/main/ui/ds/product/loader.cljs:39
 msgid "loader.tips.10.message"
-msgstr "Tingkatkan Penpot dengan plugin dari komunitas untuk fungsi tambahan."
+msgstr "Tingkatkan Penjar dengan plugin dari komunitas untuk fungsi tambahan."
 
 #: src/app/main/ui/ds/product/loader.cljs:38
 msgid "loader.tips.10.title"
@@ -3010,7 +3010,7 @@ msgstr "Daftar secara gratis"
 
 #: src/app/main/ui/static.cljs:153
 msgid "not-found.login.start-using"
-msgstr "Dan mulai menggunakan Penpot dalam hitungan detik!"
+msgstr "Dan mulai menggunakan Penjar dalam hitungan detik!"
 
 #: src/app/main/ui/static.cljs:69
 msgid "not-found.made-with-love"
@@ -3054,15 +3054,15 @@ msgstr "Anda tidak memiliki akses ke berkas ini."
 
 #: src/app/main/ui/static.cljs:56, src/app/main/ui/static.cljs:244, src/app/main/ui/static.cljs:250, src/app/main/ui/static.cljs:256, src/app/main/ui/static.cljs:262, src/app/main/ui/static.cljs:271, src/app/main/ui/static.cljs:280
 msgid "not-found.no-permission.go-dashboard"
-msgstr "Pergi ke Penpot Anda"
+msgstr "Pergi ke Penjar Anda"
 
 #: src/app/main/ui/static.cljs:268, src/app/main/ui/static.cljs:277
 msgid "not-found.no-permission.if-approves"
 msgstr "Jika pemilik mengizinkan, Anda akan diundang ke tim."
 
 #: src/app/main/ui/static.cljs:496, src/app/main/ui/static.cljs:509
-msgid "not-found.no-permission.penpot-file"
-msgstr "Berkas Penpot"
+msgid "not-found.no-permission.penjar-file"
+msgstr "Berkas Penjar"
 
 #: src/app/main/ui/static.cljs:243, src/app/main/ui/static.cljs:275
 msgid "not-found.no-permission.project"
@@ -3116,13 +3116,13 @@ msgstr "Surel verifikasi dikirim ke %s. Periksa surel Anda!"
 msgid "onboarding-v2.before-start.desc1"
 msgstr ""
 "Anda seharusnya tahu bahwa ada banyak sumber daya yang tersedia untuk "
-"membantu Anda memulai dengan Penpot, seperti Panduan Pengguna dan saluran "
+"membantu Anda memulai dengan Penjar, seperti Panduan Pengguna dan saluran "
 "YouTube kami."
 
 #, unused
 msgid "onboarding-v2.before-start.desc2"
 msgstr ""
-"Info detail cara menggunakan Penpot. Dari pembuatan prototipe sampai "
+"Info detail cara menggunakan Penjar. Dari pembuatan prototipe sampai "
 "mengelola atau membagikan desain."
 
 #, unused
@@ -3146,12 +3146,12 @@ msgstr "Sebelum Anda mulai"
 #: src/app/main/ui/onboarding/newsletter.cljs:68
 msgid "onboarding-v2.newsletter.desc"
 msgstr ""
-"Berlangganan ke buletin Penpot untuk tetap terkini dengan kemajuan "
+"Berlangganan ke buletin Penjar untuk tetap terkini dengan kemajuan "
 "pengembangan dan berita produk."
 
 #: src/app/main/ui/onboarding/newsletter.cljs:88
 msgid "onboarding-v2.newsletter.news"
-msgstr "Kirimkan saya berita tentang Penpot (pos blog, tutorial video, siaran...)."
+msgstr "Kirimkan saya berita tentang Penjar (pos blog, tutorial video, siaran...)."
 
 #: src/app/main/ui/onboarding/newsletter.cljs:96
 msgid "onboarding-v2.newsletter.privacy1"
@@ -3171,15 +3171,15 @@ msgstr "Kirimkan saya pembaruan produk (fitur baru, rilis, perbaikan...)."
 #, unused
 msgid "onboarding-v2.welcome.desc1"
 msgstr ""
-"Penpot itu Sumber Terbuka dan dibuat oleh Kaleidos beserta komunitasnya, di "
+"Penjar itu Sumber Terbuka dan dibuat oleh Kaleidos beserta komunitasnya, di "
 "mana banyak orang sudah membantu sesama. Siapa pun dapat berkontribusi "
 "dengan:"
 
 #, unused
 msgid "onboarding-v2.welcome.desc2"
 msgstr ""
-"Sebuah ruang umum untuk belajar, berbagi, dan berdiskusi tentang Penpot, "
-"masa sekarang dan masa depan dengan seluruh Komunitas dan tim inti Penpot."
+"Sebuah ruang umum untuk belajar, berbagi, dan berdiskusi tentang Penjar, "
+"masa sekarang dan masa depan dengan seluruh Komunitas dan tim inti Penjar."
 
 #, unused
 msgid "onboarding-v2.welcome.desc2.title"
@@ -3197,7 +3197,7 @@ msgstr "Panduan berkontribusi"
 
 #: src/app/main/ui/onboarding/team_choice.cljs:241
 msgid "onboarding-v2.welcome.title"
-msgstr "Selamat datang di Penpot!"
+msgstr "Selamat datang di Penjar!"
 
 #: src/app/main/ui/onboarding/team_choice.cljs:254
 #, unused
@@ -3276,7 +3276,7 @@ msgstr "Kebijakan Privasi kami."
 
 #: src/app/main/ui/onboarding/newsletter.cljs:65
 msgid "onboarding.newsletter.title"
-msgstr "Ingin menerima berita Penpot?"
+msgstr "Ingin menerima berita Penjar?"
 
 #: src/app/main/ui/onboarding/questions.cljs:108
 msgid "onboarding.questions.lets-get-started"
@@ -3292,7 +3292,7 @@ msgstr "Masih eksplorasi"
 
 #: src/app/main/ui/onboarding/questions.cljs:246
 msgid "onboarding.questions.reasons.fit"
-msgstr "Melihat apakah Penpot baik untuk tim saya"
+msgstr "Melihat apakah Penjar baik untuk tim saya"
 
 #: src/app/main/ui/onboarding/questions.cljs:252
 msgid "onboarding.questions.reasons.testing"
@@ -3335,16 +3335,16 @@ msgstr "Kerangka Kerja"
 
 #: src/app/main/ui/onboarding/questions.cljs:116
 msgid "onboarding.questions.step1.question1"
-msgstr "Untuk apa Anda akan menggunakan Penpot?"
+msgstr "Untuk apa Anda akan menggunakan Penjar?"
 
 #: src/app/main/ui/onboarding/questions.cljs:273
 msgid "onboarding.questions.step1.question2"
-msgstr "Apa yang membawa Anda ke Penpot hari ini?"
+msgstr "Apa yang membawa Anda ke Penjar hari ini?"
 
 #: src/app/main/ui/onboarding/questions.cljs:112
 msgid "onboarding.questions.step1.subtitle"
 msgstr ""
-"Beri tahu kami sedikit tentang Anda untuk membantu kami membuat Penpot "
+"Beri tahu kami sedikit tentang Anda untuk membantu kami membuat Penjar "
 "berfungsi bagi Anda. Jawaban Anda akan membantu kami memprioritaskan fitur "
 "baru dan mengarahkan Anda ke arah yang tepat untuk memulai."
 
@@ -3380,7 +3380,7 @@ msgstr "Di mana Anda ingin mulai?"
 #: src/app/main/ui/onboarding/questions.cljs:428
 #, unused
 msgid "onboarding.questions.step5.title"
-msgstr "Dari mana Anda mendengar tentang Penpot?"
+msgstr "Dari mana Anda mendengar tentang Penjar?"
 
 #: src/app/main/ui/onboarding/questions.cljs:233
 msgid "onboarding.questions.team-size.11-30"
@@ -3425,7 +3425,7 @@ msgstr "Buat sebuah tim"
 #: src/app/main/ui/onboarding/team_choice.cljs:31
 msgid "onboarding.team-modal.create-team-desc"
 msgstr ""
-"Sebuah tim memungkinkan Anda berkolaborasi dengan pengguna Penpot lain "
+"Sebuah tim memungkinkan Anda berkolaborasi dengan pengguna Penjar lain "
 "bekerja dalam berkas dan proyek yang sama."
 
 #: src/app/main/ui/onboarding/team_choice.cljs:36
@@ -3462,7 +3462,7 @@ msgstr "Mulai mendesain"
 
 #, unused
 msgid "onboarding.welcome.alt"
-msgstr "Penpot"
+msgstr "Penjar"
 
 #: src/app/main/ui/auth/recovery.cljs:88
 msgid "profile.recovery.go-to-login"
@@ -4131,31 +4131,31 @@ msgstr "Zum ke terpilih"
 
 #: src/app/main/ui/dashboard/files.cljs:181
 msgid "title.dashboard.files"
-msgstr "%s - Penpot"
+msgstr "%s - Penjar"
 
 #: src/app/main/ui/dashboard/fonts.cljs:46
 msgid "title.dashboard.font-providers"
-msgstr "Penyedia Fon - %s - Penpot"
+msgstr "Penyedia Fon - %s - Penjar"
 
 #: src/app/main/ui/dashboard/fonts.cljs:45
 msgid "title.dashboard.fonts"
-msgstr "Fon - %s - Penpot"
+msgstr "Fon - %s - Penjar"
 
 #: src/app/main/ui/dashboard/projects.cljs:357
 msgid "title.dashboard.projects"
-msgstr "Proyek - %s - Penpot"
+msgstr "Proyek - %s - Penjar"
 
 #: src/app/main/ui/dashboard/search.cljs:50
 msgid "title.dashboard.search"
-msgstr "Cari - %s - Penpot"
+msgstr "Cari - %s - Penjar"
 
 #: src/app/main/ui/dashboard/libraries.cljs:58
 msgid "title.dashboard.shared-libraries"
-msgstr "Pustaka Terbagi - %s - Penpot"
+msgstr "Pustaka Terbagi - %s - Penjar"
 
 #: src/app/main/ui/auth/verify_token.cljs:70, src/app/main/ui/auth.cljs:34
 msgid "title.default"
-msgstr "Penpot - Kebebasan Desain untuk Tim"
+msgstr "Penjar - Kebebasan Desain untuk Tim"
 
 #: src/app/main/ui/settings/access_tokens.cljs:278
 msgid "title.settings.access-tokens"
@@ -4163,47 +4163,47 @@ msgstr "Profil - Token akses"
 
 #: src/app/main/ui/settings/feedback.cljs:161
 msgid "title.settings.feedback"
-msgstr "Berikan masukan - Penpot"
+msgstr "Berikan masukan - Penjar"
 
 #: src/app/main/ui/settings/notifications.cljs:45
 msgid "title.settings.notifications"
-msgstr "Notifikasi - Penpot"
+msgstr "Notifikasi - Penjar"
 
 #: src/app/main/ui/settings/options.cljs:83
 msgid "title.settings.options"
-msgstr "Pengaturan - Penpot"
+msgstr "Pengaturan - Penjar"
 
 #: src/app/main/ui/settings/password.cljs:105
 msgid "title.settings.password"
-msgstr "Kata sandi - Penpot"
+msgstr "Kata sandi - Penjar"
 
 #: src/app/main/ui/settings/profile.cljs:124
 msgid "title.settings.profile"
-msgstr "Profil - Penpot"
+msgstr "Profil - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:981
 msgid "title.team-invitations"
-msgstr "Undangan - %s - Penpot"
+msgstr "Undangan - %s - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:535
 msgid "title.team-members"
-msgstr "Anggota - %s - Penpot"
+msgstr "Anggota - %s - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:1296
 msgid "title.team-settings"
-msgstr "Pengaturan - %s - Penpot"
+msgstr "Pengaturan - %s - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:1249
 msgid "title.team-webhooks"
-msgstr "Kaitan Web - %s - Penpot"
+msgstr "Kaitan Web - %s - Penjar"
 
 #: src/app/main/ui/viewer.cljs:423
 msgid "title.viewer"
-msgstr "%s - Mode penampilan - Penpot"
+msgstr "%s - Mode penampilan - Penjar"
 
 #: src/app/main/ui/workspace.cljs:237
 msgid "title.workspace"
-msgstr "%s - Penpot"
+msgstr "%s - Penjar"
 
 #: src/app/main/ui.cljs:138
 #, unused
@@ -7162,7 +7162,7 @@ msgstr "Buka menu versi"
 msgid "workspace.versions.warning.subtext"
 msgstr ""
 "Jika Anda ingin meningkatkan batas ini, tulis kepada kami di "
-"[support@penpot.app](%s)"
+"[support@penjar.app](%s)"
 
 #: src/app/main/ui/workspace/sidebar/versions.cljs:431
 msgid "workspace.versions.warning.text"

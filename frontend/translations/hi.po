@@ -3,7 +3,7 @@ msgstr ""
 "PO-Revision-Date: 2026-02-16 08:35+0000\n"
 "Last-Translator: VKing9 <vaibhavrathod2282@gmail.com>\n"
 "Language-Team: Hindi "
-"<https://hosted.weblate.org/projects/penpot/frontend/hi/>\n"
+"<https://hosted.weblate.org/projects/penjar/frontend/hi/>\n"
 "Language: hi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -23,7 +23,7 @@ msgstr "अपना ईमेल देखें"
 #, unused
 msgid "auth.check-your-email"
 msgstr ""
-"अपने ईमेल की जाँच करें और सत्यापन के लिए लिंक पर क्लिक करके Penpot का उपयोग "
+"अपने ईमेल की जाँच करें और सत्यापन के लिए लिंक पर क्लिक करके Penjar का उपयोग "
 "शुरू करें।"
 
 #: src/app/main/ui/auth/recovery.cljs:67
@@ -158,7 +158,7 @@ msgstr "खाता बनाएं"
 #, unused
 msgid "auth.register-tagline"
 msgstr ""
-"मुफ्त Penpot खाते के साथ, आप unlimited टीम्स बना सकते हैं और जितने चाहें "
+"मुफ्त Penjar खाते के साथ, आप unlimited टीम्स बना सकते हैं और जितने चाहें "
 "उतने प्रोजेक्ट्स पर अन्य डिज़ाइनरों और डेवलपर्स के साथ मिलकर काम कर सकते "
 "हैं। "
 
@@ -294,7 +294,7 @@ msgstr "टीम प्रबंधन"
 #: src/app/main/ui/dashboard/projects.cljs:92
 msgid "dasboard.team-hero.text"
 msgstr ""
-"Penpot टीमों के लिए है। परियोजनाओं और फ़ाइलों पर साथ काम करने के लिए "
+"Penjar टीमों के लिए है। परियोजनाओं और फ़ाइलों पर साथ काम करने के लिए "
 "सदस्यों को आमंत्रित करें"
 
 #: src/app/main/ui/dashboard/projects.cljs:90
@@ -305,7 +305,7 @@ msgstr "टीम बनाओ!"
 #, unused
 msgid "dasboard.tutorial-hero.info"
 msgstr ""
-"Penpot पर बुनियादी बातें सीखें और इस इंटरैक्टिव ट्यूटोरियल के साथ मज़ा भी "
+"Penjar पर बुनियादी बातें सीखें और इस इंटरैक्टिव ट्यूटोरियल के साथ मज़ा भी "
 "करें।"
 
 #: src/app/main/ui/dashboard/projects.cljs
@@ -321,7 +321,7 @@ msgstr "प्रायोगिक ट्यूटोरियल"
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
 msgid "dasboard.walkthrough-hero.info"
-msgstr "Penpot की सैर करें और इसके मुख्य फीचर्स को जानें।"
+msgstr "Penjar की सैर करें और इसके मुख्य फीचर्स को जानें।"
 
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
@@ -401,7 +401,7 @@ msgstr "व्यक्तिगत एक्सेस टोकन"
 msgid "dashboard.access-tokens.personal.description"
 msgstr ""
 "व्यक्तिगत एक्सेस टोकन हमारे लॉगिन/पासवर्ड प्रमाणीकरण प्रणाली का विकल्प के "
-"रूप में कार्य करते हैं और इन्हें किसी एप्लिकेशन को Penpot की आंतरिक API तक "
+"रूप में कार्य करते हैं और इन्हें किसी एप्लिकेशन को Penjar की आंतरिक API तक "
 "पहुंच प्रदान करने के लिए उपयोग किया जा सकता है"
 
 #: src/app/main/ui/settings/access_tokens.cljs:142
@@ -489,7 +489,7 @@ msgstr "% हटा दिया जाएगा"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:328, src/app/main/ui/workspace/main_menu.cljs:690
 msgid "dashboard.download-binary-file"
-msgstr "पेनपोट फ़ाइल (.penpot) डाउनलोड करें"
+msgstr "पेनपोट फ़ाइल (.penjar) डाउनलोड करें"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:321, src/app/main/ui/workspace/main_menu.cljs:712
 #, unused
@@ -526,7 +526,7 @@ msgid "dashboard.empty-placeholder-libraries"
 msgstr ""
 "परियोजना में जोड़ी गई लाइब्रेरी यहाँ दिखाई देंगी। अपने फ़ाइलों को साझा करने "
 "की कोशिश करें या हमारी [लाइब्रेरी और "
-"टेम्पलेट्स](https://penpot.app/libraries-templates) से जोड़ें।"
+"टेम्पलेट्स](https://penjar.app/libraries-templates) से जोड़ें।"
 
 #: src/app/main/ui/dashboard/placeholder.cljs
 #, markdown, unused
@@ -534,7 +534,7 @@ msgid "dashboard.empty-placeholder-libraries-subtitle"
 msgstr ""
 "परियोजना में जोड़ी गई लाइब्रेरी यहाँ दिखाई देंगी। अपनी फ़ाइलें साझा करने का "
 "प्रयास करें या हमारी [लाइब्रेरी और "
-"टेम्पलेट्स](https://penpot.app/libraries-templates) से जोड़ें।"
+"टेम्पलेट्स](https://penjar.app/libraries-templates) से जोड़ें।"
 
 #: src/app/main/ui/dashboard/placeholder.cljs:114
 msgid "dashboard.empty-placeholder-libraries-subtitle-viewer-role"
@@ -565,8 +565,8 @@ msgid "dashboard.empty-project.import"
 msgstr "एक फ़ाइल आयात करें"
 
 #: src/app/main/ui/dashboard/placeholder.cljs:53
-msgid "dashboard.empty-project.import-penpot"
-msgstr "एक .penpot फ़ाइल आयात करें"
+msgid "dashboard.empty-project.import-penjar"
+msgstr "एक .penjar फ़ाइल आयात करें"
 
 #: src/app/main/ui/dashboard/placeholder.cljs:45
 msgid "dashboard.empty-project.start"
@@ -586,7 +586,7 @@ msgstr "प्रोजेक्ट %s को डिलीट करते स�
 
 #: src/app/main/ui/dashboard/file_menu.cljs:280
 msgid "dashboard.export-binary-multi"
-msgstr "%s Penpot फ़ाइलें (.penpot) डाउनलोड करें"
+msgstr "%s Penjar फ़ाइलें (.penjar) डाउनलोड करें"
 
 #: src/app/main/ui/workspace/main_menu.cljs:698
 msgid "dashboard.export-frames"
@@ -686,8 +686,8 @@ msgstr ""
 msgid "dashboard.fonts.hero-text2"
 msgstr ""
 "आपको केवल वही फ़ॉन्ट्स अपलोड करने चाहिए जो आपके पास हों या जिन्हें आप "
-"Penpot में उपयोग करने के लिए लाइसेंस प्राप्त हैं। अधिक जानकारी के लिए "
-"[Penpot की सेवा की शर्तें](%s) के कंटेंट राइट्स सेक्शन को पढ़ें। आप [फ़ॉन्ट "
+"Penjar में उपयोग करने के लिए लाइसेंस प्राप्त हैं। अधिक जानकारी के लिए "
+"[Penjar की सेवा की शर्तें](%s) के कंटेंट राइट्स सेक्शन को पढ़ें। आप [फ़ॉन्ट "
 "लाइसेंसिंग](https://www.typography.com/faq) के बारे में भी पढ़ना चाह सकते "
 "हैं।"
 
@@ -1150,7 +1150,7 @@ msgid "dashboard.upgrade-plan.no-limits"
 msgstr "रचनात्मकता पर कोई सीमा नहीं"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:1069
-msgid "dashboard.upgrade-plan.penpot-free"
+msgid "dashboard.upgrade-plan.penjar-free"
 msgstr "पेनपॉट मुफ़्त"
 
 #: src/app/main/ui/dashboard/team.cljs:1115
@@ -1180,7 +1180,7 @@ msgstr "वेबहुक सफलतापूर्वक बनाया ग
 #: src/app/main/ui/dashboard/team.cljs:1136
 msgid "dashboard.webhooks.description"
 msgstr ""
-"वेबहुक्स एक सरल तरीका हैं जिससे अन्य वेबसाइटें और ऐप्स Penpot में कुछ "
+"वेबहुक्स एक सरल तरीका हैं जिससे अन्य वेबसाइटें और ऐप्स Penjar में कुछ "
 "घटनाएँ होने पर सूचित हो सकें। हम आपके द्वारा दिए गए प्रत्येक URL पर POST "
 "अनुरोध भेजेंगे।"
 
@@ -1209,7 +1209,7 @@ msgid "dashboard.your-name"
 msgstr "आपका नाम"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:40, src/app/main/ui/dashboard/fonts.cljs:42, src/app/main/ui/dashboard/libraries.cljs:56, src/app/main/ui/dashboard/projects.cljs:355, src/app/main/ui/dashboard/search.cljs:48, src/app/main/ui/dashboard/sidebar.cljs:312, src/app/main/ui/dashboard/team.cljs:537, src/app/main/ui/dashboard/team.cljs:983, src/app/main/ui/dashboard/team.cljs:1251, src/app/main/ui/dashboard/team.cljs:1298
-msgid "dashboard.your-penpot"
+msgid "dashboard.your-penjar"
 msgstr "आपका पेनपॉट"
 
 #: src/app/main/ui/alert.cljs:35
@@ -1348,7 +1348,7 @@ msgstr ""
 msgid "errors.feature-mismatch"
 msgstr ""
 "ऐसा लगता है कि आप एक ऐसी फ़ाइल खोल रहे हैं जिसमें '%s' सुविधा सक्षम है, "
-"लेकिन वर्तमान Penpot संस्करण इसे समर्थन नहीं करता या इसे अक्षम कर दिया गया "
+"लेकिन वर्तमान Penjar संस्करण इसे समर्थन नहीं करता या इसे अक्षम कर दिया गया "
 "है।"
 
 #: src/app/main/errors.cljs:283, src/app/main/errors.cljs:297
@@ -1625,7 +1625,7 @@ msgid "feedback.other-ways-contact"
 msgstr "हमसे संपर्क करने के अन्य तरीके"
 
 #: src/app/main/ui/settings/feedback.cljs:126
-msgid "feedback.penpot.link"
+msgid "feedback.penjar.link"
 msgstr ""
 "यदि फीडबैक किसी फ़ाइल या प्रोजेक्ट से संबंधित है, तो यहां पेनपॉट लिंक "
 "जोड़ें:"
@@ -2046,7 +2046,7 @@ msgid "label.shortcuts"
 msgstr "शॉर्टकट्स"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:1138
-msgid "labels.about-penpot"
+msgid "labels.about-penjar"
 msgstr "पेनपोट के बारे में"
 
 #: src/app/main/data/common.cljs:90, src/app/main/ui/dashboard/import.cljs:530
@@ -2177,7 +2177,7 @@ msgid "labels.continue-with"
 msgstr "के साथ जारी रखें"
 
 #: src/app/main/ui/viewer/login.cljs:69
-msgid "labels.continue-with-penpot"
+msgid "labels.continue-with-penjar"
 msgstr "आप पेनपॉट खाते के साथ जारी रख सकते हैं"
 
 #: src/app/main/ui/components/copy_button.cljs:41
@@ -2555,11 +2555,11 @@ msgid "labels.pending-invitation"
 msgstr "लंबित"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:973
-msgid "labels.penpot-changelog"
+msgid "labels.penjar-changelog"
 msgstr "पेनपॉट चेंजलॉग"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:899
-msgid "labels.penpot-hub"
+msgid "labels.penjar-hub"
 msgstr "पेनपॉट हब"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:846
@@ -3555,7 +3555,7 @@ msgid "not-found.no-permission.if-approves"
 msgstr "यदि स्वामी अनुमति देता है, तो आपको टीम में आमंत्रित किया जाएगा।"
 
 #: src/app/main/ui/static.cljs:496, src/app/main/ui/static.cljs:509
-msgid "not-found.no-permission.penpot-file"
+msgid "not-found.no-permission.penjar-file"
 msgstr "पेनपॉट फ़ाइल"
 
 #: src/app/main/ui/static.cljs:243, src/app/main/ui/static.cljs:275
@@ -4847,7 +4847,7 @@ msgstr ""
 
 #: src/app/main/ui/settings/subscription.cljs:533
 msgid "subscription.settings.member-since"
-msgstr "%s से Penpot सदस्य"
+msgstr "%s से Penjar सदस्य"
 
 #: src/app/main/ui/settings/subscription.cljs:546, src/app/main/ui/settings/subscription.cljs:560, src/app/main/ui/settings/subscription.cljs:576
 msgid "subscription.settings.more-information"
@@ -8534,7 +8534,7 @@ msgstr "संस्करण मेनू खोलें"
 #, markdown
 msgid "workspace.versions.warning.subtext"
 msgstr ""
-"यदि आप इस सीमा को बढ़ाना चाहते हैं, तो हमें [support@penpot.app](%s) पर "
+"यदि आप इस सीमा को बढ़ाना चाहते हैं, तो हमें [support@penjar.app](%s) पर "
 "लिखें"
 
 #: src/app/main/ui/workspace/sidebar/versions.cljs:431

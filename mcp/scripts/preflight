@@ -8,10 +8,10 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 FAILURES=0
 WARNINGS=0
 
-MCP_PLUGIN_PORT="${PENPOT_MCP_PLUGIN_PORT:-4400}"
-MCP_SERVER_PORT="${PENPOT_MCP_SERVER_PORT:-4401}"
-MCP_WEBSOCKET_PORT="${PENPOT_MCP_WEBSOCKET_PORT:-4402}"
-MCP_REPL_PORT="${PENPOT_MCP_REPL_PORT:-4403}"
+MCP_PLUGIN_PORT="${PENJAR_MCP_PLUGIN_PORT:-4400}"
+MCP_SERVER_PORT="${PENJAR_MCP_SERVER_PORT:-4401}"
+MCP_WEBSOCKET_PORT="${PENJAR_MCP_WEBSOCKET_PORT:-4402}"
+MCP_REPL_PORT="${PENJAR_MCP_REPL_PORT:-4403}"
 
 log_info() {
     printf "[INFO] %s\n" "$1"
@@ -194,7 +194,7 @@ print_remediation() {
     printf "2. Ensure corepack is enabled: corepack enable\n"
     printf "3. Install pnpm via corepack: corepack install\n"
     printf "4. Free occupied ports or override via env vars:\n"
-    printf "   PENPOT_MCP_PLUGIN_PORT, PENPOT_MCP_SERVER_PORT, PENPOT_MCP_WEBSOCKET_PORT, PENPOT_MCP_REPL_PORT\n"
+    printf "   PENJAR_MCP_PLUGIN_PORT, PENJAR_MCP_SERVER_PORT, PENJAR_MCP_WEBSOCKET_PORT, PENJAR_MCP_REPL_PORT\n"
 }
 
 print_summary() {
@@ -210,7 +210,7 @@ print_summary() {
 }
 
 main() {
-    printf "Penpot MCP preflight checks\n"
+    printf "Penjar MCP preflight checks\n"
     printf "Workspace: %s\n" "$PROJECT_ROOT"
 
     check_workspace_layout

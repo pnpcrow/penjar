@@ -1,5 +1,5 @@
 import * as http from "http";
-import { PluginTaskResponse, PluginTaskResult } from "@penpot/mcp-common";
+import { PluginTaskResponse, PluginTaskResult } from "@penjar/mcp-common";
 import { WebSocket, WebSocketServer } from "ws";
 import { PluginTask } from "./PluginTask";
 import {
@@ -9,7 +9,7 @@ import {
     getErrorMessage,
 } from "./BridgeDiagnostics";
 import { createLogger } from "./logger";
-import type { PenpotMcpServer } from "./PenpotMcpServer";
+import type { PenjarMcpServer } from "./PenjarMcpServer";
 
 interface ClientConnection {
     socket: WebSocket;
@@ -48,7 +48,7 @@ export interface PluginBridgeHealthSnapshot {
 }
 
 /**
- * Manages WebSocket connections to Penpot plugin instances and handles plugin tasks
+ * Manages WebSocket connections to Penjar plugin instances and handles plugin tasks
  * over these connections.
  */
 export class PluginBridge {
@@ -65,7 +65,7 @@ export class PluginBridge {
     private lastFailure: BridgeFailureSnapshot | null = null;
 
     constructor(
-        public readonly mcpServer: PenpotMcpServer,
+        public readonly mcpServer: PenjarMcpServer,
         private port: number,
         private taskTimeoutSecs: number = 30
     ) {
@@ -105,7 +105,7 @@ export class PluginBridge {
      * Sets up WebSocket connection handlers for plugin communication.
      *
      * Manages client connections and provides bidirectional communication
-     * channel between the MCP mcpServer and Penpot plugin instances.
+     * channel between the MCP mcpServer and Penjar plugin instances.
      */
     private setupWebSocketHandlers(): void {
         this.wsServer.on("connection", (ws: WebSocket, request: http.IncomingMessage) => {
@@ -248,12 +248,12 @@ export class PluginBridge {
         // single-user mode: return the single connected client
         if (this.connectedClients.size === 0) {
             throw new Error(
-                "No Penpot plugin instances are currently connected. Please ensure the plugin is running and connected."
+                "No Penjar plugin instances are currently connected. Please ensure the plugin is running and connected."
             );
         }
         if (this.connectedClients.size > 1) {
             throw new Error(
-                `Multiple (${this.connectedClients.size}) Penpot MCP Plugin instances are connected. ` +
+                `Multiple (${this.connectedClients.size}) Penjar MCP Plugin instances are connected. ` +
                     "Ask the user to ensure that only one instance is connected at a time."
             );
         }

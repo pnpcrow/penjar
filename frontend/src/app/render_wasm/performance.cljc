@@ -11,7 +11,7 @@
 
 (defn enabled?
   []
-  #?(:clj (= (System/getProperty "penpot.wasm.profile-marks") "true")
+  #?(:clj (= (System/getProperty "penjar.wasm.profile-marks") "true")
      :cljs false))
 
 (defn create-memory

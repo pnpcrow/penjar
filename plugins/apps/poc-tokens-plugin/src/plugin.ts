@@ -3,18 +3,18 @@ import {
   TokenType,
   TokenProperty,
   TokenValueString,
-} from '@penpot/plugin-types';
+} from '@penjar/plugin-types';
 
-penpot.ui.open('Design Tokens test', `?theme=${penpot.theme}`, {
+penjar.ui.open('Design Tokens test', `?theme=${penjar.theme}`, {
   width: 1000,
   height: 800,
 });
 
-penpot.on('themechange', (theme) => {
+penjar.on('themechange', (theme) => {
   sendMessage({ type: 'theme', content: theme });
 });
 
-penpot.ui.onMessage<PluginUIEvent>(async (message) => {
+penjar.ui.onMessage<PluginUIEvent>(async (message) => {
   if (message.type === 'load-library') {
     loadLibrary();
   } else if (message.type === 'load-tokens') {
@@ -52,11 +52,11 @@ penpot.ui.onMessage<PluginUIEvent>(async (message) => {
 });
 
 function sendMessage(message: PluginMessageEvent) {
-  penpot.ui.sendMessage(message);
+  penjar.ui.sendMessage(message);
 }
 
 function loadLibrary() {
-  const tokensCatalog = penpot.library.local.tokens;
+  const tokensCatalog = penjar.library.local.tokens;
 
   const themes = tokensCatalog.themes;
 
@@ -71,8 +71,8 @@ function loadLibrary() {
     };
   });
 
-  penpot.ui.sendMessage({
-    source: 'penpot',
+  penjar.ui.sendMessage({
+    source: 'penjar',
     type: 'set-themes',
     themesData,
   });
@@ -87,15 +87,15 @@ function loadLibrary() {
     };
   });
 
-  penpot.ui.sendMessage({
-    source: 'penpot',
+  penjar.ui.sendMessage({
+    source: 'penjar',
     type: 'set-sets',
     setsData,
   });
 }
 
 function loadTokens(setId: string) {
-  const tokensCatalog = penpot.library.local.tokens;
+  const tokensCatalog = penjar.library.local.tokens;
   const set = tokensCatalog?.getSetById(setId);
   const tokensByType = set?.tokensByType;
 
@@ -118,8 +118,8 @@ function loadTokens(setId: string) {
       ]);
     }
 
-    penpot.ui.sendMessage({
-      source: 'penpot',
+    penjar.ui.sendMessage({
+      source: 'penjar',
       type: 'set-tokens',
       tokenGroupsData,
     });
@@ -127,7 +127,7 @@ function loadTokens(setId: string) {
 }
 
 function addTheme(themeGroup: string, themeName: string) {
-  const tokensCatalog = penpot.library.local.tokens;
+  const tokensCatalog = penjar.library.local.tokens;
   const theme = tokensCatalog?.addTheme({ group: themeGroup, name: themeName });
   if (theme) {
     loadLibrary();
@@ -135,7 +135,7 @@ function addTheme(themeGroup: string, themeName: string) {
 }
 
 function addSet(setName: string) {
-  const tokensCatalog = penpot.library.local.tokens;
+  const tokensCatalog = penjar.library.local.tokens;
   const set = tokensCatalog?.addSet({ name: setName });
   if (set) {
     loadLibrary();
@@ -148,7 +148,7 @@ function addToken(
   tokenName: string,
   tokenValue: unknown,
 ) {
-  const tokensCatalog = penpot.library.local.tokens;
+  const tokensCatalog = penjar.library.local.tokens;
   const set = tokensCatalog?.getSetById(setId);
   const token = set?.addToken({
     type: tokenType as TokenType,
@@ -165,7 +165,7 @@ function addToken(
 }
 
 function renameTheme(themeId: string, newName: string) {
-  const tokensCatalog = penpot.library.local.tokens;
+  const tokensCatalog = penjar.library.local.tokens;
   const theme = tokensCatalog?.getThemeById(themeId);
   if (theme) {
     theme.name = newName;
@@ -174,7 +174,7 @@ function renameTheme(themeId: string, newName: string) {
 }
 
 function renameSet(setId: string, newName: string) {
-  const tokensCatalog = penpot.library.local.tokens;
+  const tokensCatalog = penjar.library.local.tokens;
   const set = tokensCatalog?.getSetById(setId);
   if (set) {
     set.name = newName;
@@ -183,7 +183,7 @@ function renameSet(setId: string, newName: string) {
 }
 
 function renameToken(setId: string, tokenId: string, newName: string) {
-  const tokensCatalog = penpot.library.local.tokens;
+  const tokensCatalog = penjar.library.local.tokens;
   const set = tokensCatalog?.getSetById(setId);
   const token = set?.getTokenById(tokenId);
   if (token) {
@@ -197,7 +197,7 @@ function renameToken(setId: string, tokenId: string, newName: string) {
 }
 
 function deleteTheme(themeId: string) {
-  const tokensCatalog = penpot.library.local.tokens;
+  const tokensCatalog = penjar.library.local.tokens;
   const theme = tokensCatalog?.getThemeById(themeId);
   if (theme) {
     theme.remove();
@@ -206,7 +206,7 @@ function deleteTheme(themeId: string) {
 }
 
 function deleteSet(setId: string) {
-  const tokensCatalog = penpot.library.local.tokens;
+  const tokensCatalog = penjar.library.local.tokens;
   const set = tokensCatalog?.getSetById(setId);
   if (set) {
     set.remove();
@@ -215,7 +215,7 @@ function deleteSet(setId: string) {
 }
 
 function deleteToken(setId: string, tokenId: string) {
-  const tokensCatalog = penpot.library.local.tokens;
+  const tokensCatalog = penjar.library.local.tokens;
   const set = tokensCatalog?.getSetById(setId);
   const token = set?.getTokenById(tokenId);
   if (token) {
@@ -225,7 +225,7 @@ function deleteToken(setId: string, tokenId: string) {
 }
 
 function toggleTheme(themeId: string) {
-  const tokensCatalog = penpot.library.local.tokens;
+  const tokensCatalog = penjar.library.local.tokens;
   const theme = tokensCatalog?.getThemeById(themeId);
   if (theme) {
     theme.toggleActive();
@@ -234,7 +234,7 @@ function toggleTheme(themeId: string) {
 }
 
 function toggleSet(setId: string) {
-  const tokensCatalog = penpot.library.local.tokens;
+  const tokensCatalog = penjar.library.local.tokens;
   const set = tokensCatalog?.getSetById(setId);
   if (set) {
     set.toggleActive();
@@ -247,7 +247,7 @@ function applyToken(
   tokenId: string,
   properties: TokenProperty[] | undefined,
 ) {
-  const tokensCatalog = penpot.library.local.tokens;
+  const tokensCatalog = penjar.library.local.tokens;
   const set = tokensCatalog?.getSetById(setId);
   const token = set?.getTokenById(tokenId);
 
@@ -257,14 +257,14 @@ function applyToken(
 
   // Alternative way
   //
-  // const selection = penpot.selection;
+  // const selection = penjar.selection;
   // if (token && selection) {
   //   token.applyToShapes(selection, properties);
   // }
 
   // Other alternative way
   //
-  // const selection = penpot.selection;
+  // const selection = penjar.selection;
   // if (token && selection) {
   //   for (const shape of selection) {
   //     shape.applyToken(token, properties);

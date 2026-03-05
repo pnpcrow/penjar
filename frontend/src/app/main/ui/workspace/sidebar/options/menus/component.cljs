@@ -317,7 +317,7 @@
 
         [dprops dref]
         (h/use-sortable
-         :data-type "penpot/variant-property"
+         :data-type "penjar/variant-property"
          :on-drop on-drop
          :draggable? true
          :data {:from-pos pos})]
@@ -1127,7 +1127,7 @@
 
         [dprops dref]
         (h/use-sortable
-         :data-type "penpot/variant-main-property"
+         :data-type "penjar/variant-main-property"
          :on-drop on-drop
          :draggable? true
          :data {:from-pos pos})]

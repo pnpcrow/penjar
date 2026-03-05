@@ -1,6 +1,6 @@
 # UI
 
-A React component library with TypeScript for the Penpot ecosystem.
+A React component library with TypeScript for the Penjar ecosystem.
 
 ## Commands
 

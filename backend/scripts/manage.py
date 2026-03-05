@@ -167,11 +167,11 @@ available_commands = (
 
 parser = argparse.ArgumentParser(
     description=(
-        "Penpot Command Line Interface (CLI)"
+        "Penjar Command Line Interface (CLI)"
     )
 )
 
-parser.add_argument("-V", "--version", action="version", version="Penpot CLI %%develop%%")
+parser.add_argument("-V", "--version", action="version", version="Penjar CLI %%develop%%")
 parser.add_argument("action", action="store", choices=available_commands)
 parser.add_argument("-f", "--force", help="force operation", action="store_true")
 parser.add_argument("-n", "--fullname", help="fullname", action="store")

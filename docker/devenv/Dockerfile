@@ -293,9 +293,9 @@ RUN set -ex; \
 FROM base AS devenv-base
 
 RUN set -ex; \
-    usermod -l penpot -d /home/penpot -G users -s /bin/bash ubuntu; \
-    passwd penpot -d; \
-    echo "penpot ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+    usermod -l penjar -d /home/penjar -G users -s /bin/bash ubuntu; \
+    passwd penjar -d; \
+    echo "penjar ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 RUN set -ex; \
     apt-get -qq update; \
@@ -387,7 +387,7 @@ RUN set -ex; \
 ################################################################################
 
 FROM devenv-base AS devenv
-LABEL maintainer="Penpot <docker@penpot.app>"
+LABEL maintainer="Penjar <docker@penjar.app>"
 
 ENV LANG='C.UTF-8' \
     LC_ALL='C.UTF-8' \
@@ -397,7 +397,7 @@ ENV LANG='C.UTF-8' \
     RUSTUP_HOME="/opt/rustup" \
     PATH="/opt/jdk/bin:/opt/utils/bin:/opt/clojure/bin:/opt/node/bin:/opt/imagick/bin:/opt/cargo/bin:$PATH"
 
-COPY --from=penpotapp/imagemagick:7.1.2-13 /opt/imagick /opt/imagick
+COPY --from=penjarapp/imagemagick:7.1.2-13 /opt/imagick /opt/imagick
 COPY --from=setup-jvm /opt/jdk /opt/jdk
 COPY --from=setup-jvm /opt/clojure /opt/clojure
 COPY --from=setup-node /opt/node /opt/node

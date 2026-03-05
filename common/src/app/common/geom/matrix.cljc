@@ -424,7 +424,7 @@
 #?(:clj
    (defmethod print-dup Matrix
      [^Matrix mtx ^java.io.Writer writer]
-     (.write writer (str "#penpot/matrix \"" (matrix->str mtx) "\""))))
+     (.write writer (str "#penjar/matrix \"" (matrix->str mtx) "\""))))
 
 (defmethod pp/simple-dispatch Matrix
   [obj]
@@ -432,7 +432,7 @@
 
 #?(:clj
    (fres/add-handlers!
-    {:name "penpot/matrix"
+    {:name "penjar/matrix"
      :class Matrix
      :wfn (fn [n w o]
             (fres/write-tag! w n 1)

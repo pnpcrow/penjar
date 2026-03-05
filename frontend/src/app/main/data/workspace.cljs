@@ -326,7 +326,7 @@
                    (->> (rx/from @wasm/module)
                         (rx/filter true?)
                         (rx/tap (fn [_]
-                                  (let [event (ug/event "penpot:wasm:loaded")]
+                                  (let [event (ug/event "penjar:wasm:loaded")]
                                     (ug/dispatch! event))))
                         (rx/ignore))
                    (rx/empty))

@@ -3,7 +3,7 @@ msgstr ""
 "PO-Revision-Date: 2026-01-08 17:06+0000\n"
 "Last-Translator: Ahmad HosseinBor <123hozeifeh@gmail.com>\n"
 "Language-Team: Persian "
-"<https://hosted.weblate.org/projects/penpot/frontend/fa/>\n"
+"<https://hosted.weblate.org/projects/penjar/frontend/fa/>\n"
 "Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -23,7 +23,7 @@ msgstr "ایمیل خود را مرور کنید"
 #, unused
 msgid "auth.check-your-email"
 msgstr ""
-"ایمیل خود را بررسی کنید و برای تأیید و شروع استفاده از Penpot روی لینک کلیک "
+"ایمیل خود را بررسی کنید و برای تأیید و شروع استفاده از Penjar روی لینک کلیک "
 "کنید."
 
 #: src/app/main/ui/auth/recovery.cljs:67
@@ -69,7 +69,7 @@ msgstr "ورود"
 #: src/app/main/ui/auth/login.cljs:274
 msgid "auth.login-tagline"
 msgstr ""
-"Penpot یک ابزار طراحی و همکاری در کد نویسی است که رایگان و کد آن متن باز "
+"Penjar یک ابزار طراحی و همکاری در کد نویسی است که رایگان و کد آن متن باز "
 "است."
 
 #: src/app/main/ui/auth/login.cljs:231
@@ -285,7 +285,7 @@ msgstr "مدیریت تیم"
 #: src/app/main/ui/dashboard/projects.cljs:92
 msgid "dasboard.team-hero.text"
 msgstr ""
-"Penpot برای تیم‌ها در نظر گرفته شده است. از اعضا دعوت کنید تا روی پروژه‌ها "
+"Penjar برای تیم‌ها در نظر گرفته شده است. از اعضا دعوت کنید تا روی پروژه‌ها "
 "و فایل‌ها با هم کار کنند"
 
 #: src/app/main/ui/dashboard/projects.cljs:90
@@ -295,7 +295,7 @@ msgstr "تیم ایجاد کن!"
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
 msgid "dasboard.tutorial-hero.info"
-msgstr "در عین حالی که با این آموزش سرگرم می‌شوید، اصول اولیه را در Penpot بیاموزید."
+msgstr "در عین حالی که با این آموزش سرگرم می‌شوید، اصول اولیه را در Penjar بیاموزید."
 
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
@@ -414,7 +414,7 @@ msgstr "ایجاد تیم جدید"
 
 #: src/app/main/ui/components/context_menu_a11y.cljs:300, src/app/main/ui/dashboard/sidebar.cljs:638
 msgid "dashboard.default-team-name"
-msgstr "Penpot شما"
+msgstr "Penjar شما"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:495
 msgid "dashboard.delete-team"
@@ -422,7 +422,7 @@ msgstr "حذف تیم"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:328, src/app/main/ui/workspace/main_menu.cljs:690
 msgid "dashboard.download-binary-file"
-msgstr "دانلود فایل پنپات (.penpot)"
+msgstr "دانلود فایل پنپات (.penjar)"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:321, src/app/main/ui/workspace/main_menu.cljs:712
 #, unused
@@ -447,7 +447,7 @@ msgstr "ایجاد فایل جدید"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:280
 msgid "dashboard.export-binary-multi"
-msgstr "دانلود %s عدد فایل های پنپات (.penpot)"
+msgstr "دانلود %s عدد فایل های پنپات (.penjar)"
 
 #: src/app/main/ui/workspace/main_menu.cljs:698
 msgid "dashboard.export-frames"
@@ -532,7 +532,7 @@ msgstr ""
 msgid "dashboard.fonts.hero-text2"
 msgstr ""
 "شما فقط باید فونت‌هایی را که مالک آنها هستید یا مجوز استفاده از آنها را در "
-"Penpot دارید آپلود کنید. در بخش حقوق محتوا [شرایط خدمات Penpot] (%s) "
+"Penjar دارید آپلود کنید. در بخش حقوق محتوا [شرایط خدمات Penjar] (%s) "
 "اطلاعات بیشتری کسب کنید. همچنین ممکن است بخواهید درباره [مجوز فونت] "
 "(https://www.typography.com/faq) مطالعه کنید."
 
@@ -799,7 +799,7 @@ msgid "dashboard.your-name"
 msgstr "نام شما"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:40, src/app/main/ui/dashboard/fonts.cljs:42, src/app/main/ui/dashboard/libraries.cljs:56, src/app/main/ui/dashboard/projects.cljs:355, src/app/main/ui/dashboard/search.cljs:48, src/app/main/ui/dashboard/sidebar.cljs:312, src/app/main/ui/dashboard/team.cljs:537, src/app/main/ui/dashboard/team.cljs:983, src/app/main/ui/dashboard/team.cljs:1251, src/app/main/ui/dashboard/team.cljs:1298
-msgid "dashboard.your-penpot"
+msgid "dashboard.your-penjar"
 msgstr "پن‌پات شما"
 
 #: src/app/main/ui/alert.cljs:35
@@ -956,7 +956,7 @@ msgstr ""
 
 #: src/app/main/ui/settings/feedback.cljs:149
 msgid "feedback.discourse-title"
-msgstr "انجمن Penpot"
+msgstr "انجمن Penjar"
 
 #: src/app/main/ui/settings/feedback.cljs:105
 msgid "feedback.subject"
@@ -1293,8 +1293,8 @@ msgid "labels.continue-with"
 msgstr "ادامه دادن با"
 
 #: src/app/main/ui/viewer/login.cljs:69
-msgid "labels.continue-with-penpot"
-msgstr "شما می‌توانید با یک حساب Penpot ادامه دهید"
+msgid "labels.continue-with-penjar"
+msgstr "شما می‌توانید با یک حساب Penjar ادامه دهید"
 
 #: src/app/main/ui/workspace/sidebar/assets/groups.cljs:167, src/app/main/ui/workspace/sidebar/options/menus/component.cljs:203
 msgid "labels.create"
@@ -1919,7 +1919,7 @@ msgstr "پروفایل با موفقیت ذخیره شد!"
 #, unused
 msgid "onboarding-v2.before-start.desc2"
 msgstr ""
-"اطلاعات دقیق در مورد نحوه استفاده از Penpot. از نمونه‌سازی تا سازماندهی یا "
+"اطلاعات دقیق در مورد نحوه استفاده از Penjar. از نمونه‌سازی تا سازماندهی یا "
 "به اشتراک‌گذاری طرح‌ها."
 
 #, unused
@@ -1934,7 +1934,7 @@ msgstr "پس از نامگذاری تیم خود، می‌توانید افرا�
 
 #, unused
 msgid "onboarding.welcome.alt"
-msgstr "Penpot"
+msgstr "Penjar"
 
 #: src/app/main/ui/inspect/exports.cljs:148, src/app/main/ui/workspace/sidebar/options/menus/border_radius.cljs:196, src/app/main/ui/workspace/sidebar/options/menus/border_radius.cljs:213, src/app/main/ui/workspace/sidebar/options/menus/border_radius.cljs:215, src/app/main/ui/workspace/sidebar/options/menus/border_radius.cljs:240, src/app/main/ui/workspace/sidebar/options/menus/border_radius.cljs:260, src/app/main/ui/workspace/sidebar/options/menus/border_radius.cljs:278, src/app/main/ui/workspace/sidebar/options/menus/border_radius.cljs:295, src/app/main/ui/workspace/sidebar/options/menus/component.cljs:342, src/app/main/ui/workspace/sidebar/options/menus/component.cljs:496, src/app/main/ui/workspace/sidebar/options/menus/component.cljs:1062, src/app/main/ui/workspace/sidebar/options/menus/component.cljs:1302, src/app/main/ui/workspace/sidebar/options/menus/constraints.cljs:138, src/app/main/ui/workspace/sidebar/options/menus/constraints.cljs:149, src/app/main/ui/workspace/sidebar/options/menus/exports.cljs:223, src/app/main/ui/workspace/sidebar/options/menus/fill.cljs:221, src/app/main/ui/workspace/sidebar/options/menus/input_wrapper_tokens.cljs:28, src/app/main/ui/workspace/sidebar/options/menus/layer.cljs:233, src/app/main/ui/workspace/sidebar/options/menus/layout_container.cljs:385, src/app/main/ui/workspace/sidebar/options/menus/layout_container.cljs:396, src/app/main/ui/workspace/sidebar/options/menus/layout_container.cljs:422, src/app/main/ui/workspace/sidebar/options/menus/layout_container.cljs:432, src/app/main/ui/workspace/sidebar/options/menus/layout_container.cljs:520, src/app/main/ui/workspace/sidebar/options/menus/layout_container.cljs:554, src/app/main/ui/workspace/sidebar/options/menus/layout_container.cljs:587, src/app/main/ui/workspace/sidebar/options/menus/layout_container.cljs:621, src/app/main/ui/workspace/sidebar/options/menus/layout_container.cljs:763, src/app/main/ui/workspace/sidebar/options/menus/layout_container.cljs:801, src/app/main/ui/workspace/sidebar/options/menus/layout_item.cljs:80, src/app/main/ui/workspace/sidebar/options/menus/layout_item.cljs:86, src/app/main/ui/workspace/sidebar/options/menus/measures.cljs:424, src/app/main/ui/workspace/sidebar/options/menus/measures.cljs:447, src/app/main/ui/workspace/sidebar/options/menus/measures.cljs:458, src/app/main/ui/workspace/sidebar/options/menus/measures.cljs:486, src/app/main/ui/workspace/sidebar/options/menus/measures.cljs:499, src/app/main/ui/workspace/sidebar/options/menus/measures.cljs:508, src/app/main/ui/workspace/sidebar/options/menus/measures.cljs:519, src/app/main/ui/workspace/sidebar/options/menus/measures.cljs:540, src/app/main/ui/workspace/sidebar/options/menus/measures.cljs:552, src/app/main/ui/workspace/sidebar/options/menus/shadow.cljs:155, src/app/main/ui/workspace/sidebar/options/menus/stroke.cljs:200, src/app/main/ui/workspace/sidebar/options/menus/typography.cljs:336, src/app/main/ui/workspace/sidebar/options/menus/typography.cljs:391, src/app/main/ui/workspace/sidebar/options/menus/typography.cljs:410, src/app/main/ui/workspace/sidebar/options/rows/color_row.cljs:422, src/app/main/ui/workspace/sidebar/options/rows/stroke_row.cljs:235
 msgid "settings.multiple"
@@ -2082,19 +2082,19 @@ msgstr "توزیع به صورت عمودی"
 
 #: src/app/main/ui/dashboard/files.cljs:181
 msgid "title.dashboard.files"
-msgstr "%s - Penpot"
+msgstr "%s - Penjar"
 
 #: src/app/main/ui/dashboard/fonts.cljs:45
 msgid "title.dashboard.fonts"
-msgstr "فونت‌ها - %s - Penpot"
+msgstr "فونت‌ها - %s - Penjar"
 
 #: src/app/main/ui/dashboard/projects.cljs:357
 msgid "title.dashboard.projects"
-msgstr "پروژه‌ها - %s - Penpot"
+msgstr "پروژه‌ها - %s - Penjar"
 
 #: src/app/main/ui/dashboard/search.cljs:50
 msgid "title.dashboard.search"
-msgstr "جستجو - %s - Penpot"
+msgstr "جستجو - %s - Penjar"
 
 #: src/app/main/ui/dashboard/libraries.cljs:58
 msgid "title.dashboard.shared-libraries"
@@ -2102,19 +2102,19 @@ msgstr "کتابخانه‌های مشترک - %s - پن‌پات"
 
 #: src/app/main/ui/auth/verify_token.cljs:70, src/app/main/ui/auth.cljs:34
 msgid "title.default"
-msgstr "Penpot - طراحی آزاد برای تیم‌ها"
+msgstr "Penjar - طراحی آزاد برای تیم‌ها"
 
 #: src/app/main/ui/settings/feedback.cljs:161
 msgid "title.settings.feedback"
-msgstr "بازخورد بدهید - Penpot"
+msgstr "بازخورد بدهید - Penjar"
 
 #: src/app/main/ui/settings/options.cljs:83
 msgid "title.settings.options"
-msgstr "تنظیمات - Penpot"
+msgstr "تنظیمات - Penjar"
 
 #: src/app/main/ui/settings/password.cljs:105
 msgid "title.settings.password"
-msgstr "رمزعبور - Penpot"
+msgstr "رمزعبور - Penjar"
 
 #: src/app/main/ui/settings/profile.cljs:124
 msgid "title.settings.profile"
@@ -2122,7 +2122,7 @@ msgstr "پروفایل - پن‌پات"
 
 #: src/app/main/ui/dashboard/team.cljs:981
 msgid "title.team-invitations"
-msgstr "دعوت‌نامه‌ها - %s - Penpot"
+msgstr "دعوت‌نامه‌ها - %s - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:535
 msgid "title.team-members"
@@ -2138,7 +2138,7 @@ msgstr "%s - حالت مشاهده - پن‌پات"
 
 #: src/app/main/ui/workspace.cljs:237
 msgid "title.workspace"
-msgstr "%s - Penpot"
+msgstr "%s - Penjar"
 
 #: src/app/main/ui.cljs:138
 #, unused

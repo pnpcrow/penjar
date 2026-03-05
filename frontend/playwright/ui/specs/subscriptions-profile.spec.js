@@ -29,7 +29,7 @@ test.describe("Subscriptions: profile", () => {
     ).not.toBeVisible();
 
     await expect(
-      page.getByRole("heading", { name: "Other Penpot plans", level: 3 }),
+      page.getByRole("heading", { name: "Other Penjar plans", level: 3 }),
     ).toBeVisible();
 
     await expect(page.getByText("$7")).toBeVisible();
@@ -59,7 +59,7 @@ test.describe("Subscriptions: profile", () => {
     ).toBeVisible();
 
     await expect(
-      page.getByRole("heading", { name: "Other Penpot plans", level: 3 }),
+      page.getByRole("heading", { name: "Other Penjar plans", level: 3 }),
     ).toBeVisible();
 
     await expect(page.getByText("$0")).toBeVisible();
@@ -93,7 +93,7 @@ test.describe("Subscriptions: profile", () => {
     ).toBeVisible();
 
     await expect(
-      page.getByRole("heading", { name: "Other Penpot plans", level: 3 }),
+      page.getByRole("heading", { name: "Other Penjar plans", level: 3 }),
     ).toBeVisible();
 
     await expect(page.getByText("$0")).toBeVisible();

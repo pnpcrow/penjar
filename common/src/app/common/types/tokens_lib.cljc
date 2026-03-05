@@ -84,7 +84,7 @@
 
 (defmethod pp/simple-dispatch Token
   [^Token obj]
-  (.write *out* "#penpot/token ")
+  (.write *out* "#penjar/token ")
   (pp/pprint-newline :miser)
   (pp/pprint (datafy obj)))
 
@@ -92,7 +92,7 @@
    (do
      (defmethod print-method Token
        [^Token this ^java.io.Writer w]
-       (.write w "#penpot/token ")
+       (.write w "#penjar/token ")
        (print-method (datafy this) w))
 
      (defmethod print-dup Token
@@ -103,7 +103,7 @@
    (extend-type Token
      cljs.core/IPrintWithWriter
      (-pr-writer [this writer opts]
-       (-write writer "#penpot/token ")
+       (-write writer "#penjar/token ")
        (-pr-writer (datafy this) writer opts))
 
      cljs.core/IEncodeJS
@@ -277,7 +277,7 @@
     tokens))
 
 (defmethod pp/simple-dispatch TokenSet [^TokenSet obj]
-  (.write *out* "#penpot/token-set ")
+  (.write *out* "#penjar/token-set ")
   (pp/pprint-newline :miser)
   (pp/pprint (datafy obj)))
 
@@ -285,7 +285,7 @@
    (do
      (defmethod print-method TokenSet
        [^TokenSet this ^java.io.Writer w]
-       (.write w "#penpot/token-set ")
+       (.write w "#penjar/token-set ")
        (print-method (datafy this) w))
 
      (defmethod print-dup TokenSet
@@ -296,7 +296,7 @@
    (extend-type TokenSet
      cljs.core/IPrintWithWriter
      (-pr-writer [this writer opts]
-       (-write writer "#penpot/token-set ")
+       (-write writer "#penjar/token-set ")
        (-pr-writer (datafy this) writer opts))
 
      cljs.core/IEncodeJS
@@ -574,7 +574,7 @@
   "")
 
 (def hidden-theme-name
-  "__PENPOT__HIDDEN__TOKEN__THEME__")
+  "__PENJAR__HIDDEN__TOKEN__THEME__")
 
 (defrecord TokenTheme [id name group description is-source external-id modified-at sets]
   cp/Datafiable
@@ -651,7 +651,7 @@
 
 (defmethod pp/simple-dispatch TokenTheme
   [^TokenTheme obj]
-  (.write *out* "#penpot/token-theme ")
+  (.write *out* "#penjar/token-theme ")
   (pp/pprint-newline :miser)
   (pp/pprint (datafy obj)))
 
@@ -659,7 +659,7 @@
    (do
      (defmethod print-method TokenTheme
        [^TokenTheme this ^java.io.Writer w]
-       (.write w "#penpot/token-theme ")
+       (.write w "#penjar/token-theme ")
        (print-method (datafy this) w))
 
      (defmethod print-dup TokenTheme
@@ -670,7 +670,7 @@
    (extend-type TokenTheme
      cljs.core/IPrintWithWriter
      (-pr-writer [this writer opts]
-       (-write writer "#penpot/token-theme ")
+       (-write writer "#penjar/token-theme ")
        (-pr-writer (datafy this) writer opts))
 
      cljs.core/IEncodeJS
@@ -1345,7 +1345,7 @@ Will return a value that matches this schema:
 
 (defmethod pp/simple-dispatch TokensLib
   [^TokensLib obj]
-  (.write *out* "#penpot/tokens-lib ")
+  (.write *out* "#penjar/tokens-lib ")
   (pp/pprint-newline :miser)
   (pp/pprint (export-dtcg-json obj)))
 
@@ -1353,7 +1353,7 @@ Will return a value that matches this schema:
    (do
      (defmethod print-method TokensLib
        [^TokensLib obj ^java.io.Writer w]
-       (.write w "#penpot/tokens-lib ")
+       (.write w "#penjar/tokens-lib ")
        (print-method (export-dtcg-json obj) w))
 
      (defmethod print-dup TokensLib
@@ -1364,7 +1364,7 @@ Will return a value that matches this schema:
    (extend-type TokensLib
      cljs.core/IPrintWithWriter
      (-pr-writer [this writer opts]
-       (-write writer "#penpot/tokens-lib ")
+       (-write writer "#penjar/tokens-lib ")
        (-pr-writer (export-dtcg-json this) writer opts))
 
      cljs.core/IEncodeJS
@@ -1729,7 +1729,7 @@ Will return a value that matches this schema:
   (parse-single-set-dtcg-json set-name (legacy-json->dtcg-json decoded-json-tokens)))
 
 (def ^:private schema:multi-set-dtcg
-  "Schema for penpot multi-set dtcg json decoded data/
+  "Schema for penjar multi-set dtcg json decoded data/
 
   Mainly used for validate the structure of the incoming data before
   proceed to parse it to our internal data structures."
@@ -1856,7 +1856,7 @@ Will return a value that matches this schema:
     library))
 
 (defn read-multi-set-dtcg
-  "Read penpot multi-set dctg tokens. Accepts string or JSON decoded
+  "Read penjar multi-set dctg tokens. Accepts string or JSON decoded
   data (without any case transformation). Used as schema decoder and
   in the SDK."
   [data]
@@ -1970,7 +1970,7 @@ Will return a value that matches this schema:
              (tree-seq d/ordered-map? vals)
              (into [] themes-xform))
 
-        ;; Active themes without exposing hidden penpot theme
+        ;; Active themes without exposing hidden penjar theme
         active-themes
         (-> (get-active-theme-paths tokens-lib)
             (disj hidden-theme-path))]
@@ -2029,7 +2029,7 @@ Will return a value that matches this schema:
 
 (defn get-tokens-of-unknown-type
   "Search for all tokens in the decoded json file that have a type that is not currently
-   supported by Penpot. Returns a map token-path -> token type."
+   supported by Penjar. Returns a map token-path -> token type."
   [decoded-json {:keys [json-format parent-path process-token-type]
                  :or {json-format (get-json-format decoded-json)
                       parent-path ""
@@ -2062,22 +2062,22 @@ Will return a value that matches this schema:
 ;; and the frontend
 
 (t/add-handlers!
- {:id "penpot/tokens-lib"
+ {:id "penjar/tokens-lib"
   :class TokensLib
   :wfn datafy
   :rfn #(make-tokens-lib %)}
 
- {:id "penpot/token-set"
+ {:id "penjar/token-set"
   :class TokenSet
   :wfn datafy
   :rfn #(make-token-set %)}
 
- {:id "penpot/token-theme"
+ {:id "penjar/token-theme"
   :class TokenTheme
   :wfn datafy
   :rfn #(map->TokenTheme %)}
 
- {:id "penpot/token"
+ {:id "penjar/token"
   :class Token
   :wfn datafy
   :rfn #(map->Token %)})
@@ -2279,7 +2279,7 @@ Will return a value that matches this schema:
 
 #?(:clj
    (fres/add-handlers!
-    {:name "penpot/token/v1"
+    {:name "penjar/token/v1"
      :class Token
      :wfn (fn [n w o]
             (fres/write-tag! w n 1)
@@ -2288,12 +2288,12 @@ Will return a value that matches this schema:
             (let [obj (fres/read-object! r)]
               (make-token obj)))}
 
-    {:name "penpot/token-set/v1"
+    {:name "penjar/token-set/v1"
      :rfn (fn [r]
             (let [obj (fres/read-object! r)]
               (map->TokenSetLegacy obj)))}
 
-    {:name "penpot/token-set/v2"
+    {:name "penjar/token-set/v2"
      :class TokenSet
      :wfn (fn [n w o]
             (fres/write-tag! w n 1)
@@ -2302,7 +2302,7 @@ Will return a value that matches this schema:
             (let [obj (fres/read-object! r)]
               (make-token-set obj)))}
 
-    {:name "penpot/token-theme/v1"
+    {:name "penjar/token-theme/v1"
      :class TokenTheme
      :wfn (fn [n w o]
             (fres/write-tag! w n 1)
@@ -2311,17 +2311,17 @@ Will return a value that matches this schema:
             (let [obj (fres/read-object! r)]
               (make-token-theme obj)))}
 
-    {:name "penpot/tokens-lib/v1.1"
+    {:name "penjar/tokens-lib/v1.1"
      :rfn read-tokens-lib-v1-1}
 
-    {:name "penpot/tokens-lib/v1.2"
+    {:name "penjar/tokens-lib/v1.2"
      :rfn read-tokens-lib-v1-2}
 
-    {:name "penpot/tokens-lib/v1.3"
+    {:name "penjar/tokens-lib/v1.3"
      :rfn read-tokens-lib-v1-3}
 
     ;; CURRENT TOKENS LIB READER & WRITTER
-    {:name "penpot/tokens-lib/v1.4"
+    {:name "penjar/tokens-lib/v1.4"
      :class TokensLib
      :wfn write-tokens-lib
      :rfn read-tokens-lib}))

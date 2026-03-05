@@ -1,11 +1,11 @@
 ---
 title: 3.08. Data Guide
-desc: Learn about data structures, code organization, file operations, migrations, shape editing, and component syncing. See Penpot's technical guide. Try it free!
+desc: Learn about data structures, code organization, file operations, migrations, shape editing, and component syncing. See Penjar's technical guide. Try it free!
 ---
 
 # Data Guide
 
-The data structures are one of the most complex and important parts of Penpot.
+The data structures are one of the most complex and important parts of Penjar.
 It's critical that the data integrity is always maintained throughout the whole
 usage, and also file exports & imports and data model evolution.
 
@@ -40,7 +40,7 @@ all of this is important in general.
 ```
 
 When changing the model it's essential to take into account that the existing
-Penpot files must keep working without changes. If you follow the general
+Penjar files must keep working without changes. If you follow the general
 considerations stated above, usually this is automatic, since the objects
 already in the database just have the default behavior, that should be the same
 as before the change. And the new features apply to new or edited objects.
@@ -164,7 +164,7 @@ Any attribute that is not in this map will be ignored in synchronizations.
             parser.cljs
 ```
 
-To export a penpot file, basically we use the same system that is used to
+To export a penjar file, basically we use the same system that is used to
 display shapes in the workspace or viewer. In <code class="language-text">shapes/*.cljs</code> there are
 components that render one shape of each type into a SVG node.
 
@@ -175,7 +175,7 @@ proportion locks, constraints, stroke alignment...). This is done in the
 
 Finally, to import a file, we make use of <code class="language-text">parser.cljs</code>, a module that
 contains the <code class="language-clojure">parse-data</code> function. It receives a SVG node (possibly with
-children) and converts it into a Penpot shape object. There are auxiliary
+children) and converts it into a Penjar shape object. There are auxiliary
 functions to read and convert each group of attributes, from the node
 properties or the metadata (with the <code class="language-clojure">get-meta</code> function).
 

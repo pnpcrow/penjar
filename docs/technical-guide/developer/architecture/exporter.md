@@ -1,6 +1,6 @@
 ---
 title: Exporter app
-desc: Learn about self-hosting, configuration, architecture (backend, frontend), data model, and development environment. See Penpot's technical guide.
+desc: Learn about self-hosting, configuration, architecture (backend, frontend), data model, and development environment. See Penjar's technical guide.
 ---
 
 # Exporter app
@@ -16,7 +16,7 @@ it to a file that the user can download.
 
 ## Exporter structure
 
-Penpot exporter app code resides under <code class="language-text">exporter/src/app</code> path in the main repository.
+Penjar exporter app code resides under <code class="language-text">exporter/src/app</code> path in the main repository.
 
 @startuml Exporter
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml

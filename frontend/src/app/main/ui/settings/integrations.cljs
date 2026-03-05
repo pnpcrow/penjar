@@ -128,7 +128,7 @@
          (dm/str
           "{\n"
           "  \"mcpServers\": {\n"
-          "    \"penpot\": {\n"
+          "    \"penjar\": {\n"
           "      \"url\": \"" cf/mcp-server-url "?userToken=" (:token token-created "") "\"\n"
           "    }\n"
           "  }"

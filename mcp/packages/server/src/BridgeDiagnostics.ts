@@ -3,7 +3,10 @@ export type BridgeDiagnosticCode =
     | "PLUGIN_TASK_TIMEOUT"
     | "AUTH_TOKEN_MISSING"
     | "AUTH_TOKEN_EXPIRED_OR_MISMATCH"
-    | "PLUGIN_CONNECTION_CONFLICT";
+    | "PLUGIN_CONNECTION_CONFLICT"
+    | "PERMISSION_DENIED"
+    | "RESOURCE_NOT_FOUND"
+    | "UNSUPPORTED_OPERATION";
 
 export interface BridgeDiagnostic {
     code: BridgeDiagnosticCode;
@@ -15,11 +18,11 @@ export interface BridgeDiagnostic {
 const DIAGNOSTIC_TEMPLATES: Record<BridgeDiagnosticCode, BridgeDiagnostic> = {
     PLUGIN_DISCONNECTED: {
         code: "PLUGIN_DISCONNECTED",
-        title: "Penpot MCP plugin is not connected",
+        title: "Penjar MCP plugin is not connected",
         summary:
             "The MCP server could not dispatch the request because no active plugin WebSocket connection was available.",
         remediation: [
-            "Open the Penpot MCP plugin UI in an active design file.",
+            "Open the Penjar MCP plugin UI in an active design file.",
             "Click 'Connect to MCP server' and keep the plugin UI open.",
             "If the issue persists, inspect browser console and server logs for WebSocket close reasons.",
         ],
@@ -64,6 +67,36 @@ const DIAGNOSTIC_TEMPLATES: Record<BridgeDiagnosticCode, BridgeDiagnostic> = {
             "Disconnect duplicate sessions, then reconnect only the intended tab.",
         ],
     },
+    PERMISSION_DENIED: {
+        code: "PERMISSION_DENIED",
+        title: "Operation blocked by permission policy",
+        summary: "The requested operation requires a permission that is not currently granted for this context.",
+        remediation: [
+            "Confirm the user/session has the required permission scope (for example content:write).",
+            "Retry only after switching to a role with the required write privileges.",
+            "If policy is expected to allow the operation, review backend role mapping and plugin permissions.",
+        ],
+    },
+    RESOURCE_NOT_FOUND: {
+        code: "RESOURCE_NOT_FOUND",
+        title: "Target resource was not found",
+        summary: "The requested file/page/shape target could not be resolved in the active context.",
+        remediation: [
+            "Refresh context and verify the target ID still exists.",
+            "Use context-inspection tools to list active file/page/selection state before retrying.",
+            "Handle deleted/moved resources explicitly in calling workflows.",
+        ],
+    },
+    UNSUPPORTED_OPERATION: {
+        code: "UNSUPPORTED_OPERATION",
+        title: "Operation is not supported in current runtime",
+        summary: "The requested operation is not available through the current Penjar MCP plugin/runtime API surface.",
+        remediation: [
+            "Check the tool contract for supported operations in the current version.",
+            "Use a supported alternative workflow path for this mutation.",
+            "If the operation is required, route through backend APIs or schedule plugin/runtime feature expansion.",
+        ],
+    },
 };
 
 export function getBridgeDiagnosticTemplates(): BridgeDiagnostic[] {
@@ -92,7 +125,7 @@ export function classifyBridgeErrorMessage(message: string): BridgeDiagnosticCod
     }
 
     if (
-        message.includes("No Penpot plugin instances are currently connected") ||
+        message.includes("No Penjar plugin instances are currently connected") ||
         message.includes("Plugin instance is disconnected")
     ) {
         return "PLUGIN_DISCONNECTED";
@@ -100,6 +133,23 @@ export function classifyBridgeErrorMessage(message: string): BridgeDiagnosticCod
 
     if (message.includes("Multiple (") || message.includes("Duplicate connection for given user token")) {
         return "PLUGIN_CONNECTION_CONFLICT";
+    }
+
+    const normalized = message.toLowerCase();
+    if (
+        normalized.includes("permission") ||
+        normalized.includes("not allowed") ||
+        normalized.includes("content:write")
+    ) {
+        return "PERMISSION_DENIED";
+    }
+
+    if (normalized.includes("not found") || normalized.includes("was not found")) {
+        return "RESOURCE_NOT_FOUND";
+    }
+
+    if (normalized.includes("not supported")) {
+        return "UNSUPPORTED_OPERATION";
     }
 
     return undefined;

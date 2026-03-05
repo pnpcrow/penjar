@@ -66,7 +66,7 @@
    [:organization-id ::sm/text]])
 
 (sv/defmethod ::notify-team-change
-  "Notify to Penpot a team change from nitrate"
+  "Notify to Penjar a team change from nitrate"
   {::doc/added "2.14"
    ::sm/params schema:notify-team-change
    ::rpc/auth false}

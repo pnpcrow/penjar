@@ -43,7 +43,7 @@
 
       {:node result})))
 
-(defn penpot-with-atomic
+(defn penjar-with-atomic
   [{:keys [node]}]
   (let [[params & body] (rest (:children node))]
     (if (api/vector-node? params)
@@ -160,7 +160,7 @@
       {:node result})))
 
 
-(defn penpot-defrecord
+(defn penjar-defrecord
   [{:keys [:node]}]
   (let [[rnode rtype rparams & other] (:children node)
 

@@ -1,6 +1,6 @@
 ---
 title: Frontend app
-desc: Dive into the UI, data namespaces, ClojureScript, React, and worker app functionalities. View Penpot's frontend app architecture. Free to try!
+desc: Dive into the UI, data namespaces, ClojureScript, React, and worker app functionalities. View Penjar's frontend app architecture. Free to try!
 ---
 
 ### Frontend app
@@ -22,7 +22,7 @@ time.
 
 ## Frontend structure
 
-Penpot frontend app code resides under <code class="language-text">frontend/src/app</code> path in the main repository.
+Penjar frontend app code resides under <code class="language-text">frontend/src/app</code> path in the main repository.
 
 @startuml FrontendGeneral
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
@@ -177,7 +177,7 @@ Rel(ui_viewer, data_viewer, "Uses")
   shapes in the corresponding svg elements, without adding any extra function.
 
 * **components** a library of generic UI widgets, to be used as building blocks
-  of penpot screens (text or numeric inputs, selects, forms, buttons...).
+  of penjar screens (text or numeric inputs, selects, forms, buttons...).
 
 
 ### Data namespaces
@@ -253,7 +253,7 @@ Rel(impl, selection, "Uses")
 
 * **impl** has a simple method to update all indexes in a page at once.
 
-* **import** has a method to import a whole file from an external <code class="language-text">.penpot</code> archive.
+* **import** has a method to import a whole file from an external <code class="language-text">.penjar</code> archive.
 
-* **export** has a method to export a whole file to an external <code class="language-text">.penpot</code> archive.
+* **export** has a method to export a whole file to an external <code class="language-text">.penjar</code> archive.
 

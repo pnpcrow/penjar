@@ -451,7 +451,7 @@
 
      cljs.core/IPrintWithWriter
      (-pr-writer [this writer _]
-       (cljs.core/-write writer (str "#penpot/path-data \"" (.toString this) "\"")))))
+       (cljs.core/-write writer (str "#penjar/path-data \"" (.toString this) "\"")))))
 
 #?(:clj
    (defmethod print-method PathData
@@ -461,7 +461,7 @@
 #?(:clj
    (defmethod print-dup PathData
      [^PathData o ^java.io.Writer writer]
-     (.write writer (str "#penpot/path-data \"" (.toString o) "\""))))
+     (.write writer (str "#penjar/path-data \"" (.toString o) "\""))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; SCHEMA
@@ -701,7 +701,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (t/add-handlers!
- {:id "penpot/path-data"
+ {:id "penjar/path-data"
   :class PathData
   :wfn (fn [^PathData pdata]
          (let [buffer (.-buffer pdata)]
@@ -711,7 +711,7 @@
 
 #?(:clj
    (fres/add-handlers!
-    {:name "penpot/path-data"
+    {:name "penjar/path-data"
      :class PathData
      :wfn (fn [n w o]
             (fres/write-tag! w n 1)

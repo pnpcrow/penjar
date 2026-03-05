@@ -1,49 +1,49 @@
 ![mcp-server-cover-github-1](https://github.com/user-attachments/assets/dcd14e63-fecd-424f-9a50-c1b1eafe2a4f)
 
-# Penpot's Official MCP Server
+# Penjar's Official MCP Server
 
-Penpot integrates a LLM layer built on the Model Context Protocol
-(MCP) via Penpot's Plugin API to interact with a Penpot design
-file. Penpot's MCP server enables LLMs to perfom data queries,
+Penjar integrates a LLM layer built on the Model Context Protocol
+(MCP) via Penjar's Plugin API to interact with a Penjar design
+file. Penjar's MCP server enables LLMs to perfom data queries,
 transformation and creation operations.
 
-Penpot's MCP Server is unlike any other you've seen. You get
+Penjar's MCP Server is unlike any other you've seen. You get
 design-to- design, code-to-design and design-code supercharged
 workflows.
 
 
-[![Penpot MCP video playlist](https://github.com/user-attachments/assets/204f1d99-ce51-41dd-a5dd-1ef739f8f089)](https://www.youtube.com/playlist?list=PLgcCPfOv5v57SKMuw1NmS0-lkAXevpn10)
+[![Penjar MCP video playlist](https://github.com/user-attachments/assets/204f1d99-ce51-41dd-a5dd-1ef739f8f089)](https://www.youtube.com/playlist?list=PLgcCPfOv5v57SKMuw1NmS0-lkAXevpn10)
 
 
 ## Architecture
 
-The **Penpot MCP Server** exposes tools to AI clients (LLMs), which
+The **Penjar MCP Server** exposes tools to AI clients (LLMs), which
 support the retrieval of design data as well as the modification and
-creation of design elements.  The MCP server communicates with Penpot
-via the dedicated **Penpot MCP Plugin**,
+creation of design elements.  The MCP server communicates with Penjar
+via the dedicated **Penjar MCP Plugin**,
 which connects to the MCP server via WebSocket.  
 This enables the LLM to carry out tasks in the context of a design file by 
-executing code that leverages the Penpot Plugin API.
+executing code that leverages the Penjar Plugin API.
 The LLM is free to write and execute arbitrary code snippets
-within the Penpot Plugin environment to accomplish its tasks.
+within the Penjar Plugin environment to accomplish its tasks.
 
 ![Architecture](resources/architecture.png)
 
 This repository thus contains not only the MCP server implementation itself
-but also the supporting Penpot MCP Plugin 
+but also the supporting Penjar MCP Plugin 
 (see section [Repository Structure](#repository-structure) below).
 
 ## Demonstration
 
-[![Video](https://v32155.1blu.de/penpot/PenpotFest2025_thumbnail.png)](https://v32155.1blu.de/penpot/PenpotFest2025.mp4)
+[![Video](https://v32155.1blu.de/penjar/PenjarFest2025_thumbnail.png)](https://v32155.1blu.de/penjar/PenjarFest2025.mp4)
 
 
 ## Usage
 
-To use the Penpot MCP server, you must
+To use the Penjar MCP server, you must
  * run the MCP server and connect your AI client to it,
- * run the web server providing the Penpot MCP plugin, and
- * open the Penpot MCP plugin in Penpot and connect it to the MCP server. 
+ * run the web server providing the Penjar MCP plugin, and
+ * open the Penjar MCP plugin in Penjar and connect it to the MCP server. 
 
 Follow the steps below to enable the integration.
 
@@ -62,25 +62,25 @@ On Windows, use the Git Bash terminal to ensure compatibility with the provided 
 > The branches are subject to change in the future.  
 > Be sure to check the instructions for the latest information on which branch to use.
 
-Clone the Penpot repository, using the proper branch depending on the
-version of Penpot you want to use the MCP server with.
+Clone the Penjar repository, using the proper branch depending on the
+version of Penjar you want to use the MCP server with.
 
-  * For released versions of Penpot, use the `mcp-prod` branch:
+  * For released versions of Penjar, use the `mcp-prod` branch:
 
     ```shell
-    git clone https://github.com/penpot/penpot.git --branch mcp-prod --depth 1
+    git clone https://github.com/penjar/penjar.git --branch mcp-prod --depth 1
     ```
 
-  * For the latest development version of Penpot, use the `develop` branch:
+  * For the latest development version of Penjar, use the `develop` branch:
 
     ```shell
-    git clone https://github.com/penpot/penpot.git --branch develop --depth 1
+    git clone https://github.com/penjar/penjar.git --branch develop --depth 1
     ```
 
 Then change into the `mcp` directory:
 
 ```shell
-cd penpot/mcp
+cd penjar/mcp
 ```
 
 ### 1. Build & Launch the MCP Server and the Plugin Server
@@ -92,7 +92,7 @@ pnpm run preflight
 ```
 
 If it's your first execution, install the required dependencies.
-(If you are using the Penpot devenv, this step is not necessary, as dependencies are already installed.)
+(If you are using the Penjar devenv, this step is not necessary, as dependencies are already installed.)
 
 ```shell
 ./scripts/setup
@@ -116,27 +116,27 @@ If preflight fails, fix the reported issues and retry. Common fixes:
   * install/upgrade Node.js (validated track: v22.x)
   * run `corepack enable && corepack install`
   * free occupied ports (4400/4401/4402/4403) or override with environment variables
-    (`PENPOT_MCP_PLUGIN_PORT`, `PENPOT_MCP_SERVER_PORT`, `PENPOT_MCP_WEBSOCKET_PORT`, `PENPOT_MCP_REPL_PORT`)
+    (`PENJAR_MCP_PLUGIN_PORT`, `PENJAR_MCP_SERVER_PORT`, `PENJAR_MCP_WEBSOCKET_PORT`, `PENJAR_MCP_REPL_PORT`)
 
-### 2. Load the Plugin in Penpot and Establish the Connection
+### 2. Load the Plugin in Penjar and Establish the Connection
 
 > [!NOTE]
 > **Browser Connectivity Restrictions**
 >
 > Starting with Chromium version 142, the private network access (PNA) restrictions have been hardened,
 > and when connecting to `localhost` from a web application served from a different origin
-> (such as https://design.penpot.app), the connection must explicitly be allowed.
+> (such as https://design.penjar.app), the connection must explicitly be allowed.
 >
 > Most Chromium-based browsers (e.g. Chrome, Vivaldi) will display a popup requesting permission
 > to access the local network. Be sure to approve the request to allow the connection.
 >
 > Some browsers take additional security measures, and you may need to disable them.
-> For example, in Brave, disable the "Shield" for the Penpot website to allow local network access.
+> For example, in Brave, disable the "Shield" for the Penjar website to allow local network access.
 >
 > If your browser refuses to connect to the locally served plugin, check its configuration or
 > try a different browser (e.g. Firefox) that does not enforce these restrictions.
 
-1. Open Penpot in your browser
+1. Open Penjar in your browser
 2. Navigate to a design file
 3. Open the Plugins menu
 4. Load the plugin using the development URL (`http://localhost:4400/manifest.json` by default)
@@ -201,12 +201,12 @@ To add the server to Claude Desktop's configuration, locate the configuration fi
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Linux**: `~/.config/Claude/claude_desktop_config.json`
 
-Add a `penpot` entry under `mcpServers` with the following content: 
+Add a `penjar` entry under `mcpServers` with the following content: 
 
 ```json
 {
     "mcpServers": {
-        "penpot": {
+        "penjar": {
             "command": "npx",
             "args": ["-y", "mcp-remote", "http://localhost:4401/sse", "--allow-http"]
         }
@@ -225,9 +225,9 @@ of the prompt input area.
 
 #### Example: Claude Code
 
-To add the Penpot MCP server to a Claude Code project, issue the command
+To add the Penjar MCP server to a Claude Code project, issue the command
 
-    claude mcp add penpot -t http http://localhost:4401/mcp
+    claude mcp add penjar -t http http://localhost:4401/mcp
 
 ## Repository Structure
 
@@ -237,73 +237,84 @@ This repository is a monorepo containing four main components:
     - Shared TypeScript definitions for request/response protocol
     - Ensures type safety across server and plugin components
 
-2. **Penpot MCP Server** (`packages/server/`):
-    - Provides MCP tools to LLMs for Penpot interaction
-    - Runs a WebSocket server accepting connections from the Penpot MCP plugin
+2. **Penjar MCP Server** (`packages/server/`):
+    - Provides MCP tools to LLMs for Penjar interaction
+    - Runs a WebSocket server accepting connections from the Penjar MCP plugin
     - Implements request/response correlation with unique task IDs
     - Handles task timeouts and proper error reporting
 
-3. **Penpot MCP Plugin** (`packages/plugin/`):
+3. **Penjar MCP Plugin** (`packages/plugin/`):
     - Connects to the MCP server via WebSocket
-    - Executes tasks in Penpot using the Plugin API
+    - Executes tasks in Penjar using the Plugin API
     - Sends structured responses back to the server#
 
 4. **Types Generator** (`types-generator/`):
     - Generates data on API types for the MCP server (development use)
 
 The core components are written in TypeScript, rendering interactions with the
-Penpot Plugin API both natural and type-safe.
+Penjar Plugin API both natural and type-safe.
 
 ## Configuration
 
-The Penpot MCP server can be configured using environment variables.
+The Penjar MCP server can be configured using environment variables.
 
 ### Server Configuration
 
 | Environment Variable               | Description                                                                | Default      |
 |------------------------------------|----------------------------------------------------------------------------|--------------|
-| `PENPOT_MCP_SERVER_LISTEN_ADDRESS` | Address on which the MCP server listens (binds to)                         | `localhost`  |
-| `PENPOT_MCP_SERVER_PORT`           | Port for the HTTP/SSE server                                               | `4401`       |
-| `PENPOT_MCP_WEBSOCKET_PORT`        | Port for the WebSocket server (plugin connection)                          | `4402`       |
-| `PENPOT_MCP_REPL_PORT`             | Port for the REPL server (development/debugging)                           | `4403`       |
-| `PENPOT_MCP_SERVER_ADDRESS`        | Hostname or IP address via which clients can reach the MCP server          | `localhost`  |
-| `PENPOT_MCP_REMOTE_MODE`           | Enable remote mode (disables file system access). Set to `true` to enable. | `false`      |
+| `PENJAR_MCP_SERVER_LISTEN_ADDRESS` | Address on which the MCP server listens (binds to)                         | `localhost`  |
+| `PENJAR_MCP_SERVER_PORT`           | Port for the HTTP/SSE server                                               | `4401`       |
+| `PENJAR_MCP_WEBSOCKET_PORT`        | Port for the WebSocket server (plugin connection)                          | `4402`       |
+| `PENJAR_MCP_REPL_PORT`             | Port for the REPL server (development/debugging)                           | `4403`       |
+| `PENJAR_MCP_TASK_TIMEOUT_SECS`     | Timeout in seconds for plugin task completion                              | `30`         |
+| `PENJAR_MCP_SERVER_ADDRESS`        | Hostname or IP address via which clients can reach the MCP server          | `localhost`  |
+| `PENJAR_MCP_REMOTE_MODE`           | Enable remote mode (disables file system access). Set to `true` to enable. | `false`      |
 
 ### Logging Configuration
 
 | Environment Variable   | Description                                          | Default  |
 |------------------------|------------------------------------------------------|----------|
-| `PENPOT_MCP_LOG_LEVEL` | Log level: `trace`, `debug`, `info`, `warn`, `error` | `info`   |
-| `PENPOT_MCP_LOG_DIR`   | Directory for log files                              | `logs`   |
+| `PENJAR_MCP_LOG_LEVEL` | Log level: `trace`, `debug`, `info`, `warn`, `error` | `info`   |
+| `PENJAR_MCP_LOG_DIR`   | Directory for log files                              | `logs`   |
 
 ### Plugin Server Configuration
 
 | Environment Variable                      | Description                                                                             | Default      |
 |-------------------------------------------|-----------------------------------------------------------------------------------------|--------------|
-| `PENPOT_MCP_PLUGIN_SERVER_LISTEN_ADDRESS` | Address on which the plugin web server listens (single address or comma-separated list) | (local only) |
-| `PENPOT_MCP_PLUGIN_PORT`                  | Port used by the plugin preview server (`vite-live-preview`)                            | `4400`       |
+| `PENJAR_MCP_PLUGIN_SERVER_LISTEN_ADDRESS` | Address on which the plugin web server listens (single address or comma-separated list) | (local only) |
+| `PENJAR_MCP_PLUGIN_PORT`                  | Port used by the plugin preview server (`vite-live-preview`)                            | `4400`       |
 
 ## Beyond Local Execution
 
 The above instructions describe how to run the MCP server and plugin server locally.
 We are working on enabling remote deployments of the MCP server, particularly
-in [multi-user mode](docs/multi-user-mode.md), where multiple Penpot users will
+in [multi-user mode](docs/multi-user-mode.md), where multiple Penjar users will
 be able to connect to the same MCP server instance.
 
 To run the server remotely (even for a single user),
 you may set the following environment variables to configure the two servers
 (MCP server & plugin server) appropriately:
- * `PENPOT_MCP_REMOTE_MODE=true`: This ensures that the MCP server is operating
+ * `PENJAR_MCP_REMOTE_MODE=true`: This ensures that the MCP server is operating
    in remote mode, with local file system access disabled.
- * `PENPOT_MCP_SERVER_LISTEN_ADDRESS` and `PENPOT_MCP_PLUGIN_SERVER_LISTEN_ADDRESS`:
+ * `PENJAR_MCP_SERVER_LISTEN_ADDRESS` and `PENJAR_MCP_PLUGIN_SERVER_LISTEN_ADDRESS`:
    Set these according to your requirements for remote connectivity.
    To bind all interfaces, use `0.0.0.0` (use caution in untrusted networks).
- * `PENPOT_MCP_SERVER_ADDRESS=<your-address>`: This sets the hostname or IP address
-   where the MCP server can be reached. The Penpot MCP Plugin uses this to construct
+ * `PENJAR_MCP_SERVER_ADDRESS=<your-address>`: This sets the hostname or IP address
+   where the MCP server can be reached. The Penjar MCP Plugin uses this to construct
    the WebSocket URL as `ws://<your-address>:<port>` (default port: `4402`).
 
 ## Development
 
-* The [contribution guidelines for Penpot](../CONTRIBUTING.md) apply
+* The [contribution guidelines for Penjar](../CONTRIBUTING.md) apply
 * Auto-formatting: Use `pnpm run fmt`
+* Phase A automated parity checks (P0-001/P0-002): Use `pnpm run verify:phase-a`
+* Bridge disconnect/reconnect recovery probe (P0-002 scenario): Use `pnpm run verify:bridge-recovery`
+* Auth/session runtime checks in multi-user mode (P0-003 baseline + duplicate-token conflict): Use `pnpm run verify:auth-session`
+* Project lifecycle context probe (P0-004 contract invariants + transitions + diagnostics): Use `pnpm run verify:project-lifecycle`
+* File lifecycle tool probe (P0-005 strict contract + defaults + open-by-name + diagnostics): Use `pnpm run verify:file-lifecycle`
+* Canvas editing tool probe (P0-006 strict contract + defaults + denied/missing diagnostics): Use `pnpm run verify:canvas-editing`
+* Asset import/resilience probe (P0-007 baseline + reconnect recovery): Use `pnpm run verify:asset-management`
+* Inspect/code handoff probe (P0-008 required/optional contract + fallback + diagnostics): Use `pnpm run verify:inspect-handoff`
+* Collaboration context probe (P1-001 threads + awareness metadata + diagnostics): Use `pnpm run verify:collaboration-context`
+* Export workflows probe (P1-002 format matrix + diagnostics + artifact save path): Use `pnpm run verify:export-workflows`
 * Generating API type data: See [types-generator/README.md](types-generator/README.md)

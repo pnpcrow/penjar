@@ -85,7 +85,7 @@
            [:p {:class (stl/css :modal-text-large)}
             "Contact us to upgrade to Nitrate:"]
            [:p {:class (stl/css :modal-text-large)}
-            [:a {:class (stl/css :link) :href "mailto:sales@penpot.app"}
-             "sales@penpot.app"]]])]]]]))
+            [:a {:class (stl/css :link) :href "mailto:sales@penjar.app"}
+             "sales@penjar.app"]]])]]]]))
 
 

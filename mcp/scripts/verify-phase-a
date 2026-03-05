@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SERVER_DIR="$PROJECT_ROOT/packages/server"
+
+HEALTH_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/health"
+TMP_BASE="${TMPDIR:-/tmp}"
+HEALTH_BODY="$TMP_BASE/penjar-mcp-health-$$.json"
+HEALTH_CODE="$TMP_BASE/penjar-mcp-health-$$.code"
+SERVER_LOG="$TMP_BASE/penjar-mcp-health-$$.log"
+
+SERVER_PID=""
+
+log_step() {
+    printf "\n[PHASE-A-CHECK] %s\n" "$1"
+}
+
+cleanup() {
+    if [ -n "$SERVER_PID" ] && kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+        kill "$SERVER_PID" >/dev/null 2>&1 || true
+        wait "$SERVER_PID" >/dev/null 2>&1 || true
+    fi
+
+    rm -f "$HEALTH_BODY" "$HEALTH_CODE" "$SERVER_LOG"
+}
+
+trap cleanup EXIT
+
+log_step "Run preflight checks (P0-001)"
+bash "$PROJECT_ROOT/scripts/preflight"
+
+if [ "${VERIFY_PHASE_A_SKIP_BUILD:-false}" = "true" ]; then
+    log_step "Skip build step (VERIFY_PHASE_A_SKIP_BUILD=true)"
+else
+    log_step "Build required packages for health smoke test"
+    cd "$PROJECT_ROOT"
+    pnpm --filter mcp-common run build
+    pnpm --filter mcp-server run build
+fi
+
+log_step "Start MCP server for /health smoke test (P0-002)"
+cd "$SERVER_DIR"
+node dist/index.js >"$SERVER_LOG" 2>&1 &
+SERVER_PID="$!"
+
+log_step "Wait for /health endpoint"
+for _ in $(seq 1 20); do
+    if curl -sS -o "$HEALTH_BODY" -w "%{http_code}" "$HEALTH_URL" >"$HEALTH_CODE" 2>/dev/null; then
+        break
+    fi
+    sleep 1
+done
+
+if [ ! -f "$HEALTH_CODE" ]; then
+    echo "[PHASE-A-CHECK][FAIL] /health endpoint did not respond."
+    echo "[PHASE-A-CHECK][INFO] Server log:"
+    cat "$SERVER_LOG"
+    exit 1
+fi
+
+HTTP_CODE="$(cat "$HEALTH_CODE")"
+if [ "$HTTP_CODE" != "200" ]; then
+    echo "[PHASE-A-CHECK][FAIL] Expected HTTP 200 from /health, got ${HTTP_CODE}."
+    echo "[PHASE-A-CHECK][INFO] Body:"
+    cat "$HEALTH_BODY"
+    echo "[PHASE-A-CHECK][INFO] Server log:"
+    cat "$SERVER_LOG"
+    exit 1
+fi
+
+log_step "Validate /health payload contract"
+node -e '
+const fs = require("node:fs");
+const payload = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+
+function assert(condition, message) {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+assert(typeof payload.status === "string", "status must be a string");
+assert(payload.endpoints && payload.endpoints.health === "/health", "endpoints.health must be /health");
+assert(payload.pluginBridge && typeof payload.pluginBridge.connectedClients === "number", "pluginBridge.connectedClients must be number");
+assert(Array.isArray(payload.diagnosticsCatalog), "diagnosticsCatalog must be an array");
+assert(payload.diagnosticsCatalog.length > 0, "diagnosticsCatalog must not be empty");
+
+const requiredCodes = [
+  "PLUGIN_DISCONNECTED",
+  "PLUGIN_TASK_TIMEOUT",
+  "AUTH_TOKEN_MISSING",
+  "AUTH_TOKEN_EXPIRED_OR_MISMATCH",
+  "PLUGIN_CONNECTION_CONFLICT",
+  "PERMISSION_DENIED",
+  "RESOURCE_NOT_FOUND",
+  "UNSUPPORTED_OPERATION"
+];
+
+for (const code of requiredCodes) {
+  assert(payload.diagnosticsCatalog.some((item) => item.code === code), `${code} diagnostic missing`);
+}
+' "$HEALTH_BODY"
+
+log_step "Phase A automated checks passed"

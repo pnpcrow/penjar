@@ -1908,9 +1908,9 @@
         (t/is (nil? (:error out)))
         (let [[row1 :as result] (:result out)]
           (t/is (= 1 (count result)))
-          (t/is (= (:will-be-deleted-at row1) #penpot/inst "2025-11-07T00:00:00Z"))
-          (t/is (= (:created-at row1) #penpot/inst "2025-10-31T00:00:00Z"))
-          (t/is (= (:modified-at row1) #penpot/inst "2025-10-31T00:00:00Z"))))
+          (t/is (= (:will-be-deleted-at row1) #penjar/inst "2025-11-07T00:00:00Z"))
+          (t/is (= (:created-at row1) #penjar/inst "2025-10-31T00:00:00Z"))
+          (t/is (= (:modified-at row1) #penjar/inst "2025-10-31T00:00:00Z"))))
 
       (let [data {::th/type :permanently-delete-team-files
                   ::rpc/profile-id (:id prof)
@@ -1970,9 +1970,9 @@
         (t/is (nil? (:error out)))
         (let [[row1 :as result] (:result out)]
           (t/is (= 1 (count result)))
-          (t/is (= (:will-be-deleted-at row1) #penpot/inst "2025-11-07T00:00:00Z"))
-          (t/is (= (:created-at row1) #penpot/inst "2025-10-31T00:00:00Z"))
-          (t/is (= (:modified-at row1) #penpot/inst "2025-10-31T00:00:00Z"))))
+          (t/is (= (:will-be-deleted-at row1) #penjar/inst "2025-11-07T00:00:00Z"))
+          (t/is (= (:created-at row1) #penjar/inst "2025-10-31T00:00:00Z"))
+          (t/is (= (:modified-at row1) #penjar/inst "2025-10-31T00:00:00Z"))))
 
       (let [data {::th/type :restore-deleted-team-files
                   ::rpc/profile-id (:id prof)
@@ -2025,17 +2025,17 @@
           (t/is (nil? (:error out)))
           (let [[row1 :as result] (:result out)]
             (t/is (= 1 (count result)))
-            (t/is (= (:will-be-deleted-at row1) #penpot/inst "2025-11-07T00:00:00Z"))
-            (t/is (= (:created-at row1) #penpot/inst "2025-10-31T00:00:00Z"))
-            (t/is (= (:modified-at row1) #penpot/inst "2025-10-31T00:00:00Z"))))
+            (t/is (= (:will-be-deleted-at row1) #penjar/inst "2025-11-07T00:00:00Z"))
+            (t/is (= (:created-at row1) #penjar/inst "2025-10-31T00:00:00Z"))
+            (t/is (= (:modified-at row1) #penjar/inst "2025-10-31T00:00:00Z"))))
 
         ;; Check if project is deleted
         (let [[row1 :as rows] (th/db-query :project {:id (:id project)})]
           ;; (pp/pprint rows)
           (t/is (= 1 (count rows)))
-          (t/is (= (:deleted-at row1) #penpot/inst "2025-11-07T00:00:00Z"))
-          (t/is (= (:created-at row1) #penpot/inst "2025-10-31T00:00:00Z"))
-          (t/is (= (:modified-at row1) #penpot/inst "2025-10-31T00:00:00Z")))
+          (t/is (= (:deleted-at row1) #penjar/inst "2025-11-07T00:00:00Z"))
+          (t/is (= (:created-at row1) #penjar/inst "2025-10-31T00:00:00Z"))
+          (t/is (= (:modified-at row1) #penjar/inst "2025-10-31T00:00:00Z")))
 
         ;; Restore files
         (let [data {::th/type :restore-deleted-team-files
@@ -2057,7 +2057,7 @@
         (let [[row1 :as rows] (th/db-query :file {:project-id (:id project)})]
           ;; (pp/pprint rows)
           (t/is (= 1 (count rows)))
-          (t/is (= (:created-at row1) #penpot/inst "2025-10-31T00:00:00Z"))
+          (t/is (= (:created-at row1) #penjar/inst "2025-10-31T00:00:00Z"))
           (t/is (nil? (:deleted-at row1))))
 
 
@@ -2065,5 +2065,5 @@
         (let [[row1 :as rows] (th/db-query :project {:id (:id project)})]
           ;; (pp/pprint rows)
           (t/is (= 1 (count rows)))
-          (t/is (= (:created-at row1) #penpot/inst "2025-10-31T00:00:00Z"))
+          (t/is (= (:created-at row1) #penjar/inst "2025-10-31T00:00:00Z"))
           (t/is (nil? (:deleted-at row1))))))))

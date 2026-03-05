@@ -53,7 +53,7 @@
 (defn default-headers
   []
   {"x-frontend-version" (:full cfg/version)
-   "x-client" (str "penpot-frontend/" (:full cfg/version))})
+   "x-client" (str "penjar-frontend/" (:full cfg/version))})
 
 ;; Storage to save the average time of the requests
 (defonce network-averages

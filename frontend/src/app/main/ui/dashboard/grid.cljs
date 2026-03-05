@@ -319,7 +319,7 @@
                  (st/emit! (dd/clear-selected-files))
                  (st/emit! (dd/toggle-file-select file)))
 
-               (dnd/set-data! event "penpot/files" "dummy")
+               (dnd/set-data! event "penjar/files" "dummy")
                (dnd/set-allowed-effect! event "move")
 
                ;; set-drag-image requires that the element is rendered
@@ -488,7 +488,7 @@
         (mf/use-fn
          (fn [e]
            (when can-edit
-             (when (and (not (dnd/has-type? e "penpot/files"))
+             (when (and (not (dnd/has-type? e "penjar/files"))
                         (or (dnd/has-type? e "Files")
                             (dnd/has-type? e "application/x-moz-file")))
                (dom/prevent-default e)
@@ -511,7 +511,7 @@
         (mf/use-fn
          (fn [e]
            (if can-edit
-             (when (and (not (dnd/has-type? e "penpot/files"))
+             (when (and (not (dnd/has-type? e "penjar/files"))
                         (or (dnd/has-type? e "Files")
                             (dnd/has-type? e "application/x-moz-file")))
                (dom/prevent-default e)
@@ -599,7 +599,7 @@
          (fn [e]
            (when can-edit
              (cond
-               (dnd/has-type? e "penpot/files")
+               (dnd/has-type? e "penjar/files")
                (do
                  (dom/prevent-default e)
                  (when-not (or (dnd/from-child? e)
@@ -616,7 +616,7 @@
         on-drag-over
         (mf/use-fn
          (fn [e]
-           (when (or (dnd/has-type? e "penpot/files")
+           (when (or (dnd/has-type? e "penjar/files")
                      (dnd/has-type? e "Files")
                      (dnd/has-type? e "application/x-moz-file"))
              (dom/prevent-default e))))
@@ -641,7 +641,7 @@
          (fn [e]
            (if can-edit
              (cond
-               (dnd/has-type? e "penpot/files")
+               (dnd/has-type? e "penjar/files")
                (do
                  (reset! dragging? false)
                  (when (not= selected-project project-id)

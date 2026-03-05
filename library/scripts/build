@@ -9,4 +9,4 @@ set -ex
 
 pnpm run build
 
-sed -i -re "s/\%version\%/$CURRENT_VERSION/g" target/library/penpot.js
+sed -i -re "s/\%version\%/$CURRENT_VERSION/g" target/library/penjar.js

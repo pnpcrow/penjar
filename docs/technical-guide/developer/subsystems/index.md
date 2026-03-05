@@ -1,11 +1,11 @@
 ---
-title: 3.09. Penpot subsystems
-desc: Learn about architecture, data models, and subsystems. View Penpot's technical guide for self-hosting, configuration, and development insights. Free!
+title: 3.09. Penjar subsystems
+desc: Learn about architecture, data models, and subsystems. View Penjar's technical guide for self-hosting, configuration, and development insights. Free!
 ---
 
-# Penpot subsystems
+# Penjar subsystems
 
-This section groups articles about several Penpot subsystems that have enough
+This section groups articles about several Penjar subsystems that have enough
 complexity not to be easy to understand by only looking at the source code.
 
 Each article gives an overview of how a particular functionality has been

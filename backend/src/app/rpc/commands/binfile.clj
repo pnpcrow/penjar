@@ -68,7 +68,7 @@
         (fs/delete output)))))
 
 (sv/defmethod ::export-binfile
-  "Export a penpot file in a binary format."
+  "Export a penjar file in a binary format."
   {::doc/added "1.15"
    ::doc/changes [["2.12" "Remove version parameter, only one version is supported"]]
    ::webhooks/event? true
@@ -112,11 +112,11 @@
    [:file media/schema:upload]])
 
 (sv/defmethod ::import-binfile
-  "Import a penpot file in a binary format. If `file-id` is provided,
+  "Import a penjar file in a binary format. If `file-id` is provided,
   an in-place import will be performed instead of creating a new file.
 
   The in-place imports are only supported for binfile-v3 and when a
-  .penpot file only contains one penpot file.
+  .penjar file only contains one penjar file.
   "
   {::doc/added "1.15"
    ::doc/changes ["1.20" "Add file-id param for in-place import"

@@ -8,11 +8,16 @@ import { ConfigurationLoader } from "./ConfigurationLoader";
 import { createLogger } from "./logger";
 import { Tool } from "./Tool";
 import { HighLevelOverviewTool } from "./tools/HighLevelOverviewTool";
-import { PenpotApiInfoTool } from "./tools/PenpotApiInfoTool";
+import { PenjarApiInfoTool } from "./tools/PenjarApiInfoTool";
 import { ExportShapeTool } from "./tools/ExportShapeTool";
 import { ImportImageTool } from "./tools/ImportImageTool";
 import { ReplServer } from "./ReplServer";
 import { ApiDocs } from "./ApiDocs";
+import { ActiveDesignContextTool } from "./tools/ActiveDesignContextTool";
+import { FileLifecycleTool } from "./tools/FileLifecycleTool";
+import { CanvasEditingTool } from "./tools/CanvasEditingTool";
+import { InspectHandoffTool } from "./tools/InspectHandoffTool";
+import { CollaborationContextTool } from "./tools/CollaborationContextTool";
 
 /**
  * Session context for request-scoped data.
@@ -43,13 +48,13 @@ class ToolInfo {
     ) {}
 }
 
-export class PenpotMcpServer {
+export class PenjarMcpServer {
     /**
      * Timeout, in minutes, for idle Streamable HTTP sessions before they are automatically closed and removed.
      */
     private static readonly SESSION_TIMEOUT_MINUTES = 60;
 
-    private readonly logger = createLogger("PenpotMcpServer");
+    private readonly logger = createLogger("PenjarMcpServer");
     private readonly tools: ToolInfo[];
     public readonly configLoader: ConfigurationLoader;
     private app: any;
@@ -70,14 +75,18 @@ export class PenpotMcpServer {
     public readonly port: number;
     public readonly webSocketPort: number;
     public readonly replPort: number;
+    public readonly taskTimeoutSecs: number;
     private sessionTimeoutInterval: ReturnType<typeof setInterval> | undefined;
 
     constructor(private isMultiUser: boolean = false) {
         // read port configuration from environment variables
-        this.host = process.env.PENPOT_MCP_SERVER_HOST ?? "0.0.0.0";
-        this.port = parseInt(process.env.PENPOT_MCP_SERVER_PORT ?? "4401", 10);
-        this.webSocketPort = parseInt(process.env.PENPOT_MCP_WEBSOCKET_PORT ?? "4402", 10);
-        this.replPort = parseInt(process.env.PENPOT_MCP_REPL_PORT ?? "4403", 10);
+        this.host = process.env.PENJAR_MCP_SERVER_HOST ?? "0.0.0.0";
+        this.port = parseInt(process.env.PENJAR_MCP_SERVER_PORT ?? "4401", 10);
+        this.webSocketPort = parseInt(process.env.PENJAR_MCP_WEBSOCKET_PORT ?? "4402", 10);
+        this.replPort = parseInt(process.env.PENJAR_MCP_REPL_PORT ?? "4403", 10);
+        const configuredTaskTimeout = parseInt(process.env.PENJAR_MCP_TASK_TIMEOUT_SECS ?? "30", 10);
+        this.taskTimeoutSecs =
+            Number.isFinite(configuredTaskTimeout) && configuredTaskTimeout > 0 ? configuredTaskTimeout : 30;
 
         this.configLoader = new ConfigurationLoader(process.cwd());
         this.apiDocs = new ApiDocs();
@@ -89,7 +98,7 @@ export class PenpotMcpServer {
 
         this.tools = this.initTools();
 
-        this.pluginBridge = new PluginBridge(this, this.webSocketPort);
+        this.pluginBridge = new PluginBridge(this, this.webSocketPort, this.taskTimeoutSecs);
         this.replServer = new ReplServer(this.pluginBridge, this.replPort);
     }
 
@@ -106,12 +115,12 @@ export class PenpotMcpServer {
      *
      * In remote mode, the server is not assumed to be accessed only by a local user on the same machine,
      * with corresponding limitations being enforced.
-     * Remote mode can be explicitly enabled by setting the environment variable PENPOT_MCP_REMOTE_MODE
+     * Remote mode can be explicitly enabled by setting the environment variable PENJAR_MCP_REMOTE_MODE
      * to "true". Enabling multi-user mode forces remote mode, regardless of the value of the environment
      * variable.
      */
     public isRemoteMode(): boolean {
-        const isRemoteModeRequested: boolean = process.env.PENPOT_MCP_REMOTE_MODE === "true";
+        const isRemoteModeRequested: boolean = process.env.PENJAR_MCP_REMOTE_MODE === "true";
         return this.isMultiUserMode() || isRemoteModeRequested;
     }
 
@@ -140,8 +149,13 @@ export class PenpotMcpServer {
     private initTools(): ToolInfo[] {
         const toolInstances: Tool<any>[] = [
             new ExecuteCodeTool(this),
+            new ActiveDesignContextTool(this),
+            new FileLifecycleTool(this),
+            new CanvasEditingTool(this),
+            new InspectHandoffTool(this),
+            new CollaborationContextTool(this),
             new HighLevelOverviewTool(this),
-            new PenpotApiInfoTool(this, this.apiDocs),
+            new PenjarApiInfoTool(this, this.apiDocs),
             new ExportShapeTool(this),
         ];
         if (this.isFileSystemAccessEnabled()) {
@@ -162,7 +176,7 @@ export class PenpotMcpServer {
      */
     private createMcpServer(): McpServer {
         const server = new McpServer(
-            { name: "penpot", version: "1.0.0" },
+            { name: "penjar", version: "1.0.0" },
             { instructions: this.getInitialInstructions() }
         );
 
@@ -178,7 +192,7 @@ export class PenpotMcpServer {
      * idle for longer than {@link SESSION_TIMEOUT_MINUTES}.
      */
     private startSessionTimeoutChecker(): void {
-        const timeoutMs = PenpotMcpServer.SESSION_TIMEOUT_MINUTES * 60 * 1000;
+        const timeoutMs = PenjarMcpServer.SESSION_TIMEOUT_MINUTES * 60 * 1000;
         const checkIntervalMs = timeoutMs / 2;
         this.sessionTimeoutInterval = setInterval(() => {
             this.logger.info("Checking for stale sessions...");
@@ -357,9 +371,9 @@ export class PenpotMcpServer {
      * Gracefully shuts down the REPL server and other components.
      */
     public async stop(): Promise<void> {
-        this.logger.info("Stopping Penpot MCP Server...");
+        this.logger.info("Stopping Penjar MCP Server...");
         clearInterval(this.sessionTimeoutInterval);
         await this.replServer.stop();
-        this.logger.info("Penpot MCP Server stopped");
+        this.logger.info("Penjar MCP Server stopped");
     }
 }

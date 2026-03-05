@@ -39,8 +39,8 @@ on:
 
 jobs:
   build-bundle:
-    name: Build and Upload Penpot Bundle
-    runs-on: penpot-runner-01
+    name: Build and Upload Penjar Bundle
+    runs-on: penjar-runner-01
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -68,16 +68,16 @@ jobs:
       - name: Prepare directories for zipping
         run: |
           mkdir zips
-          mv bundles penpot
+          mv bundles penjar
 
       - name: Create zip bundle
         run: |
-          echo "📦 Packaging Penpot bundle..."
-          zip -r zips/penpot.zip penpot
+          echo "📦 Packaging Penjar bundle..."
+          zip -r zips/penjar.zip penjar
 
-      - name: Upload Penpot bundle to S3
+      - name: Upload Penjar bundle to S3
         run: |
-          aws s3 cp zips/penpot.zip s3://${{ secrets.S3_BUCKET }}/penpot-${{ steps.vars.outputs.gh_ref }}.zip --metadata bundle-version=${{ steps.vars.outputs.bundle_version }}
+          aws s3 cp zips/penjar.zip s3://${{ secrets.S3_BUCKET }}/penjar-${{ steps.vars.outputs.gh_ref }}.zip --metadata bundle-version=${{ steps.vars.outputs.bundle_version }}
 
       - name: Notify Mattermost
         if: failure()
@@ -86,7 +86,7 @@ jobs:
           MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK }}
           MATTERMOST_CHANNEL: bot-alerts-cicd
           TEXT: |
-            ❌ 📦 *[PENPOT] Error building penpot bundles.*
+            ❌ 📦 *[PENJAR] Error building penjar bundles.*
             📄 Triggered from ref: `${{ steps.vars.outputs.gh_ref }}`
                Bundle version: `${{ steps.vars.outputs.bundle_version }}`
             🔗 Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}

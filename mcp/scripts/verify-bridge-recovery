@@ -1,0 +1,166 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SERVER_DIR="$PROJECT_ROOT/packages/server"
+
+HEALTH_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/health"
+MCP_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/mcp"
+WS_URL="ws://127.0.0.1:${PENJAR_MCP_WEBSOCKET_PORT:-4402}"
+
+TMP_BASE="${TMPDIR:-/tmp}"
+SERVER_LOG="$TMP_BASE/penjar-mcp-bridge-recovery-$$.log"
+SERVER_PID=""
+
+log_step() {
+    printf "\n[BRIDGE-CHECK] %s\n" "$1"
+}
+
+cleanup() {
+    if [ -n "$SERVER_PID" ] && kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+        kill "$SERVER_PID" >/dev/null 2>&1 || true
+        wait "$SERVER_PID" >/dev/null 2>&1 || true
+    fi
+
+    rm -f "$SERVER_LOG"
+}
+
+trap cleanup EXIT
+
+if [ "${VERIFY_BRIDGE_SKIP_BUILD:-false}" = "true" ]; then
+    log_step "Skip build step (VERIFY_BRIDGE_SKIP_BUILD=true)"
+else
+    log_step "Build required packages for bridge recovery probe"
+    cd "$PROJECT_ROOT"
+    pnpm --filter mcp-common run build
+    pnpm --filter mcp-server run build
+fi
+
+log_step "Start MCP server (single-user)"
+cd "$SERVER_DIR"
+node dist/index.js >"$SERVER_LOG" 2>&1 &
+SERVER_PID="$!"
+
+log_step "Wait for /health endpoint"
+for _ in $(seq 1 20); do
+    if curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+done
+
+if ! curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+    echo "[BRIDGE-CHECK][FAIL] server did not become healthy."
+    echo "[BRIDGE-CHECK][INFO] Server log:"
+    cat "$SERVER_LOG"
+    exit 1
+fi
+
+log_step "Run bridge disconnect/reconnect recovery probe"
+node --input-type=module - "$MCP_URL" "$WS_URL" "$HEALTH_URL" <<'EOF_JS'
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
+import WebSocket from "ws";
+
+const [mcpUrl, wsUrl, healthUrl] = process.argv.slice(2);
+
+const client = new Client({ name: "bridge-recovery-check", version: "1.0.0" }, { capabilities: {} });
+const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
+
+async function callExecuteCode(code) {
+  const result = await client.request(
+    {
+      method: "tools/call",
+      params: {
+        name: "execute_code",
+        arguments: { code },
+      },
+    },
+    CallToolResultSchema
+  );
+
+  return result.content.find((item) => item.type === "text")?.text ?? "";
+}
+
+async function fetchHealth() {
+  const response = await fetch(healthUrl);
+  if (!response.ok) {
+    throw new Error(`Health endpoint returned HTTP ${response.status}`);
+  }
+  return await response.json();
+}
+
+try {
+  await client.connect(transport);
+
+  const disconnectedBefore = await callExecuteCode("return 'bridge-disconnected-before';");
+  if (!disconnectedBefore.includes("[Diagnostic PLUGIN_DISCONNECTED]")) {
+    throw new Error(`Expected disconnected diagnostic before plugin connect, got: ${disconnectedBefore}`);
+  }
+
+  const healthBefore = await fetchHealth();
+  if (healthBefore?.pluginBridge?.connectedClients !== 0) {
+    throw new Error(`Expected 0 connected clients before plugin connect, got: ${JSON.stringify(healthBefore?.pluginBridge)}`);
+  }
+
+  const ws = new WebSocket(wsUrl);
+  await new Promise((resolve, reject) => {
+    ws.once("open", resolve);
+    ws.once("error", reject);
+  });
+
+  ws.on("message", (payload) => {
+    try {
+      const request = JSON.parse(payload.toString());
+      if (!request || typeof request !== "object" || request.task !== "executeCode" || !request.id) {
+        return;
+      }
+
+      ws.send(
+        JSON.stringify({
+          id: request.id,
+          success: true,
+          data: { result: "bridge-recovered", log: "" },
+        })
+      );
+    } catch {
+      // ignore malformed payloads in probe mode
+    }
+  });
+
+  const recoveredText = await callExecuteCode("return 'bridge-recovered-check';");
+  if (recoveredText.includes("[Diagnostic")) {
+    throw new Error(`Expected success after reconnect, got diagnostic payload: ${recoveredText}`);
+  }
+  if (!recoveredText.includes('"result": "bridge-recovered"')) {
+    throw new Error(`Expected recovered execution payload, got: ${recoveredText}`);
+  }
+
+  const healthConnected = await fetchHealth();
+  if (healthConnected?.pluginBridge?.connectedClients !== 1) {
+    throw new Error(`Expected 1 connected client after plugin connect, got: ${JSON.stringify(healthConnected?.pluginBridge)}`);
+  }
+
+  ws.close();
+  await new Promise((resolve) => ws.once("close", resolve));
+
+  const disconnectedAfter = await callExecuteCode("return 'bridge-disconnected-after';");
+  if (!disconnectedAfter.includes("[Diagnostic PLUGIN_DISCONNECTED]")) {
+    throw new Error(`Expected disconnected diagnostic after plugin close, got: ${disconnectedAfter}`);
+  }
+
+  const healthAfter = await fetchHealth();
+  if (healthAfter?.pluginBridge?.connectedClients !== 0) {
+    throw new Error(`Expected 0 connected clients after plugin close, got: ${JSON.stringify(healthAfter?.pluginBridge)}`);
+  }
+
+  console.log("[BRIDGE-CHECK] Verified bridge disconnect/reconnect recovery flow");
+} finally {
+  await transport.close();
+}
+EOF_JS
+
+log_step "Bridge recovery probe passed"

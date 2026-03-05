@@ -5,7 +5,7 @@ test.beforeEach(async ({ page }) => {
   await WasmWorkspacePage.init(page);
 });
 
-// Fix for https://tree.taiga.io/project/penpot/issue/9042
+// Fix for https://tree.taiga.io/project/penjar/issue/9042
 test("Bug 9042 - Measurement unit dropdowns for columns are cut off in grid layout edit mode", async ({
   page,
 }) => {

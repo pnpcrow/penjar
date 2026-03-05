@@ -6,7 +6,7 @@
 
 (ns app.main.ui.workspace.shapes.text.editor
   (:require
-   ["@penpot/draft-js" :as draft]
+   ["@penjar/draft-js" :as draft]
    [app.common.data :as d]
    [app.common.data.macros :as dm]
    [app.common.geom.point :as gpt]
@@ -69,7 +69,7 @@
     (sts/generate-text-styles shape data {:show-text? false})))
 
 (def default-decorator
-  (ted/create-decorator "PENPOT_SELECTION" selection-component))
+  (ted/create-decorator "PENJAR_SELECTION" selection-component))
 
 (def empty-editor-state
   (ted/create-editor-state nil default-decorator))

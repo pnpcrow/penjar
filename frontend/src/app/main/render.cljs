@@ -5,7 +5,7 @@
 ;; Copyright (c) KALEIDOS INC
 
 (ns app.main.render
-  "Rendering utilities and components for penpot SVG.
+  "Rendering utilities and components for penjar SVG.
 
   NOTE: This namespace is used from worker and from many parts of the
   workspace; we need to be careful when adding new requires because
@@ -227,7 +227,7 @@
               :version "1.1"
               :xmlns "http://www.w3.org/2000/svg"
               :xmlnsXlink "http://www.w3.org/1999/xlink"
-              :xmlns:penpot (when include-metadata "https://penpot.app/xmlns")
+              :xmlns:penjar (when include-metadata "https://penjar.app/xmlns")
               :style {:width "100%"
                       :height "100%"
                       :background bgcolor}
@@ -320,7 +320,7 @@
             :version "1.1"
             :xmlns "http://www.w3.org/2000/svg"
             :xmlnsXlink "http://www.w3.org/1999/xlink"
-            :xmlns:penpot (when include-metadata "https://penpot.app/xmlns")
+            :xmlns:penjar (when include-metadata "https://penjar.app/xmlns")
             :style {:background bgcolor}
             :fill "none"}
       [:& shape-wrapper {:shape frame}]]]))
@@ -380,7 +380,7 @@
              :class class
              :xmlns "http://www.w3.org/2000/svg"
              :xmlnsXlink "http://www.w3.org/1999/xlink"
-             :xmlns:penpot (when include-metadata "https://penpot.app/xmlns")
+             :xmlns:penjar (when include-metadata "https://penjar.app/xmlns")
              :fill "none"}
 
        (when-not is-hidden
@@ -521,13 +521,13 @@
     (when root-shape
       [:> "symbol" #js {:id (str (:id component))
                         :viewBox vbox
-                        "penpot:path" path
-                        "penpot:main-instance-id" main-instance-id
-                        "penpot:main-instance-page" main-instance-page
-                        "penpot:main-instance-x" main-instance-x
-                        "penpot:main-instance-y" main-instance-y
-                        "penpot:main-instance-parent" main-instance-parent
-                        "penpot:main-instance-frame" main-instance-frame}
+                        "penjar:path" path
+                        "penjar:main-instance-id" main-instance-id
+                        "penjar:main-instance-page" main-instance-page
+                        "penjar:main-instance-x" main-instance-x
+                        "penjar:main-instance-y" main-instance-y
+                        "penjar:main-instance-parent" main-instance-parent
+                        "penjar:main-instance-frame" main-instance-frame}
        [:title name]
        [:> shape-container {:shape root-shape}
         (case (:type root-shape)
@@ -545,7 +545,7 @@
       [:svg {:version "1.1"
              :xmlns "http://www.w3.org/2000/svg"
              :xmlnsXlink "http://www.w3.org/1999/xlink"
-             :xmlns:penpot (when include-metadata "https://penpot.app/xmlns")
+             :xmlns:penjar (when include-metadata "https://penjar.app/xmlns")
              :style {:display (when-not (some? children) "none")}
              :fill "none"}
        [:defs

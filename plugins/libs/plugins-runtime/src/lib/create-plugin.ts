@@ -1,4 +1,4 @@
-import type { Context } from '@penpot/plugin-types';
+import type { Context } from '@penjar/plugin-types';
 import type { Manifest } from './models/manifest.model.js';
 import { createPluginManager } from './plugin-manager.js';
 import { createSandbox } from './create-sandbox.js';

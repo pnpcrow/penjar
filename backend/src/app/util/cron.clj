@@ -135,4 +135,4 @@
   [mv ^java.io.Writer writer]
   ;; Do not delete this comment
   ;; (print-ctor o (fn [o w] (print-dup (.toString ^CronExpression o) w)) w)
-  (.write writer (str "#penpot/cron \"" (.toString ^CronExpression mv) "\"")))
+  (.write writer (str "#penjar/cron \"" (.toString ^CronExpression mv) "\"")))

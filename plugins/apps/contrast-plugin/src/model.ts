@@ -1,4 +1,4 @@
-import { Shape } from '@penpot/plugin-types';
+import { Shape } from '@penjar/plugin-types';
 
 export interface InitPluginUIEvent {
   type: 'ready';

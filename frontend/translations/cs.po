@@ -3,7 +3,7 @@ msgstr ""
 "PO-Revision-Date: 2026-02-16 08:35+0000\n"
 "Last-Translator: \"Amerey.eu\" <info@amerey.eu>\n"
 "Language-Team: Czech "
-"<https://hosted.weblate.org/projects/penpot/frontend/cs/>\n"
+"<https://hosted.weblate.org/projects/penjar/frontend/cs/>\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -24,7 +24,7 @@ msgstr "Zkontrolujte svůj e-mail"
 msgid "auth.check-your-email"
 msgstr ""
 "Zkontrolujte svůj e-mail a klikněte na odkaz pro ověření, abyste mohli "
-"začít používat Penpot."
+"začít používat Penjar."
 
 #: src/app/main/ui/auth/recovery.cljs:67
 msgid "auth.confirm-password"
@@ -69,7 +69,7 @@ msgstr "Přihlásit se"
 #: src/app/main/ui/auth/login.cljs:274
 msgid "auth.login-tagline"
 msgstr ""
-"Penpot je bezplatný open-source návrhářský nástroj pro spolupráci v oblasti "
+"Penjar je bezplatný open-source návrhářský nástroj pro spolupráci v oblasti "
 "designu a kódu"
 
 #: src/app/main/ui/auth/login.cljs:231
@@ -160,7 +160,7 @@ msgstr "Vytvořit účet"
 #, unused
 msgid "auth.register-tagline"
 msgstr ""
-"S bezplatným účtem Penpot můžete vytvářet neomezený počet týmů a "
+"S bezplatným účtem Penjar můžete vytvářet neomezený počet týmů a "
 "spolupracovat s dalšími designéry a vývojáři na tolika projektech, kolik "
 "chcete. "
 
@@ -211,7 +211,7 @@ msgstr "Zveřejnit"
 
 #: src/app/main/ui/viewer/share_link.cljs:304, src/app/main/ui/viewer/share_link.cljs:315
 msgid "common.share-link.all-users"
-msgstr "Všichni uživatelé Penpotu"
+msgstr "Všichni uživatelé Penjaru"
 
 #: src/app/main/ui/viewer/share_link.cljs:204
 msgid "common.share-link.confirm-deletion-link-description"
@@ -289,7 +289,7 @@ msgstr "Správa týmu"
 #: src/app/main/ui/dashboard/projects.cljs:92
 msgid "dasboard.team-hero.text"
 msgstr ""
-"Penpot je určený pro týmy. Pozvěte členy ke spolupráci na projektech a "
+"Penjar je určený pro týmy. Pozvěte členy ke spolupráci na projektech a "
 "souborech"
 
 #: src/app/main/ui/dashboard/projects.cljs:90
@@ -299,7 +299,7 @@ msgstr "Vytvořte tým!"
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
 msgid "dasboard.tutorial-hero.info"
-msgstr "Naučte se základy Penpotu a pobavte se zároveň v tomto tutoriálu."
+msgstr "Naučte se základy Penjaru a pobavte se zároveň v tomto tutoriálu."
 
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
@@ -314,7 +314,7 @@ msgstr "Praktický tutoriál"
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
 msgid "dasboard.walkthrough-hero.info"
-msgstr "Projděte si Penpot a seznamte se s jeho hlavními funkcemi."
+msgstr "Projděte si Penjar a seznamte se s jeho hlavními funkcemi."
 
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
@@ -387,7 +387,7 @@ msgid "dashboard.access-tokens.personal.description"
 msgstr ""
 "Osobní přístupové tokeny fungují jako alternativa k našemu systému "
 "ověřování přihlašovacích údajů/hesel a lze je použít k tomu, aby aplikaci "
-"umožnily přístup k internímu rozhraní Penpot API"
+"umožnily přístup k internímu rozhraní Penjar API"
 
 #: src/app/main/ui/settings/access_tokens.cljs:142
 msgid "dashboard.access-tokens.token-will-expire"
@@ -423,7 +423,7 @@ msgstr "Připnout tuto verzi"
 
 #: src/app/main/ui/components/context_menu_a11y.cljs:300, src/app/main/ui/dashboard/sidebar.cljs:638
 msgid "dashboard.default-team-name"
-msgstr "Váš Penpot"
+msgstr "Váš Penjar"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:495
 msgid "dashboard.delete-team"
@@ -431,7 +431,7 @@ msgstr "Smazat tým"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:328, src/app/main/ui/workspace/main_menu.cljs:690
 msgid "dashboard.download-binary-file"
-msgstr "Stáhnout soubor Penpot (.penpot)"
+msgstr "Stáhnout soubor Penjar (.penjar)"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:321, src/app/main/ui/workspace/main_menu.cljs:712
 #, unused
@@ -467,14 +467,14 @@ msgstr "Zatím žádné soubory."
 msgid "dashboard.empty-placeholder-libraries"
 msgstr ""
 "Zde se zobrazí knihovny přidané do projektu. Zkuste své soubory sdílet nebo "
-"je přidat z [Knihovny a šablony](https://penpot.app/libraries-templates)."
+"je přidat z [Knihovny a šablony](https://penjar.app/libraries-templates)."
 
 #: src/app/main/ui/dashboard/placeholder.cljs
 #, markdown, unused
 msgid "dashboard.empty-placeholder-libraries-subtitle"
 msgstr ""
 "Zde se zobrazí knihovny přidané do projektu. Zkuste své soubory sdílet nebo "
-"je přidat z [Knihovny a šablony](https://penpot.app/libraries-templates)."
+"je přidat z [Knihovny a šablony](https://penjar.app/libraries-templates)."
 
 #: src/app/main/ui/dashboard/placeholder.cljs:114
 msgid "dashboard.empty-placeholder-libraries-subtitle-viewer-role"
@@ -486,7 +486,7 @@ msgstr "Zatím žádné knihovny."
 
 #: src/app/main/ui/dashboard/file_menu.cljs:280
 msgid "dashboard.export-binary-multi"
-msgstr "Stáhnout soubory %s Penpot (.penpot)"
+msgstr "Stáhnout soubory %s Penjar (.penjar)"
 
 #: src/app/main/ui/workspace/main_menu.cljs:698
 msgid "dashboard.export-frames"
@@ -498,7 +498,7 @@ msgstr "Exportovat do PDF"
 
 #, unused
 msgid "dashboard.export-multi"
-msgstr "Exportovat soubory Penpot %s"
+msgstr "Exportovat soubory Penjar %s"
 
 #: src/app/main/ui/exports/assets.cljs:108
 msgid "dashboard.export-multiple.selected"
@@ -516,7 +516,7 @@ msgstr ""
 
 #: src/app/main/ui/exports/assets.cljs:183
 msgid "dashboard.export-shapes.how-to-link"
-msgstr "Informace o nastavování exportů v Penpotu."
+msgstr "Informace o nastavování exportů v Penjaru."
 
 #: src/app/main/ui/exports/assets.cljs:178
 msgid "dashboard.export-shapes.no-elements"
@@ -580,8 +580,8 @@ msgstr ""
 msgid "dashboard.fonts.hero-text2"
 msgstr ""
 "Měli byste nahrávat pouze písma, která vlastníte nebo máte licenci k "
-"použití v Penpotu. Další informace najdete v části Obsahová práva "
-"[smluvních podmínek společnosti Penpot](%s). Můžete si také přečíst o "
+"použití v Penjaru. Další informace najdete v části Obsahová práva "
+"[smluvních podmínek společnosti Penjar](%s). Můžete si také přečíst o "
 "[licencování písem](https://www.typography.com/faq)."
 
 #: src/app/main/ui/dashboard/fonts.cljs:214
@@ -601,7 +601,7 @@ msgstr ""
 
 #: src/app/main/ui/dashboard/import.cljs:464, src/app/main/ui/dashboard/project_menu.cljs:109
 msgid "dashboard.import"
-msgstr "Importovat Penpot soubory"
+msgstr "Importovat Penjar soubory"
 
 #: src/app/main/ui/dashboard/import.cljs:293, src/app/worker/import.cljs:121, src/app/worker/import.cljs:124
 msgid "dashboard.import.analyze-error"
@@ -984,8 +984,8 @@ msgid "dashboard.upgrade-plan.no-limits"
 msgstr "Kreativitě se meze nekladou"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:1069
-msgid "dashboard.upgrade-plan.penpot-free"
-msgstr "Penpot Free"
+msgid "dashboard.upgrade-plan.penjar-free"
+msgstr "Penjar Free"
 
 #: src/app/main/ui/dashboard/team.cljs:1115
 msgid "dashboard.webhooks.active"
@@ -1015,7 +1015,7 @@ msgstr "Webhook byl úspěšně vytvořen."
 msgid "dashboard.webhooks.description"
 msgstr ""
 "Webhooky jsou jednoduchým způsobem, jak umožnit jiným webům a aplikacím, "
-"aby byly upozorňovány na určité události v Penpotu. Na každou z vámi "
+"aby byly upozorňovány na určité události v Penjaru. Na každou z vámi "
 "poskytnutých adres URL odešleme požadavek POST."
 
 #: src/app/main/ui/dashboard/team.cljs:1265
@@ -1043,8 +1043,8 @@ msgid "dashboard.your-name"
 msgstr "Vaše jméno"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:40, src/app/main/ui/dashboard/fonts.cljs:42, src/app/main/ui/dashboard/libraries.cljs:56, src/app/main/ui/dashboard/projects.cljs:355, src/app/main/ui/dashboard/search.cljs:48, src/app/main/ui/dashboard/sidebar.cljs:312, src/app/main/ui/dashboard/team.cljs:537, src/app/main/ui/dashboard/team.cljs:983, src/app/main/ui/dashboard/team.cljs:1251, src/app/main/ui/dashboard/team.cljs:1298
-msgid "dashboard.your-penpot"
-msgstr "Váš Penpot"
+msgid "dashboard.your-penjar"
+msgstr "Váš Penjar"
 
 #: src/app/main/ui/alert.cljs:35
 msgid "ds.alert-ok"
@@ -1130,7 +1130,7 @@ msgstr "E-mail «%s» byl nahlášen jako spam nebo byl trvale nedostupný."
 msgid "errors.feature-mismatch"
 msgstr ""
 "Vypadá to, že otevíráte soubor, který má povolenou funkci '%s', ale "
-"aktuální verze penpotu ji nepodporuje nebo je deaktivovaná."
+"aktuální verze penjaru ji nepodporuje nebo je deaktivovaná."
 
 #: src/app/main/errors.cljs:283, src/app/main/errors.cljs:297
 msgid "errors.feature-not-supported"
@@ -1325,7 +1325,7 @@ msgstr ""
 
 #: src/app/main/ui/settings/feedback.cljs:149
 msgid "feedback.discourse-title"
-msgstr "Penpot komunita"
+msgstr "Penjar komunita"
 
 #: src/app/main/ui/settings/feedback.cljs:105
 msgid "feedback.subject"
@@ -1572,7 +1572,7 @@ msgstr "Velká písmena"
 msgid "inspect.empty.help"
 msgstr ""
 "Pokud se chcete dozvědět více o inspektorovi designu, navštivte centrum "
-"nápovědy společnosti Penpot"
+"nápovědy společnosti Penjar"
 
 #: src/app/main/ui/inspect/right_sidebar.cljs:232
 msgid "inspect.empty.select"
@@ -1736,8 +1736,8 @@ msgid "labels.continue-with"
 msgstr "Pokračovat s"
 
 #: src/app/main/ui/viewer/login.cljs:69
-msgid "labels.continue-with-penpot"
-msgstr "Můžete pokračovat s účtem Penpot"
+msgid "labels.continue-with-penjar"
+msgstr "Můžete pokračovat s účtem Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:650
 msgid "labels.copy-invitation-link"
@@ -2823,7 +2823,7 @@ msgstr "Chyba 404"
 #: src/app/main/ui/static.cljs:138
 msgid "not-found.login.free"
 msgstr ""
-"Penpot je bezplatný a open-source návrhářský nástroj pro spolupráci mezi "
+"Penjar je bezplatný a open-source návrhářský nástroj pro spolupráci mezi "
 "designem a kódem"
 
 #: src/app/main/ui/auth/recovery_request.cljs:114
@@ -2840,7 +2840,7 @@ msgstr "Zaregistrujte se zdarma"
 
 #: src/app/main/ui/static.cljs:153
 msgid "not-found.login.start-using"
-msgstr "A začněte používat Penpot během několika sekund!"
+msgstr "A začněte používat Penjar během několika sekund!"
 
 #: src/app/main/ui/static.cljs:69
 msgid "not-found.made-with-love"
@@ -2884,15 +2884,15 @@ msgstr "K tomuto souboru nemáte přístup."
 
 #: src/app/main/ui/static.cljs:56, src/app/main/ui/static.cljs:244, src/app/main/ui/static.cljs:250, src/app/main/ui/static.cljs:256, src/app/main/ui/static.cljs:262, src/app/main/ui/static.cljs:271, src/app/main/ui/static.cljs:280
 msgid "not-found.no-permission.go-dashboard"
-msgstr "Přejděte na svůj Penpot"
+msgstr "Přejděte na svůj Penjar"
 
 #: src/app/main/ui/static.cljs:268, src/app/main/ui/static.cljs:277
 msgid "not-found.no-permission.if-approves"
 msgstr "Pokud to vlastník dovolí, budete pozváni do týmu."
 
 #: src/app/main/ui/static.cljs:496, src/app/main/ui/static.cljs:509
-msgid "not-found.no-permission.penpot-file"
-msgstr "Soubor Penpot"
+msgid "not-found.no-permission.penjar-file"
+msgstr "Soubor Penjar"
 
 #: src/app/main/ui/static.cljs:243, src/app/main/ui/static.cljs:275
 msgid "not-found.no-permission.project"
@@ -2942,12 +2942,12 @@ msgstr "Ověřovací e-mail byl odeslán na adresu %s. Zkontrolujte si e-mail!"
 msgid "onboarding-v2.before-start.desc1"
 msgstr ""
 "Měli byste vědět, že existuje spousta dostupných zdrojů, které vám pomohou "
-"začít s Penpot, jako je uživatelská příručka a náš kanál YouTube."
+"začít s Penjar, jako je uživatelská příručka a náš kanál YouTube."
 
 #, unused
 msgid "onboarding-v2.before-start.desc2"
 msgstr ""
-"Podrobné informace o tom, jak používat Penpot. Od prototypů po organizování "
+"Podrobné informace o tom, jak používat Penjar. Od prototypů po organizování "
 "nebo sdílení návrhů."
 
 #, unused
@@ -2969,12 +2969,12 @@ msgstr "Než začnete"
 #: src/app/main/ui/onboarding/newsletter.cljs:68
 msgid "onboarding-v2.newsletter.desc"
 msgstr ""
-"Přihlaste se k odběru novinek Penpot a zůstaňte informováni o pokroku ve "
+"Přihlaste se k odběru novinek Penjar a zůstaňte informováni o pokroku ve "
 "vývoji produktu."
 
 #: src/app/main/ui/onboarding/newsletter.cljs:88
 msgid "onboarding-v2.newsletter.news"
-msgstr "Zasílejte mi novinky o Penpot (příspěvky na blogu, videonávody, streamy...)."
+msgstr "Zasílejte mi novinky o Penjar (příspěvky na blogu, videonávody, streamy...)."
 
 #: src/app/main/ui/onboarding/newsletter.cljs:96
 msgid "onboarding-v2.newsletter.privacy1"
@@ -2993,14 +2993,14 @@ msgstr "Zasílejte mi aktualizace produktu (nové funkce, verze, opravy...)."
 #, unused
 msgid "onboarding-v2.welcome.desc1"
 msgstr ""
-"Penpot je Open Source a vytváří ho Kaleidos i komunita, kde si už spousta "
+"Penjar je Open Source a vytváří ho Kaleidos i komunita, kde si už spousta "
 "lidí pomáhá. Všichni mohou spolupracovat:"
 
 #, unused
 msgid "onboarding-v2.welcome.desc2"
 msgstr ""
-"Veřejný prostor, kde se můžete učit, sdílet a diskutovat o Penpot, jeho "
-"současnosti a budoucnosti s celou komunitou a týmem Penpot."
+"Veřejný prostor, kde se můžete učit, sdílet a diskutovat o Penjar, jeho "
+"současnosti a budoucnosti s celou komunitou a týmem Penjar."
 
 #, unused
 msgid "onboarding-v2.welcome.desc2.title"
@@ -3018,7 +3018,7 @@ msgstr "Průvodce přispíváním"
 
 #: src/app/main/ui/onboarding/team_choice.cljs:241
 msgid "onboarding-v2.welcome.title"
-msgstr "Vítejte v Penpot!"
+msgstr "Vítejte v Penjar!"
 
 #: src/app/main/ui/onboarding/team_choice.cljs:254
 #, unused
@@ -3093,7 +3093,7 @@ msgstr "Zásady ochrany osobních údajů."
 
 #: src/app/main/ui/onboarding/newsletter.cljs:65
 msgid "onboarding.newsletter.title"
-msgstr "Chcete dostávat novinky Penpot?"
+msgstr "Chcete dostávat novinky Penjar?"
 
 #: src/app/main/ui/onboarding/questions.cljs:108
 msgid "onboarding.questions.lets-get-started"
@@ -3109,7 +3109,7 @@ msgstr "Jen prozkoumávám"
 
 #: src/app/main/ui/onboarding/questions.cljs:246
 msgid "onboarding.questions.reasons.fit"
-msgstr "Zjišťuji, zda se Penpot hodí pro můj tým"
+msgstr "Zjišťuji, zda se Penjar hodí pro můj tým"
 
 #: src/app/main/ui/onboarding/questions.cljs:252
 msgid "onboarding.questions.reasons.testing"
@@ -3152,16 +3152,16 @@ msgstr "Wireframing"
 
 #: src/app/main/ui/onboarding/questions.cljs:116
 msgid "onboarding.questions.step1.question1"
-msgstr "K čemu budete Penpot používat?"
+msgstr "K čemu budete Penjar používat?"
 
 #: src/app/main/ui/onboarding/questions.cljs:273
 msgid "onboarding.questions.step1.question2"
-msgstr "Co vás přivádí k Penpotu?"
+msgstr "Co vás přivádí k Penjaru?"
 
 #: src/app/main/ui/onboarding/questions.cljs:112
 msgid "onboarding.questions.step1.subtitle"
 msgstr ""
-"Řekněte nám něco o sobě, abyste nám pomohli nastavit Penpot pro vás. Vaše "
+"Řekněte nám něco o sobě, abyste nám pomohli nastavit Penjar pro vás. Vaše "
 "odpovědi nám pomohou stanovit priority nových funkcí a nasměrovat vás "
 "správným směrem, abyste mohli začít."
 
@@ -3197,7 +3197,7 @@ msgstr "Kde byste chtěli začít?"
 #: src/app/main/ui/onboarding/questions.cljs:428
 #, unused
 msgid "onboarding.questions.step5.title"
-msgstr "Jak jste se dozvěděli o Penpot?"
+msgstr "Jak jste se dozvěděli o Penjar?"
 
 #: src/app/main/ui/onboarding/questions.cljs:233
 msgid "onboarding.questions.team-size.11-30"
@@ -3242,7 +3242,7 @@ msgstr "Vytvořte tým"
 #: src/app/main/ui/onboarding/team_choice.cljs:31
 msgid "onboarding.team-modal.create-team-desc"
 msgstr ""
-"Tým vám umožňuje spolupracovat s ostatními uživateli Penpot pracujícími na "
+"Tým vám umožňuje spolupracovat s ostatními uživateli Penjar pracujícími na "
 "stejných souborech a projektech."
 
 #: src/app/main/ui/onboarding/team_choice.cljs:36
@@ -3279,7 +3279,7 @@ msgstr "Začněte navrhovat"
 
 #, unused
 msgid "onboarding.welcome.alt"
-msgstr "Penpot"
+msgstr "Penjar"
 
 #: src/app/main/ui/auth/recovery.cljs:88
 msgid "profile.recovery.go-to-login"
@@ -3933,31 +3933,31 @@ msgstr "Přiblížit vybrané"
 
 #: src/app/main/ui/dashboard/files.cljs:181
 msgid "title.dashboard.files"
-msgstr "%s - Penpot"
+msgstr "%s - Penjar"
 
 #: src/app/main/ui/dashboard/fonts.cljs:46
 msgid "title.dashboard.font-providers"
-msgstr "Poskytovatelé písem - %s - Penpot"
+msgstr "Poskytovatelé písem - %s - Penjar"
 
 #: src/app/main/ui/dashboard/fonts.cljs:45
 msgid "title.dashboard.fonts"
-msgstr "Písma - %s - Penpot"
+msgstr "Písma - %s - Penjar"
 
 #: src/app/main/ui/dashboard/projects.cljs:357
 msgid "title.dashboard.projects"
-msgstr "Projekty - %s - Penpot"
+msgstr "Projekty - %s - Penjar"
 
 #: src/app/main/ui/dashboard/search.cljs:50
 msgid "title.dashboard.search"
-msgstr "Hledat - %s - Penpot"
+msgstr "Hledat - %s - Penjar"
 
 #: src/app/main/ui/dashboard/libraries.cljs:58
 msgid "title.dashboard.shared-libraries"
-msgstr "Sdílené knihovny - %s - Penpot"
+msgstr "Sdílené knihovny - %s - Penjar"
 
 #: src/app/main/ui/auth/verify_token.cljs:70, src/app/main/ui/auth.cljs:34
 msgid "title.default"
-msgstr "Penpot – Svoboda designu pro týmy"
+msgstr "Penjar – Svoboda designu pro týmy"
 
 #: src/app/main/ui/settings/access_tokens.cljs:278
 msgid "title.settings.access-tokens"
@@ -3965,47 +3965,47 @@ msgstr "Profil – Přístupové tokeny"
 
 #: src/app/main/ui/settings/feedback.cljs:161
 msgid "title.settings.feedback"
-msgstr "Poskytněte zpětnou vazbu – Penpot"
+msgstr "Poskytněte zpětnou vazbu – Penjar"
 
 #: src/app/main/ui/settings/notifications.cljs:45
 msgid "title.settings.notifications"
-msgstr "Upozornění – Penpot"
+msgstr "Upozornění – Penjar"
 
 #: src/app/main/ui/settings/options.cljs:83
 msgid "title.settings.options"
-msgstr "Nastavení - Penpot"
+msgstr "Nastavení - Penjar"
 
 #: src/app/main/ui/settings/password.cljs:105
 msgid "title.settings.password"
-msgstr "Heslo - Penpot"
+msgstr "Heslo - Penjar"
 
 #: src/app/main/ui/settings/profile.cljs:124
 msgid "title.settings.profile"
-msgstr "Profil - Penpot"
+msgstr "Profil - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:981
 msgid "title.team-invitations"
-msgstr "Pozvánky – %s – Penpot"
+msgstr "Pozvánky – %s – Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:535
 msgid "title.team-members"
-msgstr "Členové - %s - Penpot"
+msgstr "Členové - %s - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:1296
 msgid "title.team-settings"
-msgstr "Nastavení - %s - Penpot"
+msgstr "Nastavení - %s - Penjar"
 
 #: src/app/main/ui/dashboard/team.cljs:1249
 msgid "title.team-webhooks"
-msgstr "Webhooks - %s - Penpot"
+msgstr "Webhooks - %s - Penjar"
 
 #: src/app/main/ui/viewer.cljs:423
 msgid "title.viewer"
-msgstr "%s - Režim zobrazení - Penpot"
+msgstr "%s - Režim zobrazení - Penjar"
 
 #: src/app/main/ui/workspace.cljs:237
 msgid "title.workspace"
-msgstr "%s - Penpot"
+msgstr "%s - Penjar"
 
 #: src/app/main/ui.cljs:138
 #, unused
@@ -6759,7 +6759,7 @@ msgstr "Otevřít nabídku verzí"
 msgid "workspace.versions.warning.subtext"
 msgstr ""
 "Pokud byste chtěli tento limit zvýšit, napište nám na "
-"[support@penpot.app](%s)"
+"[support@penjar.app](%s)"
 
 #: src/app/main/ui/workspace/sidebar/versions.cljs:431
 msgid "workspace.versions.warning.text"

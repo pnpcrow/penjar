@@ -1,4 +1,4 @@
-import type { Penpot } from '@penpot/plugin-types';
+import type { Penjar } from '@penjar/plugin-types';
 import type { createPluginManager } from './plugin-manager';
 import { createApi } from './api';
 import { ses } from './ses.js';
@@ -12,7 +12,7 @@ export function createSandbox(
   const pluginApi = createApi(plugin);
 
   const safeHandler = {
-    get(target: Penpot, prop: string, receiver: unknown) {
+    get(target: Penjar, prop: string, receiver: unknown) {
       const originalValue = Reflect.get(target, prop, receiver);
 
       if (typeof originalValue === 'function') {
@@ -27,7 +27,7 @@ export function createSandbox(
     },
   };
 
-  const proxyApi = new Proxy(pluginApi.penpot, safeHandler);
+  const proxyApi = new Proxy(pluginApi.penjar, safeHandler);
 
   const safeFetch = (url: string, options: RequestInit) => {
     const sanitizedOptions: RequestInit = {
@@ -54,7 +54,7 @@ export function createSandbox(
   };
 
   let publicPluginApi = {
-    penpot: proxyApi,
+    penjar: proxyApi,
     fetch: ses.harden(safeFetch),
     setTimeout: ses.harden(
       (...[handler, timeout]: Parameters<typeof setTimeout>) => {

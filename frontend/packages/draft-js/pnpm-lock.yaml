@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       draft-js:
-        specifier: penpot/draft-js.git#4a99b2a6020b2af97f6dc5fa1b4275ec16b559a0
-        version: https://codeload.github.com/penpot/draft-js/tar.gz/4a99b2a6020b2af97f6dc5fa1b4275ec16b559a0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        specifier: penjar/draft-js.git#4a99b2a6020b2af97f6dc5fa1b4275ec16b559a0
+        version: https://codeload.github.com/penjar/draft-js/tar.gz/4a99b2a6020b2af97f6dc5fa1b4275ec16b559a0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       immutable:
         specifier: ^5.1.4
         version: 5.1.4
@@ -189,8 +189,8 @@ packages:
   cross-fetch@3.2.0:
     resolution: {integrity: sha512-Q+xVJLoGOeIMXZmbUK4HYk+69cQH6LudR0Vu/pRm2YlU/hDV9CiS0gKUMaWY5f2NeUH9C1nV3bsTlCo0FsTV1Q==}
 
-  draft-js@https://codeload.github.com/penpot/draft-js/tar.gz/4a99b2a6020b2af97f6dc5fa1b4275ec16b559a0:
-    resolution: {tarball: https://codeload.github.com/penpot/draft-js/tar.gz/4a99b2a6020b2af97f6dc5fa1b4275ec16b559a0}
+  draft-js@https://codeload.github.com/penjar/draft-js/tar.gz/4a99b2a6020b2af97f6dc5fa1b4275ec16b559a0:
+    resolution: {tarball: https://codeload.github.com/penjar/draft-js/tar.gz/4a99b2a6020b2af97f6dc5fa1b4275ec16b559a0}
     version: 0.11.7
     peerDependencies:
       react: '>=0.14.0'
@@ -353,7 +353,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  draft-js@https://codeload.github.com/penpot/draft-js/tar.gz/4a99b2a6020b2af97f6dc5fa1b4275ec16b559a0(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+  draft-js@https://codeload.github.com/penjar/draft-js/tar.gz/4a99b2a6020b2af97f6dc5fa1b4275ec16b559a0(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
     dependencies:
       fbjs: 3.0.5
       immutable: 3.7.6

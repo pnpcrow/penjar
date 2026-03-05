@@ -13,15 +13,15 @@ export class WasmWorkspacePage extends WorkspacePage {
     await WasmWorkspacePage.mockConfigFlags(page, WASM_FLAGS);
 
     await page.addInitScript(() => {
-      document.addEventListener("penpot:wasm:loaded", () => {
+      document.addEventListener("penjar:wasm:loaded", () => {
         window.wasmModuleLoaded = true;
       });
 
-      document.addEventListener("penpot:wasm:render", () => {
+      document.addEventListener("penjar:wasm:render", () => {
         window.wasmRenderCount = (window.wasmRenderCount || 0) + 1;
       });
 
-      document.addEventListener("penpot:wasm:set-objects", () => {
+      document.addEventListener("penjar:wasm:set-objects", () => {
         window.wasmSetObjectsFinished = true;
       });
     });

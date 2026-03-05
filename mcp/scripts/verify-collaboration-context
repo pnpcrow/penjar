@@ -1,0 +1,348 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SERVER_DIR="$PROJECT_ROOT/packages/server"
+
+HEALTH_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/health"
+MCP_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/mcp"
+WS_URL="ws://127.0.0.1:${PENJAR_MCP_WEBSOCKET_PORT:-4402}"
+
+TMP_BASE="${TMPDIR:-/tmp}"
+SERVER_LOG="$TMP_BASE/penjar-mcp-collaboration-context-$$.log"
+SERVER_PID=""
+
+log_step() {
+    printf "\n[COLLAB-CHECK] %s\n" "$1"
+}
+
+cleanup() {
+    if [ -n "$SERVER_PID" ] && kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+        kill "$SERVER_PID" >/dev/null 2>&1 || true
+        wait "$SERVER_PID" >/dev/null 2>&1 || true
+    fi
+
+    rm -f "$SERVER_LOG"
+}
+
+trap cleanup EXIT
+
+if [ "${VERIFY_COLLAB_SKIP_BUILD:-false}" = "true" ]; then
+    log_step "Skip build step (VERIFY_COLLAB_SKIP_BUILD=true)"
+else
+    log_step "Build required packages for collaboration context probe"
+    cd "$PROJECT_ROOT"
+    pnpm --filter mcp-common run build
+    pnpm --filter mcp-server run build
+fi
+
+log_step "Start MCP server (single-user)"
+cd "$SERVER_DIR"
+node dist/index.js >"$SERVER_LOG" 2>&1 &
+SERVER_PID="$!"
+
+log_step "Wait for /health endpoint"
+for _ in $(seq 1 20); do
+    if curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+done
+
+if ! curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+    echo "[COLLAB-CHECK][FAIL] server did not become healthy."
+    echo "[COLLAB-CHECK][INFO] Server log:"
+    cat "$SERVER_LOG"
+    exit 1
+fi
+
+log_step "Run collaboration_context E2E probe with fake plugin session"
+node --input-type=module - "$MCP_URL" "$WS_URL" <<'EOF_JS'
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
+import WebSocket from "ws";
+
+const [mcpUrl, wsUrl] = process.argv.slice(2);
+let observedOps = new Set();
+
+const ws = new WebSocket(wsUrl);
+await new Promise((resolve, reject) => {
+  ws.once("open", resolve);
+  ws.once("error", reject);
+});
+
+ws.on("message", (payload) => {
+  try {
+    const request = JSON.parse(payload.toString());
+    if (!request || typeof request !== "object" || request.task !== "executeCode" || !request.id) {
+      return;
+    }
+
+    const code = request.params?.code ?? "";
+    let result;
+    if (typeof code === "string" && code.includes("collaboration_context_operation: inspect_threads")) {
+      observedOps.add("inspect_threads");
+      result = {
+        operation: "inspect_threads",
+        page: { id: "page-1", name: "Collaboration Page" },
+        filters: { onlyYours: false, includeResolved: true },
+        threadCount: 2,
+        threads: [
+          { seqNumber: 1, resolved: false, commentCount: 2, position: { x: 10, y: 20 } },
+          { seqNumber: 2, resolved: true, commentCount: 1, position: { x: 40, y: 55 } },
+        ],
+      };
+    } else if (typeof code === "string" && code.includes("collaboration_context_operation: inspect_awareness")) {
+      if (code.includes('"deny-user-read"')) {
+        observedOps.add("awareness_permission_denied");
+        ws.send(
+          JSON.stringify({
+            id: request.id,
+            success: false,
+            error: "Permission denied: missing user:read scope for inspect_awareness operation",
+          })
+        );
+        return;
+      }
+
+      observedOps.add("inspect_awareness");
+      result = {
+        operation: "inspect_awareness",
+        page: { id: "page-1", name: "Collaboration Page" },
+        currentUser: {
+          id: "user-1",
+          name: "Current User",
+          avatarUrl: null,
+          color: "#0ea5e9",
+        },
+        activeUsers: [
+          {
+            id: "user-1",
+            name: "Current User",
+            avatarUrl: null,
+            color: "#0ea5e9",
+            sessionId: "session-1",
+            position: { x: 300, y: 120 },
+            zoom: 1.25,
+          },
+          {
+            id: "user-2",
+            name: "Reviewer",
+            avatarUrl: null,
+            color: "#f97316",
+            sessionId: "session-2",
+            position: { x: 480, y: 260 },
+            zoom: 0.9,
+          },
+        ],
+        metrics: {
+          includesCurrentUser: true,
+          includesActiveUsers: true,
+          activeUserCount: 2,
+          currentUserActive: true,
+        },
+      };
+    } else if (typeof code === "string" && code.includes("collaboration_context_operation: create_thread")) {
+      observedOps.add("create_thread");
+      result = {
+        operation: "create_thread",
+        page: { id: "page-1", name: "Collaboration Page" },
+        thread: { seqNumber: 3, resolved: false, commentCount: 1, position: { x: 120, y: 80 } },
+      };
+    } else if (typeof code === "string" && code.includes("collaboration_context_operation: reply_thread")) {
+      if (code.includes("404")) {
+        observedOps.add("resource_not_found");
+        ws.send(
+          JSON.stringify({
+            id: request.id,
+            success: false,
+            error: "Comment thread was not found.",
+          })
+        );
+        return;
+      }
+
+      observedOps.add("reply_thread");
+      result = {
+        operation: "reply_thread",
+        page: { id: "page-1", name: "Collaboration Page" },
+        thread: { seqNumber: 1, resolved: false, commentCount: 3 },
+        comment: { content: "Thanks for the update" },
+      };
+    } else if (typeof code === "string" && code.includes("collaboration_context_operation: set_thread_resolved")) {
+      observedOps.add("set_thread_resolved");
+      result = {
+        operation: "set_thread_resolved",
+        page: { id: "page-1", name: "Collaboration Page" },
+        thread: { seqNumber: 1, previousResolved: false, currentResolved: true },
+      };
+    } else if (typeof code === "string" && code.includes("collaboration_context_operation: remove_thread")) {
+      if (code.includes("99")) {
+        observedOps.add("permission_denied");
+        ws.send(
+          JSON.stringify({
+            id: request.id,
+            success: false,
+            error: "Permission denied: missing comment:write scope for remove_thread operation",
+          })
+        );
+        return;
+      }
+
+      observedOps.add("remove_thread");
+      result = {
+        operation: "remove_thread",
+        page: { id: "page-1", name: "Collaboration Page" },
+        removed: { seqNumber: 2 },
+      };
+    } else {
+      ws.send(JSON.stringify({ id: request.id, success: false, error: "Unknown collaboration test payload" }));
+      return;
+    }
+
+    ws.send(JSON.stringify({ id: request.id, success: true, data: { result, log: "" } }));
+  } catch {
+    // ignore malformed messages in probe mode
+  }
+});
+
+const client = new Client({ name: "collaboration-context-check", version: "1.0.0" }, { capabilities: {} });
+const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
+
+async function callToolText(name, args) {
+  const result = await client.request(
+    { method: "tools/call", params: { name, arguments: args } },
+    CallToolResultSchema
+  );
+  return result.content.find((item) => item.type === "text")?.text ?? "";
+}
+
+async function callToolJson(name, args) {
+  const text = await callToolText(name, args);
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(`Tool ${name} returned non-JSON payload: ${text}`);
+  }
+}
+
+try {
+  await client.connect(transport);
+
+  const inspectPayload = await callToolJson("collaboration_context", {
+    operation: "inspect_threads",
+    includeResolved: true,
+    onlyYours: false,
+  });
+  if (inspectPayload?.operation !== "inspect_threads" || inspectPayload?.threadCount !== 2) {
+    throw new Error(`inspect_threads payload mismatch: ${JSON.stringify(inspectPayload)}`);
+  }
+
+  const awarenessPayload = await callToolJson("collaboration_context", {
+    operation: "inspect_awareness",
+    includeCurrentUser: true,
+    includeActiveUsers: true,
+  });
+  if (
+    awarenessPayload?.operation !== "inspect_awareness" ||
+    awarenessPayload?.metrics?.activeUserCount !== 2 ||
+    awarenessPayload?.metrics?.currentUserActive !== true
+  ) {
+    throw new Error(`inspect_awareness payload mismatch: ${JSON.stringify(awarenessPayload)}`);
+  }
+
+  const createPayload = await callToolJson("collaboration_context", {
+    operation: "create_thread",
+    content: "Please review this layout",
+    x: 120,
+    y: 80,
+  });
+  if (createPayload?.operation !== "create_thread" || createPayload?.thread?.seqNumber !== 3) {
+    throw new Error(`create_thread payload mismatch: ${JSON.stringify(createPayload)}`);
+  }
+
+  const replyPayload = await callToolJson("collaboration_context", {
+    operation: "reply_thread",
+    threadSeqNumber: 1,
+    content: "Thanks for the update",
+  });
+  if (replyPayload?.operation !== "reply_thread" || replyPayload?.thread?.commentCount !== 3) {
+    throw new Error(`reply_thread payload mismatch: ${JSON.stringify(replyPayload)}`);
+  }
+
+  const resolvePayload = await callToolJson("collaboration_context", {
+    operation: "set_thread_resolved",
+    threadSeqNumber: 1,
+    resolved: true,
+  });
+  if (
+    resolvePayload?.operation !== "set_thread_resolved" ||
+    resolvePayload?.thread?.previousResolved !== false ||
+    resolvePayload?.thread?.currentResolved !== true
+  ) {
+    throw new Error(`set_thread_resolved payload mismatch: ${JSON.stringify(resolvePayload)}`);
+  }
+
+  const removePayload = await callToolJson("collaboration_context", {
+    operation: "remove_thread",
+    threadSeqNumber: 2,
+  });
+  if (removePayload?.operation !== "remove_thread" || removePayload?.removed?.seqNumber !== 2) {
+    throw new Error(`remove_thread payload mismatch: ${JSON.stringify(removePayload)}`);
+  }
+
+  const deniedText = await callToolText("collaboration_context", {
+    operation: "remove_thread",
+    threadSeqNumber: 99,
+  });
+  if (!deniedText.includes("[Diagnostic PERMISSION_DENIED]")) {
+    throw new Error(`Expected permission denied diagnostic, got: ${deniedText}`);
+  }
+
+  const awarenessDeniedText = await callToolText("collaboration_context", {
+    operation: "inspect_awareness",
+    pageId: "deny-user-read",
+  });
+  if (!awarenessDeniedText.includes("[Diagnostic PERMISSION_DENIED]")) {
+    throw new Error(`Expected awareness permission denied diagnostic, got: ${awarenessDeniedText}`);
+  }
+
+  const notFoundText = await callToolText("collaboration_context", {
+    operation: "reply_thread",
+    threadSeqNumber: 404,
+    content: "missing thread",
+  });
+  if (!notFoundText.includes("[Diagnostic RESOURCE_NOT_FOUND]")) {
+    throw new Error(`Expected resource not found diagnostic, got: ${notFoundText}`);
+  }
+
+  const requiredOps = [
+    "inspect_threads",
+    "inspect_awareness",
+    "create_thread",
+    "reply_thread",
+    "set_thread_resolved",
+    "remove_thread",
+    "permission_denied",
+    "awareness_permission_denied",
+    "resource_not_found",
+  ];
+
+  for (const op of requiredOps) {
+    if (!observedOps.has(op)) {
+      throw new Error(`Expected collaboration scenario ${op} to be observed by fake plugin.`);
+    }
+  }
+
+  console.log("[COLLAB-CHECK] Verified collaboration_context tool flow + diagnostics");
+} finally {
+  await transport.close();
+  ws.close();
+  await new Promise((resolve) => ws.once("close", resolve));
+}
+EOF_JS
+
+log_step "Collaboration context probe passed"

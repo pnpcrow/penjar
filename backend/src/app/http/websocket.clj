@@ -5,7 +5,7 @@
 ;; Copyright (c) KALEIDOS INC
 
 (ns app.http.websocket
-  "A penpot notification service for file cooperative edition."
+  "A penjar notification service for file cooperative edition."
   (:require
    [app.common.exceptions :as ex]
    [app.common.logging :as l]

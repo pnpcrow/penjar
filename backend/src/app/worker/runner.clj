@@ -247,7 +247,7 @@
                          :cause cause)))))]
 
     (try
-      (let [key         (str/ffmt "penpot.worker.queue:%" queue)
+      (let [key         (str/ffmt "penjar.worker.queue:%" queue)
             [_ payload] (rds/blpop conn [key] timeout)]
         (some-> payload
                 decode-payload
@@ -272,7 +272,7 @@
 (defn- start-thread!
   [{:keys [::id ::queue ::wrk/tenant] :as cfg}]
   (px/thread
-    {:name (str "penpot/job-runner/" id)}
+    {:name (str "penjar/job-runner/" id)}
     (l/inf :hint "started" :id id :queue queue)
 
     (let [rconn (rds/connect cfg)]

@@ -26,7 +26,7 @@
   The format can be set at compile time (externaly), passing a JVM
   property or closure compiler compile-time constant. Example:
 
-      -Dpenpot.logging.props-format=':default'
+      -Dpenjar.logging.props-format=':default'
 
   The exception formating is customizable in the same way as the props
   formatter.
@@ -70,7 +70,7 @@
     :dynamic true}
   *default-executor*
   (delay
-    #?(:clj  (px/single-executor :factory (px/thread-factory :name "penpot/logger"))
+    #?(:clj  (px/single-executor :factory (px/thread-factory :name "penjar/logger"))
        :cljs (px/microtask-executor))))
 
 #?(:cljs

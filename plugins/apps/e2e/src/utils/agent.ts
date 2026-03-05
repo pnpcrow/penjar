@@ -1,5 +1,5 @@
 import puppeteer, { ConsoleMessage } from 'puppeteer';
-import { PenpotApi } from './api';
+import { PenjarApi } from './api';
 import { getFileUrl } from './get-file-url';
 import { idObjectToArray } from './clean-id';
 import { Shape } from '../models/shape.model';
@@ -45,11 +45,11 @@ function replaceIds(shapes: Shape[]) {
 }
 
 export async function Agent() {
-  console.log('Initializing Penpot API...');
-  const penpotApi = await PenpotApi();
+  console.log('Initializing Penjar API...');
+  const penjarApi = await PenjarApi();
 
   console.log('Creating file...');
-  const file = await penpotApi.createFile();
+  const file = await penjarApi.createFile();
   console.log('File created with id:', file['~:id']);
 
   const fileUrl = getFileUrl(file);
@@ -70,7 +70,7 @@ export async function Agent() {
   console.log('Setting authentication cookie...');
   page.setCookie({
     name: 'auth-token',
-    value: penpotApi.getAuth().split('=')[1],
+    value: penjarApi.getAuth().split('=')[1],
     domain: 'localhost',
     path: '/',
     expires: (Date.now() + 3600 * 1000) / 1000,
@@ -92,7 +92,7 @@ export async function Agent() {
   const finish = async () => {
     console.log('Deleting file and closing browser...');
     // TODO
-    // await penpotApi.deleteFile(file['~:id']);
+    // await penjarApi.deleteFile(file['~:id']);
     if (process.env['E2E_CLOSE_BROWSER'] !== 'false') {
       await browser.close();
     }

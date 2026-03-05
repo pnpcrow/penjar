@@ -1,15 +1,15 @@
 ---
 title: Authentication
-desc: Dive into Penpot today! Learn about self-hosting, configuration, developer insights, authentication, and more. View Penpot's technical guide. Try it free.
+desc: Dive into Penjar today! Learn about self-hosting, configuration, developer insights, authentication, and more. View Penjar's technical guide. Try it free.
 ---
 
 # User authentication
 
-Users in Penpot may register via several different methods (if enabled in the
-configuration of the Penpot instance). We have implemented this as a series
+Users in Penjar may register via several different methods (if enabled in the
+configuration of the Penjar instance). We have implemented this as a series
 of "authentication backends" in our code:
 
- * **penpot**: internal registration with email and password.
+ * **penjar**: internal registration with email and password.
  * **ldap**: authentication over an external LDAP directory.
  * **oidc**, **google**, **github**, **gitlab**: authentication over an external
    service using the [OpenID Connect](https://openid.net/connect) protocol. We
@@ -37,9 +37,9 @@ The code is organized to try to reuse functions and unify processes as much as
 possible for the different auth systems.
 
 
-### Penpot backend
+### Penjar backend
 
-When a user types an email and password in the basic Penpot registration page,
+When a user types an email and password in the basic Penjar registration page,
 frontend calls <code class="language-clojure">:prepare-register-profile</code> method. It generates a "register
 token", a temporary JWT token that includes the login data.
 
@@ -47,7 +47,7 @@ This is used in the second registration page, that finally calls
 <code class="language-clojure">:register-profile</code> with the token and the rest of profile data. This function
 is reused in all the registration methods, and it's responsible of creating the
 user profile in the database. Then, it sends the confirmation email if using
-penpot backend, or directly opens a session (see below) for othe methods or if
+penjar backend, or directly opens a session (see below) for othe methods or if
 the user has been invited from a team.
 
 The confirmation email has a link to <code class="language-clojure">/auth/verify-token</code>, that has a handler
@@ -55,7 +55,7 @@ in frontend, that is a hub for different kinds of tokens (registration email,
 email change and invitation link). This view uses <code class="language-clojure">:verify-token</code> RPC call and
 redirects to the corresponding page with the result.
 
-To login with the penpot backend, the user simply types the email and password
+To login with the penjar backend, the user simply types the email and password
 and they are sent to <code class="language-clojure">:login</code> method to check and open session.
 
 ### OIDC backend
@@ -82,7 +82,7 @@ variables.
 ### LDAP
 
 Registration is not possible by LDAP (we use an external user directory managed
-outside of Penpot). Typically when LDAP registration is enabled, the plain user
+outside of Penjar). Typically when LDAP registration is enabled, the plain user
 & password login is disabled.
 
 When the user types their user & password and presses "Login with LDAP" button,
@@ -145,6 +145,6 @@ server, that is already configured, and only needs to be enabled in frontend
 <code class="language-text">config.js</code>:
 
 ```js
-var penpotFlags = "enable-login-with-ldap";
+var penjarFlags = "enable-login-with-ldap";
 ```
 

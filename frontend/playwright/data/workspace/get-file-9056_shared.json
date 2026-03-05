@@ -36,7 +36,7 @@
     ],
     "~:pages-index": {
       "~u3622460c-3408-81e2-8005-2fc938010234": {
-        "~#penpot/pointer": [
+        "~#penjar/pointer": [
           "~u3622460c-3408-81e2-8005-31859c15ff90",
           {
             "~:created-at": "~m1730217905239"
@@ -49,7 +49,7 @@
       "~:components-v2": true
     },
     "~:components": {
-      "~#penpot/pointer": [
+      "~#penjar/pointer": [
         "~u3622460c-3408-81e2-8005-31859c15ff91",
         {
           "~:created-at": "~m1730217905239"

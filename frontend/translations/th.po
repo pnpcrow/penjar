@@ -3,7 +3,7 @@ msgstr ""
 "PO-Revision-Date: 2025-02-04 21:02+0000\n"
 "Last-Translator: Late Night Defender <pongpeera054@protonmail.com>\n"
 "Language-Team: Thai "
-"<https://hosted.weblate.org/projects/penpot/frontend/th/>\n"
+"<https://hosted.weblate.org/projects/penjar/frontend/th/>\n"
 "Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -22,7 +22,7 @@ msgstr "ตรวจสอบอีเมลของคุณ"
 #: src/app/main/ui/auth/register.cljs:277
 #, unused
 msgid "auth.check-your-email"
-msgstr "ตรวจสอบอีเมลของคุณและคลิกลิงก์เพื่อยืนยันและเริ่มใช้งาน Penpot"
+msgstr "ตรวจสอบอีเมลของคุณและคลิกลิงก์เพื่อยืนยันและเริ่มใช้งาน Penjar"
 
 #: src/app/main/ui/auth/recovery.cljs:67
 msgid "auth.confirm-password"
@@ -61,7 +61,7 @@ msgstr "ลงชื่อเข้าใช้"
 
 #: src/app/main/ui/auth/login.cljs:274
 msgid "auth.login-tagline"
-msgstr "Penpot เป็นเครื่องมือออกแบบที่ฟรีและโอเพนซอร์สสำหรับการดีไซน์และโค้ดร่วมกัน"
+msgstr "Penjar เป็นเครื่องมือออกแบบที่ฟรีและโอเพนซอร์สสำหรับการดีไซน์และโค้ดร่วมกัน"
 
 #: src/app/main/ui/auth/login.cljs:231
 msgid "auth.login-with-github-submit"
@@ -147,7 +147,7 @@ msgstr "สร้างบัญชี"
 #, unused
 msgid "auth.register-tagline"
 msgstr ""
-"ด้วยบัญชี Penpot ฟรี "
+"ด้วยบัญชี Penjar ฟรี "
 "คุณสามารถสร้างทีมได้อย่างไม่จำกัดและทำงานร่วมกับดีไซเนอร์และนักพัฒนาคนอื่น "
 "ๆ กี่โปรเจกต์ก็ได้ "
 
@@ -183,7 +183,7 @@ msgstr "อีเมลทำงาน"
 
 #: src/app/main/ui/viewer/share_link.cljs:304, src/app/main/ui/viewer/share_link.cljs:315
 msgid "common.share-link.all-users"
-msgstr "ผู้ใช้ Penpot ทั้งหมด"
+msgstr "ผู้ใช้ Penjar ทั้งหมด"
 
 #: src/app/main/ui/viewer/share_link.cljs:204
 msgid "common.share-link.confirm-deletion-link-description"
@@ -253,7 +253,7 @@ msgstr "การจัดการทีม"
 #: src/app/main/ui/dashboard/projects.cljs:92
 msgid "dasboard.team-hero.text"
 msgstr ""
-"Penpot เป็นเครื่องมือสำหรับการทำงานเป็นทีม "
+"Penjar เป็นเครื่องมือสำหรับการทำงานเป็นทีม "
 "เชิญชวนสมาชิกมาทำงานด้วยกันผ่านโปรเจกต์และไฟล์ต่าง ๆ เลย"
 
 #: src/app/main/ui/dashboard/projects.cljs:90
@@ -263,7 +263,7 @@ msgstr "รวบรวมทีมเลย!"
 #: src/app/main/ui/dashboard/projects.cljs
 #, unused
 msgid "dasboard.tutorial-hero.info"
-msgstr "เรียนรู้การใช้งาน Penpot เบื้องต้นด้วยการลงมือทำจริง"
+msgstr "เรียนรู้การใช้งาน Penjar เบื้องต้นด้วยการลงมือทำจริง"
 
 #: src/app/main/ui/settings/access_tokens.cljs:103
 msgid "dashboard.access-tokens.copied-success"
@@ -325,7 +325,7 @@ msgstr "โทเคนการเข้าถึงส่วนบุคคล
 msgid "dashboard.access-tokens.personal.description"
 msgstr ""
 "โทเคนการเข้าถึงส่วนบุคคลจะทำงานใกล้เคียงกับการยืนยันตัวตนด้วยชื่อผู้ใช้/"
-"รหัสผ่าน และสามารถใช้ในการอนุญาตให้แอปพลิเคชันเข้าถึง API ภายในของ Penpot "
+"รหัสผ่าน และสามารถใช้ในการอนุญาตให้แอปพลิเคชันเข้าถึง API ภายในของ Penjar "
 "ได้"
 
 #: src/app/main/ui/settings/access_tokens.cljs:142
@@ -350,7 +350,7 @@ msgstr "สร้างทีมใหม่"
 
 #: src/app/main/ui/components/context_menu_a11y.cljs:300, src/app/main/ui/dashboard/sidebar.cljs:638
 msgid "dashboard.default-team-name"
-msgstr "Penpot ของคุณ"
+msgstr "Penjar ของคุณ"
 
 #: src/app/main/ui/dashboard/sidebar.cljs:495
 msgid "dashboard.delete-team"
@@ -358,7 +358,7 @@ msgstr "ลบทีม"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:328, src/app/main/ui/workspace/main_menu.cljs:690
 msgid "dashboard.download-binary-file"
-msgstr "ดาวน์โหลดไฟล์ Penpot (.penpot)"
+msgstr "ดาวน์โหลดไฟล์ Penjar (.penjar)"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:321, src/app/main/ui/workspace/main_menu.cljs:712
 #, unused
@@ -386,7 +386,7 @@ msgstr "ยังไม่มีไฟล์"
 msgid "dashboard.empty-placeholder-libraries"
 msgstr ""
 "ไลบรารีที่เพิ่มให้กับโปรเจกต์จะปรากฏที่นี่ "
-"ลองแชร์ไฟล์ของคุณหรือเพิ่มจาก[ไลบรารีและเทมเพลต](https://penpot.app/"
+"ลองแชร์ไฟล์ของคุณหรือเพิ่มจาก[ไลบรารีและเทมเพลต](https://penjar.app/"
 "libraries-templates)ของเรา"
 
 #: src/app/main/ui/dashboard/placeholder.cljs
@@ -394,7 +394,7 @@ msgstr ""
 msgid "dashboard.empty-placeholder-libraries-subtitle"
 msgstr ""
 "ไลบรารีที่เพิ่มให้กับโปรเจกต์จะปรากฏที่นี่ "
-"ลองแชร์ไฟล์ของคุณหรือเพิ่มจาก[ไลบรารีและเทมเพลต](https://penpot.app/"
+"ลองแชร์ไฟล์ของคุณหรือเพิ่มจาก[ไลบรารีและเทมเพลต](https://penjar.app/"
 "libraries-templates)ของเรา"
 
 #: src/app/main/ui/dashboard/placeholder.cljs:114
@@ -407,7 +407,7 @@ msgstr "ยังไม่มีไลบรารี"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:280
 msgid "dashboard.export-binary-multi"
-msgstr "ดาวน์โหลด %s ไฟล์ Penpot (.penpot)"
+msgstr "ดาวน์โหลด %s ไฟล์ Penjar (.penjar)"
 
 #: src/app/main/ui/workspace/main_menu.cljs:698
 msgid "dashboard.export-frames"
@@ -419,7 +419,7 @@ msgstr "ส่งออกเป็น PDF"
 
 #, unused
 msgid "dashboard.export-multi"
-msgstr "ส่งออก %s ไฟล์ Penpot"
+msgstr "ส่งออก %s ไฟล์ Penjar"
 
 #: src/app/main/ui/workspace/main_menu.cljs:679
 msgid "dashboard.export-shapes"
@@ -459,8 +459,8 @@ msgstr[0] "เพิ่มแล้ว %s ฟอนต์"
 #, markdown
 msgid "dashboard.fonts.hero-text2"
 msgstr ""
-"คุณควรอัปโหลดเฉพาะฟอนต์ที่คุณเป็นเจ้าของหรือมีสิทธิ์ในการใช้งานใน Penpot "
-"ดูรายละอียดเพิ่มเติมในส่วนเนื้อหาของ[ข้อกำหนดการให้บริการของ Penpot](%s) "
+"คุณควรอัปโหลดเฉพาะฟอนต์ที่คุณเป็นเจ้าของหรือมีสิทธิ์ในการใช้งานใน Penjar "
+"ดูรายละอียดเพิ่มเติมในส่วนเนื้อหาของ[ข้อกำหนดการให้บริการของ Penjar](%s) "
 "นอกจากนี้คุณอาจต้องการอ่านเพิ่มเติมเกี่ยวกับ[ลิขสิทธิ์ฟอนต์](https://www."
 "typography.com/faq)"
 
@@ -470,7 +470,7 @@ msgstr "อัปโหลดทั้งหมด"
 
 #: src/app/main/ui/dashboard/import.cljs:464, src/app/main/ui/dashboard/project_menu.cljs:109
 msgid "dashboard.import"
-msgstr "นำเข้าไฟล์ Penpot"
+msgstr "นำเข้าไฟล์ Penjar"
 
 #: src/app/main/ui/dashboard/import.cljs:293, src/app/worker/import.cljs:121, src/app/worker/import.cljs:124
 msgid "dashboard.import.analyze-error"
@@ -671,8 +671,8 @@ msgid "dashboard.your-name"
 msgstr "ชื่อของคุณ"
 
 #: src/app/main/ui/dashboard/file_menu.cljs:40, src/app/main/ui/dashboard/fonts.cljs:42, src/app/main/ui/dashboard/libraries.cljs:56, src/app/main/ui/dashboard/projects.cljs:355, src/app/main/ui/dashboard/search.cljs:48, src/app/main/ui/dashboard/sidebar.cljs:312, src/app/main/ui/dashboard/team.cljs:537, src/app/main/ui/dashboard/team.cljs:983, src/app/main/ui/dashboard/team.cljs:1251, src/app/main/ui/dashboard/team.cljs:1298
-msgid "dashboard.your-penpot"
-msgstr "Penpot ของคุณ"
+msgid "dashboard.your-penjar"
+msgstr "Penjar ของคุณ"
 
 #: src/app/main/ui/workspace/plugins.cljs:340, src/app/main/ui/workspace/plugins.cljs:394
 msgid "ds.confirm-allow"
@@ -718,7 +718,7 @@ msgstr "รหัสผ่านเดิมไม่ถูกต้อง"
 
 #: src/app/main/ui/settings/feedback.cljs:149
 msgid "feedback.discourse-title"
-msgstr "ชุมชน Penpot"
+msgstr "ชุมชน Penjar"
 
 #: src/app/main/ui/inspect/attributes/layout.cljs
 #, unused

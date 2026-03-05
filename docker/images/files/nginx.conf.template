@@ -57,7 +57,7 @@ http {
         ''      close;
     }
 
-    proxy_cache_path /tmp/cache/ levels=2:2 keys_zone=penpot:20m;
+    proxy_cache_path /tmp/cache/ levels=2:2 keys_zone=penjar:20m;
     proxy_cache_methods GET HEAD;
     proxy_cache_valid any 48h;
     proxy_cache_key "$host$request_uri";
@@ -76,7 +76,7 @@ http {
         listen [::]:8080 default_server;
         server_name _;
 
-        client_max_body_size $PENPOT_HTTP_SERVER_MAX_BODY_SIZE;
+        client_max_body_size $PENJAR_HTTP_SERVER_MAX_BODY_SIZE;
         charset utf-8;
 
         etag off;
@@ -107,7 +107,7 @@ http {
         }
 
         location /assets {
-            proxy_pass $PENPOT_BACKEND_URI/assets;
+            proxy_pass $PENJAR_BACKEND_URI/assets;
             recursive_error_pages on;
             proxy_intercept_errors on;
             error_page 301 302 307 = @handle_redirect;
@@ -122,11 +122,11 @@ http {
         }
 
         location /api/export {
-            proxy_pass $PENPOT_EXPORTER_URI;
+            proxy_pass $PENJAR_EXPORTER_URI;
         }
 
         location /api {
-            proxy_pass $PENPOT_BACKEND_URI/api;
+            proxy_pass $PENJAR_BACKEND_URI/api;
             proxy_buffering off;
         }
 
@@ -137,13 +137,13 @@ http {
 
         location /readyz {
             access_log off;
-            proxy_pass $PENPOT_BACKEND_URI$request_uri;
+            proxy_pass $PENJAR_BACKEND_URI$request_uri;
         }
 
         location /ws/notifications {
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection 'upgrade';
-            proxy_pass $PENPOT_BACKEND_URI/ws/notifications;
+            proxy_pass $PENJAR_BACKEND_URI/ws/notifications;
         }
 
         location /control-center {
@@ -151,7 +151,7 @@ http {
             proxy_set_header Host $http_host;
             proxy_set_header X-Real-IP $http_cf_connecting_ip;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass $PENPOT_NITRATE_URI$request_uri;
+            proxy_pass $PENJAR_NITRATE_URI$request_uri;
         }
 
         include /etc/nginx/overrides/server.d/*.conf;

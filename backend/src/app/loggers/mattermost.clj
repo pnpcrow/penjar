@@ -137,7 +137,7 @@
   (when-let [uri (cf/get :error-report-webhook)]
     (let [input  (sp/chan :buf (sp/sliding-buffer 256))
           thread (px/thread
-                   {:name "penpot/reporter/mattermost"}
+                   {:name "penjar/reporter/mattermost"}
                    (l/info :hint "initializing error reporter" :uri uri)
 
                    (try

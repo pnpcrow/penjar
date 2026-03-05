@@ -1,10 +1,10 @@
-# Penpot MCP Project Overview - Updated
+# Penjar MCP Project Overview - Updated
 
 ## Purpose
-This project is a Model Context Protocol (MCP) server for Penpot integration. 
-The MCP server communicates with a Penpot plugin via WebSockets, allowing
+This project is a Model Context Protocol (MCP) server for Penjar integration. 
+The MCP server communicates with a Penjar plugin via WebSockets, allowing
 the MCP server to send tasks to the plugin and receive results, 
-enabling advanced AI-driven features in Penpot.
+enabling advanced AI-driven features in Penjar.
 
 ## Tech Stack
 - **Language**: TypeScript
@@ -21,21 +21,21 @@ enabling advanced AI-driven features in Penpot.
 │   ├── src/
 │   │   ├── index.ts           # Exports for shared types
 │   │   └── types.ts           # PluginTaskResult, request/response interfaces
-│   └── package.json           # @penpot-mcp/common package
+│   └── package.json           # @penjar-mcp/common package
 ├── packages/server/           # Main MCP server implementation
 │   ├── src/
 │   │   ├── index.ts           # Main server entry point
-│   │   ├── PenpotMcpServer.ts # Enhanced with request/response correlation
+│   │   ├── PenjarMcpServer.ts # Enhanced with request/response correlation
 │   │   ├── PluginTask.ts      # Now supports result promises
 │   │   ├── tasks/             # PluginTask implementations
 │   │   └── tools/             # Tool implementations
 |   ├── data/                  # Contains resources, such as API info and prompts
-│   └── package.json           # Includes @penpot-mcp/common dependency
-├── packages/plugin/           # Penpot plugin with response capability
+│   └── package.json           # Includes @penjar-mcp/common dependency
+├── packages/plugin/           # Penjar plugin with response capability
 │   ├── src/
 │   │   ├── main.ts            # Enhanced WebSocket handling with response forwarding
 │   │   └── plugin.ts          # Now sends task responses back to server
-│   └── package.json           # Includes @penpot-mcp/common dependency
+│   └── package.json           # Includes @penjar-mcp/common dependency
 └── prepare-api-docs           # Python project for the generation of API docs
 ```
 
@@ -49,7 +49,7 @@ The system prompt file is located in `packages/server/data/initial_instructions.
 
 1. Implement the tool class in `packages/server/src/tools/` following the `Tool` interface. 
    IMPORTANT: Do not catch any exceptions in the `executeCore` method. Let them propagate to be handled centrally.
-2. Register the tool in `PenpotMcpServer`.
+2. Register the tool in `PenjarMcpServer`.
 
 Tools can be associated with a `PluginTask` that is executed in the plugin.
 Many tools build on `ExecuteCodePluginTask`, as many operations can be reduced to code execution.

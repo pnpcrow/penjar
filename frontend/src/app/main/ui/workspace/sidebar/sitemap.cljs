@@ -131,7 +131,7 @@
 
         [dprops dref]
         (hooks/use-sortable
-         :data-type "penpot/page"
+         :data-type "penjar/page"
          :on-drop on-drop
          :data {:id id
                 :index index

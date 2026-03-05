@@ -12,7 +12,7 @@
 - **Declaration Files**: Generated with source maps
 
 ## Naming Conventions
-- **Classes**: PascalCase (e.g., `ExeceuteCodeTool`, `PenpotMcpServer`)
+- **Classes**: PascalCase (e.g., `ExeceuteCodeTool`, `PenjarMcpServer`)
 - **Interfaces**: PascalCase (e.g., `Tool`)
 - **Methods**: camelCase (e.g., `execute`, `registerTools`)
 - **Constants**: camelCase for readonly properties (e.g., `definition`)

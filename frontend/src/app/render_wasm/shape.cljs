@@ -120,7 +120,7 @@
 
   c/IPrintWithWriter
   (-pr-writer [_ writer _]
-    (-write writer (str "#penpot/shape " (:id delegate)))))
+    (-write writer (str "#penjar/shape " (:id delegate)))))
 
 ;; --- SHAPE IMPL
 ;; When an attribute is sent to WASM it could still be pending some side operations

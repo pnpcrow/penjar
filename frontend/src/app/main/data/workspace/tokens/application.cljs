@@ -123,7 +123,7 @@
                                                     :page-id page-id}))))
 
 (defn value->color
-  "Transform a token color value into penpot color data structure"
+  "Transform a token color value into penjar color data structure"
   [color]
   (when-let [tc (tinycolor/valid-color color)]
     (let [hex (tinycolor/->hex-string tc)
@@ -156,7 +156,7 @@
                           :changed-sub-attr [:stroke-color]}))))
 
 (defn value->shadow
-  "Transform a token shadow value into penpot shadow data structure"
+  "Transform a token shadow value into penjar shadow data structure"
   [value]
   (mapv (fn [{:keys [offset-x offset-y blur spread color inset]}]
           {:id (random-uuid)
@@ -658,7 +658,7 @@
 
                             resolved-value (get-in resolved-tokens [(cfo/token-identifier token) :resolved-value])
                             resolved-value (if (contains? cf/flags :tokenscript)
-                                             (ts/tokenscript-symbols->penpot-unit resolved-value)
+                                             (ts/tokenscript-symbols->penjar-unit resolved-value)
                                              resolved-value)
                             tokenized-attributes (cfo/attributes-map attributes token)
                             type (:type token)]

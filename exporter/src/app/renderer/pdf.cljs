@@ -58,7 +58,7 @@
 
           (render-object [page base-uri {:keys [id] :as object}]
             (p/let [uri  (prepare-uri base-uri id)
-                    path (sh/tempfile :prefix "penpot.tmp.pdf." :suffix (mime/get-extension type))]
+                    path (sh/tempfile :prefix "penjar.tmp.pdf." :suffix (mime/get-extension type))]
               (l/info :uri uri)
               (bw/nav! page uri)
               (p/let [dom (bw/select page (dm/str "#screenshot-" id))]

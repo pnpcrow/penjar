@@ -132,7 +132,7 @@
 
         [dprops dref]
         (h/use-sortable
-         :data-type "penpot/stops"
+         :data-type "penjar/stops"
          :on-drop on-drop
          :data {:index index}
          :draggable? true)]

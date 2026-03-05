@@ -86,7 +86,7 @@
         navigate-to-help
         (mf/use-fn
          (fn []
-           (dom/open-new-window "https://help.penpot.app/user-guide/inspect/")))
+           (dom/open-new-window "https://help.penjar.app/user-guide/inspect/")))
 
         handle-change-color-space
         (mf/use-fn

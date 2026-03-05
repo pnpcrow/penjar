@@ -7,9 +7,9 @@
 - `common/`: 백엔드/프론트엔드가 공유하는 공통 로직
 - `render-wasm/`: Rust + Emscripten 기반 WASM 렌더 엔진
 - `exporter/`: 외부 렌더링/내보내기 관련 서비스
-- `mcp/`: Penpot MCP 서버 및 관련 플러그인/도구
+- `mcp/`: Penjar MCP 서버 및 관련 플러그인/도구
 - `plugins/`: 플러그인 런타임, 샘플 플러그인, 타입/스타일 라이브러리
-- `library/`: Penpot 파일 생성/내보내기를 위한 npm 라이브러리
+- `library/`: Penjar 파일 생성/내보내기를 위한 npm 라이브러리
 - `docker/`: 로컬 개발환경/이미지/배포 실행 관련 Docker 설정
 - `docs/`: 사용자/기술 문서(현재 문서 포함)
 

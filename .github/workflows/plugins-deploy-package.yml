@@ -34,7 +34,7 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: penpot-runner-01
+    runs-on: penjar-runner-01
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -88,13 +88,13 @@ jobs:
           case "$REF" in
             main)
               echo "WORKER_NAME=${{ inputs.plugin_name }}-plugin-pro" >> $GITHUB_ENV
-              echo "WORKER_URI=${{ inputs.plugin_name }}.plugins.penpot.app" >> $GITHUB_ENV ;;
+              echo "WORKER_URI=${{ inputs.plugin_name }}.plugins.penjar.app" >> $GITHUB_ENV ;;
             staging)
               echo "WORKER_NAME=${{ inputs.plugin_name }}-plugin-pre" >> $GITHUB_ENV
-              echo "WORKER_URI=${{ inputs.plugin_name }}.plugins.penpot.dev" >> $GITHUB_ENV ;;
+              echo "WORKER_URI=${{ inputs.plugin_name }}.plugins.penjar.dev" >> $GITHUB_ENV ;;
             develop)
               echo "WORKER_NAME=${{ inputs.plugin_name }}-plugin-hourly" >> $GITHUB_ENV
-              echo "WORKER_URI=${{ inputs.plugin_name }}.plugins.hourly.penpot.dev" >> $GITHUB_ENV ;;
+              echo "WORKER_URI=${{ inputs.plugin_name }}.plugins.hourly.penjar.dev" >> $GITHUB_ENV ;;
             *) echo "Unsupported branch ${REF}" && exit 1 ;;
           esac
 
@@ -119,7 +119,7 @@ jobs:
           MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK }}
           MATTERMOST_CHANNEL: bot-alerts-cicd
           TEXT: |
-            ❌ 🧩📦 *[PENPOT PLUGINS] Error deploying ${{ env.WORKER_NAME }}.*
+            ❌ 🧩📦 *[PENJAR PLUGINS] Error deploying ${{ env.WORKER_NAME }}.*
             📄 Triggered from ref: `${{ inputs.gh_ref }}`
                Plugin name: `${{ inputs.plugin_name }}-plugin`
                Cloudflare worker name: `${{ env.WORKER_NAME }}`

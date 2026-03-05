@@ -157,7 +157,7 @@
 
         [dprops dref]
         (h/use-sortable
-         :data-type "penpot/token-set"
+         :data-type "penjar/token-set"
          :on-drop on-drop
          :data {:index index
                 :is-group true}
@@ -266,7 +266,7 @@
 
         [dprops dref]
         (h/use-sortable
-         :data-type "penpot/token-set"
+         :data-type "penjar/token-set"
          :on-drag on-drag
          :on-drop on-drop
          :data {:index index

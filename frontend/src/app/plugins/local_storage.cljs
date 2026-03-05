@@ -19,7 +19,7 @@
 
 (defn prefix-key
   [plugin-id key]
-  (dm/str "penpot-plugins:" plugin-id "/" key))
+  (dm/str "penjar-plugins:" plugin-id "/" key))
 
 (defn local-storage-proxy
   [plugin-id]

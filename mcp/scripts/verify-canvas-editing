@@ -1,0 +1,340 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SERVER_DIR="$PROJECT_ROOT/packages/server"
+
+HEALTH_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/health"
+MCP_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/mcp"
+WS_URL="ws://127.0.0.1:${PENJAR_MCP_WEBSOCKET_PORT:-4402}"
+
+TMP_BASE="${TMPDIR:-/tmp}"
+SERVER_LOG="$TMP_BASE/penjar-mcp-canvas-editing-$$.log"
+SERVER_PID=""
+
+log_step() {
+    printf "\n[CANVAS-CHECK] %s\n" "$1"
+}
+
+cleanup() {
+    if [ -n "$SERVER_PID" ] && kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+        kill "$SERVER_PID" >/dev/null 2>&1 || true
+        wait "$SERVER_PID" >/dev/null 2>&1 || true
+    fi
+
+    rm -f "$SERVER_LOG"
+}
+
+trap cleanup EXIT
+
+if [ "${VERIFY_CANVAS_SKIP_BUILD:-false}" = "true" ]; then
+    log_step "Skip build step (VERIFY_CANVAS_SKIP_BUILD=true)"
+else
+    log_step "Build required packages for canvas editing probe"
+    cd "$PROJECT_ROOT"
+    pnpm --filter mcp-common run build
+    pnpm --filter mcp-server run build
+fi
+
+log_step "Start MCP server (single-user)"
+cd "$SERVER_DIR"
+node dist/index.js >"$SERVER_LOG" 2>&1 &
+SERVER_PID="$!"
+
+log_step "Wait for /health endpoint"
+for _ in $(seq 1 20); do
+    if curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+done
+
+if ! curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+    echo "[CANVAS-CHECK][FAIL] server did not become healthy."
+    echo "[CANVAS-CHECK][INFO] Server log:"
+    cat "$SERVER_LOG"
+    exit 1
+fi
+
+log_step "Run canvas_editing E2E probe with fake plugin session"
+node --input-type=module - "$MCP_URL" "$WS_URL" <<'EOF'
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
+import WebSocket from "ws";
+
+const [mcpUrl, wsUrl] = process.argv.slice(2);
+let observedOps = new Set();
+
+const ws = new WebSocket(wsUrl);
+await new Promise((resolve, reject) => {
+  ws.once("open", resolve);
+  ws.once("error", reject);
+});
+
+ws.on("message", (payload) => {
+  try {
+    const request = JSON.parse(payload.toString());
+    if (!request || typeof request !== "object" || request.task !== "executeCode" || !request.id) {
+      return;
+    }
+
+    const code = request.params?.code ?? "";
+    let result;
+    if (typeof code === "string" && code.includes("canvas_editing_operation: create_rectangle")) {
+      if (code.includes("rect.resize(100, 100);") && !code.includes("rect.fills =")) {
+        observedOps.add("create_rectangle_defaults");
+        result = {
+          operation: "create_rectangle",
+          shape: { id: "shape-default", name: "Generated rectangle", x: 0, y: 0, width: 100, height: 100 },
+        };
+      } else {
+        observedOps.add("create_rectangle");
+        result = {
+          operation: "create_rectangle",
+          shape: { id: "shape-1", name: "Generated rectangle", x: 24, y: 36, width: 180, height: 96 },
+        };
+      }
+    } else if (typeof code === "string" && code.includes("canvas_editing_operation: resize_shape")) {
+      if (code.includes("shape-missing")) {
+        observedOps.add("resource_not_found");
+        ws.send(
+          JSON.stringify({
+            id: request.id,
+            success: false,
+            error: "Target shape was not found.",
+          })
+        );
+        return;
+      }
+
+      observedOps.add("resize_shape");
+      result = {
+        operation: "resize_shape",
+        shape: { id: "shape-1", width: 220, height: 120 },
+      };
+    } else if (typeof code === "string" && code.includes("canvas_editing_operation: move_shape")) {
+      observedOps.add("move_shape");
+      result = {
+        operation: "move_shape",
+        shape: { id: "shape-1", x: 48, y: 64 },
+      };
+    } else if (typeof code === "string" && code.includes("canvas_editing_operation: set_fill_color")) {
+      if (code.includes("shape-readonly")) {
+        observedOps.add("permission_denied");
+        ws.send(
+          JSON.stringify({
+            id: request.id,
+            success: false,
+            error: "Permission denied: missing content:write scope for set_fill_color operation",
+          })
+        );
+        return;
+      }
+
+      observedOps.add("set_fill_color");
+      result = {
+        operation: "set_fill_color",
+        shape: { id: "shape-1", fills: [{ fillColor: "#ff6600" }] },
+      };
+    } else {
+      ws.send(JSON.stringify({ id: request.id, success: false, error: "Unknown canvas test payload" }));
+      return;
+    }
+
+    ws.send(JSON.stringify({ id: request.id, success: true, data: { result, log: "" } }));
+  } catch {
+    // ignore malformed messages in probe mode
+  }
+});
+
+const client = new Client({ name: "canvas-editing-check", version: "1.0.0" }, { capabilities: {} });
+const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
+
+async function callToolText(name, args) {
+  const result = await client.request(
+    { method: "tools/call", params: { name, arguments: args } },
+    CallToolResultSchema
+  );
+  return result.content.find((item) => item.type === "text")?.text ?? "";
+}
+
+async function callTool(name, args) {
+  const text = await callToolText(name, args);
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(`Tool ${name} returned non-JSON payload: ${text}`);
+  }
+}
+
+function assertShapeId(shape, label) {
+  if (!shape || typeof shape !== "object" || typeof shape.id !== "string" || shape.id.length === 0) {
+    throw new Error(`${label}: shape.id contract mismatch: ${JSON.stringify(shape)}`);
+  }
+}
+
+function assertNumber(value, label) {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    throw new Error(`${label}: expected number, got ${JSON.stringify(value)}`);
+  }
+}
+
+function assertCreateRectanglePayload(payload, expected) {
+  if (payload?.operation !== "create_rectangle") {
+    throw new Error(`create_rectangle operation mismatch: ${JSON.stringify(payload)}`);
+  }
+  assertShapeId(payload.shape, "create_rectangle");
+  if (payload.shape.name !== expected.name) {
+    throw new Error(`create_rectangle name mismatch: ${JSON.stringify(payload)}`);
+  }
+  assertNumber(payload.shape.x, "create_rectangle shape.x");
+  assertNumber(payload.shape.y, "create_rectangle shape.y");
+  assertNumber(payload.shape.width, "create_rectangle shape.width");
+  assertNumber(payload.shape.height, "create_rectangle shape.height");
+  if (
+    payload.shape.x !== expected.x ||
+    payload.shape.y !== expected.y ||
+    payload.shape.width !== expected.width ||
+    payload.shape.height !== expected.height
+  ) {
+    throw new Error(`create_rectangle geometry mismatch: ${JSON.stringify(payload)}`);
+  }
+}
+
+function assertResizePayload(payload, expected) {
+  if (payload?.operation !== "resize_shape") {
+    throw new Error(`resize_shape operation mismatch: ${JSON.stringify(payload)}`);
+  }
+  assertShapeId(payload.shape, "resize_shape");
+  assertNumber(payload.shape.width, "resize_shape shape.width");
+  assertNumber(payload.shape.height, "resize_shape shape.height");
+  if (payload.shape.width !== expected.width || payload.shape.height !== expected.height) {
+    throw new Error(`resize_shape geometry mismatch: ${JSON.stringify(payload)}`);
+  }
+}
+
+function assertMovePayload(payload, expected) {
+  if (payload?.operation !== "move_shape") {
+    throw new Error(`move_shape operation mismatch: ${JSON.stringify(payload)}`);
+  }
+  assertShapeId(payload.shape, "move_shape");
+  assertNumber(payload.shape.x, "move_shape shape.x");
+  assertNumber(payload.shape.y, "move_shape shape.y");
+  if (payload.shape.x !== expected.x || payload.shape.y !== expected.y) {
+    throw new Error(`move_shape geometry mismatch: ${JSON.stringify(payload)}`);
+  }
+}
+
+function assertSetFillPayload(payload, expectedColor) {
+  if (payload?.operation !== "set_fill_color") {
+    throw new Error(`set_fill_color operation mismatch: ${JSON.stringify(payload)}`);
+  }
+  assertShapeId(payload.shape, "set_fill_color");
+  if (!Array.isArray(payload.shape.fills) || payload.shape.fills.length === 0) {
+    throw new Error(`set_fill_color fills contract mismatch: ${JSON.stringify(payload)}`);
+  }
+  const firstFill = payload.shape.fills[0];
+  if (!firstFill || typeof firstFill.fillColor !== "string" || firstFill.fillColor !== expectedColor) {
+    throw new Error(`set_fill_color fillColor mismatch: ${JSON.stringify(payload)}`);
+  }
+}
+
+try {
+  await client.connect(transport);
+
+  const createPayload = await callTool("canvas_editing", {
+    operation: "create_rectangle",
+    x: 24,
+    y: 36,
+    width: 180,
+    height: 96,
+    fillColor: "#ff6600",
+  });
+  assertCreateRectanglePayload(createPayload, {
+    name: "Generated rectangle",
+    x: 24,
+    y: 36,
+    width: 180,
+    height: 96,
+  });
+
+  const createDefaultPayload = await callTool("canvas_editing", {
+    operation: "create_rectangle",
+  });
+  assertCreateRectanglePayload(createDefaultPayload, {
+    name: "Generated rectangle",
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 100,
+  });
+
+  const resizePayload = await callTool("canvas_editing", {
+    operation: "resize_shape",
+    shapeId: "shape-1",
+    width: 220,
+    height: 120,
+  });
+  assertResizePayload(resizePayload, { width: 220, height: 120 });
+
+  const movePayload = await callTool("canvas_editing", {
+    operation: "move_shape",
+    shapeId: "shape-1",
+    x: 48,
+    y: 64,
+  });
+  assertMovePayload(movePayload, { x: 48, y: 64 });
+
+  const fillPayload = await callTool("canvas_editing", {
+    operation: "set_fill_color",
+    shapeId: "shape-1",
+    fillColor: "#ff6600",
+  });
+  assertSetFillPayload(fillPayload, "#ff6600");
+
+  const notFoundText = await callToolText("canvas_editing", {
+    operation: "resize_shape",
+    shapeId: "shape-missing",
+    width: 111,
+    height: 77,
+  });
+  if (!notFoundText.includes("[Diagnostic RESOURCE_NOT_FOUND]")) {
+    throw new Error(`Expected resource not found diagnostic, got: ${notFoundText}`);
+  }
+
+  const deniedText = await callToolText("canvas_editing", {
+    operation: "set_fill_color",
+    shapeId: "shape-readonly",
+    fillColor: "#223344",
+  });
+  if (!deniedText.includes("[Diagnostic PERMISSION_DENIED]")) {
+    throw new Error(`Expected permission denied diagnostic, got: ${deniedText}`);
+  }
+
+  const requiredOps = [
+    "create_rectangle",
+    "create_rectangle_defaults",
+    "resize_shape",
+    "move_shape",
+    "set_fill_color",
+    "resource_not_found",
+    "permission_denied",
+  ];
+  for (const op of requiredOps) {
+    if (!observedOps.has(op)) {
+      throw new Error(`Expected fake plugin to receive ${op} operation payload.`);
+    }
+  }
+
+  console.log("[CANVAS-CHECK] Verified canvas_editing contract + defaults + permission/not-found diagnostics");
+} finally {
+  await transport.close();
+  ws.close();
+  await new Promise((resolve) => ws.once("close", resolve));
+}
+EOF
+
+log_step "Canvas editing probe passed"

@@ -48,7 +48,7 @@ export class LoginPage extends BasePage {
     );
     await this.mockRPC(
       "get-team-members?team-id=*",
-      "logged-in-user/get-team-members-your-penpot.json",
+      "logged-in-user/get-team-members-your-penjar.json",
     );
     await this.mockRPC(
       "get-team-users?team-id=*",

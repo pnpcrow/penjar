@@ -4,7 +4,7 @@ This guide walks you through the steps to create a plugin for our platform. You'
 
 If you prefer to create the plugin with angular, there's also a [Creating a Plugin (angular)](./create-angular-plugin.md).
 
-Keep in mind that this guide is for creating a plugin **inside `penpot-plugins` monorepo**. If you want to create a plugin outside our environment you can check the [Penpot Plugin Starter Template](https://github.com/penpot/penpot-plugin-starter-template) or the documentation at [Create a Plugin](https://help.penpot.app/plugins/create-a-plugin/).
+Keep in mind that this guide is for creating a plugin **inside `penjar-plugins` monorepo**. If you want to create a plugin outside our environment you can check the [Penjar Plugin Starter Template](https://github.com/penjar/penjar-plugin-starter-template) or the documentation at [Create a Plugin](https://help.penjar.app/plugins/create-a-plugin/).
 
 Let's dive in.
 
@@ -117,15 +117,15 @@ Or for production preview:
 pnpm --filter example-plugin build && pnpm --filter example-plugin preview
 ```
 
-### Step 7: Load the Plugin in Penpot
+### Step 7: Load the Plugin in Penjar
 
-To load your plugin into Penpot you can use the shortcut `Ctrl + Alt + P` to directly open the Plugin manager modal. There you need to provide the plugin's manifest URL (example: `http://plugin.example/manifest.json`) for the installation. If there's no issues the plugin will be installed and then you would be able to open it whenever you like.
+To load your plugin into Penjar you can use the shortcut `Ctrl + Alt + P` to directly open the Plugin manager modal. There you need to provide the plugin's manifest URL (example: `http://plugin.example/manifest.json`) for the installation. If there's no issues the plugin will be installed and then you would be able to open it whenever you like.
 
 You can also open the Plugin manager modal via:
 
 - Menu
 
-  ![Penpot's menu image](./images/plugin-menu.png)
+  ![Penjar's menu image](./images/plugin-menu.png)
 
 ### Learn More About Plugin Development
 

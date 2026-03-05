@@ -39,7 +39,7 @@
   (let [resolved-tokens (ts/resolve-tokens tokens-tree)
         resolved-value  (-> resolved-tokens
                             (dm/get-in [(:name token) :resolved-value])
-                            (ts/tokenscript-symbols->penpot-unit))]
+                            (ts/tokenscript-symbols->penjar-unit))]
     resolved-value))
 
 (defn token-proxy? [p]

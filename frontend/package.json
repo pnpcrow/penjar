@@ -11,7 +11,7 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/penpot/penpot"
+    "url": "https://github.com/penjar/penjar"
   },
   "scripts": {
     "build:app:assets": "node ./scripts/build-app-assets.js",
@@ -47,13 +47,13 @@
     "postinstall": "(cd ../plugins/libs/plugins-runtime; pnpm install; pnpm run build)"
   },
   "devDependencies": {
-    "@penpot/draft-js": "workspace:./packages/draft-js",
-    "@penpot/mousetrap": "workspace:./packages/mousetrap",
-    "@penpot/plugins-runtime": "link:../plugins/dist/plugins-runtime",
-    "@penpot/svgo": "penpot/svgo#v3.2",
-    "@penpot/text-editor": "workspace:./text-editor",
-    "@penpot/tokenscript": "workspace:./packages/tokenscript",
-    "@penpot/ui": "workspace:./packages/ui",
+    "@penjar/draft-js": "workspace:./packages/draft-js",
+    "@penjar/mousetrap": "workspace:./packages/mousetrap",
+    "@penjar/plugins-runtime": "link:../plugins/dist/plugins-runtime",
+    "@penjar/svgo": "penjar/svgo#v3.2",
+    "@penjar/text-editor": "workspace:./text-editor",
+    "@penjar/tokenscript": "workspace:./packages/tokenscript",
+    "@penjar/ui": "workspace:./packages/ui",
     "@playwright/test": "1.58.0",
     "@storybook/addon-docs": "10.1.11",
     "@storybook/addon-themes": "10.1.11",

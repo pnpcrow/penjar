@@ -21,8 +21,8 @@ All main shapes for components of the same VariantComponent must be direct child
 - Its `id` equals the shared `variant-id` of its child components.
 - It has an attribute `is-variant-container` set to `true`.
 - A variant container without children is invalid. It must have at least one child.
-- The first child of the variant container is used to represent visually the entire VariantComponent in different places on Penpot, so the order of the children is significant.
-- When created in the interface of Penpot, it may include some attributes (e.g., flex layout, stroke color `#bb97d8`, border radius `20`). These attributes are not mandatory. (TBD: Will the SDK create those attributes by itself?).
+- The first child of the variant container is used to represent visually the entire VariantComponent in different places on Penjar, so the order of the children is significant.
+- When created in the interface of Penjar, it may include some attributes (e.g., flex layout, stroke color `#bb97d8`, border radius `20`). These attributes are not mandatory. (TBD: Will the SDK create those attributes by itself?).
 
 ### Main shape
 

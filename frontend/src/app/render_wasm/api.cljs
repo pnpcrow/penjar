@@ -160,7 +160,7 @@
         (js/console.error "text-editor overlay/update failed:" e)))
 
     (set! wasm/internal-frame-id nil)
-    (ug/dispatch! (ug/event "penpot:wasm:render"))))
+    (ug/dispatch! (ug/event "penjar:wasm:render"))))
 
 (defn render-sync
   []
@@ -1159,7 +1159,7 @@
                                         (if render-callback
                                           (render-callback)
                                           (render-finish))
-                                        (ug/dispatch! (ug/event "penpot:wasm:set-objects"))
+                                        (ug/dispatch! (ug/event "penjar:wasm:set-objects"))
                                         (resolve nil))))))]
          (process-next-chunk 0 [] [] 0))))))
 
@@ -1182,7 +1182,7 @@
                        (if render-callback
                          (render-callback)
                          (render-finish))
-                       (ug/dispatch! (ug/event "penpot:wasm:set-objects"))))))
+                       (ug/dispatch! (ug/event "penjar:wasm:set-objects"))))))
 
 (defn- shapes-in-tree-order
   "Returns shapes sorted in tree order (parents before children).

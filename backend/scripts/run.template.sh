@@ -23,4 +23,4 @@ export JAVA_OPTS="-Dim4java.useV7=true -Djava.util.logging.manager=org.apache.lo
 ENTRYPOINT=${1:-app.main};
 
 set -ex
-exec $JAVA_CMD $JAVA_OPTS -jar penpot.jar -m $ENTRYPOINT
+exec $JAVA_CMD $JAVA_OPTS -jar penjar.jar -m $ENTRYPOINT

@@ -1,15 +1,15 @@
 ---
 title: 3.10. UI Guide
-desc: Learn UI development with React & Rumext, design system implementation, and performance considerations. See Penpot's technical guide. Free to use!
+desc: Learn UI development with React & Rumext, design system implementation, and performance considerations. See Penjar's technical guide. Free to use!
 ---
 
 # UI Guide
 
-These are the guidelines for developing UI in Penpot, including the design system.
+These are the guidelines for developing UI in Penjar, including the design system.
 
 ## React & Rumext
 
-The UI in Penpot uses React v18 , with the help of [rumext](https://github.com/funcool/rumext) for providing Clojure bindings. See [Rumext's User Guide](https://funcool.github.io/rumext/latest/user-guide.html) to learn how to create React components with Clojure.
+The UI in Penjar uses React v18 , with the help of [rumext](https://github.com/funcool/rumext) for providing Clojure bindings. See [Rumext's User Guide](https://funcool.github.io/rumext/latest/user-guide.html) to learn how to create React components with Clojure.
 
 ## General guidelines
 
@@ -320,7 +320,7 @@ When applying typography in SCSS, use the proper mixin from the Design System.
   @include t.use-typography("body-small");
 }
 ```
-You can find the full list of available typography tokens in [Storybook](https://design.penpot.app/storybook/?path=/docs/foundations-typography--docs).
+You can find the full list of available typography tokens in [Storybook](https://design.penjar.app/storybook/?path=/docs/foundations-typography--docs).
 If the design you are implementing doesn't match any of them, ask a designer.
 
 
@@ -367,7 +367,7 @@ All UI code must be accessible. Ensure that your components are designed to be u
 
 ### Let the browser do the heavy lifting
 
-When developing UI components in Penpot, we believe it is crucial to ensure that our frontend code is semantic and follows HTML conventions. Semantic HTML helps improve the readability and accessibility of Penpot. Use appropriate HTML tags to define the structure and purpose of your content. This not only enhances the user experience but also ensures better accessibility.
+When developing UI components in Penjar, we believe it is crucial to ensure that our frontend code is semantic and follows HTML conventions. Semantic HTML helps improve the readability and accessibility of Penjar. Use appropriate HTML tags to define the structure and purpose of your content. This not only enhances the user experience but also ensures better accessibility.
 
 Whenever possible, leverage HTML semantic elements, which have been implemented by browsers and are accessible out of the box.
 
@@ -633,9 +633,9 @@ Creating an array of static elements and iterating over it to generate DOM may b
     [:> tool-button {:tool "text"}]])
 ```
 
-## Penpot Design System
+## Penjar Design System
 
-Penpot has started to use a **design system**, which is located at <code class="language-bash">frontend/src/app/main/ui/ds</code>. The components of the design system is published in a Storybook at [hourly.penpot.dev/storybook/](https://hourly.penpot.dev/storybook/) with the contents of the <code class="language-bash">develop</code> branch of the repository.
+Penjar has started to use a **design system**, which is located at <code class="language-bash">frontend/src/app/main/ui/ds</code>. The components of the design system is published in a Storybook at [hourly.penjar.dev/storybook/](https://hourly.penjar.dev/storybook/) with the contents of the <code class="language-bash">develop</code> branch of the repository.
 
 <mark>When a UI component is **available in the design system**, use it!</mark>. If it's not available but it's part of the Design System (ask the design folks if you are unsure), then do add it to the design system and Storybook.
 
@@ -667,13 +667,13 @@ We can leverage component tokens to easily implement variants as explained [here
 
 ### Using icons and SVG assets
 
-Please refer to the Storybook [documentation for icons](https://hourly.penpot.dev/storybook/?path=/docs/foundations-assets-icon--docs) and other [SVG assets](https://hourly.penpot.dev/storybook/?path=/docs/foundations-assets-rawsvg--docs) (logos, illustrations, etc.).
+Please refer to the Storybook [documentation for icons](https://hourly.penjar.dev/storybook/?path=/docs/foundations-assets-icon--docs) and other [SVG assets](https://hourly.penjar.dev/storybook/?path=/docs/foundations-assets-rawsvg--docs) (logos, illustrations, etc.).
 
 ### Storybook
 
 We use [Storybook](https://storybook.js.org/) to implement and showcase the components of the Design System.
 
-The Storybook is available at the <code class="language-bash">/storybook</code> path in the URL for each environment. For instance, the one built out of our <code class="language-bash">develop</code> branch is available at [hourly.penpot.dev/storybook](https://hourly.penpot.dev/storybook).
+The Storybook is available at the <code class="language-bash">/storybook</code> path in the URL for each environment. For instance, the one built out of our <code class="language-bash">develop</code> branch is available at [hourly.penjar.dev/storybook](https://hourly.penjar.dev/storybook).
 
 #### Local development
 
@@ -781,7 +781,7 @@ You can use Storybook's <code class="language-bash">\<Canvas></code> element to 
 
 When including codeblocks, please add code in Clojure syntax (not JSX).
 
-You can find an example MDX file in the [Buttons docs](https://hourly.penpot.dev/storybook/?path=/docs/buttons-docs--docs).
+You can find an example MDX file in the [Buttons docs](https://hourly.penjar.dev/storybook/?path=/docs/buttons-docs--docs).
 
 ### Replacing a deprecated component
 

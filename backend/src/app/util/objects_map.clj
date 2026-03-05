@@ -369,7 +369,7 @@
   (instance? ObjectsMap o))
 
 (fres/add-handlers!
- {:name "penpot/objects-map/v1"
+ {:name "penjar/objects-map/v1"
   :class ObjectsMap
   :wfn (fn [n w o]
          (fres/write-tag! w n)

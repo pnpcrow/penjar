@@ -53,11 +53,11 @@
 
 (defn set-data!
   ([e data]
-   (set-data! e "penpot/data" data))
+   (set-data! e "penjar/data" data))
   ([e data-type data]
    (let [dt (.-dataTransfer e)]
      (if (or (str/starts-with? data-type "application")
-             (str/starts-with? data-type "penpot"))
+             (str/starts-with? data-type "penjar"))
        (.setData dt data-type (t/encode-str data))
        (.setData dt data-type data))
      e)))
@@ -113,13 +113,13 @@
 
 (defn get-data
   ([e]
-   (get-data e "penpot/data"))
+   (get-data e "penjar/data"))
   ([e data-type]
    (let [dt (.-dataTransfer e)
          data (.getData dt data-type)]
      (cond-> data
        (and (some? data) (not= data "")
-            (or (str/starts-with? data-type "penpot")
+            (or (str/starts-with? data-type "penjar")
                 (= data-type "application/json")))
        (t/decode-str)))))
 

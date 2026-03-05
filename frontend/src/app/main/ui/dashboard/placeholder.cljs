@@ -30,7 +30,7 @@
            (st/emit! (ptk/event ::ev/event {::ev/name "explore-libraries-click"
                                             ::ev/origin "dashboard"
                                             :section "empty-placeholder-projects"}))
-           (dom/open-new-window "https://penpot.app/penpothub/libraries-templates")))
+           (dom/open-new-window "https://penjar.app/penjarhub/libraries-templates")))
 
         on-import
         (mf/use-fn #(dom/click (mf/ref-val file-input)))]
@@ -50,7 +50,7 @@
       [:div {:class (stl/css :empty-project-card-title)}
        (tr "dashboard.empty-project.import")]
       [:div {:class (stl/css :empty-project-card-subtitle)}
-       (tr "dashboard.empty-project.import-penpot")]]
+       (tr "dashboard.empty-project.import-penjar")]]
 
      [:div {:class (stl/css :empty-project-card)
             :on-click on-add-library

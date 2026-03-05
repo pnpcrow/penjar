@@ -1,6 +1,6 @@
 ---
 title: Backend app
-desc: Dive into self-hosting, configuration, developer insights (architecture, data model), integration, and troubleshooting. See Penpot's Technical Guide.
+desc: Dive into self-hosting, configuration, developer insights (architecture, data model), integration, and troubleshooting. See Penjar's Technical Guide.
 ---
 
 # Backend app
@@ -21,7 +21,7 @@ and detecting unused media attachment, for removing them from the file storage.
 
 ## Backend structure
 
-Penpot backend app code resides under <code class="language-text">backend/src/app</code> path in the main repository.
+Penjar backend app code resides under <code class="language-text">backend/src/app</code> path in the main repository.
 
 @startuml BackendGeneral
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml

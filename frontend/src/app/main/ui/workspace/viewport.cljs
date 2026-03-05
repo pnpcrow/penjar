@@ -366,7 +366,7 @@
        :class (stl/css :render-shapes)
        :xmlns "http://www.w3.org/2000/svg"
        :xmlnsXlink "http://www.w3.org/1999/xlink"
-       :xmlns:penpot "https://penpot.app/xmlns"
+       :xmlns:penjar "https://penjar.app/xmlns"
        :preserveAspectRatio "xMidYMid meet"
        :key (str "render" page-id)
        :width (:width vport 0)

@@ -1,4 +1,4 @@
-import { LibraryColor } from '@penpot/plugin-types';
+import { LibraryColor } from '@penjar/plugin-types';
 import { TokenStructure } from '../../model';
 
 function transformToRgba({

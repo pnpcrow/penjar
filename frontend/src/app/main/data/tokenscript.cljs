@@ -1,6 +1,6 @@
 (ns app.main.data.tokenscript
   (:require
-   ["@penpot/tokenscript" :refer [BaseSymbolType
+   ["@penjar/tokenscript" :refer [BaseSymbolType
                                   ColorSymbol
                                   ListSymbol NumberSymbol
                                   NumberWithUnitSymbol
@@ -50,7 +50,7 @@
   (instance? ProcessorError err))
 
 ;; Conversion Tools ------------------------------------------------------------
-;; Helpers to convert tokenscript symbols to penpot accepted formats
+;; Helpers to convert tokenscript symbols to penjar accepted formats
 
 (defn color-symbol->hex-string [^js v]
   (when (color-symbol? v)
@@ -61,7 +61,7 @@
     1
     (or (.getAttribute v "alpha") 1)))
 
-(defn color-symbol->penpot-color [^js v]
+(defn color-symbol->penjar-color [^js v]
   {:color (color-symbol->hex-string v)
    :opacity (color-alpha v)})
 
@@ -76,24 +76,24 @@
 (defn rem->px [^js v]
   (* (.-value v) 16))
 
-(declare tokenscript-symbols->penpot-unit)
+(declare tokenscript-symbols->penjar-unit)
 
-(defn structured-token->penpot-map
-  "Converts structured token (record or array) to penpot map format.
+(defn structured-token->penjar-map
+  "Converts structured token (record or array) to penjar map format.
   Structured tokens are non-primitive token types like `typography` or `box-shadow`."
   [^js token-symbol]
   (if (instance? js/Array (.-value token-symbol))
-    (mapv tokenscript-symbols->penpot-unit (.-value token-symbol))
+    (mapv tokenscript-symbols->penjar-unit (.-value token-symbol))
     (let [entries (es6-iterator-seq (.entries (.-value token-symbol)))]
       (into {} (map (fn [[k v :as V]]
-                      [(keyword k) (tokenscript-symbols->penpot-unit v)])
+                      [(keyword k) (tokenscript-symbols->penjar-unit v)])
                     entries)))))
 
-(defn tokenscript-symbols->penpot-unit [^js v]
+(defn tokenscript-symbols->penjar-unit [^js v]
   (cond
     (nil? v) nil
-    (structured-token? v) (structured-token->penpot-map v)
-    (list-symbol? v) (structured-token->penpot-map v)
+    (structured-token? v) (structured-token->penjar-map v)
+    (list-symbol? v) (structured-token->penjar-map v)
     (color-symbol? v) (.-value (.to v "hex"))
     (rem-number-with-unit? v) (rem->px v)
     (percent-number-with-unit? v) (/ (.-value v) 100)
@@ -131,13 +131,13 @@
          :getResult get-result}))
 
 (defn clj->token->tokenscript-token
-  "Convert penpot token into a format that tokenscript can handle."
+  "Convert penjar token into a format that tokenscript can handle."
   [{:keys [type value]}]
   #js {"$type" (name type)
        "$value" (clj->js value)})
 
 (defn clj-tokens->tokenscript-tokens
-  "Convert penpot map of tokens into tokenscript map structure.
+  "Convert penjar map of tokens into tokenscript map structure.
   tokenscript accepts a map of [token-name {\"$type\": string, \"$value\": any}]"
   [tokens]
   (let [token-map (js/Map.)]

@@ -89,7 +89,7 @@
         ],
         "~:pages-index": {
             "~u5b7ebd2b-2907-80db-8005-b9d67c20cf2f": {
-                "~#penpot/pointer": [
+                "~#penjar/pointer": [
                     "~u5b7ebd2b-2907-80db-8005-b9d67c21cbd3",
                     {
                         "~:created-at": "~m1739365911687"

@@ -7,4 +7,4 @@ Go to the team with this link:
 {{ public-uri }}/#/dashboard/team/{{team-id}}
 
 Enjoy!
-The Penpot team.
+The Penjar team.

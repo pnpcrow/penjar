@@ -114,7 +114,7 @@
          fills
          (cond
            ;; DEPRECATED: still here for backward compatibility with
-           ;; old penpot files that still has a single color.
+           ;; old penjar files that still has a single color.
            (or (some? (:fill-color data))
                (some? (:fill-opacity data))
                (some? (:fill-color-gradient data)))

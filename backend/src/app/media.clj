@@ -145,7 +145,7 @@
   (let [{:keys [path mtype]} input
         format (or (cm/mtype->format mtype) format)
         ext    (cm/format->extension format)
-        tmp    (tmp/tempfile :prefix "penpot.media." :suffix ext)]
+        tmp    (tmp/tempfile :prefix "penjar.media." :suffix ext)]
 
     (doto (ConvertCmd.)
       (.run operation (into-array (map str [path tmp]))))
@@ -322,7 +322,7 @@
                                                  {:method :get :uri uri}
                                                  {:response-type :input-stream})
           {:keys [size mtype]} (parse-and-validate response)
-          path    (tmp/tempfile :prefix "penpot.media.download.")
+          path    (tmp/tempfile :prefix "penjar.media.download.")
           written (io/write* path body :size size)]
 
       (when (not= written size)
@@ -341,7 +341,7 @@
 (defmethod process :generate-fonts
   [{:keys [input] :as params}]
   (letfn [(ttf->otf [data]
-            (let [finput  (tmp/tempfile :prefix "penpot.font." :suffix "")
+            (let [finput  (tmp/tempfile :prefix "penjar.font." :suffix "")
                   foutput (fs/path (str finput ".otf"))
                   _       (io/write* finput data)
                   res     (sh/sh "fontforge" "-lang=ff" "-c"
@@ -352,7 +352,7 @@
                 foutput)))
 
           (otf->ttf [data]
-            (let [finput  (tmp/tempfile :prefix "penpot.font." :suffix "")
+            (let [finput  (tmp/tempfile :prefix "penjar.font." :suffix "")
                   foutput (fs/path (str finput ".ttf"))
                   _       (io/write* finput data)
                   res     (sh/sh "fontforge" "-lang=ff" "-c"
@@ -366,7 +366,7 @@
             ;; NOTE: foutput is not used directly, it represents the
             ;; default output of the execution of the underlying
             ;; command.
-            (let [finput  (tmp/tempfile :prefix "penpot.font." :suffix "")
+            (let [finput  (tmp/tempfile :prefix "penjar.font." :suffix "")
                   foutput (fs/path (str finput ".woff"))
                   _       (io/write* finput data)
                   res     (sh/sh "sfnt2woff" (str finput))]
@@ -374,7 +374,7 @@
                 foutput)))
 
           (woff->sfnt [data]
-            (let [finput  (tmp/tempfile :prefix "penpot" :suffix "")
+            (let [finput  (tmp/tempfile :prefix "penjar" :suffix "")
                   _       (io/write* finput data)
                   res     (sh/sh "woff2sfnt" (str finput)
                                  :out-enc :bytes)]
@@ -383,7 +383,7 @@
 
           (woff2->sfnt [data]
             ;; woff2_decompress outputs to same directory with .ttf extension
-            (let [finput  (tmp/tempfile :prefix "penpot.font." :suffix ".woff2")
+            (let [finput  (tmp/tempfile :prefix "penjar.font." :suffix ".woff2")
                   foutput (fs/path (str/replace (str finput) #"\.woff2$" ".ttf"))]
               (try
                 (io/write* finput data)

@@ -1074,7 +1074,7 @@
 
 (defn library-subcontext
   [plugin-id]
-  (obj/reify {:name "PenpotLibrarySubcontext"}
+  (obj/reify {:name "PenjarLibrarySubcontext"}
     :$plugin {:enumerable false :get (constantly plugin-id)}
 
     :local

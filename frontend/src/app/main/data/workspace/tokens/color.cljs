@@ -21,6 +21,6 @@
 (defn resolved-token-bullet-color [{:keys [resolved-value] :as token}]
   (if (contains? cf/flags :tokenscript)
     (when (and resolved-value (ts/color-symbol? resolved-value))
-      (ts/color-symbol->penpot-color resolved-value))
+      (ts/color-symbol->penjar-color resolved-value))
     (when (and resolved-value (cfo/color-token? token))
       (color-bullet-color resolved-value))))

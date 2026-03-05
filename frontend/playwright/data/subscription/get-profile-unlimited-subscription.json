@@ -1,7 +1,7 @@
 {
     "~:email": "foo@example.com",
     "~:is-demo": false,
-    "~:auth-backend": "penpot",
+    "~:auth-backend": "penjar",
     "~:fullname": "Princesa Leia",
     "~:modified-at": "~m1713533116365",
     "~:is-active": true,

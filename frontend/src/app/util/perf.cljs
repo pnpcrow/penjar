@@ -246,4 +246,4 @@
                             (.clearMarks js/performance)
                             (.clearMeasures js/performance)
                             (catch :default _ nil)))}]
-    (unchecked-set js/window "PenpotPerf" api)))
+    (unchecked-set js/window "PenjarPerf" api)))

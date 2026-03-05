@@ -77,7 +77,7 @@
             (rx/filter dp/profile-deleted-event?)
             (rx/map da/logged-out))
 
-       ;; Once profile is fetched, initialize all penpot application
+       ;; Once profile is fetched, initialize all penjar application
        ;; routes
        (->> stream
             (rx/filter dp/profile-fetched?)

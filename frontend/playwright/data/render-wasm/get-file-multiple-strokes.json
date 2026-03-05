@@ -436,7 +436,7 @@
                             "~:rotation": 0,
                             "~:grow-type": "~:fixed",
                             "~:content": {
-                                "~#penpot/path-data": "~bAQAAAAAAAAAAAAAAAAAAAAAAAACm6Y9DAAAJRAMAAADAyXlD4wIQRCW0I0NPCiJE9sBWQzqOK0QDAAAA4+aEQyUSNUS++9dDuQojRDj3xUPoxhlEAwAAALLys0MYgxBEpumPQwAACUSm6Y9DAAAJRA=="
+                                "~#penjar/path-data": "~bAQAAAAAAAAAAAAAAAAAAAAAAAACm6Y9DAAAJRAMAAADAyXlD4wIQRCW0I0NPCiJE9sBWQzqOK0QDAAAA4+aEQyUSNUS++9dDuQojRDj3xUPoxhlEAwAAALLys0MYgxBEpumPQwAACUSm6Y9DAAAJRA=="
                             },
                             "~:name": "Path",
                             "~:width": null,

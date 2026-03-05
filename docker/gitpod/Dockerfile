@@ -29,9 +29,9 @@ ENV NODE_VERSION=v16.17.0 \
     LC_ALL=en_US.UTF-8
 
 RUN set -ex; \
-    useradd -m -g users -s /bin/bash penpot; \
-    passwd penpot -d; \
-    echo "penpot ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+    useradd -m -g users -s /bin/bash penjar; \
+    passwd penjar -d; \
+    echo "penjar ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 RUN set -ex; \
     apt-get -qq update; \
@@ -107,16 +107,16 @@ USER gitpod
 
 ENV PATH="/usr/lib/jvm/openjdk16/bin:/usr/local/nodejs/bin:$PATH" \
     JAVA_HOME=/usr/lib/jvm/openjdk16 \
-    PENPOT_SMTP_ENABLED=true \
-    PENPOT_SMTP_HOST=localhost \
-    PENPOT_SMTP_PORT=1025 \
-    PENPOT_SMTP_USER= \
-    PENPOT_SMTP_PASSWORD= \
-    PENPOT_SMTP_SSL=false \
-    PENPOT_SMTP_TLS=false \
-    PENPOT_SMTP_DEFAULT_REPLY_TO=no-reply@example.com \
-    PENPOT_SMTP_DEFAULT_FROM=no-reply@example.com \
-    PENPOT_DATABASE_URI="postgresql://localhost/penpot" \
-    PENPOT_REDIS_URI="redis://localhost/0"
+    PENJAR_SMTP_ENABLED=true \
+    PENJAR_SMTP_HOST=localhost \
+    PENJAR_SMTP_PORT=1025 \
+    PENJAR_SMTP_USER= \
+    PENJAR_SMTP_PASSWORD= \
+    PENJAR_SMTP_SSL=false \
+    PENJAR_SMTP_TLS=false \
+    PENJAR_SMTP_DEFAULT_REPLY_TO=no-reply@example.com \
+    PENJAR_SMTP_DEFAULT_FROM=no-reply@example.com \
+    PENJAR_DATABASE_URI="postgresql://localhost/penjar" \
+    PENJAR_REDIS_URI="redis://localhost/0"
 
 # TODO Retrieve OpenLDAP from rroemhild/docker-test-openldap

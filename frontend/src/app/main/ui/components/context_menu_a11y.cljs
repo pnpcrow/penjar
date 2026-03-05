@@ -218,15 +218,15 @@
                                     :options options}]))
 
     (mf/with-effect [internal-id]
-      (ug/dispatch! (ug/event "penpot:context-menu:open" #js {:id internal-id})))
+      (ug/dispatch! (ug/event "penjar:context-menu:open" #js {:id internal-id})))
 
     (mf/with-effect [internal-id on-local-close]
       (letfn [(on-event [event]
                 (when-let [detail (unchecked-get event "detail")]
                   (when (not= internal-id (unchecked-get detail "id"))
                     (on-local-close event))))]
-        (ug/listen "penpot:context-menu:open" on-event)
-        (partial ug/unlisten "penpot:context-menu:open" on-event)))
+        (ug/listen "penjar:context-menu:open" on-event)
+        (partial ug/unlisten "penjar:context-menu:open" on-event)))
 
     (mf/with-effect [ids]
       (tm/schedule-on-idle

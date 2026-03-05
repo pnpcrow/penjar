@@ -3,7 +3,7 @@ msgstr ""
 "PO-Revision-Date: 2024-06-17 08:07+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Tamil "
-"<https://hosted.weblate.org/projects/penpot/frontend/ta/>\n"
+"<https://hosted.weblate.org/projects/penjar/frontend/ta/>\n"
 "Language: ta\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -20,7 +20,7 @@ msgstr "ஏற்கனவே ஒரு கணக்கு உள்ளதா?"
 msgid "auth.check-your-email"
 msgstr ""
 "உங்கள் மின்னஞ்சலைச் சரிபார்த்து, இணைப்பைக் கிளிக் செய்து சரிபார்த்து, "
-"Penpot ஐப் பயன்படுத்தத் தொடங்குங்கள்."
+"Penjar ஐப் பயன்படுத்தத் தொடங்குங்கள்."
 
 #: src/app/main/ui/auth/recovery.cljs:67
 msgid "auth.confirm-password"
@@ -159,7 +159,7 @@ msgstr "வெளியிடுங்கள்"
 
 #: src/app/main/ui/viewer/share_link.cljs:304, src/app/main/ui/viewer/share_link.cljs:315
 msgid "common.share-link.all-users"
-msgstr "அனைத்து Penpot பயனர்களும்"
+msgstr "அனைத்து Penjar பயனர்களும்"
 
 #: src/app/main/ui/viewer/share_link.cljs:204
 msgid "common.share-link.confirm-deletion-link-description"

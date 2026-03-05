@@ -1,5 +1,5 @@
 FROM ubuntu:24.04
-LABEL maintainer="Penpot <docker@penpot.app>"
+LABEL maintainer="Penjar <docker@penjar.app>"
 
 ENV LANG='C.UTF-8' \
     LC_ALL='C.UTF-8' \

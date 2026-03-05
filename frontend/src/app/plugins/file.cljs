@@ -229,7 +229,7 @@
        (fn [resolve reject]
          (let [type (or (parser/parse-keyword type) :all)]
            (cond
-             (and (some? format) (not (contains? #{"penpot" "zip"} format)))
+             (and (some? format) (not (contains? #{"penjar" "zip"} format)))
              (u/reject-not-valid reject :format (dm/str "Invalid format: " format))
 
              (not (contains? (set exports.files/valid-types) type))

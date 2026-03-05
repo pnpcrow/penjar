@@ -24,7 +24,7 @@ UPDATE profile
  WHERE password = '!';
 
 UPDATE profile
-   SET auth_backend = 'penpot'
+   SET auth_backend = 'penjar'
  WHERE password != '!';
 
 -- Table storing a permanent complaint table for register all

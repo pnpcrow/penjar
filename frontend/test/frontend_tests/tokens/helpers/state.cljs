@@ -50,7 +50,7 @@
   (stop-on ::end))
 
 ;; Support for async events in tests
-;; https://chat.kaleidos.net/penpot-partners/pl/tz1yoes3w3fr9qanxqpuhoz3ch
+;; https://chat.kaleidos.net/penjar-partners/pl/tz1yoes3w3fr9qanxqpuhoz3ch
 (defn run-store
   "Async version of `frontend-tests.helpers.state/run-store`."
   ([store done events completed-cb]

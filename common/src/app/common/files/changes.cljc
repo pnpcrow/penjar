@@ -321,7 +321,7 @@
      [:path :string]
      [:main-instance-id ::sm/uuid]
      [:main-instance-page ::sm/uuid]
-     ;; Only used by external processes (like Penpot SDK)
+     ;; Only used by external processes (like Penjar SDK)
      [:variant-id {:optional true} ::sm/uuid]
      [:variant-properties {:optional true} [:vector ctv/schema:variant-property]]]]
 

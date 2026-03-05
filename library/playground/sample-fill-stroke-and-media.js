@@ -1,12 +1,12 @@
-import * as penpot from "#self";
+import * as penjar from "#self";
 import { writeFile, readFile } from "fs/promises";
 import { createWriteStream } from "fs";
 import { Writable } from "stream";
 
-// console.log(penpot);
+// console.log(penjar);
 
 (async function () {
-  const context = penpot.createBuildContext({referer:"playground"});
+  const context = penjar.createBuildContext({referer:"playground"});
 
   {
     context.addFile({ name: "Test File 1" });
@@ -84,7 +84,7 @@ import { Writable } from "stream";
       console.log(`Procesing ${opts.item}/${opts.total}: ${opts.path}`);
     };
 
-    let result = await penpot.exportAsBytes(context, {onProgress});
+    let result = await penjar.exportAsBytes(context, {onProgress});
     await writeFile("sample-sync.zip", result);
   }
 
@@ -93,7 +93,7 @@ import { Writable } from "stream";
   //   const output = createWriteStream('sample-stream.zip');
   //   // Wrap Node's stream in a WHATWG WritableStream
   //   const writable = Writable.toWeb(output);
-  //   await penpot.exportStream(context, writable);
+  //   await penjar.exportStream(context, writable);
   // }
 })()
   .catch((cause) => {

@@ -33,7 +33,7 @@
         ],
         "~:pages-index": {
             "~u03bff843-920f-81a1-8004-756365e1eb6b": {
-                "~#penpot/pointer": [
+                "~#penjar/pointer": [
                     "~u03bff843-920f-81a1-8004-7563acdc8ca1",
                     {
                         "~:created-at": "~m1717592543090"
