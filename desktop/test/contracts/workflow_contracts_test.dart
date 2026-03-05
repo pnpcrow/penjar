@@ -1193,6 +1193,64 @@ void main() {
       },
     );
 
+    test('supports nested backend response envelopes and message aliases', () {
+      final _BackendResponseTransportClient transportClient =
+          _BackendResponseTransportClient(<String, Map<String, Object?>>{
+            RemoteStubOperationIds.signIn: <String, Object?>{
+              'message': 'Backend auth envelope applied.',
+              'data': <String, Object?>{
+                'authState': <String, Object?>{
+                  'rememberSession': true,
+                  'signedIn': true,
+                },
+              },
+            },
+            RemoteStubOperationIds.createProject: <String, Object?>{
+              'result': <String, Object?>{
+                'message': 'Backend project envelope applied.',
+                'workflowState': <String, Object?>{
+                  'projects': <Map<String, Object?>>[
+                    <String, Object?>{
+                      'id': 'project-envelope',
+                      'name': 'Envelope Project',
+                      'files': <String>['envelope.penjar'],
+                    },
+                  ],
+                  'selectedProjectIndex': 0,
+                },
+              },
+            },
+          });
+      final RemoteStubAuthSessionContract authContract =
+          RemoteStubAuthSessionContract(transportClient: transportClient);
+      final RemoteStubProjectLifecycleContract projectContract =
+          RemoteStubProjectLifecycleContract(transportClient: transportClient);
+
+      authContract.signIn(
+        const AuthSignInRequest(
+          email: 'designer@penjar.app',
+          password: 'desktop-pass',
+        ),
+      );
+      expect(authContract.state.rememberSession, isTrue);
+      expect(authContract.state.signedIn, isTrue);
+      expect(
+        authContract.state.status,
+        '[remote-stub] Backend auth envelope applied.',
+      );
+
+      projectContract.createProject('ignored');
+      expect(projectContract.state.projects, hasLength(1));
+      expect(projectContract.state.selectedProject.name, 'Envelope Project');
+      expect(projectContract.state.selectedProject.files, <String>[
+        'envelope.penjar',
+      ]);
+      expect(
+        projectContract.state.status,
+        '[remote-stub] Backend project envelope applied.',
+      );
+    });
+
     test(
       'skips auth delegate mutation when backend response snapshot is present',
       () {

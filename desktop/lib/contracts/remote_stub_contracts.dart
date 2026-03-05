@@ -721,17 +721,40 @@ Map<String, Object?> _extractBackendSuccessPayload(String rawBody) {
   }
 }
 
+Map<String, Object?> _extractBackendEnvelopePayload(
+  Map<String, Object?> responsePayload,
+) {
+  for (final String key in const <String>['result', 'data']) {
+    final Map<String, Object?> nestedPayload = _coerceStringKeyedMap(
+      responsePayload[key],
+    );
+    if (nestedPayload.isNotEmpty) {
+      return nestedPayload;
+    }
+  }
+  return responsePayload;
+}
+
 Map<String, Object?> _extractBackendStatePayload(
   Map<String, Object?> responsePayload, {
+  required Map<String, Object?> envelopePayload,
   required List<String> aliases,
 }) {
-  for (final String alias in <String>['state', 'workflowState', ...aliases]) {
-    final Map<String, Object?> aliasPayload = _coerceStringKeyedMap(
-      responsePayload[alias],
-    );
-    if (aliasPayload.isNotEmpty) {
-      return aliasPayload;
+  for (final Map<String, Object?> source in <Map<String, Object?>>[
+    responsePayload,
+    envelopePayload,
+  ]) {
+    for (final String alias in <String>['state', 'workflowState', ...aliases]) {
+      final Map<String, Object?> aliasPayload = _coerceStringKeyedMap(
+        source[alias],
+      );
+      if (aliasPayload.isNotEmpty) {
+        return aliasPayload;
+      }
     }
+  }
+  if (!identical(envelopePayload, responsePayload)) {
+    return envelopePayload;
   }
   return responsePayload;
 }
@@ -745,13 +768,37 @@ bool _containsAnyKey(Map<String, Object?> payload, Set<String> keys) {
   return false;
 }
 
+bool _hasBackendStatus({
+  required Map<String, Object?> responsePayload,
+  required Map<String, Object?> envelopePayload,
+  required Map<String, Object?> statePayload,
+}) {
+  return _coerceNonEmptyString(responsePayload['status']) != null ||
+      _coerceNonEmptyString(responsePayload['message']) != null ||
+      _coerceNonEmptyString(responsePayload['detail']) != null ||
+      _coerceNonEmptyString(envelopePayload['status']) != null ||
+      _coerceNonEmptyString(envelopePayload['message']) != null ||
+      _coerceNonEmptyString(envelopePayload['detail']) != null ||
+      _coerceNonEmptyString(statePayload['status']) != null ||
+      _coerceNonEmptyString(statePayload['message']) != null ||
+      _coerceNonEmptyString(statePayload['detail']) != null;
+}
+
 String _resolveBackendStatusValue({
   required Map<String, Object?> responsePayload,
+  required Map<String, Object?> envelopePayload,
   required Map<String, Object?> statePayload,
   required String fallbackStatus,
 }) {
   return _coerceNonEmptyString(responsePayload['status']) ??
+      _coerceNonEmptyString(responsePayload['message']) ??
+      _coerceNonEmptyString(responsePayload['detail']) ??
+      _coerceNonEmptyString(envelopePayload['status']) ??
+      _coerceNonEmptyString(envelopePayload['message']) ??
+      _coerceNonEmptyString(envelopePayload['detail']) ??
       _coerceNonEmptyString(statePayload['status']) ??
+      _coerceNonEmptyString(statePayload['message']) ??
+      _coerceNonEmptyString(statePayload['detail']) ??
       fallbackStatus;
 }
 
@@ -788,17 +835,23 @@ AuthSessionState? _authStateFromBackendPayload(
   if (responsePayload.isEmpty) {
     return null;
   }
+  final Map<String, Object?> envelopePayload = _extractBackendEnvelopePayload(
+    responsePayload,
+  );
   final Map<String, Object?> statePayload = _extractBackendStatePayload(
     responsePayload,
+    envelopePayload: envelopePayload,
     aliases: const <String>['authState'],
   );
   final bool hasFields = _containsAnyKey(statePayload, const <String>{
     'rememberSession',
     'signedIn',
   });
-  final bool hasStatus =
-      _coerceNonEmptyString(responsePayload['status']) != null ||
-      _coerceNonEmptyString(statePayload['status']) != null;
+  final bool hasStatus = _hasBackendStatus(
+    responsePayload: responsePayload,
+    envelopePayload: envelopePayload,
+    statePayload: statePayload,
+  );
   if (!hasFields && !hasStatus) {
     return null;
   }
@@ -809,6 +862,7 @@ AuthSessionState? _authStateFromBackendPayload(
     signedIn: _coerceBool(statePayload['signedIn']) ?? currentState.signedIn,
     status: _resolveBackendStatusValue(
       responsePayload: responsePayload,
+      envelopePayload: envelopePayload,
       statePayload: statePayload,
       fallbackStatus: currentState.status,
     ),
@@ -822,17 +876,23 @@ ProjectLifecycleState? _projectStateFromBackendPayload(
   if (responsePayload.isEmpty) {
     return null;
   }
+  final Map<String, Object?> envelopePayload = _extractBackendEnvelopePayload(
+    responsePayload,
+  );
   final Map<String, Object?> statePayload = _extractBackendStatePayload(
     responsePayload,
+    envelopePayload: envelopePayload,
     aliases: const <String>['projectState', 'projectsState'],
   );
   final bool hasFields = _containsAnyKey(statePayload, const <String>{
     'projects',
     'selectedProjectIndex',
   });
-  final bool hasStatus =
-      _coerceNonEmptyString(responsePayload['status']) != null ||
-      _coerceNonEmptyString(statePayload['status']) != null;
+  final bool hasStatus = _hasBackendStatus(
+    responsePayload: responsePayload,
+    envelopePayload: envelopePayload,
+    statePayload: statePayload,
+  );
   if (!hasFields && !hasStatus) {
     return null;
   }
@@ -871,6 +931,7 @@ ProjectLifecycleState? _projectStateFromBackendPayload(
     selectedProjectIndex: selectedProjectIndex,
     status: _resolveBackendStatusValue(
       responsePayload: responsePayload,
+      envelopePayload: envelopePayload,
       statePayload: statePayload,
       fallbackStatus: currentState.status,
     ),
@@ -884,17 +945,23 @@ CanvasEditingState? _canvasStateFromBackendPayload(
   if (responsePayload.isEmpty) {
     return null;
   }
+  final Map<String, Object?> envelopePayload = _extractBackendEnvelopePayload(
+    responsePayload,
+  );
   final Map<String, Object?> statePayload = _extractBackendStatePayload(
     responsePayload,
+    envelopePayload: envelopePayload,
     aliases: const <String>['canvasState'],
   );
   final bool hasFields = _containsAnyKey(statePayload, const <String>{
     'shapes',
     'selectedIndex',
   });
-  final bool hasStatus =
-      _coerceNonEmptyString(responsePayload['status']) != null ||
-      _coerceNonEmptyString(statePayload['status']) != null;
+  final bool hasStatus = _hasBackendStatus(
+    responsePayload: responsePayload,
+    envelopePayload: envelopePayload,
+    statePayload: statePayload,
+  );
   if (!hasFields && !hasStatus) {
     return null;
   }
@@ -931,6 +998,7 @@ CanvasEditingState? _canvasStateFromBackendPayload(
     selectedIndex: selectedIndex,
     status: _resolveBackendStatusValue(
       responsePayload: responsePayload,
+      envelopePayload: envelopePayload,
       statePayload: statePayload,
       fallbackStatus: currentState.status,
     ),
@@ -944,17 +1012,23 @@ AssetManagementState? _assetStateFromBackendPayload(
   if (responsePayload.isEmpty) {
     return null;
   }
+  final Map<String, Object?> envelopePayload = _extractBackendEnvelopePayload(
+    responsePayload,
+  );
   final Map<String, Object?> statePayload = _extractBackendStatePayload(
     responsePayload,
+    envelopePayload: envelopePayload,
     aliases: const <String>['assetState', 'assetsState'],
   );
   final bool hasFields = _containsAnyKey(statePayload, const <String>{
     'assets',
     'selectedAssetIndex',
   });
-  final bool hasStatus =
-      _coerceNonEmptyString(responsePayload['status']) != null ||
-      _coerceNonEmptyString(statePayload['status']) != null;
+  final bool hasStatus = _hasBackendStatus(
+    responsePayload: responsePayload,
+    envelopePayload: envelopePayload,
+    statePayload: statePayload,
+  );
   if (!hasFields && !hasStatus) {
     return null;
   }
@@ -990,6 +1064,7 @@ AssetManagementState? _assetStateFromBackendPayload(
     selectedAssetIndex: selectedAssetIndex,
     status: _resolveBackendStatusValue(
       responsePayload: responsePayload,
+      envelopePayload: envelopePayload,
       statePayload: statePayload,
       fallbackStatus: currentState.status,
     ),
@@ -1003,8 +1078,12 @@ CollaborationContextState? _collaborationStateFromBackendPayload(
   if (responsePayload.isEmpty) {
     return null;
   }
+  final Map<String, Object?> envelopePayload = _extractBackendEnvelopePayload(
+    responsePayload,
+  );
   final Map<String, Object?> statePayload = _extractBackendStatePayload(
     responsePayload,
+    envelopePayload: envelopePayload,
     aliases: const <String>['collaborationState'],
   );
   final bool hasFields = _containsAnyKey(statePayload, const <String>{
@@ -1012,9 +1091,11 @@ CollaborationContextState? _collaborationStateFromBackendPayload(
     'threads',
     'selectedThreadIndex',
   });
-  final bool hasStatus =
-      _coerceNonEmptyString(responsePayload['status']) != null ||
-      _coerceNonEmptyString(statePayload['status']) != null;
+  final bool hasStatus = _hasBackendStatus(
+    responsePayload: responsePayload,
+    envelopePayload: envelopePayload,
+    statePayload: statePayload,
+  );
   if (!hasFields && !hasStatus) {
     return null;
   }
@@ -1052,6 +1133,7 @@ CollaborationContextState? _collaborationStateFromBackendPayload(
     selectedThreadIndex: selectedThreadIndex,
     status: _resolveBackendStatusValue(
       responsePayload: responsePayload,
+      envelopePayload: envelopePayload,
       statePayload: statePayload,
       fallbackStatus: currentState.status,
     ),
@@ -1065,17 +1147,23 @@ InspectHandoffState? _inspectStateFromBackendPayload(
   if (responsePayload.isEmpty) {
     return null;
   }
+  final Map<String, Object?> envelopePayload = _extractBackendEnvelopePayload(
+    responsePayload,
+  );
   final Map<String, Object?> statePayload = _extractBackendStatePayload(
     responsePayload,
+    envelopePayload: envelopePayload,
     aliases: const <String>['inspectState'],
   );
   final bool hasFields = _containsAnyKey(statePayload, const <String>{
     'target',
     'snippet',
   });
-  final bool hasStatus =
-      _coerceNonEmptyString(responsePayload['status']) != null ||
-      _coerceNonEmptyString(statePayload['status']) != null;
+  final bool hasStatus = _hasBackendStatus(
+    responsePayload: responsePayload,
+    envelopePayload: envelopePayload,
+    statePayload: statePayload,
+  );
   if (!hasFields && !hasStatus) {
     return null;
   }
@@ -1086,6 +1174,7 @@ InspectHandoffState? _inspectStateFromBackendPayload(
         _coerceNonEmptyString(statePayload['snippet']) ?? currentState.snippet,
     status: _resolveBackendStatusValue(
       responsePayload: responsePayload,
+      envelopePayload: envelopePayload,
       statePayload: statePayload,
       fallbackStatus: currentState.status,
     ),
@@ -1099,16 +1188,22 @@ ExportWorkflowState? _exportStateFromBackendPayload(
   if (responsePayload.isEmpty) {
     return null;
   }
+  final Map<String, Object?> envelopePayload = _extractBackendEnvelopePayload(
+    responsePayload,
+  );
   final Map<String, Object?> statePayload = _extractBackendStatePayload(
     responsePayload,
+    envelopePayload: envelopePayload,
     aliases: const <String>['exportState'],
   );
   final bool hasFields = _containsAnyKey(statePayload, const <String>{
     'artifacts',
   });
-  final bool hasStatus =
-      _coerceNonEmptyString(responsePayload['status']) != null ||
-      _coerceNonEmptyString(statePayload['status']) != null;
+  final bool hasStatus = _hasBackendStatus(
+    responsePayload: responsePayload,
+    envelopePayload: envelopePayload,
+    statePayload: statePayload,
+  );
   if (!hasFields && !hasStatus) {
     return null;
   }
@@ -1142,6 +1237,7 @@ ExportWorkflowState? _exportStateFromBackendPayload(
     artifacts: artifacts,
     status: _resolveBackendStatusValue(
       responsePayload: responsePayload,
+      envelopePayload: envelopePayload,
       statePayload: statePayload,
       fallbackStatus: currentState.status,
     ),
@@ -1155,8 +1251,12 @@ DiagnosticsRecoveryState? _diagnosticsStateFromBackendPayload(
   if (responsePayload.isEmpty) {
     return null;
   }
+  final Map<String, Object?> envelopePayload = _extractBackendEnvelopePayload(
+    responsePayload,
+  );
   final Map<String, Object?> statePayload = _extractBackendStatePayload(
     responsePayload,
+    envelopePayload: envelopePayload,
     aliases: const <String>['diagnosticsState'],
   );
   final bool hasFields = _containsAnyKey(statePayload, const <String>{
@@ -1164,9 +1264,11 @@ DiagnosticsRecoveryState? _diagnosticsStateFromBackendPayload(
     'mcpHealthy',
     'reconnectAttempts',
   });
-  final bool hasStatus =
-      _coerceNonEmptyString(responsePayload['status']) != null ||
-      _coerceNonEmptyString(statePayload['status']) != null;
+  final bool hasStatus = _hasBackendStatus(
+    responsePayload: responsePayload,
+    envelopePayload: envelopePayload,
+    statePayload: statePayload,
+  );
   if (!hasFields && !hasStatus) {
     return null;
   }
@@ -1181,6 +1283,7 @@ DiagnosticsRecoveryState? _diagnosticsStateFromBackendPayload(
         currentState.reconnectAttempts,
     status: _resolveBackendStatusValue(
       responsePayload: responsePayload,
+      envelopePayload: envelopePayload,
       statePayload: statePayload,
       fallbackStatus: currentState.status,
     ),

@@ -5025,8 +5025,55 @@ Establish a concrete Flutter shell route/state bridge baseline by wiring section
   - selected section survives `restartAndRestore()` in parity coverage.
   - full verification gate (`desktop:verify:full`) remains green after restoration bridge integration.
 
+## Unit WS-D-115: Remote-stub backend envelope/schema compatibility normalization
+
+### Planned objective
+
+Improve remote-stub backend response compatibility by normalizing nested success-envelope parsing (`result`/`data`) and status aliases (`message`/`detail`) so response-driven state transitions remain stable as backend payload wrappers evolve.
+
+### Implemented changes
+
+1. Extended backend response parser helpers in `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - added `_extractBackendEnvelopePayload(...)` to unwrap envelope-level payloads (`result`, `data`),
+   - updated `_extractBackendStatePayload(...)` to resolve state payload from both root and envelope scopes,
+   - added `_hasBackendStatus(...)` helper and expanded `_resolveBackendStatusValue(...)` to include `status`, `message`, `detail` across root/envelope/state scopes.
+2. Updated all domain parser paths (auth/project/canvas/assets/collaboration/inspect/export/diagnostics):
+   - now read envelope-aware state payloads,
+   - now detect status aliases consistently before deciding whether backend payload is actionable,
+   - preserve existing fallback behavior when backend payload lacks state/status semantics.
+3. Added regression coverage in `desktop/test/contracts/workflow_contracts_test.dart`:
+   - new test `supports nested backend response envelopes and message aliases` verifies:
+     - auth payload via `data.authState` + root `message`,
+     - project payload via `result.workflowState` + nested `message`.
+4. Synced continuity docs:
+   - `desktop-flutter-development-runbook.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+5. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/contracts/desktop_contract_bundle_test.dart`,
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - compatibility of response-driven mutation path with nested backend success envelopes,
+  - status-text propagation coverage across alternate backend status keys,
+  - non-regression of existing remote-stub transport/degraded-path behavior.
+- **Issues found during review**
+  1. Existing parser flow assumed root-level state payloads and could ignore backend snapshots wrapped under `result` or `data`.
+  2. Status propagation depended on `status` key only, which reduced compatibility with backends returning `message` or `detail`.
+  3. Without envelope-specific regression tests, parser drift risk remained high for future backend schema updates.
+- **Fix applied**
+  1. Added envelope unwrapping helper and dual-scope state payload lookup.
+  2. Expanded status resolution logic to include alias keys across root/envelope/state scopes.
+  3. Added contract-level regression test covering nested envelope + alias behavior and re-ran full verification.
+- **Post-fix validation criteria**
+  - response-driven state transitions work for both root and nested envelope payload schemas.
+  - backend status text remains visible when backend uses `status` or `message` aliases.
+  - full verification gate (`desktop:verify:full`) remains green after parser compatibility normalization.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata, shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline, and runtime mode parity/matrix gates, but native deep-link/window-route interoperability and live backend schema alignment/session persistence integration are still pending.
+- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata, shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline, backend envelope/schema compatibility normalization, and runtime mode parity/matrix gates, but native deep-link/window-route interoperability and durable backend session persistence integration are still pending.
 - Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard plus coverage-contract regression guard (set-diff optimized uncovered/missing detection), desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks with in-memory duplicate-key tracking + base-check markdown report emission) plus evidence-index contract regression guard (including dedicated missing-base-check-report attachment, missing-index-file, invalid-decision, and promoted-placeholder cases, dedicated tests workflow release-evidence guard base+contract enforcement/upload, and parity matrix base-check artifact retention), update-manifest guard automation with validation + contract report artifacts (including dedicated tests workflow update-manifest guard job contract enforcement/upload), on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
