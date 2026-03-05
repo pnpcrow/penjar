@@ -122,6 +122,25 @@ void main() {
   });
 
   testWidgets(
+    'remote-stub mode surfaces forwarded auth sign-in payload profile label',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubAuthForwardSignInCredentials: true,
+        ),
+      );
+
+      await openWorkflowSection(tester, 'diagnostics');
+      expect(
+        find.textContaining('Remote profile: auth-sign-in-payload: forwarded'),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
     'strict schema mode blocks malformed restore/refresh auth fallback',
     (WidgetTester tester) async {
       await pumpDesktopApp(

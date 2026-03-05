@@ -179,6 +179,7 @@ DesktopRemoteStubProfile _buildRemoteStubProfile({
   required RemoteStubTransportClient transportClient,
   required RemoteStubAuthStateStore authStateStore,
   bool authStrictBackendSchema = false,
+  bool authForwardSignInCredentials = false,
   String authStoreLabelOverride = '',
 }) {
   final RemoteStubTransportProfile transportProfile = transportClient.profile;
@@ -186,6 +187,9 @@ DesktopRemoteStubProfile _buildRemoteStubProfile({
       ? authStoreLabelOverride.trim()
       : _describeAuthStateStore(authStateStore);
   final String authBackendSchemaLabel = authStrictBackendSchema ? 'strict' : '';
+  final String authSignInPayloadLabel = authForwardSignInCredentials
+      ? 'forwarded'
+      : '';
 
   return DesktopRemoteStubProfile(
     unavailable: faultProfile.unavailable,
@@ -197,6 +201,7 @@ DesktopRemoteStubProfile _buildRemoteStubProfile({
     transportLabel: transportProfile.transportLabel,
     authStoreLabel: authStoreLabel,
     authBackendSchemaLabel: authBackendSchemaLabel,
+    authSignInPayloadLabel: authSignInPayloadLabel,
   );
 }
 
@@ -453,6 +458,7 @@ class DesktopRemoteStubProfile {
     this.transportLabel = '',
     this.authStoreLabel = '',
     this.authBackendSchemaLabel = '',
+    this.authSignInPayloadLabel = '',
   });
 
   final bool unavailable;
@@ -462,6 +468,7 @@ class DesktopRemoteStubProfile {
   final String transportLabel;
   final String authStoreLabel;
   final String authBackendSchemaLabel;
+  final String authSignInPayloadLabel;
 
   bool get isEmpty =>
       !unavailable &&
@@ -469,7 +476,8 @@ class DesktopRemoteStubProfile {
       transportBlockedOperations.isEmpty &&
       transportLabel.trim().isEmpty &&
       authStoreLabel.trim().isEmpty &&
-      authBackendSchemaLabel.trim().isEmpty;
+      authBackendSchemaLabel.trim().isEmpty &&
+      authSignInPayloadLabel.trim().isEmpty;
 
   String get summaryLabel {
     if (isEmpty) {
@@ -496,6 +504,9 @@ class DesktopRemoteStubProfile {
     }
     if (authBackendSchemaLabel.trim().isNotEmpty) {
       parts.add('auth-backend-schema: $authBackendSchemaLabel');
+    }
+    if (authSignInPayloadLabel.trim().isNotEmpty) {
+      parts.add('auth-sign-in-payload: $authSignInPayloadLabel');
     }
     return parts.join(' · ');
   }
@@ -610,6 +621,7 @@ class DesktopContractBundle {
         transportClient: transportClient,
         authStateStore: remoteStubAuthStateStore,
         authStrictBackendSchema: remoteStubAuthStrictBackendSchema,
+        authForwardSignInCredentials: remoteStubAuthForwardSignInCredentials,
         authStoreLabelOverride:
             remoteStubAuthStateStoreResolution.profileAuthStoreLabel,
       ),
@@ -645,6 +657,8 @@ class DesktopContractBundle {
               transportClient: remoteStubTransportClient,
               authStateStore: remoteStubAuthStateStore,
               authStrictBackendSchema: remoteStubAuthStrictBackendSchema,
+              authForwardSignInCredentials:
+                  remoteStubAuthForwardSignInCredentials,
             ),
       ),
     };
@@ -720,6 +734,7 @@ class DesktopContractBundle {
             transportClient: transportClient,
             authStateStore: authStateStore,
             authStrictBackendSchema: authStrictBackendSchema,
+            authForwardSignInCredentials: authForwardSignInCredentials,
           ),
     );
   }

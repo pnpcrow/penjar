@@ -301,6 +301,20 @@ void main() {
     );
   });
 
+  test('remote-stub profile exposes forwarded auth sign-in payload label', () {
+    final DesktopContractBundle bundle = DesktopContractBundle.fromMode(
+      DesktopContractMode.remoteStub,
+      remoteStubAuthForwardSignInCredentials: true,
+    );
+
+    expect(bundle.remoteStubProfile?.isEmpty, isFalse);
+    expect(bundle.remoteStubProfile?.authSignInPayloadLabel, 'forwarded');
+    expect(
+      bundle.remoteStubProfile?.summaryLabel,
+      contains('auth-sign-in-payload: forwarded'),
+    );
+  });
+
   test('remote-stub bundle forwards auth state store persistence seam', () {
     final RemoteStubMemoryAuthStateStore authStateStore =
         RemoteStubMemoryAuthStateStore();

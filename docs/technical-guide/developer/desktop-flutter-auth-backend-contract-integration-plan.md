@@ -60,6 +60,7 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
 10. Opt-in sign-in credential forwarding path for backend binding:
    - default auth transport payload remains sanitized (`passwordLength` only),
    - optional raw password forwarding is available via `PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_FORWARD_CREDENTIALS` through bundle/runtime wiring.
+   - diagnostics remote profile can surface forwarding state as `auth-sign-in-payload: forwarded`.
 
 ## Remaining integration gaps (auth scope)
 
