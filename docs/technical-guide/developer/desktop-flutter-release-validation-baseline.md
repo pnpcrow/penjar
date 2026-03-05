@@ -233,6 +233,7 @@ CI baseline note:
 - Appcast external production guard: `desktop/scripts/guard_appcast_external_production.sh`.
 - Appcast external publication readiness checker: `desktop/scripts/check_appcast_external_readiness.sh`.
 - Appcast external publication runner: `desktop/scripts/publish_appcast_external.sh`.
+- Shared placeholder command-hygiene helper: `desktop/scripts/lib/placeholder_hygiene.sh`.
 - Signing readiness checker: `desktop/scripts/check_signing_readiness.sh`.
 - Signing execution pipeline runners: `desktop/scripts/run_signing_pipeline.sh`, `desktop/scripts/run_signing_with_build.sh`.
 - Signing provenance checker: `desktop/scripts/check_signing_artifact_provenance.sh`.

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/placeholder_hygiene.sh
+source "${script_dir}/lib/placeholder_hygiene.sh"
+
 platform="${1:-}"
 strict_input="${2:-0}"
 build_mode="${3:-release}"
@@ -58,21 +62,6 @@ overall_status="warning"
 hash_value=""
 error_message=""
 verify_command_placeholder_status="not-configured"
-
-is_placeholder_command() {
-  local command_value
-  command_value="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
-  if [[ "$command_value" =~ ^[[:space:]]*echo([[:space:]]|$) ]]; then
-    return 0
-  fi
-  if printf '%s' "$command_value" | grep -Eq '<[^>]+>'; then
-    return 0
-  fi
-  if [[ "$command_value" =~ (^|[^a-z0-9_])(todo|tbd|placeholder|changeme|change_me|replace_me|example|dummy|sample|fixme)([^a-z0-9_]|$) ]]; then
-    return 0
-  fi
-  return 1
-}
 
 compute_hash() {
   local target="$1"
