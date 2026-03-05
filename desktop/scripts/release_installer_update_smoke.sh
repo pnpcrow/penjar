@@ -38,6 +38,7 @@ case "$platform" in
 esac
 
 ./scripts/run_signing_pipeline.sh "$platform" "${STRICT_SIGNING_EXECUTION:-0}" "$build_mode"
+./scripts/check_signing_artifact_provenance.sh "$platform" "${STRICT_SIGNING_PROVENANCE:-0}" "$build_mode"
 
 if [[ "$platform" == "windows" ]]; then
   ./scripts/run_windows_installer_pipeline.sh "${STRICT_WINDOWS_INSTALLER_EXECUTION:-0}" "$build_mode"

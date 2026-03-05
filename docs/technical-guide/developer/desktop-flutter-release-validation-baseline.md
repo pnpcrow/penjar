@@ -81,6 +81,11 @@ This baseline defines minimum release validation requirements for desktop distri
      - `pnpm run desktop:release:signing:run:windows`
    - strict execution mode:
      - set `STRICT_SIGNING_EXECUTION=1` when invoking smoke pipeline to enforce command-backed signing/notarization.
+   - signing provenance strict mode:
+     - set `STRICT_SIGNING_PROVENANCE=1` (or workflow input `enforce_signing_provenance=true`) to enforce artifact hash + sign-verify command evidence.
+   - standalone signing provenance checks:
+     - `pnpm run desktop:release:signing:provenance:macos`
+     - `pnpm run desktop:release:signing:provenance:windows`
    - windows installer strict mode:
      - set `STRICT_WINDOWS_INSTALLER_PACKAGING=1` (or workflow input `enforce_windows_installer_packaging=true`) to enforce `.msi/.exe` artifact presence.
    - windows installer naming strict mode:
@@ -138,12 +143,14 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job runs release smoke gate policy preflight and uploads gate policy report artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing command-hook enforcement via `enforce_signing_command_hooks` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing execution enforcement via `enforce_signing_execution` input.
+- `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing provenance enforcement via `enforce_signing_provenance` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer artifact enforcement via `enforce_windows_installer_packaging` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer naming enforcement via `enforce_windows_installer_naming` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer provenance enforcement via `enforce_windows_installer_provenance` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer execution enforcement via `enforce_windows_installer_execution` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` builds macOS/Windows release artifacts on demand and uploads installer/update smoke archives + JSON reports.
 - `.github/workflows/release-desktop-installer-smoke.yml` uploads per-platform signing pipeline reports generated during smoke execution.
+- `.github/workflows/release-desktop-installer-smoke.yml` uploads per-platform signing provenance reports generated during smoke execution.
 - `.github/workflows/release-desktop-installer-smoke.yml` uploads Windows installer packaging report artifacts.
 - `.github/workflows/release-desktop-installer-smoke.yml` uploads Windows installer pipeline execution report artifacts.
 - `.github/workflows/release-desktop-installer-smoke.yml` uploads Windows installer provenance report artifacts.
@@ -171,13 +178,14 @@ CI baseline note:
 - Appcast external publication runner: `desktop/scripts/publish_appcast_external.sh`.
 - Signing readiness checker: `desktop/scripts/check_signing_readiness.sh`.
 - Signing execution pipeline runners: `desktop/scripts/run_signing_pipeline.sh`, `desktop/scripts/run_signing_with_build.sh`.
+- Signing provenance checker: `desktop/scripts/check_signing_artifact_provenance.sh`.
 - Windows installer pipeline runner: `desktop/scripts/run_windows_installer_pipeline.sh`.
 - Windows installer packaging checker: `desktop/scripts/check_windows_installer_packaging.sh`.
 - Windows installer provenance checker: `desktop/scripts/check_windows_installer_provenance.sh`.
 
 ## 5) Implementation backlog seeds
 
-1. Wire actual platform signing/notarization commands into `PENJAR_*_SIGN_COMMAND` / `PENJAR_MACOS_NOTARIZE_COMMAND` secrets and harden failure diagnostics.
+1. Wire actual platform signing/notarization/verify commands into `PENJAR_*_SIGN_COMMAND`, `PENJAR_MACOS_NOTARIZE_COMMAND`, and `PENJAR_*_SIGN_VERIFY_COMMAND` secrets with hardened diagnostics.
 2. Wire actual Windows installer generation/provenance commands into `PENJAR_WINDOWS_INSTALLER_COMMAND` and `PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND`.
 3. Provision production external publication credentials/role wiring and validate non-dry-run invalidation command execution against target environment.
 4. Promote evidence index preview automation into governed auto-apply (PR/comment gate) workflow.

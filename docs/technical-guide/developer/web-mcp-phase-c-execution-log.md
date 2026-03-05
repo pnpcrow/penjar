@@ -2548,8 +2548,61 @@ Add an explicit gate-policy preflight to prevent inconsistent strict toggle comb
   - Gate-policy report captures effective toggle map and findings.
   - Full-fast desktop verification remains green after preflight integration.
 
+## Unit WS-D-60: Signing artifact provenance gate baseline
+
+### Planned objective
+
+Add signing artifact provenance verification to smoke flow, so platform signing evidence includes artifact hash and sign-verify command execution trace.
+
+### Implemented changes
+
+1. Added signing provenance checker:
+   - `desktop/scripts/check_signing_artifact_provenance.sh`.
+2. Implemented provenance semantics:
+   - supports macOS/Windows artifact-path resolution with override paths,
+   - computes deterministic artifact SHA256 (file/dir-aware hashing),
+   - supports platform verify command hooks (`PENJAR_MACOS_SIGN_VERIFY_COMMAND`, `PENJAR_WINDOWS_SIGN_VERIFY_COMMAND`),
+   - supports strict/non-strict mode (`STRICT_SIGNING_PROVENANCE`),
+   - emits platform provenance reports (`release/reports/signing_artifact_provenance_macos.md`, `release/reports/signing_artifact_provenance_windows.md`).
+3. Integrated signing provenance checker into smoke orchestrator:
+   - `desktop/scripts/release_installer_update_smoke.sh` now runs signing provenance checks immediately after signing pipeline execution.
+4. Extended installer-smoke workflow dispatch/env/artifacts:
+   - added `enforce_signing_provenance` input,
+   - passes `STRICT_SIGNING_PROVENANCE`, `PENJAR_MACOS_SIGN_VERIFY_COMMAND`, `PENJAR_WINDOWS_SIGN_VERIFY_COMMAND`,
+   - uploads signing provenance report artifacts per platform.
+5. Extended gate-policy preflight dependencies:
+   - `check_release_smoke_gate_policy.sh` now validates `STRICT_SIGNING_PROVENANCE` dependency on signing execution/command-hook strict gates.
+6. Added root command surface:
+   - `desktop:release:signing:provenance:macos`,
+   - `desktop:release:signing:provenance:windows`.
+7. Updated release/runbook/index docs:
+   - `desktop-flutter-development-runbook.md` now includes signing provenance commands and updated next-gap wording,
+   - `desktop-flutter-release-validation-baseline.md` now includes signing provenance strict mode and workflow/script references,
+   - `desktop-flutter-release-evidence-index.md` now includes signing provenance report attachment rule.
+8. Re-ran validation commands:
+   - `pnpm run desktop:release:signing:provenance:macos`,
+   - `cd desktop && PENJAR_MACOS_SIGN_ARTIFACT_PATH="/tmp/penjar-signing-macos.bin" ./scripts/check_signing_artifact_provenance.sh macos 1` (expected strict failure without verify command),
+   - `cd desktop && PENJAR_MACOS_SIGN_ARTIFACT_PATH="/tmp/penjar-signing-macos.bin" PENJAR_MACOS_SIGN_VERIFY_COMMAND='echo verify-ok' ./scripts/check_signing_artifact_provenance.sh macos 1`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict provenance behavior across missing artifact/hash/verify-command branches,
+  - smoke workflow env/artifact integration for signing provenance evidence,
+  - policy-preflight dependency enforcement for new strict signing provenance toggle.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Signing provenance report always includes artifact hash and verify-command state.
+  - Strict signing provenance mode fails when verify evidence is incomplete.
+  - Full-fast desktop verification remains green after signing provenance integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, and Windows installer provenance gate baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, and Windows installer provenance gate baseline, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

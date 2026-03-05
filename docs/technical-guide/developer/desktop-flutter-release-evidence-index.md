@@ -47,10 +47,11 @@ Each release candidate record should include:
 12. Attach signing readiness report from `pnpm run desktop:release:signing:readiness` (or strict variants including `desktop:release:signing:readiness:strict` / `desktop:release:signing:readiness:command-hooks:strict`) before promotion decision.
 13. Generate/check appcast publication bundle (`pnpm run desktop:release:appcast:bundle:generate`, `pnpm run desktop:release:appcast:bundle:check`) and attach artifact link before promotion decision.
 14. Attach platform signing pipeline reports (`release/reports/signing_report_macos.md`, `release/reports/signing_report_windows.md`) before promotion decision.
-15. Attach external publication report (`release/reports/appcast_external_publication_report.md`) when external publication stage is executed.
-16. Attach Windows installer packaging report (`release/reports/windows_installer_packaging_report.md`) before promotion decision, and require naming policy status to be `passed` when strict naming mode is enabled.
-17. Attach Windows installer pipeline report (`release/reports/windows_installer_pipeline_report.md`) before promotion decision.
-18. Attach external publication readiness report (`release/reports/appcast_external_readiness_report.md`) when external publication stage is executed, including identity/invalidation check status fields when non-dry-run readiness is evaluated.
-19. Attach external production guard report (`release/reports/appcast_external_production_guard_report.md`) when external publication stage is executed.
-20. Attach Windows installer provenance report (`release/reports/windows_installer_provenance_report.md`) before promotion decision when installer smoke is executed.
-21. Attach release smoke gate policy report (`release/reports/release_smoke_gate_policy_report.md`) before promotion decision.
+15. Attach platform signing provenance reports (`release/reports/signing_artifact_provenance_macos.md`, `release/reports/signing_artifact_provenance_windows.md`) before promotion decision when provenance gate is enabled.
+16. Attach external publication report (`release/reports/appcast_external_publication_report.md`) when external publication stage is executed.
+17. Attach Windows installer packaging report (`release/reports/windows_installer_packaging_report.md`) before promotion decision, and require naming policy status to be `passed` when strict naming mode is enabled.
+18. Attach Windows installer pipeline report (`release/reports/windows_installer_pipeline_report.md`) before promotion decision.
+19. Attach external publication readiness report (`release/reports/appcast_external_readiness_report.md`) when external publication stage is executed, including identity/invalidation check status fields when non-dry-run readiness is evaluated.
+20. Attach external production guard report (`release/reports/appcast_external_production_guard_report.md`) when external publication stage is executed.
+21. Attach Windows installer provenance report (`release/reports/windows_installer_provenance_report.md`) before promotion decision when installer smoke is executed.
+22. Attach release smoke gate policy report (`release/reports/release_smoke_gate_policy_report.md`) before promotion decision.

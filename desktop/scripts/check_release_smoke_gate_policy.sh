@@ -12,6 +12,7 @@ to_bool() {
 
 strict_signing_execution="$(to_bool "${STRICT_SIGNING_EXECUTION:-0}")"
 strict_signing_command_hooks="$(to_bool "${STRICT_SIGNING_COMMAND_HOOKS:-0}")"
+strict_signing_provenance="$(to_bool "${STRICT_SIGNING_PROVENANCE:-0}")"
 strict_windows_installer_execution="$(to_bool "${STRICT_WINDOWS_INSTALLER_EXECUTION:-0}")"
 strict_windows_installer_packaging="$(to_bool "${STRICT_WINDOWS_INSTALLER_PACKAGING:-0}")"
 strict_windows_installer_provenance="$(to_bool "${STRICT_WINDOWS_INSTALLER_PROVENANCE:-0}")"
@@ -53,6 +54,14 @@ if [[ "$strict_signing_execution" -eq 1 && "$strict_signing_command_hooks" -eq 0
   add_required "STRICT_SIGNING_EXECUTION requires STRICT_SIGNING_COMMAND_HOOKS=1."
 fi
 
+if [[ "$strict_signing_provenance" -eq 1 && "$strict_signing_execution" -eq 0 ]]; then
+  add_required "STRICT_SIGNING_PROVENANCE requires STRICT_SIGNING_EXECUTION=1."
+fi
+
+if [[ "$strict_signing_provenance" -eq 1 && "$strict_signing_command_hooks" -eq 0 ]]; then
+  add_required "STRICT_SIGNING_PROVENANCE requires STRICT_SIGNING_COMMAND_HOOKS=1."
+fi
+
 if [[ "$strict_windows_installer_packaging" -eq 1 && "$strict_windows_installer_execution" -eq 0 ]]; then
   add_required "STRICT_WINDOWS_INSTALLER_PACKAGING requires STRICT_WINDOWS_INSTALLER_EXECUTION=1."
 fi
@@ -90,6 +99,7 @@ fi
   echo "## Effective gate toggles"
   echo "- STRICT_SIGNING_EXECUTION: $strict_signing_execution"
   echo "- STRICT_SIGNING_COMMAND_HOOKS: $strict_signing_command_hooks"
+  echo "- STRICT_SIGNING_PROVENANCE: $strict_signing_provenance"
   echo "- STRICT_WINDOWS_INSTALLER_EXECUTION: $strict_windows_installer_execution"
   echo "- STRICT_WINDOWS_INSTALLER_PACKAGING: $strict_windows_installer_packaging"
   echo "- STRICT_WINDOWS_INSTALLER_PROVENANCE: $strict_windows_installer_provenance"

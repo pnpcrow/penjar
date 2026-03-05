@@ -53,6 +53,8 @@ This runbook defines the repeatable execution loop for the Flutter desktop full-
    - `pnpm run desktop:release:signing:readiness`
    - `pnpm run desktop:release:signing:readiness:strict`
    - `pnpm run desktop:release:signing:readiness:command-hooks:strict`
+   - `pnpm run desktop:release:signing:provenance:macos`
+   - `pnpm run desktop:release:signing:provenance:windows`
    - `pnpm run desktop:release:signing:run:macos`
    - `pnpm run desktop:release:signing:run:windows`
    - `pnpm run desktop:release:windows-installer:run`
@@ -118,6 +120,6 @@ Before pausing or transferring work:
 ## 7) Current next-unit candidates
 
 1. Backend transport wiring for runtime-switchable contract adapters.
-2. Real command wiring for signed packaging/notarization in installer smoke workflow (`PENJAR_*_SIGN_COMMAND` paths).
+2. Real command wiring for signed packaging/notarization/verification in installer smoke workflow (`PENJAR_*_SIGN_COMMAND`, `PENJAR_*_SIGN_VERIFY_COMMAND` paths).
 3. Real Windows signed installer generation (`.msi/.exe`) command chain and provenance command/secret wiring.
 4. External appcast publication production rollout with real credentials/invalidation execution.

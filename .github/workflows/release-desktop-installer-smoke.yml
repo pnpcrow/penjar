@@ -18,6 +18,11 @@ on:
         type: boolean
         required: true
         default: false
+      enforce_signing_provenance:
+        description: "Fail workflow when signing provenance verification is incomplete"
+        type: boolean
+        required: true
+        default: false
       enforce_signing_command_hooks:
         description: "Fail workflow when signing command hooks are missing"
         type: boolean
@@ -102,6 +107,7 @@ jobs:
         env:
           STRICT_SIGNING_EXECUTION: ${{ inputs.enforce_signing_execution }}
           STRICT_SIGNING_COMMAND_HOOKS: ${{ inputs.enforce_signing_command_hooks }}
+          STRICT_SIGNING_PROVENANCE: ${{ inputs.enforce_signing_provenance }}
           STRICT_WINDOWS_INSTALLER_EXECUTION: ${{ inputs.enforce_windows_installer_execution }}
           STRICT_WINDOWS_INSTALLER_PACKAGING: ${{ inputs.enforce_windows_installer_packaging }}
           STRICT_WINDOWS_INSTALLER_PROVENANCE: ${{ inputs.enforce_windows_installer_provenance }}
@@ -173,6 +179,7 @@ jobs:
         working-directory: ./desktop
         env:
           STRICT_SIGNING_EXECUTION: ${{ inputs.enforce_signing_execution }}
+          STRICT_SIGNING_PROVENANCE: ${{ inputs.enforce_signing_provenance }}
           STRICT_WINDOWS_INSTALLER_PACKAGING: ${{ inputs.enforce_windows_installer_packaging }}
           STRICT_WINDOWS_INSTALLER_EXECUTION: ${{ inputs.enforce_windows_installer_execution }}
           STRICT_WINDOWS_INSTALLER_NAMING: ${{ inputs.enforce_windows_installer_naming }}
@@ -187,6 +194,8 @@ jobs:
           PENJAR_WINDOWS_SIGN_COMMAND: ${{ secrets.PENJAR_WINDOWS_SIGN_COMMAND }}
           PENJAR_WINDOWS_INSTALLER_COMMAND: ${{ secrets.PENJAR_WINDOWS_INSTALLER_COMMAND }}
           PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND: ${{ secrets.PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND }}
+          PENJAR_MACOS_SIGN_VERIFY_COMMAND: ${{ secrets.PENJAR_MACOS_SIGN_VERIFY_COMMAND }}
+          PENJAR_WINDOWS_SIGN_VERIFY_COMMAND: ${{ secrets.PENJAR_WINDOWS_SIGN_VERIFY_COMMAND }}
         run: |
           set -eo pipefail
           ./scripts/release_installer_update_smoke.sh "${{ matrix.label }}" "${{ inputs.build_mode }}"
@@ -213,6 +222,14 @@ jobs:
         with:
           name: desktop-signing-pipeline-report-${{ matrix.label }}
           path: desktop/release/reports/signing_report_${{ matrix.label }}.md
+          if-no-files-found: warn
+
+      - name: Upload signing provenance report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-signing-provenance-report-${{ matrix.label }}
+          path: desktop/release/reports/signing_artifact_provenance_${{ matrix.label }}.md
           if-no-files-found: warn
 
       - name: Upload Windows installer packaging report
