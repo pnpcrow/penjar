@@ -24,6 +24,29 @@ Set<String> _parseBlockedOperations(String raw) {
   return normalizedOperations;
 }
 
+RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
+  final Set<String> blockedOperations = _parseBlockedOperations(
+    const String.fromEnvironment(
+      'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BLOCKED_OPERATIONS',
+    ),
+  );
+  if (blockedOperations.isEmpty) {
+    return const RemoteStubNoopTransportClient();
+  }
+
+  final String blockedReason = const String.fromEnvironment(
+    'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BLOCK_REASON',
+    defaultValue: 'Remote transport unavailable',
+  ).trim();
+
+  return RemoteStubScriptedTransportClient(
+    blockedOperations: blockedOperations,
+    blockedReason: blockedReason.isEmpty
+        ? 'Remote transport unavailable'
+        : blockedReason,
+  );
+}
+
 enum DesktopContractMode {
   inMemory,
   remoteStub;
@@ -70,6 +93,8 @@ class DesktopContractBundle {
         'PENJAR_DESKTOP_REMOTE_STUB_BLOCKED_OPERATIONS',
       ),
     );
+    final RemoteStubTransportClient transportClient =
+        _buildRemoteStubTransportClientFromEnvironment();
 
     return DesktopContractBundle.fromMode(
       mode,
@@ -77,6 +102,7 @@ class DesktopContractBundle {
         unavailable: remoteStubUnavailable,
         blockedOperations: blockedOperations,
       ),
+      remoteStubTransportClient: transportClient,
     );
   }
 
@@ -84,11 +110,14 @@ class DesktopContractBundle {
     DesktopContractMode mode, {
     RemoteStubFaultProfile remoteStubFaultProfile =
         const RemoteStubFaultProfile(),
+    RemoteStubTransportClient remoteStubTransportClient =
+        const RemoteStubNoopTransportClient(),
   }) {
     return switch (mode) {
       DesktopContractMode.inMemory => DesktopContractBundle.inMemory(),
       DesktopContractMode.remoteStub => DesktopContractBundle.remoteStub(
         faultProfile: remoteStubFaultProfile,
+        transportClient: remoteStubTransportClient,
       ),
     };
   }
@@ -109,30 +138,42 @@ class DesktopContractBundle {
 
   factory DesktopContractBundle.remoteStub({
     RemoteStubFaultProfile faultProfile = const RemoteStubFaultProfile(),
+    RemoteStubTransportClient transportClient =
+        const RemoteStubNoopTransportClient(),
   }) {
     return DesktopContractBundle(
       mode: DesktopContractMode.remoteStub,
-      authSession: RemoteStubAuthSessionContract(faultProfile: faultProfile),
+      authSession: RemoteStubAuthSessionContract(
+        faultProfile: faultProfile,
+        transportClient: transportClient,
+      ),
       projectLifecycle: RemoteStubProjectLifecycleContract(
         faultProfile: faultProfile,
+        transportClient: transportClient,
       ),
       canvasEditing: RemoteStubCanvasEditingContract(
         faultProfile: faultProfile,
+        transportClient: transportClient,
       ),
       assetManagement: RemoteStubAssetManagementContract(
         faultProfile: faultProfile,
+        transportClient: transportClient,
       ),
       collaborationContext: RemoteStubCollaborationContextContract(
         faultProfile: faultProfile,
+        transportClient: transportClient,
       ),
       inspectHandoff: RemoteStubInspectHandoffContract(
         faultProfile: faultProfile,
+        transportClient: transportClient,
       ),
       exportWorkflow: RemoteStubExportWorkflowContract(
         faultProfile: faultProfile,
+        transportClient: transportClient,
       ),
       diagnosticsRecovery: RemoteStubDiagnosticsRecoveryContract(
         faultProfile: faultProfile,
+        transportClient: transportClient,
       ),
     );
   }

@@ -4541,8 +4541,65 @@ Start backend-transport rollout prep by evolving remote-stub fault controls from
   - Global unavailable profile behavior remains unchanged.
   - Full-fast desktop verification remains green after runtime fault-model extension.
 
+## Unit WS-D-106: Scripted transport-client injection baseline for remote-stub adapters
+
+### Planned objective
+
+Establish backend-transport wiring seam in remote-stub adapters by introducing an injectable transport client path, while preserving current sync contract signatures and existing degraded-path guard behavior.
+
+### Implemented changes
+
+1. Added transport client abstractions in `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `RemoteStubTransportRequest`, `RemoteStubTransportResult`, `RemoteStubTransportClient`,
+   - `RemoteStubNoopTransportClient` (default pass-through),
+   - `RemoteStubScriptedTransportClient` (operation-scoped scripted blocking for transport simulation).
+2. Added shared operation preflight helper:
+   - `_allowRemoteStubOperation(...)` now evaluates both:
+     - fault-profile blocks (`unavailable` + `blockedOperations`),
+     - transport-client denial results.
+3. Rewired all remote-stub adapters to use injected transport client:
+   - auth/project/canvas/assets/collaboration/inspect/export/diagnostics contracts now accept `transportClient`,
+   - constructors default to `const RemoteStubNoopTransportClient()` to preserve existing behavior.
+4. Extended bundle/runtime environment wiring in `desktop/lib/contracts/desktop_contract_bundle.dart`:
+   - `DesktopContractBundle.fromMode(...)` now accepts `remoteStubTransportClient`,
+   - `DesktopContractBundle.remoteStub(...)` forwards a shared transport client to all remote-stub adapters,
+   - `DesktopContractBundle.fromEnvironment()` now parses:
+     - `PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BLOCKED_OPERATIONS`,
+     - `PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BLOCK_REASON`,
+     - and builds scripted/noop transport client accordingly.
+5. Added regression tests:
+   - `desktop/test/contracts/desktop_contract_bundle_test.dart`:
+     - `remote-stub transport client blocks selected operations independently`.
+   - `desktop/test/contracts/workflow_contracts_test.dart`:
+     - `transport client blocks configured operations`.
+6. Synced continuity docs:
+   - `desktop-flutter-migration-inventory.md` now notes scripted transport-client injection path in shell/runtime blocker.
+   - `desktop-flutter-parity-acceptance-baseline.md` now documents transport simulation env vars.
+   - `desktop-flutter-development-runbook.md` next-unit candidate now points to replacing scripted transport with real backend transport implementation.
+7. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/desktop_contract_bundle_test.dart test/contracts/workflow_contracts_test.dart`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - compatibility of new transport seam with existing contract signatures and parity harnesses,
+  - non-regression of fault-profile behavior after introducing transport preflight,
+  - runtime environment wiring correctness for transport simulation configuration.
+- **Issues found during review**
+  1. Remote-stub adapters had no transport-client seam, forcing all degraded behavior into fault-profile logic and limiting backend-transport rollout readiness.
+  2. Bundle/environment wiring could not distribute a shared transport simulation profile across all adapters.
+- **Fix applied**
+  1. Introduced transport client interface + noop/scripted implementations and integrated them into adapter preflight.
+  2. Added bundle-level shared transport-client injection path and environment parser for scripted blocking configuration.
+  3. Added contract tests to verify transport-level blocking operates independently from fault-profile blocking.
+- **Post-fix validation criteria**
+  - Existing remote-stub behaviors remain unchanged with noop transport client.
+  - Scripted transport client can block selected operations without enabling global unavailable mode.
+  - Full-fast desktop verification remains green after transport seam integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
+- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
 - Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard plus coverage-contract regression guard (set-diff optimized uncovered/missing detection), desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks with in-memory duplicate-key tracking + base-check markdown report emission) plus evidence-index contract regression guard (including dedicated missing-base-check-report attachment, missing-index-file, invalid-decision, and promoted-placeholder cases, dedicated tests workflow release-evidence guard base+contract enforcement/upload, and parity matrix base-check artifact retention), update-manifest guard automation with validation + contract report artifacts (including dedicated tests workflow update-manifest guard job contract enforcement/upload), on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

@@ -174,4 +174,36 @@ void main() {
       '[remote-stub] Project created: Allowed Project.',
     );
   });
+
+  test(
+    'remote-stub transport client blocks selected operations independently',
+    () {
+      final DesktopContractBundle bundle = DesktopContractBundle.fromMode(
+        DesktopContractMode.remoteStub,
+        remoteStubTransportClient: const RemoteStubScriptedTransportClient(
+          blockedOperations: <String>{'create-project'},
+          blockedReason: 'Remote transport unavailable',
+        ),
+      );
+
+      bundle.authSession.signIn(
+        const AuthSignInRequest(
+          email: 'designer@penjar.app',
+          password: 'desktop-pass',
+        ),
+      );
+      expect(bundle.authSession.state.signedIn, isTrue);
+      expect(
+        bundle.authSession.state.status,
+        '[remote-stub] Signed in (simulated).',
+      );
+
+      bundle.projectLifecycle.createProject('Transport Blocked');
+      expect(bundle.projectLifecycle.state.projects, hasLength(1));
+      expect(
+        bundle.projectLifecycle.state.status,
+        '[remote-stub] Remote transport unavailable: create-project.',
+      );
+    },
+  );
 }

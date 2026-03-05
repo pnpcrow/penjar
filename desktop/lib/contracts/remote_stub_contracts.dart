@@ -39,6 +39,93 @@ class RemoteStubFaultProfile {
   }
 }
 
+class RemoteStubTransportRequest {
+  const RemoteStubTransportRequest({required this.operation});
+
+  final String operation;
+}
+
+class RemoteStubTransportResult {
+  const RemoteStubTransportResult({this.allowed = true, this.status});
+
+  static const RemoteStubTransportResult allow = RemoteStubTransportResult();
+
+  factory RemoteStubTransportResult.blocked(String status) =>
+      RemoteStubTransportResult(allowed: false, status: status);
+
+  final bool allowed;
+  final String? status;
+}
+
+abstract class RemoteStubTransportClient {
+  const RemoteStubTransportClient();
+
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request);
+}
+
+class RemoteStubNoopTransportClient extends RemoteStubTransportClient {
+  const RemoteStubNoopTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    return RemoteStubTransportResult.allow;
+  }
+}
+
+class RemoteStubScriptedTransportClient extends RemoteStubTransportClient {
+  const RemoteStubScriptedTransportClient({
+    this.blockedOperations = const <String>{},
+    this.blockedReason = 'Remote transport unavailable',
+  });
+
+  final Set<String> blockedOperations;
+  final String blockedReason;
+
+  bool _isBlocked(String operation) {
+    final String normalizedOperation = operation.trim().toLowerCase();
+    for (final String blockedOperation in blockedOperations) {
+      if (blockedOperation.trim().toLowerCase() == normalizedOperation) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (_isBlocked(request.operation)) {
+      return RemoteStubTransportResult.blocked(
+        '$blockedReason: ${request.operation}.',
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
+bool _allowRemoteStubOperation({
+  required RemoteStubFaultProfile faultProfile,
+  required RemoteStubTransportClient transportClient,
+  required String operation,
+  required void Function(String status) setStatusOverride,
+}) {
+  if (faultProfile.blocksOperation(operation)) {
+    setStatusOverride(_blockedStatus(faultProfile, operation));
+    return false;
+  }
+
+  final RemoteStubTransportResult transportResult = transportClient.execute(
+    RemoteStubTransportRequest(operation: operation),
+  );
+  if (!transportResult.allowed) {
+    final String deniedStatus =
+        transportResult.status ?? '${faultProfile.reason}: $operation.';
+    setStatusOverride(_decorateStatus(deniedStatus));
+    return false;
+  }
+
+  return true;
+}
+
 AuthSessionState _decorateAuthState(AuthSessionState state, {String? status}) =>
     AuthSessionState(
       rememberSession: state.rememberSession,
@@ -114,19 +201,27 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
   RemoteStubAuthSessionContract({
     AuthSessionContract? delegate,
     this.faultProfile = const RemoteStubFaultProfile(),
+    this.transportClient = const RemoteStubNoopTransportClient(),
   }) : _delegate = delegate ?? InMemoryAuthSessionContract();
 
   final AuthSessionContract _delegate;
   final RemoteStubFaultProfile faultProfile;
+  final RemoteStubTransportClient transportClient;
   String? _statusOverride;
 
   @override
   AuthSessionState get state =>
       _decorateAuthState(_delegate.state, status: _statusOverride);
 
-  AuthSessionState _blocked(String operation) {
-    _statusOverride = _blockedStatus(faultProfile, operation);
-    return state;
+  bool _allowOperation(String operation) {
+    return _allowRemoteStubOperation(
+      faultProfile: faultProfile,
+      transportClient: transportClient,
+      operation: operation,
+      setStatusOverride: (String status) {
+        _statusOverride = status;
+      },
+    );
   }
 
   void _clearOverride() {
@@ -135,8 +230,8 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
 
   @override
   AuthSessionState setRememberSession(bool enabled) {
-    if (faultProfile.blocksOperation('set-remember-session')) {
-      return _blocked('set-remember-session');
+    if (!_allowOperation('set-remember-session')) {
+      return state;
     }
     _clearOverride();
     return _decorateAuthState(_delegate.setRememberSession(enabled));
@@ -144,8 +239,8 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
 
   @override
   AuthSessionState signIn(AuthSignInRequest request) {
-    if (faultProfile.blocksOperation('sign-in')) {
-      return _blocked('sign-in');
+    if (!_allowOperation('sign-in')) {
+      return state;
     }
     _clearOverride();
     return _decorateAuthState(_delegate.signIn(request));
@@ -153,8 +248,8 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
 
   @override
   AuthSessionState restoreSession() {
-    if (faultProfile.blocksOperation('restore-session')) {
-      return _blocked('restore-session');
+    if (!_allowOperation('restore-session')) {
+      return state;
     }
     _clearOverride();
     return _decorateAuthState(_delegate.restoreSession());
@@ -162,8 +257,8 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
 
   @override
   AuthSessionState refreshToken() {
-    if (faultProfile.blocksOperation('refresh-token')) {
-      return _blocked('refresh-token');
+    if (!_allowOperation('refresh-token')) {
+      return state;
     }
     _clearOverride();
     return _decorateAuthState(_delegate.refreshToken());
@@ -174,19 +269,27 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
   RemoteStubProjectLifecycleContract({
     ProjectLifecycleContract? delegate,
     this.faultProfile = const RemoteStubFaultProfile(),
+    this.transportClient = const RemoteStubNoopTransportClient(),
   }) : _delegate = delegate ?? InMemoryProjectLifecycleContract();
 
   final ProjectLifecycleContract _delegate;
   final RemoteStubFaultProfile faultProfile;
+  final RemoteStubTransportClient transportClient;
   String? _statusOverride;
 
   @override
   ProjectLifecycleState get state =>
       _decorateProjectState(_delegate.state, status: _statusOverride);
 
-  ProjectLifecycleState _blocked(String operation) {
-    _statusOverride = _blockedStatus(faultProfile, operation);
-    return state;
+  bool _allowOperation(String operation) {
+    return _allowRemoteStubOperation(
+      faultProfile: faultProfile,
+      transportClient: transportClient,
+      operation: operation,
+      setStatusOverride: (String status) {
+        _statusOverride = status;
+      },
+    );
   }
 
   void _clearOverride() {
@@ -195,8 +298,8 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
 
   @override
   ProjectLifecycleState createProject(String projectName) {
-    if (faultProfile.blocksOperation('create-project')) {
-      return _blocked('create-project');
+    if (!_allowOperation('create-project')) {
+      return state;
     }
     _clearOverride();
     return _decorateProjectState(_delegate.createProject(projectName));
@@ -204,8 +307,8 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
 
   @override
   ProjectLifecycleState switchProject(int index) {
-    if (faultProfile.blocksOperation('switch-project')) {
-      return _blocked('switch-project');
+    if (!_allowOperation('switch-project')) {
+      return state;
     }
     _clearOverride();
     return _decorateProjectState(_delegate.switchProject(index));
@@ -213,8 +316,8 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
 
   @override
   ProjectLifecycleState createFile(String fileName) {
-    if (faultProfile.blocksOperation('create-file')) {
-      return _blocked('create-file');
+    if (!_allowOperation('create-file')) {
+      return state;
     }
     _clearOverride();
     return _decorateProjectState(_delegate.createFile(fileName));
@@ -222,8 +325,8 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
 
   @override
   ProjectLifecycleState deleteFirstFile() {
-    if (faultProfile.blocksOperation('delete-file')) {
-      return _blocked('delete-file');
+    if (!_allowOperation('delete-file')) {
+      return state;
     }
     _clearOverride();
     return _decorateProjectState(_delegate.deleteFirstFile());
@@ -234,19 +337,27 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
   RemoteStubCanvasEditingContract({
     CanvasEditingContract? delegate,
     this.faultProfile = const RemoteStubFaultProfile(),
+    this.transportClient = const RemoteStubNoopTransportClient(),
   }) : _delegate = delegate ?? InMemoryCanvasEditingContract();
 
   final CanvasEditingContract _delegate;
   final RemoteStubFaultProfile faultProfile;
+  final RemoteStubTransportClient transportClient;
   String? _statusOverride;
 
   @override
   CanvasEditingState get state =>
       _decorateCanvasState(_delegate.state, status: _statusOverride);
 
-  CanvasEditingState _blocked(String operation) {
-    _statusOverride = _blockedStatus(faultProfile, operation);
-    return state;
+  bool _allowOperation(String operation) {
+    return _allowRemoteStubOperation(
+      faultProfile: faultProfile,
+      transportClient: transportClient,
+      operation: operation,
+      setStatusOverride: (String status) {
+        _statusOverride = status;
+      },
+    );
   }
 
   void _clearOverride() {
@@ -255,8 +366,8 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState createRectangle() {
-    if (faultProfile.blocksOperation('create-rectangle')) {
-      return _blocked('create-rectangle');
+    if (!_allowOperation('create-rectangle')) {
+      return state;
     }
     _clearOverride();
     return _decorateCanvasState(_delegate.createRectangle());
@@ -264,8 +375,8 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState selectShape(int index) {
-    if (faultProfile.blocksOperation('select-shape')) {
-      return _blocked('select-shape');
+    if (!_allowOperation('select-shape')) {
+      return state;
     }
     _clearOverride();
     return _decorateCanvasState(_delegate.selectShape(index));
@@ -273,8 +384,8 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState moveSelected() {
-    if (faultProfile.blocksOperation('move-shape')) {
-      return _blocked('move-shape');
+    if (!_allowOperation('move-shape')) {
+      return state;
     }
     _clearOverride();
     return _decorateCanvasState(_delegate.moveSelected());
@@ -282,8 +393,8 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState resizeSelected() {
-    if (faultProfile.blocksOperation('resize-shape')) {
-      return _blocked('resize-shape');
+    if (!_allowOperation('resize-shape')) {
+      return state;
     }
     _clearOverride();
     return _decorateCanvasState(_delegate.resizeSelected());
@@ -291,8 +402,8 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState toggleFillSelected() {
-    if (faultProfile.blocksOperation('toggle-fill')) {
-      return _blocked('toggle-fill');
+    if (!_allowOperation('toggle-fill')) {
+      return state;
     }
     _clearOverride();
     return _decorateCanvasState(_delegate.toggleFillSelected());
@@ -303,19 +414,27 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
   RemoteStubAssetManagementContract({
     AssetManagementContract? delegate,
     this.faultProfile = const RemoteStubFaultProfile(),
+    this.transportClient = const RemoteStubNoopTransportClient(),
   }) : _delegate = delegate ?? InMemoryAssetManagementContract();
 
   final AssetManagementContract _delegate;
   final RemoteStubFaultProfile faultProfile;
+  final RemoteStubTransportClient transportClient;
   String? _statusOverride;
 
   @override
   AssetManagementState get state =>
       _decorateAssetState(_delegate.state, status: _statusOverride);
 
-  AssetManagementState _blocked(String operation) {
-    _statusOverride = _blockedStatus(faultProfile, operation);
-    return state;
+  bool _allowOperation(String operation) {
+    return _allowRemoteStubOperation(
+      faultProfile: faultProfile,
+      transportClient: transportClient,
+      operation: operation,
+      setStatusOverride: (String status) {
+        _statusOverride = status;
+      },
+    );
   }
 
   void _clearOverride() {
@@ -324,8 +443,8 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
 
   @override
   AssetManagementState importAsset(String assetName, String assetType) {
-    if (faultProfile.blocksOperation('import-asset')) {
-      return _blocked('import-asset');
+    if (!_allowOperation('import-asset')) {
+      return state;
     }
     _clearOverride();
     return _decorateAssetState(_delegate.importAsset(assetName, assetType));
@@ -333,8 +452,8 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
 
   @override
   AssetManagementState selectAsset(int index) {
-    if (faultProfile.blocksOperation('select-asset')) {
-      return _blocked('select-asset');
+    if (!_allowOperation('select-asset')) {
+      return state;
     }
     _clearOverride();
     return _decorateAssetState(_delegate.selectAsset(index));
@@ -342,8 +461,8 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
 
   @override
   AssetManagementState useSelectedAsset() {
-    if (faultProfile.blocksOperation('use-asset')) {
-      return _blocked('use-asset');
+    if (!_allowOperation('use-asset')) {
+      return state;
     }
     _clearOverride();
     return _decorateAssetState(_delegate.useSelectedAsset());
@@ -351,8 +470,8 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
 
   @override
   AssetManagementState removeSelectedAsset() {
-    if (faultProfile.blocksOperation('remove-asset')) {
-      return _blocked('remove-asset');
+    if (!_allowOperation('remove-asset')) {
+      return state;
     }
     _clearOverride();
     return _decorateAssetState(_delegate.removeSelectedAsset());
@@ -364,19 +483,27 @@ class RemoteStubCollaborationContextContract
   RemoteStubCollaborationContextContract({
     CollaborationContextContract? delegate,
     this.faultProfile = const RemoteStubFaultProfile(),
+    this.transportClient = const RemoteStubNoopTransportClient(),
   }) : _delegate = delegate ?? InMemoryCollaborationContextContract();
 
   final CollaborationContextContract _delegate;
   final RemoteStubFaultProfile faultProfile;
+  final RemoteStubTransportClient transportClient;
   String? _statusOverride;
 
   @override
   CollaborationContextState get state =>
       _decorateCollaborationState(_delegate.state, status: _statusOverride);
 
-  CollaborationContextState _blocked(String operation) {
-    _statusOverride = _blockedStatus(faultProfile, operation);
-    return state;
+  bool _allowOperation(String operation) {
+    return _allowRemoteStubOperation(
+      faultProfile: faultProfile,
+      transportClient: transportClient,
+      operation: operation,
+      setStatusOverride: (String status) {
+        _statusOverride = status;
+      },
+    );
   }
 
   void _clearOverride() {
@@ -385,8 +512,8 @@ class RemoteStubCollaborationContextContract
 
   @override
   CollaborationContextState togglePeerPresence() {
-    if (faultProfile.blocksOperation('toggle-peer-presence')) {
-      return _blocked('toggle-peer-presence');
+    if (!_allowOperation('toggle-peer-presence')) {
+      return state;
     }
     _clearOverride();
     return _decorateCollaborationState(_delegate.togglePeerPresence());
@@ -394,8 +521,8 @@ class RemoteStubCollaborationContextContract
 
   @override
   CollaborationContextState createThread(String title) {
-    if (faultProfile.blocksOperation('create-thread')) {
-      return _blocked('create-thread');
+    if (!_allowOperation('create-thread')) {
+      return state;
     }
     _clearOverride();
     return _decorateCollaborationState(_delegate.createThread(title));
@@ -403,8 +530,8 @@ class RemoteStubCollaborationContextContract
 
   @override
   CollaborationContextState selectThread(int index) {
-    if (faultProfile.blocksOperation('select-thread')) {
-      return _blocked('select-thread');
+    if (!_allowOperation('select-thread')) {
+      return state;
     }
     _clearOverride();
     return _decorateCollaborationState(_delegate.selectThread(index));
@@ -412,8 +539,8 @@ class RemoteStubCollaborationContextContract
 
   @override
   CollaborationContextState resolveSelectedThread() {
-    if (faultProfile.blocksOperation('resolve-thread')) {
-      return _blocked('resolve-thread');
+    if (!_allowOperation('resolve-thread')) {
+      return state;
     }
     _clearOverride();
     return _decorateCollaborationState(_delegate.resolveSelectedThread());
@@ -424,19 +551,27 @@ class RemoteStubInspectHandoffContract implements InspectHandoffContract {
   RemoteStubInspectHandoffContract({
     InspectHandoffContract? delegate,
     this.faultProfile = const RemoteStubFaultProfile(),
+    this.transportClient = const RemoteStubNoopTransportClient(),
   }) : _delegate = delegate ?? InMemoryInspectHandoffContract();
 
   final InspectHandoffContract _delegate;
   final RemoteStubFaultProfile faultProfile;
+  final RemoteStubTransportClient transportClient;
   String? _statusOverride;
 
   @override
   InspectHandoffState get state =>
       _decorateInspectState(_delegate.state, status: _statusOverride);
 
-  InspectHandoffState _blocked(String operation) {
-    _statusOverride = _blockedStatus(faultProfile, operation);
-    return state;
+  bool _allowOperation(String operation) {
+    return _allowRemoteStubOperation(
+      faultProfile: faultProfile,
+      transportClient: transportClient,
+      operation: operation,
+      setStatusOverride: (String status) {
+        _statusOverride = status;
+      },
+    );
   }
 
   void _clearOverride() {
@@ -445,8 +580,8 @@ class RemoteStubInspectHandoffContract implements InspectHandoffContract {
 
   @override
   InspectHandoffState setTarget(String target) {
-    if (faultProfile.blocksOperation('set-inspect-target')) {
-      return _blocked('set-inspect-target');
+    if (!_allowOperation('set-inspect-target')) {
+      return state;
     }
     _clearOverride();
     return _decorateInspectState(_delegate.setTarget(target));
@@ -454,8 +589,8 @@ class RemoteStubInspectHandoffContract implements InspectHandoffContract {
 
   @override
   InspectHandoffState generateSnippet(String elementId) {
-    if (faultProfile.blocksOperation('generate-snippet')) {
-      return _blocked('generate-snippet');
+    if (!_allowOperation('generate-snippet')) {
+      return state;
     }
     _clearOverride();
     return _decorateInspectState(_delegate.generateSnippet(elementId));
@@ -463,8 +598,8 @@ class RemoteStubInspectHandoffContract implements InspectHandoffContract {
 
   @override
   InspectHandoffState copyMetadata(String elementId) {
-    if (faultProfile.blocksOperation('copy-metadata')) {
-      return _blocked('copy-metadata');
+    if (!_allowOperation('copy-metadata')) {
+      return state;
     }
     _clearOverride();
     return _decorateInspectState(_delegate.copyMetadata(elementId));
@@ -475,19 +610,27 @@ class RemoteStubExportWorkflowContract implements ExportWorkflowContract {
   RemoteStubExportWorkflowContract({
     ExportWorkflowContract? delegate,
     this.faultProfile = const RemoteStubFaultProfile(),
+    this.transportClient = const RemoteStubNoopTransportClient(),
   }) : _delegate = delegate ?? InMemoryExportWorkflowContract();
 
   final ExportWorkflowContract _delegate;
   final RemoteStubFaultProfile faultProfile;
+  final RemoteStubTransportClient transportClient;
   String? _statusOverride;
 
   @override
   ExportWorkflowState get state =>
       _decorateExportState(_delegate.state, status: _statusOverride);
 
-  ExportWorkflowState _blocked(String operation) {
-    _statusOverride = _blockedStatus(faultProfile, operation);
-    return state;
+  bool _allowOperation(String operation) {
+    return _allowRemoteStubOperation(
+      faultProfile: faultProfile,
+      transportClient: transportClient,
+      operation: operation,
+      setStatusOverride: (String status) {
+        _statusOverride = status;
+      },
+    );
   }
 
   void _clearOverride() {
@@ -496,8 +639,8 @@ class RemoteStubExportWorkflowContract implements ExportWorkflowContract {
 
   @override
   ExportWorkflowState runExport(ExportRequest request) {
-    if (faultProfile.blocksOperation('run-export')) {
-      return _blocked('run-export');
+    if (!_allowOperation('run-export')) {
+      return state;
     }
     _clearOverride();
     return _decorateExportState(_delegate.runExport(request));
@@ -505,8 +648,8 @@ class RemoteStubExportWorkflowContract implements ExportWorkflowContract {
 
   @override
   ExportWorkflowState saveLatest() {
-    if (faultProfile.blocksOperation('save-export')) {
-      return _blocked('save-export');
+    if (!_allowOperation('save-export')) {
+      return state;
     }
     _clearOverride();
     return _decorateExportState(_delegate.saveLatest());
@@ -514,8 +657,8 @@ class RemoteStubExportWorkflowContract implements ExportWorkflowContract {
 
   @override
   ExportWorkflowState clearArtifacts() {
-    if (faultProfile.blocksOperation('clear-export-artifacts')) {
-      return _blocked('clear-export-artifacts');
+    if (!_allowOperation('clear-export-artifacts')) {
+      return state;
     }
     _clearOverride();
     return _decorateExportState(_delegate.clearArtifacts());
@@ -527,19 +670,27 @@ class RemoteStubDiagnosticsRecoveryContract
   RemoteStubDiagnosticsRecoveryContract({
     DiagnosticsRecoveryContract? delegate,
     this.faultProfile = const RemoteStubFaultProfile(),
+    this.transportClient = const RemoteStubNoopTransportClient(),
   }) : _delegate = delegate ?? InMemoryDiagnosticsRecoveryContract();
 
   final DiagnosticsRecoveryContract _delegate;
   final RemoteStubFaultProfile faultProfile;
+  final RemoteStubTransportClient transportClient;
   String? _statusOverride;
 
   @override
   DiagnosticsRecoveryState get state =>
       _decorateDiagnosticsState(_delegate.state, status: _statusOverride);
 
-  DiagnosticsRecoveryState _blocked(String operation) {
-    _statusOverride = _blockedStatus(faultProfile, operation);
-    return state;
+  bool _allowOperation(String operation) {
+    return _allowRemoteStubOperation(
+      faultProfile: faultProfile,
+      transportClient: transportClient,
+      operation: operation,
+      setStatusOverride: (String status) {
+        _statusOverride = status;
+      },
+    );
   }
 
   void _clearOverride() {
@@ -548,8 +699,8 @@ class RemoteStubDiagnosticsRecoveryContract
 
   @override
   DiagnosticsRecoveryState runHealthCheck() {
-    if (faultProfile.blocksOperation('run-health-check')) {
-      return _blocked('run-health-check');
+    if (!_allowOperation('run-health-check')) {
+      return state;
     }
     _clearOverride();
     return _decorateDiagnosticsState(_delegate.runHealthCheck());
@@ -557,8 +708,8 @@ class RemoteStubDiagnosticsRecoveryContract
 
   @override
   DiagnosticsRecoveryState simulateDisconnect() {
-    if (faultProfile.blocksOperation('simulate-disconnect')) {
-      return _blocked('simulate-disconnect');
+    if (!_allowOperation('simulate-disconnect')) {
+      return state;
     }
     _clearOverride();
     return _decorateDiagnosticsState(_delegate.simulateDisconnect());
@@ -566,8 +717,8 @@ class RemoteStubDiagnosticsRecoveryContract
 
   @override
   DiagnosticsRecoveryState attemptReconnect() {
-    if (faultProfile.blocksOperation('attempt-reconnect')) {
-      return _blocked('attempt-reconnect');
+    if (!_allowOperation('attempt-reconnect')) {
+      return state;
     }
     _clearOverride();
     return _decorateDiagnosticsState(_delegate.attemptReconnect());
@@ -575,8 +726,8 @@ class RemoteStubDiagnosticsRecoveryContract
 
   @override
   DiagnosticsRecoveryState openRecoveryGuide() {
-    if (faultProfile.blocksOperation('open-recovery-guide')) {
-      return _blocked('open-recovery-guide');
+    if (!_allowOperation('open-recovery-guide')) {
+      return state;
     }
     _clearOverride();
     return _decorateDiagnosticsState(_delegate.openRecoveryGuide());

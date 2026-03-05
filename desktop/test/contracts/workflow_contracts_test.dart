@@ -577,5 +577,36 @@ void main() {
         '[remote-stub] Remote bridge unavailable: run-export.',
       );
     });
+
+    test('transport client blocks configured operations', () {
+      const RemoteStubScriptedTransportClient transportClient =
+          RemoteStubScriptedTransportClient(
+            blockedOperations: <String>{'SIGN-IN'},
+            blockedReason: 'Transport bridge unavailable',
+          );
+      final RemoteStubAuthSessionContract authContract =
+          RemoteStubAuthSessionContract(transportClient: transportClient);
+      final RemoteStubProjectLifecycleContract projectContract =
+          RemoteStubProjectLifecycleContract(transportClient: transportClient);
+
+      authContract.signIn(
+        const AuthSignInRequest(
+          email: 'designer@penjar.app',
+          password: 'desktop-pass',
+        ),
+      );
+      expect(authContract.state.signedIn, isFalse);
+      expect(
+        authContract.state.status,
+        '[remote-stub] Transport bridge unavailable: sign-in.',
+      );
+
+      projectContract.createProject('Allowed Project');
+      expect(projectContract.state.projects, hasLength(2));
+      expect(
+        projectContract.state.status,
+        '[remote-stub] Project created: Allowed Project.',
+      );
+    });
   });
 }
