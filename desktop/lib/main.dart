@@ -654,15 +654,6 @@ class _CanvasEditingPanelState extends State<CanvasEditingPanel> {
   }
 }
 
-class _AssetRecord {
-  _AssetRecord({required this.id, required this.name, required this.type});
-
-  final String id;
-  final String name;
-  final String type;
-  int usedCount = 0;
-}
-
 class AssetManagementPanel extends StatefulWidget {
   const AssetManagementPanel({super.key});
 
@@ -671,13 +662,10 @@ class AssetManagementPanel extends StatefulWidget {
 }
 
 class _AssetManagementPanelState extends State<AssetManagementPanel> {
+  final AssetManagementContract _contract = InMemoryAssetManagementContract();
   final TextEditingController _assetNameController = TextEditingController();
-  final List<_AssetRecord> _assets = <_AssetRecord>[];
   final List<String> _assetTypes = <String>['image', 'icon', 'vector'];
-  int _nextAssetNumber = 1;
-  int _selectedAssetIndex = -1;
   String _selectedAssetType = 'image';
-  String _status = 'Idle';
 
   @override
   void dispose() {
@@ -685,89 +673,42 @@ class _AssetManagementPanelState extends State<AssetManagementPanel> {
     super.dispose();
   }
 
-  _AssetRecord? get _selectedAsset {
-    if (_selectedAssetIndex < 0 || _selectedAssetIndex >= _assets.length) {
-      return null;
-    }
-    return _assets[_selectedAssetIndex];
-  }
-
-  void _setStatus(String status) {
-    setState(() {
-      _status = status;
-    });
-  }
-
   void _importAsset() {
-    final String name = _assetNameController.text.trim();
-    if (name.isEmpty) {
-      _setStatus('Asset import failed: asset name is required.');
-      return;
-    }
-
-    final bool duplicated = _assets.any(
-      (_AssetRecord asset) => asset.name.toLowerCase() == name.toLowerCase(),
-    );
-    if (duplicated) {
-      _setStatus('Asset import failed: duplicate asset name.');
-      return;
-    }
-
     setState(() {
-      final _AssetRecord created = _AssetRecord(
-        id: 'asset-${_nextAssetNumber++}',
-        name: name,
-        type: _selectedAssetType,
+      final String previousStatus = _contract.state.status;
+      final AssetManagementState nextState = _contract.importAsset(
+        _assetNameController.text,
+        _selectedAssetType,
       );
-      _assets.add(created);
-      _selectedAssetIndex = _assets.length - 1;
-      _assetNameController.clear();
-      _status = 'Asset imported: ${created.name} (${created.type}).';
+      if (nextState.status != previousStatus &&
+          nextState.status.startsWith('Asset imported:')) {
+        _assetNameController.clear();
+      }
     });
   }
 
   void _selectAsset(int index) {
     setState(() {
-      _selectedAssetIndex = index;
-      _status = 'Asset selected: ${_selectedAsset!.name}.';
+      _contract.selectAsset(index);
     });
   }
 
   void _useSelectedAsset() {
-    final _AssetRecord? asset = _selectedAsset;
-    if (asset == null) {
-      _setStatus('Asset use skipped: no asset selected.');
-      return;
-    }
-
     setState(() {
-      asset.usedCount += 1;
-      _status = 'Asset used: ${asset.name} (count ${asset.usedCount}).';
+      _contract.useSelectedAsset();
     });
   }
 
   void _removeSelectedAsset() {
-    final _AssetRecord? asset = _selectedAsset;
-    if (asset == null) {
-      _setStatus('Asset remove skipped: no asset selected.');
-      return;
-    }
-
     setState(() {
-      final String removedName = asset.name;
-      _assets.removeAt(_selectedAssetIndex);
-      if (_assets.isEmpty) {
-        _selectedAssetIndex = -1;
-      } else if (_selectedAssetIndex >= _assets.length) {
-        _selectedAssetIndex = _assets.length - 1;
-      }
-      _status = 'Asset removed: $removedName.';
+      _contract.removeSelectedAsset();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final _AssetRecord? asset = _selectedAsset;
+    final AssetManagementState assetState = _contract.state;
+    final AssetRecord? asset = assetState.selectedAsset;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Column(
@@ -780,7 +721,7 @@ class _AssetManagementPanelState extends State<AssetManagementPanel> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Assets: ${_assets.length}',
+          'Assets: ${assetState.assets.length}',
           key: const ValueKey<String>('asset-summary'),
           style: textTheme.bodyMedium,
         ),
@@ -826,9 +767,11 @@ class _AssetManagementPanelState extends State<AssetManagementPanel> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: List<Widget>.generate(_assets.length, (int index) {
-            final _AssetRecord item = _assets[index];
-            final bool selected = index == _selectedAssetIndex;
+          children: List<Widget>.generate(assetState.assets.length, (
+            int index,
+          ) {
+            final AssetRecord item = assetState.assets[index];
+            final bool selected = index == assetState.selectedAssetIndex;
             return ChoiceChip(
               key: ValueKey<String>('asset-chip-${item.id}'),
               label: Text(item.name),
@@ -867,7 +810,7 @@ class _AssetManagementPanelState extends State<AssetManagementPanel> {
           ),
         const SizedBox(height: 16),
         Text(
-          'Status: $_status',
+          'Status: ${assetState.status}',
           key: const ValueKey<String>('asset-status'),
           style: textTheme.bodyMedium,
         ),

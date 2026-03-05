@@ -372,6 +372,162 @@ class InMemoryCanvasEditingContract implements CanvasEditingContract {
   }
 }
 
+class AssetRecord {
+  const AssetRecord({
+    required this.id,
+    required this.name,
+    required this.type,
+    required this.usedCount,
+  });
+
+  final String id;
+  final String name;
+  final String type;
+  final int usedCount;
+}
+
+class AssetManagementState {
+  const AssetManagementState({
+    required this.assets,
+    required this.selectedAssetIndex,
+    required this.status,
+  });
+
+  final List<AssetRecord> assets;
+  final int selectedAssetIndex;
+  final String status;
+
+  AssetRecord? get selectedAsset {
+    if (selectedAssetIndex < 0 || selectedAssetIndex >= assets.length) {
+      return null;
+    }
+    return assets[selectedAssetIndex];
+  }
+}
+
+abstract class AssetManagementContract {
+  AssetManagementState get state;
+  AssetManagementState importAsset(String assetName, String assetType);
+  AssetManagementState selectAsset(int index);
+  AssetManagementState useSelectedAsset();
+  AssetManagementState removeSelectedAsset();
+}
+
+class _MutableAssetRecord {
+  _MutableAssetRecord({
+    required this.id,
+    required this.name,
+    required this.type,
+  });
+
+  final String id;
+  final String name;
+  final String type;
+  int usedCount = 0;
+}
+
+class InMemoryAssetManagementContract implements AssetManagementContract {
+  final List<_MutableAssetRecord> _assets = <_MutableAssetRecord>[];
+  int _selectedAssetIndex = -1;
+  int _nextAssetNumber = 1;
+  String _status = 'Idle';
+
+  @override
+  AssetManagementState get state => AssetManagementState(
+    assets: List<AssetRecord>.unmodifiable(
+      _assets.map(
+        (_MutableAssetRecord asset) => AssetRecord(
+          id: asset.id,
+          name: asset.name,
+          type: asset.type,
+          usedCount: asset.usedCount,
+        ),
+      ),
+    ),
+    selectedAssetIndex: _selectedAssetIndex,
+    status: _status,
+  );
+
+  _MutableAssetRecord? get _selectedAsset {
+    if (_selectedAssetIndex < 0 || _selectedAssetIndex >= _assets.length) {
+      return null;
+    }
+    return _assets[_selectedAssetIndex];
+  }
+
+  @override
+  AssetManagementState importAsset(String assetName, String assetType) {
+    final String normalizedName = assetName.trim();
+    if (normalizedName.isEmpty) {
+      _status = 'Asset import failed: asset name is required.';
+      return state;
+    }
+
+    final bool duplicated = _assets.any(
+      (_MutableAssetRecord asset) =>
+          asset.name.toLowerCase() == normalizedName.toLowerCase(),
+    );
+    if (duplicated) {
+      _status = 'Asset import failed: duplicate asset name.';
+      return state;
+    }
+
+    final _MutableAssetRecord created = _MutableAssetRecord(
+      id: 'asset-${_nextAssetNumber++}',
+      name: normalizedName,
+      type: assetType,
+    );
+    _assets.add(created);
+    _selectedAssetIndex = _assets.length - 1;
+    _status = 'Asset imported: ${created.name} (${created.type}).';
+    return state;
+  }
+
+  @override
+  AssetManagementState selectAsset(int index) {
+    if (index < 0 || index >= _assets.length) {
+      _status = 'Asset select failed: invalid index.';
+      return state;
+    }
+
+    _selectedAssetIndex = index;
+    _status = 'Asset selected: ${_assets[index].name}.';
+    return state;
+  }
+
+  @override
+  AssetManagementState useSelectedAsset() {
+    final _MutableAssetRecord? asset = _selectedAsset;
+    if (asset == null) {
+      _status = 'Asset use skipped: no asset selected.';
+      return state;
+    }
+
+    asset.usedCount += 1;
+    _status = 'Asset used: ${asset.name} (count ${asset.usedCount}).';
+    return state;
+  }
+
+  @override
+  AssetManagementState removeSelectedAsset() {
+    final _MutableAssetRecord? asset = _selectedAsset;
+    if (asset == null) {
+      _status = 'Asset remove skipped: no asset selected.';
+      return state;
+    }
+
+    final String removedName = asset.name;
+    _assets.removeAt(_selectedAssetIndex);
+    if (_assets.isEmpty) {
+      _selectedAssetIndex = -1;
+    } else if (_selectedAssetIndex >= _assets.length) {
+      _selectedAssetIndex = _assets.length - 1;
+    }
+    _status = 'Asset removed: $removedName.';
+    return state;
+  }
+}
+
 class ExportRequest {
   const ExportRequest({
     required this.fileName,

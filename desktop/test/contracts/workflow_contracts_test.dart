@@ -143,6 +143,50 @@ void main() {
     });
   });
 
+  group('InMemoryAssetManagementContract', () {
+    test('supports import/select/use/remove lifecycle', () {
+      final InMemoryAssetManagementContract contract =
+          InMemoryAssetManagementContract();
+
+      contract.importAsset('', 'image');
+      expect(
+        contract.state.status,
+        'Asset import failed: asset name is required.',
+      );
+
+      contract.importAsset('hero.png', 'image');
+      expect(contract.state.status, 'Asset imported: hero.png (image).');
+      expect(contract.state.assets, hasLength(1));
+      expect(contract.state.selectedAsset?.name, 'hero.png');
+
+      contract.importAsset('hero.png', 'image');
+      expect(
+        contract.state.status,
+        'Asset import failed: duplicate asset name.',
+      );
+
+      contract.useSelectedAsset();
+      expect(contract.state.status, 'Asset used: hero.png (count 1).');
+      expect(contract.state.selectedAsset?.usedCount, 1);
+
+      contract.removeSelectedAsset();
+      expect(contract.state.status, 'Asset removed: hero.png.');
+      expect(contract.state.assets, isEmpty);
+      expect(contract.state.selectedAsset, isNull);
+
+      contract.useSelectedAsset();
+      expect(contract.state.status, 'Asset use skipped: no asset selected.');
+    });
+
+    test('guards invalid asset selection index', () {
+      final InMemoryAssetManagementContract contract =
+          InMemoryAssetManagementContract();
+
+      contract.selectAsset(1);
+      expect(contract.state.status, 'Asset select failed: invalid index.');
+    });
+  });
+
   group('InMemoryExportWorkflowContract', () {
     test('returns validation failure for empty file name', () {
       final InMemoryExportWorkflowContract contract =
