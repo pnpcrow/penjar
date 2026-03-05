@@ -1679,6 +1679,56 @@ void main() {
     );
 
     test(
+      'export backend sibling data envelope is used when result envelope lacks export state',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.runExport: <String, Object?>{
+                'result': <String, Object?>{
+                  'meta': <String, Object?>{'requestId': 'req-export-1'},
+                },
+                'data': <String, Object?>{
+                  'detail': 'Backend sibling data export snapshot applied.',
+                  'exportState': <String, Object?>{
+                    'artifacts': <Map<String, Object?>>[
+                      <String, Object?>{
+                        'id': 'export-sibling',
+                        'fileName': 'remote-landing',
+                        'format': 'svg',
+                        'scale': '3x',
+                        'includeBackground': false,
+                      },
+                    ],
+                  },
+                },
+              },
+            });
+        final RemoteStubExportWorkflowContract exportContract =
+            RemoteStubExportWorkflowContract(transportClient: transportClient);
+
+        exportContract.runExport(
+          const ExportRequest(
+            fileName: 'ignored',
+            format: 'png',
+            scale: '2x',
+            includeBackground: true,
+          ),
+        );
+
+        expect(exportContract.state.artifacts, hasLength(1));
+        expect(exportContract.state.latestArtifact?.id, 'export-sibling');
+        expect(
+          exportContract.state.latestArtifact?.outputPath,
+          '/exports/remote-landing.svg',
+        );
+        expect(
+          exportContract.state.status,
+          '[remote-stub] Backend sibling data export snapshot applied.',
+        );
+      },
+    );
+
+    test(
       'supports deep backend response envelope chains beyond four levels',
       () {
         final _BackendResponseTransportClient transportClient =

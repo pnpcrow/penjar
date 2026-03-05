@@ -8712,6 +8712,57 @@ for metadata-only primary wrappers (`result.meta`) with inspect state in sibling
     payloads.
   - targeted tests and full desktop verification remain green after inspect regression lock.
 
+## Unit WS-D-191: Export workflow sibling-envelope fallback regression lock
+
+### Planned objective
+
+Extend sibling-envelope fallback evidence to export workflows by locking contract/parity behavior
+for metadata-only primary wrappers (`result.meta`) with export state in sibling wrappers
+(`data.exportState`).
+
+### Implemented changes
+
+1. Added export contract regression in `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `export backend sibling data envelope is used when result envelope lacks export state`.
+2. Added export parity regression in `desktop/test/parity/export_workflow_parity_test.dart`:
+   - `_ExportBackendSiblingDataEnvelopeParityTransportClient`,
+   - `export parity uses sibling data envelope when result lacks export state`.
+3. Synced continuity docs for cross-workflow sibling-envelope evidence:
+   - `desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `desktop-flutter-development-runbook.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/export_workflow_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - sibling-envelope fallback correctness for export state extraction paths,
+  - parity UI status/artifact/latest rendering under metadata-only primary wrapper payloads,
+  - regression impact on full verification chain.
+- **Issues found during review**
+  1. Project/file/canvas/asset/collaboration/inspect sibling-envelope regressions were locked, but
+     export workflow still had no dedicated regression for `result.meta` + sibling `data.exportState`.
+  2. Initial parity assertion expected a single output-path text match, but the UI intentionally
+     renders it in both latest-summary and artifact chip surfaces.
+- **Fix applied**
+  1. Added contract regression for `runExport` backend payloads with sibling `data.exportState`.
+  2. Added parity regression to assert backend-driven status text and artifact rendering under
+     sibling-envelope payloads.
+  3. Adjusted parity output-path assertion to allow multiple matches (`findsAtLeastNWidgets(1)`)
+     reflecting actual UI behavior.
+  4. Updated continuity docs so export rows and runbook/plan narrative include sibling-envelope
+     coverage evidence.
+- **Post-fix validation criteria**
+  - export snapshots resolve from sibling `data.exportState` when primary `result` wrappers are
+    metadata-only.
+  - parity UI status/artifact/latest surfaces reflect backend snapshots under sibling-envelope
+    payloads.
+  - targeted tests and full desktop verification remain green after export regression lock.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
