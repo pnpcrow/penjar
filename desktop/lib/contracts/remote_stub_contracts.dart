@@ -1014,9 +1014,9 @@ String _resolveAuthBackendStatusValue({
   required String fallbackStatus,
   required bool signedIn,
   required bool signedOutByCode,
+  required bool sessionExpiredByCode,
   required bool signedOutByStateAlias,
   required bool hasExplicitFailureFlag,
-  required String? backendCode,
   List<Map<String, Object?>> additionalPayloads =
       const <Map<String, Object?>>[],
 }) {
@@ -1032,9 +1032,9 @@ String _resolveAuthBackendStatusValue({
   final String? fallbackMappedStatus = _resolveAuthBackendFallbackStatus(
     signedIn: signedIn,
     signedOutByCode: signedOutByCode,
+    sessionExpiredByCode: sessionExpiredByCode,
     signedOutByStateAlias: signedOutByStateAlias,
     hasExplicitFailureFlag: hasExplicitFailureFlag,
-    backendCode: backendCode,
   );
   return fallbackMappedStatus ?? fallbackStatus;
 }
@@ -1042,18 +1042,17 @@ String _resolveAuthBackendStatusValue({
 String? _resolveAuthBackendFallbackStatus({
   required bool signedIn,
   required bool signedOutByCode,
+  required bool sessionExpiredByCode,
   required bool signedOutByStateAlias,
   required bool hasExplicitFailureFlag,
-  required String? backendCode,
 }) {
   if (signedIn) {
     return null;
   }
-  if (signedOutByCode && backendCode != null) {
-    if (_backendCodeIndicatesSessionExpired(backendCode)) {
-      return 'Backend session expired.';
-    }
-    return 'Authentication required.';
+  if (signedOutByCode) {
+    return sessionExpiredByCode
+        ? 'Backend session expired.'
+        : 'Authentication required.';
   }
   if (signedOutByStateAlias) {
     return 'Authentication required.';
@@ -1395,6 +1394,10 @@ AuthSessionState? _authStateFromBackendPayload(
   );
   final bool signedOutByCode =
       backendCode != null && _backendCodeIndicatesSignedOut(backendCode);
+  final bool sessionExpiredByCode =
+      backendCode != null &&
+      signedOutByCode &&
+      _backendCodeIndicatesSessionExpired(backendCode);
   final bool nextSignedIn;
   if (resolvedSignedIn != null) {
     nextSignedIn = resolvedSignedIn;
@@ -1418,9 +1421,9 @@ AuthSessionState? _authStateFromBackendPayload(
       fallbackStatus: currentState.status,
       signedIn: nextSignedIn,
       signedOutByCode: signedOutByCode,
+      sessionExpiredByCode: sessionExpiredByCode,
       signedOutByStateAlias: resolvedSignedOut == true,
       hasExplicitFailureFlag: hasExplicitFailureFlag,
-      backendCode: backendCode,
       additionalPayloads: authSources,
     ),
   );
