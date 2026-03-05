@@ -1,16 +1,14 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:penjar_desktop/main.dart';
+import 'parity_test_utils.dart';
 
 void main() {
   testWidgets('file lifecycle parity scaffold interactions work', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const PenjarDesktopApp());
-
-    await tester.tap(find.byKey(const ValueKey<String>('nav-project')));
-    await tester.pumpAndSettle();
+    await pumpDesktopApp(tester);
+    await openWorkflowSection(tester, 'project');
 
     await tester.enterText(
       find.byKey(const ValueKey<String>('file-name-input')),

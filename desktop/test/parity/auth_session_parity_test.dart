@@ -1,16 +1,14 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:penjar_desktop/main.dart';
+import 'parity_test_utils.dart';
 
 void main() {
   testWidgets('auth/session parity scaffold interactions work', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const PenjarDesktopApp());
-
-    await tester.tap(find.byKey(const ValueKey<String>('nav-auth')));
-    await tester.pumpAndSettle();
+    await pumpDesktopApp(tester);
+    await openWorkflowSection(tester, 'auth');
 
     expect(
       find.byKey(const ValueKey<String>('auth-session-panel')),

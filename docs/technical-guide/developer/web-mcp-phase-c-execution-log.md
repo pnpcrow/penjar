@@ -1074,6 +1074,39 @@ Reduce redundant command maintenance and improve local/CI verification performan
   - CI workflow and local verification now share one canonical command chain.
   - Command maintenance drift risk is reduced by centralizing verification orchestration.
 
+## Unit WS-D-27: Parity test utility consolidation
+
+### Planned objective
+
+Improve parity-suite maintainability and reduce repetitive test setup code by introducing shared parity test utilities for app pump and workflow-section navigation.
+
+### Implemented changes
+
+1. Added parity test utility module:
+   - `desktop/test/parity/parity_test_utils.dart`.
+2. Implemented shared helpers:
+   - `pumpDesktopApp(WidgetTester tester)`,
+   - `openWorkflowSection(WidgetTester tester, String sectionId)`.
+3. Refactored parity tests to use shared helpers:
+   - auth/project/file/canvas/asset/collaboration/inspect/export/diagnostics/shell-persistence parity tests now consume utility helpers instead of repeating pump/navigation boilerplate.
+4. Re-ran consolidated full verification:
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of refactored parity test navigation behavior,
+  - regression risk from shared helper abstraction,
+  - compatibility with existing parity runner and verify scripts.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - All parity tests pass after helper-based refactor.
+  - Full verification chain remains green with build path included.
+  - Parity suite navigation semantics remain unchanged while setup duplication is reduced.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
