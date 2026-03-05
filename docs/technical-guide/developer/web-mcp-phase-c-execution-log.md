@@ -1266,8 +1266,43 @@ Prevent regressions in environment-driven contract-mode routing by validating de
   - Canonical `desktop:verify:full` remains green with additional mode-matrix stage.
   - Mode-routing regressions are now caught before analyze/build stages in one chain.
 
+## Unit WS-D-32: Desktop CI platform matrix expansion (Linux + macOS)
+
+### Planned objective
+
+Reduce desktop release-risk by extending CI coverage from Linux-only verification to a Linux+macOS matrix, with macOS build validation enabled in the same canonical verification chain.
+
+### Implemented changes
+
+1. Expanded desktop CI workflow matrix:
+   - `.github/workflows/tests-desktop-flutter.yml` now defines a two-platform job matrix:
+     - `linux` (`ubuntu-latest`, `INCLUDE_BUILD=0`),
+     - `macos` (`macos-latest`, `INCLUDE_BUILD=1`).
+2. Kept canonical verification entrypoint unchanged:
+   - each matrix job runs `desktop/scripts/verify_desktop.sh`,
+   - build stage toggled through `INCLUDE_BUILD` matrix variable.
+3. Updated acceptance baseline CI notes:
+   - `desktop-flutter-parity-acceptance-baseline.md` now records Linux parity chain + macOS parity/build matrix baseline.
+4. Re-ran local full verification prior to commit:
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of matrix wiring and environment-variable propagation,
+  - risk of divergence between Linux and macOS validation paths,
+  - consistency of CI documentation with workflow behavior.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Workflow defines Linux and macOS jobs using one canonical verification script.
+  - macOS path now executes build validation in CI through `INCLUDE_BUILD=1`.
+  - Local full verification remains green after matrix workflow update.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux with consolidated verification scripts, but macOS/Windows build-matrix coverage and release-grade installer/update validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS with consolidated verification scripts and macOS build validation, but Windows matrix coverage and release-grade installer/update validation are not yet configured.

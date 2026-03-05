@@ -51,6 +51,7 @@ the [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-pha
 ## CI execution anchor
 
 - Desktop parity CI baseline workflow: `.github/workflows/tests-desktop-flutter.yml`.
+- CI matrix baseline now runs Linux parity chain and macOS parity+build chain.
 - Canonical desktop verification chain script: `desktop/scripts/verify_desktop.sh`.
 - Canonical parity test-file list is managed in `desktop/scripts/run_parity_tests.sh` and consumed by root `desktop:test:parity` script + CI workflow.
 - Contract-mode matrix script is managed in `desktop/scripts/run_mode_matrix_tests.sh` and consumed by root `desktop:test:mode-matrix` script + verification chain.
