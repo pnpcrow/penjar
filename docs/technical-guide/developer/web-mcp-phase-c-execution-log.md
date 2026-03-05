@@ -3623,8 +3623,55 @@ Ensure strict signing execution cannot be enabled without strict placeholder-hyg
   - Gate-policy preflight passes when strict signing execution, command-hook enforcement, and placeholder hygiene are coherently enabled.
   - Full-fast desktop verification remains green after dependency hardening.
 
+## Unit WS-D-85: Windows naming gate-policy integration and dependency hardening
+
+### Planned objective
+
+Close gate-policy coverage gaps for Windows installer naming enforcement and ensure strict provenance mode always includes strict naming constraints.
+
+### Implemented changes
+
+1. Extended gate-policy toggle model:
+   - `desktop/scripts/check_release_smoke_gate_policy.sh` now reads `STRICT_WINDOWS_INSTALLER_NAMING`.
+2. Added strict naming dependency checks:
+   - `STRICT_WINDOWS_INSTALLER_NAMING=1` now requires:
+     - `STRICT_WINDOWS_INSTALLER_EXECUTION=1`,
+     - `STRICT_WINDOWS_INSTALLER_PACKAGING=1`.
+3. Added strict provenance-to-naming dependency:
+   - `STRICT_WINDOWS_INSTALLER_PROVENANCE=1` now requires `STRICT_WINDOWS_INSTALLER_NAMING=1`.
+4. Extended gate-policy report transparency:
+   - report now includes effective `STRICT_WINDOWS_INSTALLER_NAMING` value.
+5. Wired workflow preflight env propagation:
+   - `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now passes `STRICT_WINDOWS_INSTALLER_NAMING: ${{ inputs.enforce_windows_installer_naming }}`.
+6. Updated release baseline docs:
+   - `desktop-flutter-release-validation-baseline.md` now documents strict Windows naming dependency graph and provenance-to-naming requirement in gate-policy preflight.
+7. Re-ran validation commands:
+   - `cd desktop && STRICT_WINDOWS_INSTALLER_NAMING=1 STRICT_WINDOWS_INSTALLER_EXECUTION=1 ./scripts/check_release_smoke_gate_policy.sh` (expected failure),
+   - `cd desktop && STRICT_WINDOWS_INSTALLER_PROVENANCE=1 STRICT_WINDOWS_INSTALLER_EXECUTION=1 STRICT_WINDOWS_INSTALLER_PACKAGING=1 ./scripts/check_release_smoke_gate_policy.sh` (expected failure),
+   - `cd desktop && STRICT_WINDOWS_INSTALLER_PROVENANCE=1 STRICT_WINDOWS_INSTALLER_EXECUTION=1 STRICT_WINDOWS_INSTALLER_PACKAGING=1 STRICT_WINDOWS_INSTALLER_NAMING=1 ./scripts/check_release_smoke_gate_policy.sh`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - gate-policy coverage completeness for Windows naming toggle,
+  - strict provenance dependency coherence with naming/packaging constraints,
+  - workflow/env propagation alignment and report observability.
+- **Issues found during review**
+  1. `enforce_windows_installer_naming` existed at workflow level but was not modeled in gate-policy preflight, creating a policy visibility gap.
+  2. Strict Windows provenance mode could previously bypass strict naming enforcement in gate-policy preflight.
+- **Fix applied**
+  1. Added naming toggle parsing/reporting + dependency checks in gate-policy script.
+  2. Added workflow env propagation for naming toggle and provenance-to-naming dependency enforcement.
+- **Post-fix validation criteria**
+  - Gate-policy preflight fails when strict naming is enabled without strict packaging.
+  - Gate-policy preflight fails when strict provenance is enabled without strict naming.
+  - Gate-policy preflight passes when strict execution/packaging/naming/provenance dependencies are coherently enabled.
+  - Full-fast desktop verification remains green after policy hardening.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks), command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging dependency, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks), command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

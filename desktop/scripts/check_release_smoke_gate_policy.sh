@@ -16,6 +16,7 @@ strict_signing_placeholders="$(to_bool "${STRICT_SIGNING_PLACEHOLDERS:-0}")"
 strict_signing_provenance="$(to_bool "${STRICT_SIGNING_PROVENANCE:-0}")"
 strict_windows_installer_execution="$(to_bool "${STRICT_WINDOWS_INSTALLER_EXECUTION:-0}")"
 strict_windows_installer_packaging="$(to_bool "${STRICT_WINDOWS_INSTALLER_PACKAGING:-0}")"
+strict_windows_installer_naming="$(to_bool "${STRICT_WINDOWS_INSTALLER_NAMING:-0}")"
 strict_windows_installer_provenance="$(to_bool "${STRICT_WINDOWS_INSTALLER_PROVENANCE:-0}")"
 strict_release_evidence_bundle="$(to_bool "${STRICT_RELEASE_EVIDENCE_BUNDLE:-0}")"
 publish_appcast_external="$(to_bool "${PUBLISH_APPCAST_EXTERNAL:-0}")"
@@ -77,12 +78,24 @@ if [[ "$strict_windows_installer_packaging" -eq 1 && "$strict_windows_installer_
   add_required "STRICT_WINDOWS_INSTALLER_PACKAGING requires STRICT_WINDOWS_INSTALLER_EXECUTION=1."
 fi
 
+if [[ "$strict_windows_installer_naming" -eq 1 && "$strict_windows_installer_execution" -eq 0 ]]; then
+  add_required "STRICT_WINDOWS_INSTALLER_NAMING requires STRICT_WINDOWS_INSTALLER_EXECUTION=1."
+fi
+
+if [[ "$strict_windows_installer_naming" -eq 1 && "$strict_windows_installer_packaging" -eq 0 ]]; then
+  add_required "STRICT_WINDOWS_INSTALLER_NAMING requires STRICT_WINDOWS_INSTALLER_PACKAGING=1."
+fi
+
 if [[ "$strict_windows_installer_provenance" -eq 1 && "$strict_windows_installer_execution" -eq 0 ]]; then
   add_required "STRICT_WINDOWS_INSTALLER_PROVENANCE requires STRICT_WINDOWS_INSTALLER_EXECUTION=1."
 fi
 
 if [[ "$strict_windows_installer_provenance" -eq 1 && "$strict_windows_installer_packaging" -eq 0 ]]; then
   add_required "STRICT_WINDOWS_INSTALLER_PROVENANCE requires STRICT_WINDOWS_INSTALLER_PACKAGING=1."
+fi
+
+if [[ "$strict_windows_installer_provenance" -eq 1 && "$strict_windows_installer_naming" -eq 0 ]]; then
+  add_required "STRICT_WINDOWS_INSTALLER_PROVENANCE requires STRICT_WINDOWS_INSTALLER_NAMING=1."
 fi
 
 if [[ "$strict_release_evidence_bundle" -eq 1 && "$strict_signing_provenance" -eq 0 ]]; then
@@ -146,6 +159,7 @@ fi
   echo "- STRICT_SIGNING_PROVENANCE: $strict_signing_provenance"
   echo "- STRICT_WINDOWS_INSTALLER_EXECUTION: $strict_windows_installer_execution"
   echo "- STRICT_WINDOWS_INSTALLER_PACKAGING: $strict_windows_installer_packaging"
+  echo "- STRICT_WINDOWS_INSTALLER_NAMING: $strict_windows_installer_naming"
   echo "- STRICT_WINDOWS_INSTALLER_PROVENANCE: $strict_windows_installer_provenance"
   echo "- STRICT_RELEASE_EVIDENCE_BUNDLE: $strict_release_evidence_bundle"
   echo "- PUBLISH_APPCAST_EXTERNAL: $publish_appcast_external"
