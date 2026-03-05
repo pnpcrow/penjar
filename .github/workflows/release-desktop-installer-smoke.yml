@@ -168,6 +168,14 @@ jobs:
         working-directory: ./desktop
         run: ./scripts/publish_appcast.sh
 
+      - name: Generate appcast publication bundle
+        working-directory: ./desktop
+        run: ./scripts/generate_appcast_publication_bundle.sh
+
+      - name: Check appcast publication bundle
+        working-directory: ./desktop
+        run: ./scripts/check_appcast_publication_bundle.sh
+
       - name: Upload appcast preview
         uses: actions/upload-artifact@v4
         with:
@@ -179,3 +187,9 @@ jobs:
         with:
           name: desktop-appcast-published-dry-run
           path: desktop/release/published/
+
+      - name: Upload appcast publication bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-appcast-publication-bundle
+          path: desktop/release/reports/appcast_publication_bundle.json

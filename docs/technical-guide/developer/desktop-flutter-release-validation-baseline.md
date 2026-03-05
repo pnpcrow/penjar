@@ -88,8 +88,11 @@ This baseline defines minimum release validation requirements for desktop distri
    - `pnpm run desktop:release:appcast:check`
 9. Publish appcast dry-run targets:
    - `pnpm run desktop:release:appcast:publish:dry-run`
-10. Record evidence in release checklist ticket and Phase C execution log.
-11. Block release promotion if any required gate is missing or only manually asserted without evidence.
+10. Generate/check appcast publication bundle:
+   - `pnpm run desktop:release:appcast:bundle:generate`
+   - `pnpm run desktop:release:appcast:bundle:check`
+11. Record evidence in release checklist ticket and Phase C execution log.
+12. Block release promotion if any required gate is missing or only manually asserted without evidence.
 
 CI baseline note:
 - `.github/workflows/tests-desktop-flutter.yml` includes `release-evidence-guard` and `release-update-manifest-guard` jobs, and uploads parity/build artifacts for audit traceability.
@@ -99,12 +102,14 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` also uploads release-evidence index preview artifacts generated from row snippets.
 - `.github/workflows/release-desktop-installer-smoke.yml` runs an `appcast-preview` job that generates/checks/uploads appcast preview JSON from smoke reports.
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job also produces channel/version appcast publish dry-run targets.
+- `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job also produces and validates appcast publication bundle artifacts.
 - Update manifest baseline file: `desktop/release/update_manifest.example.json`.
 - Installer/update smoke report generator: `desktop/scripts/generate_installer_update_report.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence index updater: `desktop/scripts/update_release_evidence_index.sh`.
 - Appcast preview generator/checker: `desktop/scripts/generate_appcast_from_reports.sh`, `desktop/scripts/check_appcast.sh`.
 - Appcast publish dry-run script: `desktop/scripts/publish_appcast.sh`.
+- Appcast publication bundle generator/checker: `desktop/scripts/generate_appcast_publication_bundle.sh`, `desktop/scripts/check_appcast_publication_bundle.sh`.
 - Signing readiness checker: `desktop/scripts/check_signing_readiness.sh`.
 
 ## 5) Implementation backlog seeds

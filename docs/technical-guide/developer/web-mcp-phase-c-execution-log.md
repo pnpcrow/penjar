@@ -1958,8 +1958,57 @@ Introduce explicit signing/notarization readiness preflight so missing release s
   - Strict readiness mode is available for release-enforcement scenarios.
   - Full-fast desktop verification remains green after signing readiness gate integration.
 
+## Unit WS-D-48: Appcast publication bundle automation baseline
+
+### Planned objective
+
+Standardize publication handoff metadata by generating and validating appcast publication bundle artifacts from dry-run publish outputs.
+
+### Implemented changes
+
+1. Added appcast publication bundle generator:
+   - `desktop/scripts/generate_appcast_publication_bundle.sh`.
+2. Added appcast publication bundle checker:
+   - `desktop/scripts/check_appcast_publication_bundle.sh`.
+3. Implemented bundle semantics:
+   - reads appcast preview + published dry-run files,
+   - captures per-target path/hash/size metadata,
+   - enforces channel/version coherence and required latest/version target presence.
+4. Added root command surfaces:
+   - `desktop:release:appcast:bundle:generate`,
+   - `desktop:release:appcast:bundle:check`.
+5. Extended appcast-preview CI job:
+   - `.github/workflows/release-desktop-installer-smoke.yml` now generates/checks publication bundle and uploads it as artifact.
+6. Updated release/runbook/index docs:
+   - `desktop-flutter-release-validation-baseline.md` now includes publication bundle protocol and CI note,
+   - `desktop-flutter-development-runbook.md` command inventory now includes bundle commands,
+   - `desktop-flutter-release-evidence-index.md` maintenance rules now include bundle artifact checks.
+7. Re-ran validation commands:
+   - `pnpm run desktop:release:appcast:generate`,
+   - `pnpm run desktop:release:appcast:check`,
+   - `pnpm run desktop:release:appcast:publish:dry-run`,
+   - `pnpm run desktop:release:appcast:bundle:generate`,
+   - `pnpm run desktop:release:appcast:bundle:check`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - publication bundle schema correctness and deterministic target metadata output,
+  - required target presence checks (`latest` and version-pinned),
+  - CI artifact continuity for publication handoff packaging.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Bundle generation emits publication metadata JSON with target hash/size entries.
+  - Bundle checker validates schema and required target coverage.
+  - Full-fast desktop verification remains green after bundle automation integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, and signing readiness gating, but signed installer packaging/notarization execution and external production update/appcast publication integrations are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, and signing readiness gating, but signed installer packaging/notarization execution and external production update/appcast publication integrations are not yet configured.
