@@ -29,6 +29,7 @@ For implementation planning across web, MCP, and desktop channels, start with th
 [Desktop Flutter Migration Inventory][12],
 [Desktop Flutter Parity Acceptance Baseline][13],
 [Desktop Flutter Development Runbook][16],
+[Desktop Flutter Release Validation Baseline][17],
 [Web ↔ MCP Auth/Session Recovery Contract][14], and
 [Web + MCP Phase A Ticket Seed][15].
 
@@ -48,3 +49,4 @@ For implementation planning across web, MCP, and desktop channels, start with th
 [14]: /technical-guide/developer/web-mcp-auth-session-recovery-contract/
 [15]: /technical-guide/developer/web-mcp-phase-a-ticket-seed/
 [16]: /technical-guide/developer/desktop-flutter-development-runbook/
+[17]: /technical-guide/developer/desktop-flutter-release-validation-baseline/

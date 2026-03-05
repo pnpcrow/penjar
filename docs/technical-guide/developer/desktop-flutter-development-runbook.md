@@ -14,6 +14,7 @@ This runbook defines the repeatable execution loop for the Flutter desktop full-
 - [Desktop Flutter Parity Checklist](/technical-guide/developer/desktop-flutter-parity-checklist/)
 - [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/)
 - [Desktop Flutter Parity Acceptance Baseline](/technical-guide/developer/desktop-flutter-parity-acceptance-baseline/)
+- [Desktop Flutter Release Validation Baseline](/technical-guide/developer/desktop-flutter-release-validation-baseline/)
 - [Web + MCP + Desktop Detailed Implementation Plan](/technical-guide/developer/web-mcp-desktop-implementation-plan/)
 
 ## 1) Session start protocol
@@ -84,6 +85,6 @@ Before pausing or transferring work:
 
 ## 7) Current next-unit candidates
 
-1. Release-grade installer/update validation baseline for desktop distribution.
-2. Backend transport wiring for runtime-switchable contract adapters.
-3. Windows/macOS build artifact and signing pipeline validation policy.
+1. Backend transport wiring for runtime-switchable contract adapters.
+2. Windows/macOS build artifact and signing pipeline validation policy.
+3. Release validation evidence index and CI artifact upload automation.

@@ -1414,8 +1414,52 @@ Reduce repeated local verification latency by allowing dependency-resolution ski
   - Default `desktop:verify` path still performs dependency resolution.
   - Docs clearly restrict fast path to unchanged dependency state.
 
+## Unit WS-D-36: Release validation baseline documentation and linkage
+
+### Planned objective
+
+Establish a concrete release-readiness baseline for desktop distribution by defining installer/signing/update validation gates and wiring the new artifact into all Phase C continuity anchors.
+
+### Implemented changes
+
+1. Added release validation baseline artifact:
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md`.
+2. Baseline content defines:
+   - platform release targets (macOS/Windows),
+   - required gates (build reproducibility, installer integrity, signing/notarization, update path, runtime smoke),
+   - required evidence bundle per release candidate,
+   - operating protocol and backlog seeds.
+3. Linked baseline into core Phase C navigation:
+   - `web-mcp-documentation-map.md`,
+   - `web-mcp-desktop-implementation-plan.md`,
+   - `developer/index.md`.
+4. Linked baseline into desktop tracker/runbook artifacts:
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`,
+   - `desktop-flutter-development-runbook.md`.
+5. Updated runbook next-unit candidates after baseline publication:
+   - shifted from baseline definition to evidence/index automation candidates.
+6. Re-ran canonical verification fast path:
+   - `pnpm run desktop:verify:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - completeness of release validation gates and evidence requirements,
+  - cross-document linkage integrity for desktop continuity navigation,
+  - consistency between newly documented release scope and existing remaining-gap statements.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Release baseline is reachable from documentation map, implementation plan, developer index, and Phase C tracker docs.
+  - Remaining gaps now reference execution/automation readiness rather than missing baseline definition.
+  - Fast verification chain remains green after documentation expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts and macOS build validation, but release-grade installer/update validation is not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts and macOS build validation, and release-validation baseline documentation is published, but automated installer/update validation execution pipelines and evidence artifact automation are not yet configured.

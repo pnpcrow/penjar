@@ -29,6 +29,7 @@ This document is the canonical navigation map to keep development continuity wit
    - [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/)
    - [Desktop Flutter Parity Acceptance Baseline](/technical-guide/developer/desktop-flutter-parity-acceptance-baseline/)
    - [Desktop Flutter Development Runbook](/technical-guide/developer/desktop-flutter-development-runbook/)
+   - [Desktop Flutter Release Validation Baseline](/technical-guide/developer/desktop-flutter-release-validation-baseline/)
 
 ## 2) Phase tracking anchors
 
@@ -36,7 +37,7 @@ This document is the canonical navigation map to keep development continuity wit
 |---|---|---|---|
 | Phase A | roadmap + implementation plan | phase-a execution log | capability matrix + parity backlog |
 | Phase B | roadmap + implementation plan | (to be created at phase start) | capability matrix + parity backlog |
-| Phase C | roadmap + implementation plan | web-mcp-phase-c-execution-log + desktop flutter development runbook | desktop parity checklist + migration inventory + acceptance baseline |
+| Phase C | roadmap + implementation plan | web-mcp-phase-c-execution-log + desktop flutter development runbook | desktop parity checklist + migration inventory + acceptance baseline + release validation baseline |
 | Phase D | roadmap + implementation plan | (to be created at phase start) | capability matrix + parity backlog |
 | Phase E | roadmap + implementation plan | (to be created at phase start) | capability matrix + parity backlog |
 
@@ -70,3 +71,4 @@ This document is the canonical navigation map to keep development continuity wit
 - Incident/recovery work: contract doc -> diagnostics probes -> execution log.
 - Desktop parity planning work: roadmap phase C/D sections -> implementation plan WS-D -> matrix/backlog impact rows.
 - Desktop migration execution work: roadmap full-port mandate -> desktop flutter development runbook -> WS-D migration inventory/decommission plan -> acceptance baseline -> execution log evidence.
+- Desktop release-readiness work: release validation baseline -> execution log -> CI/release workflow evidence.

@@ -22,6 +22,7 @@ This document turns the roadmap into an execution plan that can be tracked sprin
   - [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/)
   - [Desktop Flutter Parity Acceptance Baseline](/technical-guide/developer/desktop-flutter-parity-acceptance-baseline/)
   - [Desktop Flutter Development Runbook](/technical-guide/developer/desktop-flutter-development-runbook/)
+  - [Desktop Flutter Release Validation Baseline](/technical-guide/developer/desktop-flutter-release-validation-baseline/)
 
 ## 1. Scope and sequencing
 
