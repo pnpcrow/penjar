@@ -138,7 +138,7 @@ Before pausing or transferring work:
 
 ## 7) Current next-unit candidates
 
-1. Legacy auth-store retirement enforcement for remote-stub auth snapshots (default secure-storage rollout + telemetry baseline is complete; command/file path decommission gates and removal schedule enforcement remain pending).
+1. Legacy auth-store physical removal planning for remote-stub auth snapshots (retirement strict-enforcement control is available; command/file path hard decommission and removal-date enforcement remain pending).
 2. Production Windows protocol-registration command provisioning and signed installer wiring validation (command-hook baseline is complete; real registry/installer command secrets and release execution evidence remain pending).
 3. Real command wiring for signed packaging/notarization/verification in installer smoke workflow (`PENJAR_*_SIGN_COMMAND`, `PENJAR_*_SIGN_VERIFY_COMMAND` paths).
 4. Real Windows signed installer generation (`.msi/.exe`) command chain and provenance command/secret wiring.
