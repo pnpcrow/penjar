@@ -7,6 +7,17 @@ desc: Living matrix for tracking workflow parity between the web client and MCP 
 
 This is the execution artifact for Phase A in the Web + MCP + Desktop roadmap.
 
+## Related execution artifacts
+
+- Navigation and update protocol:
+  - [Web + MCP + Desktop Documentation Map](/technical-guide/developer/web-mcp-documentation-map/)
+- Planning anchors:
+  - [Web + MCP + Desktop Delivery Roadmap](/technical-guide/developer/web-mcp-desktop-roadmap/)
+  - [Web + MCP + Desktop Detailed Implementation Plan](/technical-guide/developer/web-mcp-desktop-implementation-plan/)
+- Execution/detail anchors:
+  - [Web ↔ MCP Parity Backlog](/technical-guide/developer/web-mcp-parity-backlog/)
+  - [Web + MCP Phase A Execution Log](/technical-guide/developer/web-mcp-phase-a-execution-log/)
+
 ## Status legend
 
 - **Complete**: Supported end-to-end with documented usage and tests.
@@ -24,15 +35,15 @@ This is the execution artifact for Phase A in the Web + MCP + Desktop roadmap.
 
 | Domain | Representative web workflow | MCP parity status | Priority | Notes / next action |
 |---|---|---|---|---|
-| Project lifecycle | Open project and navigate file context | Partial | P0 | `active_design_context` + `verify:project-lifecycle` now validates strict context contract invariants (file/page/selection cardinality), multi-context transitions, detached state, and deterministic `PERMISSION_DENIED` diagnostics. Next add real workspace navigation scenarios for closure. |
-| File lifecycle | Create/rename/delete files | Partial | P0 | `file_lifecycle` + `verify:file-lifecycle` now validates strict file/page payload contracts, create-page default naming behavior, name-based open-page semantics, deterministic denied/missing diagnostics, and delete-path `UNSUPPORTED_OPERATION` signaling. Next add constrained-role live integration checks and backend-linked delete workflow closure. |
-| Canvas editing | Create and modify shapes/components | Partial | P0 | `canvas_editing` + `verify:canvas-editing` now validates strict shape-payload contracts (geometry/fill types), create default-value semantics, and deterministic `PERMISSION_DENIED`/`RESOURCE_NOT_FOUND` diagnostics. Next add live fixture snapshot tests for closure. |
-| Asset management | Browse/use/upload assets | Partial | P0 | `verify:asset-management` probe validates import path, interruption diagnostics (timeout/disconnect), and reconnect-recovery import success. Extend to live reference-consistency fixtures for closure. |
-| Collaboration context | Read comments/presence/context metadata | Partial | P1 | `collaboration_context` tool + `verify:collaboration-context` probe now covers thread workflows plus `inspect_awareness` presence metadata (current user + active users) with deterministic permission/not-found diagnostics. Next add live workspace fixtures for awareness payload stability. |
-| Inspect/code handoff | Extract inspect metadata for implementation | Partial | P0 | `inspect_handoff` + `verify:inspect-handoff` now validates required/optional handoff contract fields (hierarchy node shape, layout semantics, token hints, CSS/null style), selection-fallback semantics, and `RESOURCE_NOT_FOUND` diagnostics. Next add live fixture schema regression tests for closure. |
-| Export workflows | Trigger export and retrieve artifacts | Partial | P1 | `verify:export-workflows` now validates PNG/SVG + fill export matrix, deterministic failure diagnostics (`UNSUPPORTED_OPERATION`, `RESOURCE_NOT_FOUND`, `PERMISSION_DENIED`), and artifact file-save path. Next add live fixture-based fidelity checks. |
+| Project lifecycle | Open project and navigate file context | Partial | P0 | `active_design_context` + `verify:project-lifecycle` now validates strict context contract invariants (file/page/selection cardinality), multi-context transitions, detached state, and deterministic `PERMISSION_DENIED` diagnostics; plus cross-tool acceptance chain evidence via `verify:workflow-acceptance`. `verify:workflow-live` is now available for real plugin-session/live-workspace continuity checks. |
+| File lifecycle | Create/rename/delete files | Partial | P0 | `file_lifecycle` + `verify:file-lifecycle` now validates strict file/page payload contracts, create-page default naming behavior, name-based open-page semantics, deterministic denied/missing diagnostics, and delete-path `UNSUPPORTED_OPERATION` signaling; cross-tool acceptance chain (`verify:workflow-acceptance`) now covers create/open continuity into canvas + inspect handoff, and `verify:workflow-live` provides live workspace chain validation entrypoint. |
+| Canvas editing | Create and modify shapes/components | Partial | P0 | `canvas_editing` + `verify:canvas-editing` now validates strict shape-payload contracts (geometry/fill types), create default-value semantics, and deterministic `PERMISSION_DENIED`/`RESOURCE_NOT_FOUND` diagnostics; cross-tool acceptance chain (`verify:workflow-acceptance`) validates downstream inspect handoff continuity after canvas mutations, and `verify:workflow-live` extends this to live plugin sessions. |
+| Asset management | Browse/use/upload assets | Partial | P0 | `verify:asset-management` now validates import payload contract, repeated-import idempotency, missing-file `RESOURCE_NOT_FOUND`, interruption diagnostics (timeout/disconnect), and reconnect-recovery import success. Extend to live reference-consistency fixtures for closure. |
+| Collaboration context | Read comments/presence/context metadata | Partial | P1 | `collaboration_context` + `verify:collaboration-context` now validates strict payload contracts across threads/awareness operations, awareness/thread filter-toggle semantics, deterministic permission/not-found diagnostics, and golden JSON fixture regression baselines for inspect/create/reply/resolve/remove flows; `verify:collaboration-live` now provides live-session inspect/awareness contract + missing-page diagnostic checks with payload capture mode. Next add captured live fixture evidence for row closure. |
+| Inspect/code handoff | Extract inspect metadata for implementation | Partial | P0 | `inspect_handoff` + `verify:inspect-handoff` now validates required/optional handoff contract fields, selection-fallback semantics, `RESOURCE_NOT_FOUND` diagnostics, and golden JSON fixture regression baseline for core scopes; cross-tool acceptance chain (`verify:workflow-acceptance`) validates selection-scope handoff after file/canvas transition sequence, while `verify:workflow-live` validates page-scope handoff in live sessions. Next add live fixture schema regression tests for closure. |
+| Export workflows | Trigger export and retrieve artifacts | Partial | P1 | `verify:export-workflows` now validates PNG/SVG + fill export matrix, deterministic failure diagnostics (`UNSUPPORTED_OPERATION`, `RESOURCE_NOT_FOUND`, `PERMISSION_DENIED`), artifact file-save path, and golden SVG/PNG fixture fidelity regression for in-memory + persisted outputs; `verify:export-live` now provides live-session PNG/SVG + artifact-save + missing-shape diagnostic checks with capture mode. Next add captured live fidelity evidence for row closure. |
 | Authentication/session | Recover from token/session expiration | Partial | P0 | Contract documented; `verify:auth-session` validates missing token, mismatched token, reconnect-retry success, and duplicate-token conflict handling in multi-user mode. |
-| Diagnostics/health | Detect plugin/server disconnect and recovery | Partial | P0 | `/health` endpoint + remediation catalog + automated smoke check (`verify:phase-a`) and reconnect-cycle probe (`verify:bridge-recovery`) shipped; add live-environment recovery fixtures for closure. |
+| Diagnostics/health | Detect plugin/server disconnect and recovery | Partial | P0 | `/health` endpoint + remediation catalog + automated smoke check (`verify:phase-a`) now validates diagnostic catalog structure/uniqueness + endpoint contracts, and reconnect-cycle probe (`verify:bridge-recovery`) is shipped; add live-environment recovery fixtures for closure. |
 | Setup/bootstrap | Clean-environment install to first successful request | Partial | P0 | `preflight` + one-command bootstrap + automated preflight gate (`verify:phase-a`) shipped; add clean-machine KPI measurements to close. |
 
 ## Gap-closure operating rules
@@ -51,3 +62,7 @@ This is the execution artifact for Phase A in the Web + MCP + Desktop roadmap.
   - merged implementation reference,
   - test evidence,
   - docs/diagnostics update reference.
+
+## Live evidence capture entrypoint
+
+- Use `pnpm run verify:live-evidence` to execute live probes (`workflow`, `collaboration`, `export`) and generate a summary report (`summary.json`/`summary.md`) for closure evidence curation.

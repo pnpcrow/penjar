@@ -71,8 +71,8 @@ import WebSocket from "ws";
 
 const [mcpUrl, wsUrl, imagePath] = process.argv.slice(2);
 let mode = "success";
-let sawImportPayload = false;
-let sawRecoveryImportPayload = false;
+let primaryImportPayloadCount = 0;
+let recoveryImportPayloadCount = 0;
 
 function attachPluginHandler(socket, responseShapeId) {
   socket.on("message", (payload) => {
@@ -85,9 +85,9 @@ function attachPluginHandler(socket, responseShapeId) {
       const code = request.params?.code ?? "";
       if (typeof code === "string" && code.includes("penjarUtils.importImage")) {
         if (responseShapeId === "asset-shape-1") {
-          sawImportPayload = true;
+          primaryImportPayloadCount += 1;
         } else {
-          sawRecoveryImportPayload = true;
+          recoveryImportPayloadCount += 1;
         }
       }
 
@@ -119,7 +119,7 @@ attachPluginHandler(ws, "asset-shape-1");
 const client = new Client({ name: "asset-management-check", version: "1.0.0" }, { capabilities: {} });
 const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
 
-async function callTool(name, args) {
+async function callToolText(name, args) {
   const result = await client.request(
     { method: "tools/call", params: { name, arguments: args } },
     CallToolResultSchema
@@ -128,25 +128,61 @@ async function callTool(name, args) {
   return text;
 }
 
+function parseJsonPayload(label, text) {
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(`${label} returned non-JSON payload: ${text}`);
+  }
+}
+
+function assertImportPayloadContract(payload, label) {
+  if (!payload || typeof payload !== "object") {
+    throw new Error(`${label}: payload must be an object: ${JSON.stringify(payload)}`);
+  }
+  if (typeof payload.shapeId !== "string" || payload.shapeId.length === 0) {
+    throw new Error(`${label}: shapeId contract mismatch: ${JSON.stringify(payload)}`);
+  }
+}
+
 try {
   await client.connect(transport);
 
-  const importText = await callTool("import_image", { filePath: imagePath, x: 10, y: 20, width: 50, height: 50 });
-  let importPayload;
-  try {
-    importPayload = JSON.parse(importText);
-  } catch (error) {
-    throw new Error(`import_image returned non-JSON payload: ${importText}`);
-  }
+  const importText = await callToolText("import_image", { filePath: imagePath, x: 10, y: 20, width: 50, height: 50 });
+  const importPayload = parseJsonPayload("import_image", importText);
+  assertImportPayloadContract(importPayload, "import_image");
   if (importPayload?.shapeId !== "asset-shape-1") {
     throw new Error(`import_image success flow mismatch: ${importText}`);
   }
-  if (!sawImportPayload) {
-    throw new Error("import_image request did not reach fake plugin payload handler.");
+
+  const repeatedImportText = await callToolText("import_image", {
+    filePath: imagePath,
+    x: 10,
+    y: 20,
+    width: 50,
+    height: 50,
+  });
+  const repeatedImportPayload = parseJsonPayload("import_image (repeated)", repeatedImportText);
+  assertImportPayloadContract(repeatedImportPayload, "import_image (repeated)");
+  if (repeatedImportPayload?.shapeId !== importPayload?.shapeId) {
+    throw new Error(`import_image idempotency mismatch: first=${importText}; repeated=${repeatedImportText}`);
+  }
+
+  const missingFileText = await callToolText("import_image", {
+    filePath: `${imagePath}.missing`,
+    x: 10,
+    y: 20,
+  });
+  if (!missingFileText.includes("[Diagnostic RESOURCE_NOT_FOUND]")) {
+    throw new Error(`Expected missing-file resource not found diagnostic, got: ${missingFileText}`);
+  }
+
+  if (primaryImportPayloadCount < 2) {
+    throw new Error(`Expected >=2 primary import payloads for idempotency probe, got ${primaryImportPayloadCount}.`);
   }
 
   mode = "timeout";
-  const timeoutText = await callTool("execute_code", { code: "return 'timeout-check';" });
+  const timeoutText = await callToolText("execute_code", { code: "return 'timeout-check';" });
   if (!timeoutText.includes("[Diagnostic PLUGIN_TASK_TIMEOUT]")) {
     throw new Error(`Expected timeout diagnostic, got: ${timeoutText}`);
   }
@@ -154,7 +190,7 @@ try {
   ws.close();
   await new Promise((resolve) => ws.once("close", resolve));
 
-  const disconnectedText = await callTool("execute_code", { code: "return 'disconnect-check';" });
+  const disconnectedText = await callToolText("execute_code", { code: "return 'disconnect-check';" });
   if (!disconnectedText.includes("[Diagnostic PLUGIN_DISCONNECTED]")) {
     throw new Error(`Expected disconnected diagnostic, got: ${disconnectedText}`);
   }
@@ -167,24 +203,22 @@ try {
   });
   attachPluginHandler(wsRecovery, "asset-shape-2");
 
-  const recoveryImportText = await callTool("import_image", { filePath: imagePath, x: 16, y: 24, width: 60, height: 60 });
-  let recoveryImportPayload;
-  try {
-    recoveryImportPayload = JSON.parse(recoveryImportText);
-  } catch (error) {
-    throw new Error(`recovery import_image returned non-JSON payload: ${recoveryImportText}`);
-  }
+  const recoveryImportText = await callToolText("import_image", { filePath: imagePath, x: 16, y: 24, width: 60, height: 60 });
+  const recoveryImportPayload = parseJsonPayload("recovery import_image", recoveryImportText);
+  assertImportPayloadContract(recoveryImportPayload, "recovery import_image");
   if (recoveryImportPayload?.shapeId !== "asset-shape-2") {
     throw new Error(`Recovery import flow mismatch: ${recoveryImportText}`);
   }
-  if (!sawRecoveryImportPayload) {
-    throw new Error("Recovery import_image request did not reach fake plugin payload handler.");
+  if (recoveryImportPayloadCount < 1) {
+    throw new Error(
+      `Expected >=1 recovery import payload after reconnect, got ${recoveryImportPayloadCount}.`
+    );
   }
 
   wsRecovery.close();
   await new Promise((resolve) => wsRecovery.once("close", resolve));
 
-  console.log("[ASSET-CHECK] Verified asset import resilience + reconnect recovery");
+  console.log("[ASSET-CHECK] Verified asset import contract + idempotency + resilience + reconnect recovery");
 } finally {
   await transport.close();
 }

@@ -1,0 +1,22 @@
+{
+  "operation": "inspect_handoff",
+  "scope": "selection",
+  "hierarchy": [
+    {
+      "id": "shape-1",
+      "name": "Button",
+      "type": "rectangle",
+      "children": []
+    }
+  ],
+  "layoutSemantics": {
+    "maxDepth": 2,
+    "targetCount": 1,
+    "fallbackUsed": false
+  },
+  "style": ".button { display:flex; }",
+  "tokenHints": [
+    "color.primary",
+    "spacing.sm"
+  ]
+}

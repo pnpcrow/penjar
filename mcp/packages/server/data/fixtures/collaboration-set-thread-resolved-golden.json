@@ -1,0 +1,12 @@
+{
+  "operation": "set_thread_resolved",
+  "page": {
+    "id": "page-1",
+    "name": "Collaboration Page"
+  },
+  "thread": {
+    "seqNumber": 1,
+    "previousResolved": false,
+    "currentResolved": true
+  }
+}

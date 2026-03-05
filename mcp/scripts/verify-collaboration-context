@@ -12,6 +12,14 @@ WS_URL="ws://127.0.0.1:${PENJAR_MCP_WEBSOCKET_PORT:-4402}"
 
 TMP_BASE="${TMPDIR:-/tmp}"
 SERVER_LOG="$TMP_BASE/penjar-mcp-collaboration-context-$$.log"
+THREADS_FIXTURE="$SERVER_DIR/data/fixtures/collaboration-inspect-threads-golden.json"
+THREADS_FILTERED_FIXTURE="$SERVER_DIR/data/fixtures/collaboration-inspect-threads-filtered-golden.json"
+AWARENESS_FIXTURE="$SERVER_DIR/data/fixtures/collaboration-inspect-awareness-golden.json"
+AWARENESS_MINIMAL_FIXTURE="$SERVER_DIR/data/fixtures/collaboration-inspect-awareness-minimal-golden.json"
+CREATE_FIXTURE="$SERVER_DIR/data/fixtures/collaboration-create-thread-golden.json"
+REPLY_FIXTURE="$SERVER_DIR/data/fixtures/collaboration-reply-thread-golden.json"
+RESOLVE_FIXTURE="$SERVER_DIR/data/fixtures/collaboration-set-thread-resolved-golden.json"
+REMOVE_FIXTURE="$SERVER_DIR/data/fixtures/collaboration-remove-thread-golden.json"
 SERVER_PID=""
 
 log_step() {
@@ -59,20 +67,72 @@ if ! curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
 fi
 
 log_step "Run collaboration_context E2E probe with fake plugin session"
-node --input-type=module - "$MCP_URL" "$WS_URL" <<'EOF_JS'
+node --input-type=module - "$MCP_URL" "$WS_URL" "$THREADS_FIXTURE" "$THREADS_FILTERED_FIXTURE" "$AWARENESS_FIXTURE" "$AWARENESS_MINIMAL_FIXTURE" "$CREATE_FIXTURE" "$REPLY_FIXTURE" "$RESOLVE_FIXTURE" "$REMOVE_FIXTURE" <<'EOF_JS'
+import fs from "node:fs";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
 import WebSocket from "ws";
 
-const [mcpUrl, wsUrl] = process.argv.slice(2);
-let observedOps = new Set();
+const [
+  mcpUrl,
+  wsUrl,
+  threadsFixturePath,
+  threadsFilteredFixturePath,
+  awarenessFixturePath,
+  awarenessMinimalFixturePath,
+  createFixturePath,
+  replyFixturePath,
+  resolveFixturePath,
+  removeFixturePath,
+] = process.argv.slice(2);
+
+const threadsFixture = JSON.parse(fs.readFileSync(threadsFixturePath, "utf8"));
+const threadsFilteredFixture = JSON.parse(fs.readFileSync(threadsFilteredFixturePath, "utf8"));
+const awarenessFixture = JSON.parse(fs.readFileSync(awarenessFixturePath, "utf8"));
+const awarenessMinimalFixture = JSON.parse(fs.readFileSync(awarenessMinimalFixturePath, "utf8"));
+const createFixture = JSON.parse(fs.readFileSync(createFixturePath, "utf8"));
+const replyFixture = JSON.parse(fs.readFileSync(replyFixturePath, "utf8"));
+const resolveFixture = JSON.parse(fs.readFileSync(resolveFixturePath, "utf8"));
+const removeFixture = JSON.parse(fs.readFileSync(removeFixturePath, "utf8"));
+
+const observedOps = new Set();
 
 const ws = new WebSocket(wsUrl);
 await new Promise((resolve, reject) => {
   ws.once("open", resolve);
   ws.once("error", reject);
 });
+
+function parseBoolean(value, fallback) {
+  if (value === "true") {
+    return true;
+  }
+  if (value === "false") {
+    return false;
+  }
+  return fallback;
+}
+
+function buildAwarenessPayload(includeCurrentUser, includeActiveUsers) {
+  if (includeCurrentUser && includeActiveUsers) {
+    return awarenessFixture;
+  }
+  if (!includeCurrentUser && !includeActiveUsers) {
+    return awarenessMinimalFixture;
+  }
+
+  const payload = JSON.parse(JSON.stringify(awarenessFixture));
+  payload.currentUser = includeCurrentUser ? payload.currentUser : null;
+  payload.activeUsers = includeActiveUsers ? payload.activeUsers : [];
+  payload.metrics = {
+    includesCurrentUser: includeCurrentUser,
+    includesActiveUsers: includeActiveUsers,
+    activeUserCount: payload.activeUsers.length,
+    currentUserActive: includeCurrentUser && includeActiveUsers ? awarenessFixture.metrics.currentUserActive : false,
+  };
+  return payload;
+}
 
 ws.on("message", (payload) => {
   try {
@@ -84,17 +144,16 @@ ws.on("message", (payload) => {
     const code = request.params?.code ?? "";
     let result;
     if (typeof code === "string" && code.includes("collaboration_context_operation: inspect_threads")) {
-      observedOps.add("inspect_threads");
-      result = {
-        operation: "inspect_threads",
-        page: { id: "page-1", name: "Collaboration Page" },
-        filters: { onlyYours: false, includeResolved: true },
-        threadCount: 2,
-        threads: [
-          { seqNumber: 1, resolved: false, commentCount: 2, position: { x: 10, y: 20 } },
-          { seqNumber: 2, resolved: true, commentCount: 1, position: { x: 40, y: 55 } },
-        ],
-      };
+      const criteriaMatch = code.match(/const criteria = \{ onlyYours: (true|false), showResolved: (true|false) \};/);
+      const onlyYours = parseBoolean(criteriaMatch?.[1], false);
+      const includeResolved = parseBoolean(criteriaMatch?.[2], true);
+      if (onlyYours && !includeResolved) {
+        observedOps.add("inspect_threads_filtered");
+        result = threadsFilteredFixture;
+      } else {
+        observedOps.add("inspect_threads");
+        result = threadsFixture;
+      }
     } else if (typeof code === "string" && code.includes("collaboration_context_operation: inspect_awareness")) {
       if (code.includes('"deny-user-read"')) {
         observedOps.add("awareness_permission_denied");
@@ -108,50 +167,20 @@ ws.on("message", (payload) => {
         return;
       }
 
-      observedOps.add("inspect_awareness");
-      result = {
-        operation: "inspect_awareness",
-        page: { id: "page-1", name: "Collaboration Page" },
-        currentUser: {
-          id: "user-1",
-          name: "Current User",
-          avatarUrl: null,
-          color: "#0ea5e9",
-        },
-        activeUsers: [
-          {
-            id: "user-1",
-            name: "Current User",
-            avatarUrl: null,
-            color: "#0ea5e9",
-            sessionId: "session-1",
-            position: { x: 300, y: 120 },
-            zoom: 1.25,
-          },
-          {
-            id: "user-2",
-            name: "Reviewer",
-            avatarUrl: null,
-            color: "#f97316",
-            sessionId: "session-2",
-            position: { x: 480, y: 260 },
-            zoom: 0.9,
-          },
-        ],
-        metrics: {
-          includesCurrentUser: true,
-          includesActiveUsers: true,
-          activeUserCount: 2,
-          currentUserActive: true,
-        },
-      };
+      const includeCurrentUserMatch = code.match(/includesCurrentUser: (true|false)/);
+      const includeActiveUsersMatch = code.match(/includesActiveUsers: (true|false)/);
+      const includeCurrentUser = parseBoolean(includeCurrentUserMatch?.[1], true);
+      const includeActiveUsers = parseBoolean(includeActiveUsersMatch?.[1], true);
+
+      if (!includeCurrentUser && !includeActiveUsers) {
+        observedOps.add("inspect_awareness_minimal");
+      } else {
+        observedOps.add("inspect_awareness");
+      }
+      result = buildAwarenessPayload(includeCurrentUser, includeActiveUsers);
     } else if (typeof code === "string" && code.includes("collaboration_context_operation: create_thread")) {
       observedOps.add("create_thread");
-      result = {
-        operation: "create_thread",
-        page: { id: "page-1", name: "Collaboration Page" },
-        thread: { seqNumber: 3, resolved: false, commentCount: 1, position: { x: 120, y: 80 } },
-      };
+      result = createFixture;
     } else if (typeof code === "string" && code.includes("collaboration_context_operation: reply_thread")) {
       if (code.includes("404")) {
         observedOps.add("resource_not_found");
@@ -166,19 +195,10 @@ ws.on("message", (payload) => {
       }
 
       observedOps.add("reply_thread");
-      result = {
-        operation: "reply_thread",
-        page: { id: "page-1", name: "Collaboration Page" },
-        thread: { seqNumber: 1, resolved: false, commentCount: 3 },
-        comment: { content: "Thanks for the update" },
-      };
+      result = replyFixture;
     } else if (typeof code === "string" && code.includes("collaboration_context_operation: set_thread_resolved")) {
       observedOps.add("set_thread_resolved");
-      result = {
-        operation: "set_thread_resolved",
-        page: { id: "page-1", name: "Collaboration Page" },
-        thread: { seqNumber: 1, previousResolved: false, currentResolved: true },
-      };
+      result = resolveFixture;
     } else if (typeof code === "string" && code.includes("collaboration_context_operation: remove_thread")) {
       if (code.includes("99")) {
         observedOps.add("permission_denied");
@@ -193,11 +213,7 @@ ws.on("message", (payload) => {
       }
 
       observedOps.add("remove_thread");
-      result = {
-        operation: "remove_thread",
-        page: { id: "page-1", name: "Collaboration Page" },
-        removed: { seqNumber: 2 },
-      };
+      result = removeFixture;
     } else {
       ws.send(JSON.stringify({ id: request.id, success: false, error: "Unknown collaboration test payload" }));
       return;
@@ -211,6 +227,259 @@ ws.on("message", (payload) => {
 
 const client = new Client({ name: "collaboration-context-check", version: "1.0.0" }, { capabilities: {} });
 const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
+
+function assertNonEmptyString(value, label) {
+  if (typeof value !== "string" || value.length === 0) {
+    throw new Error(`${label} must be a non-empty string: ${JSON.stringify(value)}`);
+  }
+}
+
+function assertNullableString(value, label) {
+  if (value !== null && typeof value !== "string") {
+    throw new Error(`${label} must be string|null: ${JSON.stringify(value)}`);
+  }
+}
+
+function assertPosition(value, label, allowNull = true) {
+  if (value === null && allowNull) {
+    return;
+  }
+  if (!value || typeof value !== "object") {
+    throw new Error(`${label} must be an object${allowNull ? " or null" : ""}: ${JSON.stringify(value)}`);
+  }
+  if (typeof value.x !== "number" || typeof value.y !== "number") {
+    throw new Error(`${label}.x/y must be numbers: ${JSON.stringify(value)}`);
+  }
+}
+
+function assertPage(page, label = "page") {
+  if (!page || typeof page !== "object") {
+    throw new Error(`${label} must be an object: ${JSON.stringify(page)}`);
+  }
+  assertNonEmptyString(page.id, `${label}.id`);
+  assertNullableString(page.name, `${label}.name`);
+}
+
+function assertInspectThread(thread, label) {
+  if (!thread || typeof thread !== "object") {
+    throw new Error(`${label} must be an object: ${JSON.stringify(thread)}`);
+  }
+  if (!Number.isInteger(thread.seqNumber) || thread.seqNumber <= 0) {
+    throw new Error(`${label}.seqNumber must be a positive integer: ${JSON.stringify(thread)}`);
+  }
+  if (typeof thread.resolved !== "boolean") {
+    throw new Error(`${label}.resolved must be boolean: ${JSON.stringify(thread)}`);
+  }
+  if (!Number.isInteger(thread.commentCount) || thread.commentCount < 0) {
+    throw new Error(`${label}.commentCount must be an integer >= 0: ${JSON.stringify(thread)}`);
+  }
+  assertPosition(thread.position, `${label}.position`);
+
+  if (thread.owner !== null) {
+    if (!thread.owner || typeof thread.owner !== "object") {
+      throw new Error(`${label}.owner must be object|null: ${JSON.stringify(thread.owner)}`);
+    }
+    assertNullableString(thread.owner.id, `${label}.owner.id`);
+    assertNullableString(thread.owner.name, `${label}.owner.name`);
+  }
+
+  if (thread.lastComment !== null) {
+    if (!thread.lastComment || typeof thread.lastComment !== "object") {
+      throw new Error(`${label}.lastComment must be object|null: ${JSON.stringify(thread.lastComment)}`);
+    }
+    assertNullableString(thread.lastComment.content, `${label}.lastComment.content`);
+  }
+}
+
+function assertAwarenessUser(user, label, allowNull) {
+  if (user === null && allowNull) {
+    return;
+  }
+  if (!user || typeof user !== "object") {
+    throw new Error(`${label} must be an object${allowNull ? " or null" : ""}: ${JSON.stringify(user)}`);
+  }
+  assertNullableString(user.id, `${label}.id`);
+  assertNullableString(user.name, `${label}.name`);
+  assertNullableString(user.avatarUrl, `${label}.avatarUrl`);
+  assertNullableString(user.color, `${label}.color`);
+}
+
+function assertActiveUser(user, label) {
+  assertAwarenessUser(user, label, false);
+  assertNullableString(user.sessionId, `${label}.sessionId`);
+  assertPosition(user.position, `${label}.position`);
+  if (user.zoom !== null && typeof user.zoom !== "number") {
+    throw new Error(`${label}.zoom must be number|null: ${JSON.stringify(user.zoom)}`);
+  }
+}
+
+function assertInspectThreadsContract(payload, expectation) {
+  if (!payload || typeof payload !== "object") {
+    throw new Error(`inspect_threads payload must be an object: ${JSON.stringify(payload)}`);
+  }
+  if (payload.operation !== "inspect_threads") {
+    throw new Error(`inspect_threads operation mismatch: ${JSON.stringify(payload)}`);
+  }
+  assertPage(payload.page);
+
+  if (!payload.filters || typeof payload.filters !== "object") {
+    throw new Error(`inspect_threads filters must be an object: ${JSON.stringify(payload)}`);
+  }
+  if (payload.filters.onlyYours !== expectation.onlyYours) {
+    throw new Error(`inspect_threads onlyYours mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (payload.filters.includeResolved !== expectation.includeResolved) {
+    throw new Error(`inspect_threads includeResolved mismatch: ${JSON.stringify(payload)}`);
+  }
+
+  if (!Array.isArray(payload.threads)) {
+    throw new Error(`inspect_threads threads must be an array: ${JSON.stringify(payload)}`);
+  }
+  if (!Number.isInteger(payload.threadCount) || payload.threadCount !== payload.threads.length) {
+    throw new Error(`inspect_threads threadCount mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (payload.threadCount !== expectation.threadCount) {
+    throw new Error(`inspect_threads expected threadCount=${expectation.threadCount}: ${JSON.stringify(payload)}`);
+  }
+
+  payload.threads.forEach((thread, index) => {
+    assertInspectThread(thread, `threads[${index}]`);
+  });
+}
+
+function assertInspectAwarenessContract(payload, expectation) {
+  if (!payload || typeof payload !== "object") {
+    throw new Error(`inspect_awareness payload must be an object: ${JSON.stringify(payload)}`);
+  }
+  if (payload.operation !== "inspect_awareness") {
+    throw new Error(`inspect_awareness operation mismatch: ${JSON.stringify(payload)}`);
+  }
+  assertPage(payload.page);
+
+  assertAwarenessUser(payload.currentUser, "currentUser", true);
+  if (!Array.isArray(payload.activeUsers)) {
+    throw new Error(`inspect_awareness activeUsers must be an array: ${JSON.stringify(payload)}`);
+  }
+  payload.activeUsers.forEach((user, index) => {
+    assertActiveUser(user, `activeUsers[${index}]`);
+  });
+
+  if (!payload.metrics || typeof payload.metrics !== "object") {
+    throw new Error(`inspect_awareness metrics must be an object: ${JSON.stringify(payload)}`);
+  }
+  if (payload.metrics.includesCurrentUser !== expectation.includesCurrentUser) {
+    throw new Error(`inspect_awareness includesCurrentUser mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (payload.metrics.includesActiveUsers !== expectation.includesActiveUsers) {
+    throw new Error(`inspect_awareness includesActiveUsers mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (!Number.isInteger(payload.metrics.activeUserCount) || payload.metrics.activeUserCount < 0) {
+    throw new Error(`inspect_awareness activeUserCount must be integer >= 0: ${JSON.stringify(payload)}`);
+  }
+  if (payload.metrics.activeUserCount !== payload.activeUsers.length) {
+    throw new Error(`inspect_awareness activeUserCount must match activeUsers length: ${JSON.stringify(payload)}`);
+  }
+  if (payload.metrics.activeUserCount !== expectation.activeUserCount) {
+    throw new Error(`inspect_awareness expected activeUserCount=${expectation.activeUserCount}: ${JSON.stringify(payload)}`);
+  }
+  if (payload.metrics.currentUserActive !== expectation.currentUserActive) {
+    throw new Error(`inspect_awareness currentUserActive mismatch: ${JSON.stringify(payload)}`);
+  }
+}
+
+function assertCreateThreadContract(payload) {
+  if (!payload || typeof payload !== "object" || payload.operation !== "create_thread") {
+    throw new Error(`create_thread payload mismatch: ${JSON.stringify(payload)}`);
+  }
+  assertPage(payload.page);
+  if (!payload.thread || typeof payload.thread !== "object") {
+    throw new Error(`create_thread thread payload mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (!Number.isInteger(payload.thread.seqNumber) || payload.thread.seqNumber <= 0) {
+    throw new Error(`create_thread thread.seqNumber mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (typeof payload.thread.resolved !== "boolean") {
+    throw new Error(`create_thread thread.resolved mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (!Number.isInteger(payload.thread.commentCount) || payload.thread.commentCount < 1) {
+    throw new Error(`create_thread thread.commentCount mismatch: ${JSON.stringify(payload)}`);
+  }
+  assertPosition(payload.thread.position, "create_thread.thread.position", false);
+}
+
+function assertReplyThreadContract(payload) {
+  if (!payload || typeof payload !== "object" || payload.operation !== "reply_thread") {
+    throw new Error(`reply_thread payload mismatch: ${JSON.stringify(payload)}`);
+  }
+  assertPage(payload.page);
+  if (!payload.thread || typeof payload.thread !== "object") {
+    throw new Error(`reply_thread thread.payload mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (!Number.isInteger(payload.thread.seqNumber) || payload.thread.seqNumber <= 0) {
+    throw new Error(`reply_thread thread.seqNumber mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (typeof payload.thread.resolved !== "boolean") {
+    throw new Error(`reply_thread thread.resolved mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (!Number.isInteger(payload.thread.commentCount) || payload.thread.commentCount < 1) {
+    throw new Error(`reply_thread thread.commentCount mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (!payload.comment || typeof payload.comment !== "object") {
+    throw new Error(`reply_thread comment payload mismatch: ${JSON.stringify(payload)}`);
+  }
+  assertNullableString(payload.comment.content, "reply_thread.comment.content");
+}
+
+function assertSetThreadResolvedContract(payload) {
+  if (!payload || typeof payload !== "object" || payload.operation !== "set_thread_resolved") {
+    throw new Error(`set_thread_resolved payload mismatch: ${JSON.stringify(payload)}`);
+  }
+  assertPage(payload.page);
+  if (!payload.thread || typeof payload.thread !== "object") {
+    throw new Error(`set_thread_resolved thread payload mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (!Number.isInteger(payload.thread.seqNumber) || payload.thread.seqNumber <= 0) {
+    throw new Error(`set_thread_resolved thread.seqNumber mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (typeof payload.thread.previousResolved !== "boolean") {
+    throw new Error(`set_thread_resolved previousResolved mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (typeof payload.thread.currentResolved !== "boolean") {
+    throw new Error(`set_thread_resolved currentResolved mismatch: ${JSON.stringify(payload)}`);
+  }
+}
+
+function assertRemoveThreadContract(payload) {
+  if (!payload || typeof payload !== "object" || payload.operation !== "remove_thread") {
+    throw new Error(`remove_thread payload mismatch: ${JSON.stringify(payload)}`);
+  }
+  assertPage(payload.page);
+  if (!payload.removed || typeof payload.removed !== "object") {
+    throw new Error(`remove_thread removed payload mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (!Number.isInteger(payload.removed.seqNumber) || payload.removed.seqNumber <= 0) {
+    throw new Error(`remove_thread removed.seqNumber mismatch: ${JSON.stringify(payload)}`);
+  }
+}
+
+function canonicalize(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => canonicalize(item));
+  }
+  if (value && typeof value === "object") {
+    const entries = Object.entries(value).sort(([left], [right]) => left.localeCompare(right));
+    return Object.fromEntries(entries.map(([key, item]) => [key, canonicalize(item)]));
+  }
+  return value;
+}
+
+function assertFixtureMatch(actual, expected, label) {
+  const actualCanonical = JSON.stringify(canonicalize(actual));
+  const expectedCanonical = JSON.stringify(canonicalize(expected));
+  if (actualCanonical !== expectedCanonical) {
+    throw new Error(`${label} fixture mismatch. actual=${actualCanonical}, expected=${expectedCanonical}`);
+  }
+}
 
 async function callToolText(name, args) {
   const result = await client.request(
@@ -234,25 +503,49 @@ try {
 
   const inspectPayload = await callToolJson("collaboration_context", {
     operation: "inspect_threads",
-    includeResolved: true,
-    onlyYours: false,
   });
-  if (inspectPayload?.operation !== "inspect_threads" || inspectPayload?.threadCount !== 2) {
-    throw new Error(`inspect_threads payload mismatch: ${JSON.stringify(inspectPayload)}`);
-  }
+  assertInspectThreadsContract(inspectPayload, {
+    onlyYours: false,
+    includeResolved: true,
+    threadCount: 2,
+  });
+  assertFixtureMatch(inspectPayload, threadsFixture, "inspect_threads");
+
+  const inspectFilteredPayload = await callToolJson("collaboration_context", {
+    operation: "inspect_threads",
+    onlyYours: true,
+    includeResolved: false,
+  });
+  assertInspectThreadsContract(inspectFilteredPayload, {
+    onlyYours: true,
+    includeResolved: false,
+    threadCount: 1,
+  });
+  assertFixtureMatch(inspectFilteredPayload, threadsFilteredFixture, "inspect_threads_filtered");
 
   const awarenessPayload = await callToolJson("collaboration_context", {
     operation: "inspect_awareness",
-    includeCurrentUser: true,
-    includeActiveUsers: true,
   });
-  if (
-    awarenessPayload?.operation !== "inspect_awareness" ||
-    awarenessPayload?.metrics?.activeUserCount !== 2 ||
-    awarenessPayload?.metrics?.currentUserActive !== true
-  ) {
-    throw new Error(`inspect_awareness payload mismatch: ${JSON.stringify(awarenessPayload)}`);
-  }
+  assertInspectAwarenessContract(awarenessPayload, {
+    includesCurrentUser: true,
+    includesActiveUsers: true,
+    activeUserCount: 2,
+    currentUserActive: true,
+  });
+  assertFixtureMatch(awarenessPayload, awarenessFixture, "inspect_awareness");
+
+  const awarenessMinimalPayload = await callToolJson("collaboration_context", {
+    operation: "inspect_awareness",
+    includeCurrentUser: false,
+    includeActiveUsers: false,
+  });
+  assertInspectAwarenessContract(awarenessMinimalPayload, {
+    includesCurrentUser: false,
+    includesActiveUsers: false,
+    activeUserCount: 0,
+    currentUserActive: false,
+  });
+  assertFixtureMatch(awarenessMinimalPayload, awarenessMinimalFixture, "inspect_awareness_minimal");
 
   const createPayload = await callToolJson("collaboration_context", {
     operation: "create_thread",
@@ -260,39 +553,31 @@ try {
     x: 120,
     y: 80,
   });
-  if (createPayload?.operation !== "create_thread" || createPayload?.thread?.seqNumber !== 3) {
-    throw new Error(`create_thread payload mismatch: ${JSON.stringify(createPayload)}`);
-  }
+  assertCreateThreadContract(createPayload);
+  assertFixtureMatch(createPayload, createFixture, "create_thread");
 
   const replyPayload = await callToolJson("collaboration_context", {
     operation: "reply_thread",
     threadSeqNumber: 1,
     content: "Thanks for the update",
   });
-  if (replyPayload?.operation !== "reply_thread" || replyPayload?.thread?.commentCount !== 3) {
-    throw new Error(`reply_thread payload mismatch: ${JSON.stringify(replyPayload)}`);
-  }
+  assertReplyThreadContract(replyPayload);
+  assertFixtureMatch(replyPayload, replyFixture, "reply_thread");
 
   const resolvePayload = await callToolJson("collaboration_context", {
     operation: "set_thread_resolved",
     threadSeqNumber: 1,
     resolved: true,
   });
-  if (
-    resolvePayload?.operation !== "set_thread_resolved" ||
-    resolvePayload?.thread?.previousResolved !== false ||
-    resolvePayload?.thread?.currentResolved !== true
-  ) {
-    throw new Error(`set_thread_resolved payload mismatch: ${JSON.stringify(resolvePayload)}`);
-  }
+  assertSetThreadResolvedContract(resolvePayload);
+  assertFixtureMatch(resolvePayload, resolveFixture, "set_thread_resolved");
 
   const removePayload = await callToolJson("collaboration_context", {
     operation: "remove_thread",
     threadSeqNumber: 2,
   });
-  if (removePayload?.operation !== "remove_thread" || removePayload?.removed?.seqNumber !== 2) {
-    throw new Error(`remove_thread payload mismatch: ${JSON.stringify(removePayload)}`);
-  }
+  assertRemoveThreadContract(removePayload);
+  assertFixtureMatch(removePayload, removeFixture, "remove_thread");
 
   const deniedText = await callToolText("collaboration_context", {
     operation: "remove_thread",
@@ -321,7 +606,9 @@ try {
 
   const requiredOps = [
     "inspect_threads",
+    "inspect_threads_filtered",
     "inspect_awareness",
+    "inspect_awareness_minimal",
     "create_thread",
     "reply_thread",
     "set_thread_resolved",
@@ -337,7 +624,7 @@ try {
     }
   }
 
-  console.log("[COLLAB-CHECK] Verified collaboration_context tool flow + diagnostics");
+  console.log("[COLLAB-CHECK] Verified collaboration_context flow + strict contracts + golden fixtures + filter/toggle semantics + diagnostics");
 } finally {
   await transport.close();
   ws.close();

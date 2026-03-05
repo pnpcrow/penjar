@@ -1,0 +1,46 @@
+{
+  "operation": "inspect_threads",
+  "page": {
+    "id": "page-1",
+    "name": "Collaboration Page"
+  },
+  "filters": {
+    "onlyYours": false,
+    "includeResolved": true
+  },
+  "threadCount": 2,
+  "threads": [
+    {
+      "seqNumber": 1,
+      "resolved": false,
+      "position": {
+        "x": 10,
+        "y": 20
+      },
+      "owner": {
+        "id": "user-1",
+        "name": "Current User"
+      },
+      "commentCount": 2,
+      "lastComment": {
+        "content": "Looks good to me"
+      }
+    },
+    {
+      "seqNumber": 2,
+      "resolved": true,
+      "position": {
+        "x": 40,
+        "y": 55
+      },
+      "owner": {
+        "id": "user-2",
+        "name": "Reviewer"
+      },
+      "commentCount": 1,
+      "lastComment": {
+        "content": "Done"
+      }
+    }
+  ]
+}

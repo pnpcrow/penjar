@@ -1,0 +1,30 @@
+{
+  "operation": "inspect_threads",
+  "page": {
+    "id": "page-1",
+    "name": "Collaboration Page"
+  },
+  "filters": {
+    "onlyYours": true,
+    "includeResolved": false
+  },
+  "threadCount": 1,
+  "threads": [
+    {
+      "seqNumber": 1,
+      "resolved": false,
+      "position": {
+        "x": 10,
+        "y": 20
+      },
+      "owner": {
+        "id": "user-1",
+        "name": "Current User"
+      },
+      "commentCount": 2,
+      "lastComment": {
+        "content": "Looks good to me"
+      }
+    }
+  ]
+}

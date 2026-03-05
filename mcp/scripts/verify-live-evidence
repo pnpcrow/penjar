@@ -1,0 +1,171 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+TMP_BASE="${TMPDIR:-/tmp}"
+EVIDENCE_DIR="${VERIFY_LIVE_EVIDENCE_DIR:-$TMP_BASE/penjar-mcp-live-evidence-$$}"
+LOG_DIR="$EVIDENCE_DIR/logs"
+
+ALLOW_NO_PLUGIN="${VERIFY_LIVE_EVIDENCE_ALLOW_NO_PLUGIN:-true}"
+REQUIRE_CAPTURE="${VERIFY_LIVE_EVIDENCE_REQUIRE_CAPTURE:-false}"
+SKIP_BUILD="${VERIFY_LIVE_EVIDENCE_SKIP_BUILD:-true}"
+PLUGIN_WAIT_SECS="${VERIFY_LIVE_EVIDENCE_PLUGIN_WAIT_SECS:-60}"
+
+WORKFLOW_CAPTURE_DIR="$EVIDENCE_DIR/workflow"
+COLLAB_CAPTURE_DIR="$EVIDENCE_DIR/collaboration"
+EXPORT_CAPTURE_DIR="$EVIDENCE_DIR/export"
+
+mkdir -p "$WORKFLOW_CAPTURE_DIR" "$COLLAB_CAPTURE_DIR" "$EXPORT_CAPTURE_DIR" "$LOG_DIR"
+
+log_step() {
+    printf "\n[LIVE-EVIDENCE] %s\n" "$1"
+}
+
+run_probe() {
+    local name="$1"
+    local capture_dir="$2"
+    local log_file="$3"
+    shift 3
+
+    log_step "Run ${name} live probe" >&2
+
+    set +e
+    (
+        cd "$PROJECT_ROOT"
+        "$@"
+    ) >"$log_file" 2>&1
+    local exit_code=$?
+    set -e
+
+    local count
+    count=$(find "$capture_dir" -type f -name "*.json" | wc -l | tr -d ' ')
+
+    local status
+    if [ "$exit_code" -ne 0 ]; then
+        status="failed"
+    elif [ "$count" -gt 0 ]; then
+        status="captured"
+    else
+        status="skipped"
+    fi
+
+    printf "%s|%s|%s|%s\n" "$name" "$status" "$count" "$log_file"
+}
+
+WORKFLOW_RESULT=$(run_probe \
+    "workflow" \
+    "$WORKFLOW_CAPTURE_DIR" \
+    "$LOG_DIR/workflow.log" \
+    env \
+    VERIFY_WORKFLOW_LIVE_CAPTURE_DIR="$WORKFLOW_CAPTURE_DIR" \
+    VERIFY_WORKFLOW_LIVE_ALLOW_NO_PLUGIN="$ALLOW_NO_PLUGIN" \
+    VERIFY_WORKFLOW_LIVE_SKIP_BUILD="$SKIP_BUILD" \
+    VERIFY_WORKFLOW_LIVE_PLUGIN_WAIT_SECS="$PLUGIN_WAIT_SECS" \
+    pnpm run verify:workflow-live)
+
+COLLAB_RESULT=$(run_probe \
+    "collaboration" \
+    "$COLLAB_CAPTURE_DIR" \
+    "$LOG_DIR/collaboration.log" \
+    env \
+    VERIFY_COLLAB_LIVE_CAPTURE_DIR="$COLLAB_CAPTURE_DIR" \
+    VERIFY_COLLAB_LIVE_ALLOW_NO_PLUGIN="$ALLOW_NO_PLUGIN" \
+    VERIFY_COLLAB_LIVE_SKIP_BUILD="$SKIP_BUILD" \
+    VERIFY_COLLAB_LIVE_PLUGIN_WAIT_SECS="$PLUGIN_WAIT_SECS" \
+    pnpm run verify:collaboration-live)
+
+EXPORT_RESULT=$(run_probe \
+    "export" \
+    "$EXPORT_CAPTURE_DIR" \
+    "$LOG_DIR/export.log" \
+    env \
+    VERIFY_EXPORT_LIVE_CAPTURE_DIR="$EXPORT_CAPTURE_DIR" \
+    VERIFY_EXPORT_LIVE_ALLOW_NO_PLUGIN="$ALLOW_NO_PLUGIN" \
+    VERIFY_EXPORT_LIVE_SKIP_BUILD="$SKIP_BUILD" \
+    VERIFY_EXPORT_LIVE_PLUGIN_WAIT_SECS="$PLUGIN_WAIT_SECS" \
+    pnpm run verify:export-live)
+
+IFS='|' read -r WORKFLOW_NAME WORKFLOW_STATUS WORKFLOW_COUNT WORKFLOW_LOG <<<"$WORKFLOW_RESULT"
+IFS='|' read -r COLLAB_NAME COLLAB_STATUS COLLAB_COUNT COLLAB_LOG <<<"$COLLAB_RESULT"
+IFS='|' read -r EXPORT_NAME EXPORT_STATUS EXPORT_COUNT EXPORT_LOG <<<"$EXPORT_RESULT"
+
+SUMMARY_JSON="$EVIDENCE_DIR/summary.json"
+SUMMARY_MD="$EVIDENCE_DIR/summary.md"
+
+cat >"$SUMMARY_JSON" <<EOF_JSON
+{
+  "generatedAt": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "evidenceDir": "$EVIDENCE_DIR",
+  "allowNoPlugin": "$ALLOW_NO_PLUGIN",
+  "requireCapture": "$REQUIRE_CAPTURE",
+  "probes": [
+    {
+      "name": "$WORKFLOW_NAME",
+      "status": "$WORKFLOW_STATUS",
+      "captureCount": $WORKFLOW_COUNT,
+      "logFile": "$WORKFLOW_LOG",
+      "captureDir": "$WORKFLOW_CAPTURE_DIR"
+    },
+    {
+      "name": "$COLLAB_NAME",
+      "status": "$COLLAB_STATUS",
+      "captureCount": $COLLAB_COUNT,
+      "logFile": "$COLLAB_LOG",
+      "captureDir": "$COLLAB_CAPTURE_DIR"
+    },
+    {
+      "name": "$EXPORT_NAME",
+      "status": "$EXPORT_STATUS",
+      "captureCount": $EXPORT_COUNT,
+      "logFile": "$EXPORT_LOG",
+      "captureDir": "$EXPORT_CAPTURE_DIR"
+    }
+  ]
+}
+EOF_JSON
+
+cat >"$SUMMARY_MD" <<EOF_MD
+# Live Evidence Summary
+
+- Generated at (UTC): $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+- Evidence directory: $EVIDENCE_DIR
+- allowNoPlugin: $ALLOW_NO_PLUGIN
+- requireCapture: $REQUIRE_CAPTURE
+
+| Probe | Status | Captured JSON files | Log |
+|---|---|---:|---|
+| $WORKFLOW_NAME | $WORKFLOW_STATUS | $WORKFLOW_COUNT | $WORKFLOW_LOG |
+| $COLLAB_NAME | $COLLAB_STATUS | $COLLAB_COUNT | $COLLAB_LOG |
+| $EXPORT_NAME | $EXPORT_STATUS | $EXPORT_COUNT | $EXPORT_LOG |
+
+## Capture directories
+
+- workflow: $WORKFLOW_CAPTURE_DIR
+- collaboration: $COLLAB_CAPTURE_DIR
+- export: $EXPORT_CAPTURE_DIR
+EOF_MD
+
+log_step "Summary written"
+printf "[LIVE-EVIDENCE] %s\n" "$SUMMARY_JSON"
+printf "[LIVE-EVIDENCE] %s\n" "$SUMMARY_MD"
+
+FAILED=0
+if [ "$WORKFLOW_STATUS" = "failed" ] || [ "$COLLAB_STATUS" = "failed" ] || [ "$EXPORT_STATUS" = "failed" ]; then
+    FAILED=1
+fi
+
+if [ "$REQUIRE_CAPTURE" = "true" ]; then
+    if [ "$WORKFLOW_STATUS" != "captured" ] || [ "$COLLAB_STATUS" != "captured" ] || [ "$EXPORT_STATUS" != "captured" ]; then
+        echo "[LIVE-EVIDENCE][FAIL] requireCapture=true but at least one probe did not capture live evidence."
+        FAILED=1
+    fi
+fi
+
+if [ "$FAILED" -ne 0 ]; then
+    exit 1
+fi
+
+log_step "Live evidence bundle completed"

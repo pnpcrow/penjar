@@ -1,0 +1,16 @@
+{
+  "operation": "create_thread",
+  "page": {
+    "id": "page-1",
+    "name": "Collaboration Page"
+  },
+  "thread": {
+    "seqNumber": 3,
+    "resolved": false,
+    "commentCount": 1,
+    "position": {
+      "x": 120,
+      "y": 80
+    }
+  }
+}

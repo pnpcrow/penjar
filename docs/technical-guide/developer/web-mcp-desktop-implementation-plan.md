@@ -7,6 +7,21 @@ desc: Execution-level plan derived from the roadmap, including workstreams, mile
 
 This document turns the roadmap into an execution plan that can be tracked sprint-by-sprint.
 
+## 0. Documentation traceability anchors
+
+- Canonical navigation/update protocol:
+  - [Web + MCP + Desktop Documentation Map](/technical-guide/developer/web-mcp-documentation-map/)
+- Execution evidence anchors (current phase):
+  - [Web + MCP Phase A Execution Log](/technical-guide/developer/web-mcp-phase-a-execution-log/)
+  - [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/)
+  - [Web ↔ MCP Capability Matrix](/technical-guide/developer/web-mcp-capability-matrix/)
+  - [Web ↔ MCP Parity Backlog](/technical-guide/developer/web-mcp-parity-backlog/)
+  - [Web + MCP Phase A Ticket Seed](/technical-guide/developer/web-mcp-phase-a-ticket-seed/)
+  - [Web ↔ MCP Auth/Session Recovery Contract](/technical-guide/developer/web-mcp-auth-session-recovery-contract/)
+  - [Desktop Flutter Parity Checklist](/technical-guide/developer/desktop-flutter-parity-checklist/)
+  - [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/)
+  - [Desktop Flutter Parity Acceptance Baseline](/technical-guide/developer/desktop-flutter-parity-acceptance-baseline/)
+
 ## 1. Scope and sequencing
 
 We follow the roadmap phase order and explicitly gate each phase:
@@ -18,6 +33,16 @@ We follow the roadmap phase order and explicitly gate each phase:
 5. **Phase E**: LLM-ready structured code delivery
 
 A phase can start implementation in parallel only when dependencies are formally marked as non-blocking.
+
+## 1.1 Desktop full-port mandate
+
+- Target desktop end-state is a full Flutter port for user-facing workflows.
+- Hybrid legacy desktop shells are treated as temporary transition paths only when explicitly blocked.
+- Any temporary non-Flutter path must include:
+  - blocker reference,
+  - owner,
+  - removal deadline,
+  - parity impact note.
 
 ## 2. Workstreams
 
@@ -79,13 +104,15 @@ A phase can start implementation in parallel only when dependencies are formally
 
 **Objective**
 
-- De-risk desktop parity by stabilizing contract boundaries now.
+- De-risk and deliver desktop parity through a full Flutter port with stable contract boundaries.
 
 **Implementation tasks**
 
 1. Freeze API contract subset required by desktop MVP.
 2. Publish parity checklist to track web workflow porting.
 3. Define desktop-specific non-functional requirements (secure credential storage, crash reporting, update strategy).
+4. Maintain migration inventory for remaining non-Flutter desktop paths and decommission plan per path.
+5. Maintain executable workflow acceptance baseline for Flutter parity gates.
 
 ## WS-E. LLM structured export readiness
 
@@ -107,7 +134,7 @@ A phase can start implementation in parallel only when dependencies are formally
 | M2 | Top P0 gaps closed with automated tests | MCP team |
 | M3 | Setup preflight + diagnostics shipped and documented | DevEx / platform |
 | M4 | Autosave/recovery SLA + resilience suite baseline approved | Backend + reliability |
-| M5 | Desktop contract freeze + parity checklist baseline | Desktop + API |
+| M5 | Desktop contract freeze + parity checklist baseline + full Flutter port tracking baseline | Desktop + API |
 | M6 | Structured export contract + fixtures baseline | Design-to-code |
 
 ## 4. Definition of done (execution checklist)
@@ -126,7 +153,7 @@ A task is complete only when all conditions below are true:
 |---|---|---|
 | MCP parity appears complete but misses edge workflows | High | Validate with workflow-based acceptance tests and matrix review cadence |
 | Setup complexity increases with local network/browser security changes | Medium | Keep diagnostics up to date and maintain browser-specific troubleshooting guidance |
-| Desktop parity drifts from web semantics | High | Maintain shared contract tests and enforce parity checklist sign-off |
+| Desktop parity drifts from web semantics or remains hybrid longer than planned | High | Maintain shared contract tests, enforce parity checklist sign-off, and track non-Flutter path decommission deadlines |
 | Autosave restores inconsistent state under conflicts | High | Add conflict-aware persistence contract and replay tests |
 | LLM export output quality is unstable across design patterns | Medium | Use golden fixture regression gates and fidelity thresholds |
 

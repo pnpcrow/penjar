@@ -1,0 +1,249 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SERVER_DIR="$PROJECT_ROOT/packages/server"
+
+HEALTH_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/health"
+MCP_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/mcp"
+
+PLUGIN_WAIT_SECS="${VERIFY_EXPORT_LIVE_PLUGIN_WAIT_SECS:-60}"
+ALLOW_NO_PLUGIN="${VERIFY_EXPORT_LIVE_ALLOW_NO_PLUGIN:-false}"
+CAPTURE_DIR="${VERIFY_EXPORT_LIVE_CAPTURE_DIR:-}"
+
+TMP_BASE="${TMPDIR:-/tmp}"
+SERVER_LOG="$TMP_BASE/penjar-mcp-export-live-$$.log"
+HEALTH_BODY="$TMP_BASE/penjar-mcp-export-live-health-$$.json"
+EXPORT_TMP_DIR="$TMP_BASE/penjar-mcp-export-live-artifacts-$$"
+SERVER_PID=""
+
+log_step() {
+    printf "\n[EXPORT-LIVE] %s\n" "$1"
+}
+
+cleanup() {
+    if [ -n "$SERVER_PID" ] && kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+        kill "$SERVER_PID" >/dev/null 2>&1 || true
+        wait "$SERVER_PID" >/dev/null 2>&1 || true
+    fi
+
+    rm -f "$SERVER_LOG" "$HEALTH_BODY"
+    rm -rf "$EXPORT_TMP_DIR"
+}
+
+trap cleanup EXIT
+
+if [ "${VERIFY_EXPORT_LIVE_SKIP_BUILD:-false}" = "true" ]; then
+    log_step "Skip build step (VERIFY_EXPORT_LIVE_SKIP_BUILD=true)"
+else
+    log_step "Build required packages for live export probe"
+    cd "$PROJECT_ROOT"
+    pnpm --filter mcp-common run build
+    pnpm --filter mcp-server run build
+fi
+
+mkdir -p "$EXPORT_TMP_DIR"
+
+if [ -n "$CAPTURE_DIR" ]; then
+    mkdir -p "$CAPTURE_DIR"
+    log_step "Capture directory enabled: $CAPTURE_DIR"
+fi
+
+log_step "Start MCP server (single-user)"
+cd "$SERVER_DIR"
+node dist/index.js >"$SERVER_LOG" 2>&1 &
+SERVER_PID="$!"
+
+log_step "Wait for /health endpoint"
+for _ in $(seq 1 20); do
+    if curl -sS "$HEALTH_URL" >"$HEALTH_BODY" 2>/dev/null; then
+        break
+    fi
+    sleep 1
+done
+
+if ! curl -sS "$HEALTH_URL" >"$HEALTH_BODY" 2>/dev/null; then
+    echo "[EXPORT-LIVE][FAIL] server did not become healthy."
+    echo "[EXPORT-LIVE][INFO] Server log:"
+    cat "$SERVER_LOG"
+    exit 1
+fi
+
+log_step "Wait for live plugin bridge connection (timeout=${PLUGIN_WAIT_SECS}s)"
+CONNECTED="false"
+for _ in $(seq 1 "$PLUGIN_WAIT_SECS"); do
+    if ! curl -sS "$HEALTH_URL" >"$HEALTH_BODY" 2>/dev/null; then
+        sleep 1
+        continue
+    fi
+
+    CONNECTED="$(node -e 'const fs=require("node:fs");const p=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));process.stdout.write(String((p.pluginBridge?.connectedClients ?? 0) > 0));' "$HEALTH_BODY" 2>/dev/null || echo false)"
+
+    if [ "$CONNECTED" = "true" ]; then
+        break
+    fi
+    sleep 1
+done
+
+if [ "$CONNECTED" != "true" ]; then
+    if [ "$ALLOW_NO_PLUGIN" = "true" ]; then
+        echo "[EXPORT-LIVE][WARN] no live plugin connection detected; skipping probe because VERIFY_EXPORT_LIVE_ALLOW_NO_PLUGIN=true"
+        exit 0
+    fi
+
+    echo "[EXPORT-LIVE][FAIL] no live plugin connection detected within ${PLUGIN_WAIT_SECS}s."
+    echo "[EXPORT-LIVE][INFO] Connect the Penjar MCP plugin to ws://<host>:${PENJAR_MCP_WEBSOCKET_PORT:-4402} and retry."
+    echo "[EXPORT-LIVE][INFO] Last /health payload:"
+    cat "$HEALTH_BODY"
+    echo
+    exit 1
+fi
+
+log_step "Run live export probe"
+node --input-type=module - "$MCP_URL" "$EXPORT_TMP_DIR" "$CAPTURE_DIR" <<'EOF_JS'
+import fs from "node:fs";
+import path from "node:path";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
+
+const [mcpUrl, exportTmpDir, captureDirRaw] = process.argv.slice(2);
+const captureDir = captureDirRaw && captureDirRaw.length > 0 ? captureDirRaw : null;
+
+const client = new Client({ name: "export-live-check", version: "1.0.0" }, { capabilities: {} });
+const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
+
+function assert(condition, message) {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function writeCapture(name, payload) {
+  if (!captureDir) {
+    return;
+  }
+  const filePath = path.join(captureDir, `${name}.json`);
+  fs.writeFileSync(filePath, JSON.stringify(payload, null, 2));
+}
+
+async function callTool(name, args) {
+  return client.request({ method: "tools/call", params: { name, arguments: args } }, CallToolResultSchema);
+}
+
+function firstText(result) {
+  return result.content.find((item) => item.type === "text")?.text ?? "";
+}
+
+try {
+  await client.connect(transport);
+
+  const stamp = Date.now();
+  const shapeName = `Live Export Shape ${stamp}`;
+
+  const createShape = JSON.parse(
+    firstText(
+      await callTool("canvas_editing", {
+        operation: "create_rectangle",
+        name: shapeName,
+        x: 32,
+        y: 40,
+        width: 180,
+        height: 72,
+        fillColor: "#0ea5e9",
+      })
+    )
+  );
+  assert(createShape?.operation === "create_rectangle", "create_rectangle operation mismatch");
+  const shapeId = createShape?.shape?.id;
+  assert(typeof shapeId === "string" && shapeId.length > 0, "create_rectangle shapeId missing");
+  writeCapture("export-live-create-shape", createShape);
+
+  const pngResult = await callTool("export_shape", {
+    shapeId,
+    mode: "shape",
+    format: "png",
+  });
+  const pngImage = pngResult.content[0];
+  assert(pngImage?.type === "image", "png export: first content must be image");
+  assert(pngImage?.mimeType === "image/png", "png export: mimeType must be image/png");
+  assert(typeof pngImage?.data === "string" && pngImage.data.length > 0, "png export: image data missing");
+  writeCapture("export-live-png-response-meta", {
+    mimeType: pngImage.mimeType,
+    base64Length: pngImage.data.length,
+  });
+
+  const svgResult = await callTool("export_shape", {
+    shapeId,
+    mode: "shape",
+    format: "svg",
+  });
+  const svgText = firstText(svgResult).trim();
+  assert(svgText.startsWith("<svg") || svgText.includes("<svg"), "svg export: expected svg payload");
+  writeCapture("export-live-svg-response-meta", {
+    textLength: svgText.length,
+  });
+
+  const pngExportPath = path.join(exportTmpDir, `live-shape-${stamp}.png`);
+  const savePngText = firstText(
+    await callTool("export_shape", {
+      shapeId,
+      mode: "shape",
+      format: "png",
+      filePath: pngExportPath,
+    })
+  );
+  assert(savePngText.includes(pngExportPath), "save png: response missing file path");
+  assert(fs.existsSync(pngExportPath), "save png: artifact file missing");
+  const savedPngBase64 = fs.readFileSync(pngExportPath).toString("base64");
+  assert(savedPngBase64.length > 0, "save png: artifact bytes missing");
+
+  const svgExportPath = path.join(exportTmpDir, `live-shape-${stamp}.svg`);
+  const saveSvgText = firstText(
+    await callTool("export_shape", {
+      shapeId,
+      mode: "shape",
+      format: "svg",
+      filePath: svgExportPath,
+    })
+  );
+  assert(saveSvgText.includes(svgExportPath), "save svg: response missing file path");
+  assert(fs.existsSync(svgExportPath), "save svg: artifact file missing");
+  const savedSvg = fs.readFileSync(svgExportPath, "utf8").trim();
+  assert(savedSvg.length > 0, "save svg: artifact text missing");
+
+  const missingShapeId = `missing-live-shape-${stamp}`;
+  const missingText = firstText(
+    await callTool("export_shape", {
+      shapeId: missingShapeId,
+      mode: "shape",
+      format: "png",
+    })
+  );
+  assert(
+    missingText.includes("[Diagnostic RESOURCE_NOT_FOUND]"),
+    `missing-shape diagnostic mismatch: ${missingText}`
+  );
+
+  writeCapture("export-live-artifact-meta", {
+    shapeId,
+    pngResponseBase64Length: pngImage.data.length,
+    pngSavedBase64Length: savedPngBase64.length,
+    svgResponseLength: svgText.length,
+    svgSavedLength: savedSvg.length,
+    pngExportPath,
+    svgExportPath,
+  });
+
+  console.log("[EXPORT-LIVE] Verified live export shape flow (png/svg + save + missing diagnostic)");
+  if (captureDir) {
+    console.log(`[EXPORT-LIVE] Captured live payload metadata at ${captureDir}`);
+  }
+} finally {
+  await transport.close();
+}
+EOF_JS
+
+log_step "Live export probe passed"

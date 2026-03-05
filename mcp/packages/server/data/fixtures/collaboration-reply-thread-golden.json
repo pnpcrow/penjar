@@ -1,0 +1,15 @@
+{
+  "operation": "reply_thread",
+  "page": {
+    "id": "page-1",
+    "name": "Collaboration Page"
+  },
+  "thread": {
+    "seqNumber": 1,
+    "resolved": false,
+    "commentCount": 3
+  },
+  "comment": {
+    "content": "Thanks for the update"
+  }
+}

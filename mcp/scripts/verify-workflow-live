@@ -1,0 +1,292 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SERVER_DIR="$PROJECT_ROOT/packages/server"
+
+HEALTH_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/health"
+MCP_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/mcp"
+
+PLUGIN_WAIT_SECS="${VERIFY_WORKFLOW_LIVE_PLUGIN_WAIT_SECS:-60}"
+ALLOW_NO_PLUGIN="${VERIFY_WORKFLOW_LIVE_ALLOW_NO_PLUGIN:-false}"
+CAPTURE_DIR="${VERIFY_WORKFLOW_LIVE_CAPTURE_DIR:-}"
+
+TMP_BASE="${TMPDIR:-/tmp}"
+SERVER_LOG="$TMP_BASE/penjar-mcp-workflow-live-$$.log"
+HEALTH_BODY="$TMP_BASE/penjar-mcp-workflow-live-health-$$.json"
+SERVER_PID=""
+
+log_step() {
+    printf "\n[WORKFLOW-LIVE] %s\n" "$1"
+}
+
+cleanup() {
+    if [ -n "$SERVER_PID" ] && kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+        kill "$SERVER_PID" >/dev/null 2>&1 || true
+        wait "$SERVER_PID" >/dev/null 2>&1 || true
+    fi
+
+    rm -f "$SERVER_LOG" "$HEALTH_BODY"
+}
+
+trap cleanup EXIT
+
+if [ "${VERIFY_WORKFLOW_LIVE_SKIP_BUILD:-false}" = "true" ]; then
+    log_step "Skip build step (VERIFY_WORKFLOW_LIVE_SKIP_BUILD=true)"
+else
+    log_step "Build required packages for live workflow probe"
+    cd "$PROJECT_ROOT"
+    pnpm --filter mcp-common run build
+    pnpm --filter mcp-server run build
+fi
+
+if [ -n "$CAPTURE_DIR" ]; then
+    mkdir -p "$CAPTURE_DIR"
+    log_step "Capture directory enabled: $CAPTURE_DIR"
+fi
+
+log_step "Start MCP server (single-user)"
+cd "$SERVER_DIR"
+node dist/index.js >"$SERVER_LOG" 2>&1 &
+SERVER_PID="$!"
+
+log_step "Wait for /health endpoint"
+for _ in $(seq 1 20); do
+    if curl -sS "$HEALTH_URL" >"$HEALTH_BODY" 2>/dev/null; then
+        break
+    fi
+    sleep 1
+done
+
+if ! curl -sS "$HEALTH_URL" >"$HEALTH_BODY" 2>/dev/null; then
+    echo "[WORKFLOW-LIVE][FAIL] server did not become healthy."
+    echo "[WORKFLOW-LIVE][INFO] Server log:"
+    cat "$SERVER_LOG"
+    exit 1
+fi
+
+log_step "Wait for live plugin bridge connection (timeout=${PLUGIN_WAIT_SECS}s)"
+CONNECTED="false"
+for _ in $(seq 1 "$PLUGIN_WAIT_SECS"); do
+    if ! curl -sS "$HEALTH_URL" >"$HEALTH_BODY" 2>/dev/null; then
+        sleep 1
+        continue
+    fi
+
+    CONNECTED="$(node -e 'const fs=require("fs");const p=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));process.stdout.write(String((p.pluginBridge?.connectedClients ?? 0) > 0));' "$HEALTH_BODY" 2>/dev/null || echo false)"
+
+    if [ "$CONNECTED" = "true" ]; then
+        break
+    fi
+    sleep 1
+done
+
+if [ "$CONNECTED" != "true" ]; then
+    if [ "$ALLOW_NO_PLUGIN" = "true" ]; then
+        echo "[WORKFLOW-LIVE][WARN] no live plugin connection detected; skipping probe because VERIFY_WORKFLOW_LIVE_ALLOW_NO_PLUGIN=true"
+        exit 0
+    fi
+
+    echo "[WORKFLOW-LIVE][FAIL] no live plugin connection detected within ${PLUGIN_WAIT_SECS}s."
+    echo "[WORKFLOW-LIVE][INFO] Connect the Penjar MCP plugin to ws://<host>:${PENJAR_MCP_WEBSOCKET_PORT:-4402} and retry."
+    echo "[WORKFLOW-LIVE][INFO] Last /health payload:"
+    cat "$HEALTH_BODY"
+    echo
+    exit 1
+fi
+
+log_step "Run live cross-tool workflow probe"
+node --input-type=module - "$MCP_URL" "$CAPTURE_DIR" <<'EOF_JS'
+import fs from "node:fs";
+import path from "node:path";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
+
+const [mcpUrl, captureDirRaw] = process.argv.slice(2);
+const captureDir = captureDirRaw && captureDirRaw.length > 0 ? captureDirRaw : null;
+
+const client = new Client({ name: "workflow-live-check", version: "1.0.0" }, { capabilities: {} });
+const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
+
+function assert(condition, message) {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function isNonEmptyString(value) {
+  return typeof value === "string" && value.length > 0;
+}
+
+function writeCapture(name, payload) {
+  if (!captureDir) {
+    return;
+  }
+  const filePath = path.join(captureDir, `${name}.json`);
+  fs.writeFileSync(filePath, JSON.stringify(payload, null, 2));
+}
+
+async function callToolText(name, args) {
+  const result = await client.request(
+    { method: "tools/call", params: { name, arguments: args } },
+    CallToolResultSchema
+  );
+  return result.content.find((item) => item.type === "text")?.text ?? "";
+}
+
+async function callToolJson(name, args) {
+  const text = await callToolText(name, args);
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`Tool ${name} returned non-JSON payload: ${text}`);
+  }
+}
+
+function assertActiveContextPayload(payload, label) {
+  assert(payload && typeof payload === "object", `${label}: context payload must be object`);
+  assert(payload.file && typeof payload.file === "object", `${label}: file must be object (open a design file)`);
+  assert(isNonEmptyString(payload.file.id), `${label}: file.id must be non-empty string`);
+  assert(typeof payload.file.pageCount === "number", `${label}: file.pageCount must be number`);
+  assert(payload.currentPage && typeof payload.currentPage === "object", `${label}: currentPage must be object`);
+  assert(isNonEmptyString(payload.currentPage.id), `${label}: currentPage.id must be non-empty string`);
+  assert(payload.selection && typeof payload.selection === "object", `${label}: selection must be object`);
+  assert(Array.isArray(payload.selection.ids), `${label}: selection.ids must be array`);
+  assert(Array.isArray(payload.selection.names), `${label}: selection.names must be array`);
+  assert(typeof payload.selection.count === "number", `${label}: selection.count must be number`);
+}
+
+function assertFileInspectPayload(payload, label) {
+  assert(payload && typeof payload === "object", `${label}: payload must be object`);
+  assert(payload.operation === "inspect", `${label}: operation mismatch`);
+  assert(payload.file && typeof payload.file === "object", `${label}: file must be object`);
+  assert(typeof payload.file.pageCount === "number", `${label}: file.pageCount must be number`);
+  assert(Array.isArray(payload.file.pages), `${label}: file.pages must be array`);
+}
+
+function assertInspectHandoffPayload(payload, label) {
+  assert(payload && typeof payload === "object", `${label}: payload must be object`);
+  assert(payload.operation === "inspect_handoff", `${label}: operation mismatch`);
+  assert(payload.scope === "page", `${label}: scope must be page`);
+  assert(Array.isArray(payload.hierarchy) && payload.hierarchy.length > 0, `${label}: hierarchy must be non-empty array`);
+  assert(payload.layoutSemantics && typeof payload.layoutSemantics === "object", `${label}: layoutSemantics missing`);
+  assert(typeof payload.layoutSemantics.maxDepth === "number", `${label}: maxDepth must be number`);
+  assert(typeof payload.layoutSemantics.targetCount === "number", `${label}: targetCount must be number`);
+  assert(typeof payload.layoutSemantics.fallbackUsed === "boolean", `${label}: fallbackUsed must be boolean`);
+  assert(payload.style === null, `${label}: style must be null when includeCss=false`);
+  assert(Array.isArray(payload.tokenHints), `${label}: tokenHints must be array`);
+}
+
+try {
+  await client.connect(transport);
+
+  const stamp = Date.now();
+  const pageName = `Live Workflow ${stamp}`;
+  const shapeName = `Live Shape ${stamp}`;
+
+  const contextBefore = await callToolJson("active_design_context", {});
+  assertActiveContextPayload(contextBefore, "contextBefore");
+  writeCapture("workflow-live-context-before", contextBefore);
+
+  const inspectBefore = await callToolJson("file_lifecycle", { operation: "inspect" });
+  assertFileInspectPayload(inspectBefore, "inspectBefore");
+  writeCapture("workflow-live-file-inspect-before", inspectBefore);
+  const pageCountBefore = inspectBefore.file.pageCount;
+
+  const createPage = await callToolJson("file_lifecycle", {
+    operation: "create_page",
+    pageName,
+  });
+  assert(createPage?.operation === "create_page", "create_page: operation mismatch");
+  assert(isNonEmptyString(createPage?.createdPage?.id), "create_page: createdPage.id missing");
+  assert(createPage?.createdPage?.name === pageName, `create_page: expected page name ${pageName}`);
+  writeCapture("workflow-live-file-create-page", createPage);
+
+  const openPage = await callToolJson("file_lifecycle", {
+    operation: "open_page",
+    pageId: createPage.createdPage.id,
+  });
+  assert(openPage?.operation === "open_page", "open_page: operation mismatch");
+  assert(openPage?.page?.id === createPage.createdPage.id, "open_page: page id mismatch");
+  writeCapture("workflow-live-file-open-page", openPage);
+
+  const createShape = await callToolJson("canvas_editing", {
+    operation: "create_rectangle",
+    name: shapeName,
+    x: 24,
+    y: 32,
+    width: 200,
+    height: 80,
+    fillColor: "#0ea5e9",
+  });
+  assert(createShape?.operation === "create_rectangle", "create_rectangle: operation mismatch");
+  assert(isNonEmptyString(createShape?.shape?.id), "create_rectangle: shape id missing");
+  const shapeId = createShape.shape.id;
+  writeCapture("workflow-live-canvas-create-rectangle", createShape);
+
+  const moveShape = await callToolJson("canvas_editing", {
+    operation: "move_shape",
+    shapeId,
+    x: 48,
+    y: 64,
+  });
+  assert(moveShape?.operation === "move_shape", "move_shape: operation mismatch");
+  assert(moveShape?.shape?.id === shapeId, "move_shape: shape id mismatch");
+  writeCapture("workflow-live-canvas-move-shape", moveShape);
+
+  const resizeShape = await callToolJson("canvas_editing", {
+    operation: "resize_shape",
+    shapeId,
+    width: 240,
+    height: 96,
+  });
+  assert(resizeShape?.operation === "resize_shape", "resize_shape: operation mismatch");
+  assert(resizeShape?.shape?.id === shapeId, "resize_shape: shape id mismatch");
+  writeCapture("workflow-live-canvas-resize-shape", resizeShape);
+
+  const setFill = await callToolJson("canvas_editing", {
+    operation: "set_fill_color",
+    shapeId,
+    fillColor: "#0284c7",
+  });
+  assert(setFill?.operation === "set_fill_color", "set_fill_color: operation mismatch");
+  assert(setFill?.shape?.id === shapeId, "set_fill_color: shape id mismatch");
+  writeCapture("workflow-live-canvas-set-fill-color", setFill);
+
+  const inspectPage = await callToolJson("inspect_handoff", {
+    scope: "page",
+    includeCss: false,
+    maxDepth: 2,
+  });
+  assertInspectHandoffPayload(inspectPage, "inspectPage");
+  writeCapture("workflow-live-inspect-page", inspectPage);
+
+  const inspectAfter = await callToolJson("file_lifecycle", { operation: "inspect" });
+  assertFileInspectPayload(inspectAfter, "inspectAfter");
+  writeCapture("workflow-live-file-inspect-after", inspectAfter);
+  assert(
+    inspectAfter.file.pageCount >= pageCountBefore + 1,
+    `inspectAfter: expected pageCount >= ${pageCountBefore + 1}, got ${inspectAfter.file.pageCount}`
+  );
+
+  const contextAfter = await callToolJson("active_design_context", {});
+  assertActiveContextPayload(contextAfter, "contextAfter");
+  writeCapture("workflow-live-context-after", contextAfter);
+  assert(
+    contextAfter.currentPage.id === createPage.createdPage.id,
+    "contextAfter: current page is not the newly created/opened page"
+  );
+
+  console.log("[WORKFLOW-LIVE] Verified live cross-tool workflow chain (project/file/canvas/inspect)");
+  if (captureDir) {
+    console.log(`[WORKFLOW-LIVE] Captured live payloads at ${captureDir}`);
+  }
+} finally {
+  await transport.close();
+}
+EOF_JS
+
+log_step "Live workflow probe passed"

@@ -1,0 +1,74 @@
+name: "Desktop Flutter CI"
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - staging
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - "desktop/**"
+      - "package.json"
+      - ".github/workflows/tests-desktop-flutter.yml"
+  push:
+    branches:
+      - develop
+      - staging
+      - main
+    paths:
+      - "desktop/**"
+      - "package.json"
+      - ".github/workflows/tests-desktop-flutter.yml"
+
+concurrency:
+  group: desktop-flutter-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  desktop-parity:
+    name: "Desktop Flutter Parity"
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install desktop dependencies
+        working-directory: ./desktop
+        run: flutter pub get
+
+      - name: Run desktop test suite
+        working-directory: ./desktop
+        run: flutter test
+
+      - name: Run desktop parity gates
+        working-directory: ./desktop
+        run: |
+          flutter test \
+            test/parity/auth_session_parity_test.dart \
+            test/parity/project_lifecycle_parity_test.dart \
+            test/parity/file_lifecycle_parity_test.dart \
+            test/parity/canvas_editing_parity_test.dart \
+            test/parity/asset_management_parity_test.dart \
+            test/parity/collaboration_context_parity_test.dart \
+            test/parity/inspect_handoff_parity_test.dart \
+            test/parity/export_workflow_parity_test.dart \
+            test/parity/diagnostics_recovery_parity_test.dart
+
+      - name: Run desktop static analysis
+        working-directory: ./desktop
+        run: flutter analyze

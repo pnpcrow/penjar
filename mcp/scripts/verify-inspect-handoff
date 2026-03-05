@@ -12,6 +12,9 @@ WS_URL="ws://127.0.0.1:${PENJAR_MCP_WEBSOCKET_PORT:-4402}"
 
 TMP_BASE="${TMPDIR:-/tmp}"
 SERVER_LOG="$TMP_BASE/penjar-mcp-inspect-handoff-$$.log"
+SELECTION_FIXTURE="$SERVER_DIR/data/fixtures/inspect-selection-golden.json"
+PAGE_FIXTURE="$SERVER_DIR/data/fixtures/inspect-page-golden.json"
+FALLBACK_FIXTURE="$SERVER_DIR/data/fixtures/inspect-selection-fallback-golden.json"
 SERVER_PID=""
 
 log_step() {
@@ -59,14 +62,18 @@ if ! curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
 fi
 
 log_step "Run inspect_handoff E2E probe with fake plugin session"
-node --input-type=module - "$MCP_URL" "$WS_URL" <<'EOF_JS'
+node --input-type=module - "$MCP_URL" "$WS_URL" "$SELECTION_FIXTURE" "$PAGE_FIXTURE" "$FALLBACK_FIXTURE" <<'EOF_JS'
+import fs from "node:fs";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
 import WebSocket from "ws";
 
-const [mcpUrl, wsUrl] = process.argv.slice(2);
+const [mcpUrl, wsUrl, selectionFixturePath, pageFixturePath, fallbackFixturePath] = process.argv.slice(2);
 let observedScenarios = new Set();
+const selectionFixture = JSON.parse(fs.readFileSync(selectionFixturePath, "utf8"));
+const pageFixture = JSON.parse(fs.readFileSync(pageFixturePath, "utf8"));
+const fallbackFixture = JSON.parse(fs.readFileSync(fallbackFixturePath, "utf8"));
 
 const ws = new WebSocket(wsUrl);
 await new Promise((resolve, reject) => {
@@ -94,14 +101,7 @@ ws.on("message", (payload) => {
             id: request.id,
             success: true,
             data: {
-              result: {
-                operation: "inspect_handoff",
-                scope: "selection",
-                hierarchy: [{ id: "shape-1", name: "Button", type: "rectangle", children: [] }],
-                layoutSemantics: { maxDepth: 2, targetCount: 1, fallbackUsed: false },
-                style: ".button { display:flex; }",
-                tokenHints: ["color.primary", "spacing.sm"],
-              },
+              result: selectionFixture,
               log: "",
             },
           })
@@ -120,14 +120,7 @@ ws.on("message", (payload) => {
             id: request.id,
             success: true,
             data: {
-              result: {
-                operation: "inspect_handoff",
-                scope: "page",
-                hierarchy: [{ id: "page-root", name: "Page Root", type: "group", children: [] }],
-                layoutSemantics: { maxDepth: 4, targetCount: 1, fallbackUsed: false },
-                style: null,
-                tokenHints: [],
-              },
+              result: pageFixture,
               log: "",
             },
           })
@@ -146,14 +139,7 @@ ws.on("message", (payload) => {
             id: request.id,
             success: true,
             data: {
-              result: {
-                operation: "inspect_handoff",
-                scope: "selection",
-                hierarchy: [{ id: "page-root", name: "Page Root", type: "group", children: [] }],
-                layoutSemantics: { maxDepth: 3, targetCount: 1, fallbackUsed: true },
-                style: null,
-                tokenHints: ["fallback.selection.empty"],
-              },
+              result: fallbackFixture,
               log: "",
             },
           })
@@ -269,6 +255,28 @@ function assertInspectPayloadContract(payload, expectation) {
   }
 }
 
+function canonicalize(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => canonicalize(item));
+  }
+  if (value && typeof value === "object") {
+    const out = {};
+    for (const key of Object.keys(value).sort()) {
+      out[key] = canonicalize(value[key]);
+    }
+    return out;
+  }
+  return value;
+}
+
+function assertMatchesFixture(actual, expected, label) {
+  const actualCanonical = JSON.stringify(canonicalize(actual));
+  const expectedCanonical = JSON.stringify(canonicalize(expected));
+  if (actualCanonical !== expectedCanonical) {
+    throw new Error(`${label}: payload does not match fixture.\nactual=${actualCanonical}\nexpected=${expectedCanonical}`);
+  }
+}
+
 try {
   await client.connect(transport);
 
@@ -283,6 +291,7 @@ try {
     expectCss: true,
     fallbackUsed: false,
   });
+  assertMatchesFixture(selectionPayload, selectionFixture, "selection fixture");
 
   const pagePayload = await callToolJson("inspect_handoff", {
     scope: "page",
@@ -295,6 +304,7 @@ try {
     expectCss: false,
     fallbackUsed: false,
   });
+  assertMatchesFixture(pagePayload, pageFixture, "page fixture");
 
   const fallbackSelectionPayload = await callToolJson("inspect_handoff", {
     scope: "selection",
@@ -307,6 +317,7 @@ try {
     expectCss: false,
     fallbackUsed: true,
   });
+  assertMatchesFixture(fallbackSelectionPayload, fallbackFixture, "selection fallback fixture");
 
   const notFoundText = await callToolText("inspect_handoff", {
     scope: "selection",
@@ -324,7 +335,7 @@ try {
     }
   }
 
-  console.log("[INSPECT-CHECK] Verified inspect_handoff tool flow + scope/diagnostic scenarios");
+  console.log("[INSPECT-CHECK] Verified inspect_handoff contract + fixture baseline + scope/diagnostic scenarios");
 } finally {
   await transport.close();
   ws.close();

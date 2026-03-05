@@ -8,11 +8,32 @@ desc: Detailed implementation record and unit-by-unit review log for Phase A del
 This log records execution work for Phase A tasks from the
 [Detailed Implementation Plan](/technical-guide/developer/web-mcp-desktop-implementation-plan/).
 
+## Linked planning and tracking artifacts
+
+- Navigation and update protocol:
+  - [Web + MCP + Desktop Documentation Map](/technical-guide/developer/web-mcp-documentation-map/)
+- Upstream planning:
+  - [Web + MCP + Desktop Delivery Roadmap](/technical-guide/developer/web-mcp-desktop-roadmap/)
+  - [Web + MCP + Desktop Detailed Implementation Plan](/technical-guide/developer/web-mcp-desktop-implementation-plan/)
+- Parallel tracking/evidence:
+  - [Web ↔ MCP Capability Matrix](/technical-guide/developer/web-mcp-capability-matrix/)
+  - [Web ↔ MCP Parity Backlog](/technical-guide/developer/web-mcp-parity-backlog/)
+  - [Web + MCP Phase A Ticket Seed](/technical-guide/developer/web-mcp-phase-a-ticket-seed/)
+  - [Web ↔ MCP Auth/Session Recovery Contract](/technical-guide/developer/web-mcp-auth-session-recovery-contract/)
+
 ## Execution baseline
 
 - Active plan scope: **WS-B (Setup and operability)** in Phase A.
 - Work date: **2026-03-04**.
 - Delivery rule applied: implementation-first (runtime + diagnostics + docs, then review).
+
+## Strategic decision note (2026-03-05)
+
+- Desktop objective is confirmed as a **full Flutter port** for user-facing workflows.
+- Temporary non-Flutter desktop paths are allowed only as explicitly blocked transition items with owner and removal deadline.
+- Policy anchors:
+  - [Web + MCP + Desktop Delivery Roadmap](/technical-guide/developer/web-mcp-desktop-roadmap/)
+  - [Web + MCP + Desktop Detailed Implementation Plan](/technical-guide/developer/web-mcp-desktop-implementation-plan/)
 
 ## Unit WS-B-01: Preflight and bootstrap hardening
 
@@ -1063,9 +1084,478 @@ Deepen P0-005 validation by converting lifecycle checks from coarse operation as
   - `VERIFY_FILE_SKIP_BUILD=true pnpm run verify:file-lifecycle` passes with strict contract/default/open-by-name assertions.
   - `bash mcp/scripts/check` passes with hardened file lifecycle gate.
 
+## Unit WS-A-31: Asset idempotency + missing-file diagnostic gate
+
+### Planned objective
+
+Deepen P0-007 validation by adding idempotency and local failure-semantic checks to asset import resilience coverage.
+
+### Implemented changes
+
+1. Extended `mcp/scripts/verify-asset-management`:
+   - added import payload contract assertions (`shapeId` type/value),
+   - added repeated-import idempotency scenario (same input import twice; stable `shapeId` assertion),
+   - added missing-file failure scenario asserting deterministic `RESOURCE_NOT_FOUND`,
+   - retained timeout (`PLUGIN_TASK_TIMEOUT`), disconnect (`PLUGIN_DISCONNECTED`), and reconnect-recovery import checks.
+2. Strengthened probe observability:
+   - replaced boolean payload flags with counters for:
+     - primary-session import requests,
+     - recovery-session import requests.
+3. Updated traceability docs:
+   - capability matrix, parity backlog, and `mcp/README.md` now reference contract + idempotency + missing-file coverage.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - import payload contract strictness and deterministic JSON behavior,
+  - repeated-import idempotency semantics in stable session conditions,
+  - local file-precondition diagnostic behavior (`RESOURCE_NOT_FOUND`),
+  - regression safety for timeout/disconnect/reconnect resilience assertions.
+- **Issues found during review**
+  1. None; targeted asset probe and full check pipeline passed on first implementation.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - `VERIFY_ASSET_SKIP_BUILD=true pnpm run verify:asset-management` passes with contract/idempotency/missing-file assertions.
+  - `bash mcp/scripts/check` passes with hardened asset management gate.
+
+## Unit WS-A-32: Export golden-fidelity fixture gate
+
+### Planned objective
+
+Deepen P1-002 output-quality assurance by adding a deterministic fixture baseline for SVG export fidelity checks.
+
+### Implemented changes
+
+1. Added golden fixture:
+   - `mcp/packages/server/data/fixtures/export-shape-golden.svg`
+   - canonical expected SVG payload for export-workflow probe.
+2. Extended `mcp/scripts/verify-export-workflows`:
+   - now loads golden fixture and uses it as fake-plugin SVG result,
+   - validates in-memory SVG export equals golden fixture,
+   - validates file-saved SVG export equals golden fixture,
+   - preserves existing format-matrix and diagnostics assertions.
+3. Updated traceability docs:
+   - capability matrix, parity backlog, and `mcp/README.md` now reference golden-fidelity regression coverage.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - deterministic SVG export regression baseline stability,
+  - parity between in-memory and persisted SVG artifact outputs,
+  - compatibility with existing export diagnostics matrix assertions.
+- **Issues found during review**
+  1. None; targeted export probe and full check pipeline passed on first implementation.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - `VERIFY_EXPORT_SKIP_BUILD=true pnpm run verify:export-workflows` passes with golden-fidelity assertions.
+  - `bash mcp/scripts/check` passes with hardened export workflow gate.
+
+## Unit WS-B-33: Health diagnostics catalog structure/uniqueness gate
+
+### Planned objective
+
+Strengthen P0-002 operational safety by validating not only diagnostic-code presence but also health-catalog structural integrity and uniqueness constraints.
+
+### Implemented changes
+
+1. Extended `mcp/scripts/verify-phase-a` `/health` contract assertions:
+   - endpoint field types:
+     - `endpoints.websocketPort` numeric,
+     - `endpoints.replPort` numeric,
+   - diagnostics catalog structural checks:
+     - each entry has non-empty `code`, `title`, `summary`,
+     - `remediation` is non-empty array of non-empty strings,
+     - diagnostic codes are unique (duplicate detection).
+2. Updated traceability docs:
+   - capability matrix, parity backlog, and `mcp/README.md` now explicitly reference diagnostics-catalog contract enforcement.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - `/health` diagnostics catalog shape validity under current bridge implementation,
+  - duplicate-code prevention and remediation-list quality gates,
+  - compatibility with full `scripts/check` pipeline.
+- **Issues found during review**
+  1. None; targeted phase-a probe and full check pipeline passed on first implementation.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - `VERIFY_PHASE_A_SKIP_BUILD=true pnpm run verify:phase-a` passes with structural/uniqueness assertions.
+  - `bash mcp/scripts/check` passes with strengthened health-contract gate.
+
+## Unit WS-A-34: Inspect golden-fixture regression gate
+
+### Planned objective
+
+Deepen P0-008 schema stability by introducing fixture-based regression checks for inspect payload outputs across core scopes.
+
+### Implemented changes
+
+1. Added inspect golden fixtures:
+   - `mcp/packages/server/data/fixtures/inspect-selection-golden.json`
+   - `mcp/packages/server/data/fixtures/inspect-page-golden.json`
+   - `mcp/packages/server/data/fixtures/inspect-selection-fallback-golden.json`
+2. Extended `mcp/scripts/verify-inspect-handoff`:
+   - now loads fixture payloads and uses them in fake-plugin responses,
+   - preserves strict contract assertions for hierarchy/layout/style/token fields,
+   - adds canonical deep-equality checks against fixture payloads for:
+     - selection scope,
+     - page scope,
+     - selection-fallback scope,
+   - retains deterministic missing-target diagnostic check (`RESOURCE_NOT_FOUND`).
+3. Updated traceability docs:
+   - capability matrix, parity backlog, and `mcp/README.md` now reference inspect golden-fixture regression coverage.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - fixture baseline consistency for inspect payload outputs,
+  - compatibility of fixture-equality checks with existing strict contract assertions,
+  - regression safety of missing-target diagnostic scenario.
+- **Issues found during review**
+  1. None; targeted inspect probe and full check pipeline passed on first implementation.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - `VERIFY_INSPECT_SKIP_BUILD=true pnpm run verify:inspect-handoff` passes with fixture equality checks.
+  - `bash mcp/scripts/check` passes with inspect fixture regression gate enabled.
+
+## Unit WS-A-35: Collaboration golden-fixture regression + strict contract gate
+
+### Planned objective
+
+Deepen P1-001 collaboration stability by introducing fixture-based regression baselines and strict contract assertions across awareness/thread payloads.
+
+### Implemented changes
+
+1. Added collaboration golden fixtures:
+   - `mcp/packages/server/data/fixtures/collaboration-inspect-threads-golden.json`
+   - `mcp/packages/server/data/fixtures/collaboration-inspect-awareness-golden.json`
+   - `mcp/packages/server/data/fixtures/collaboration-create-thread-golden.json`
+   - `mcp/packages/server/data/fixtures/collaboration-reply-thread-golden.json`
+   - `mcp/packages/server/data/fixtures/collaboration-set-thread-resolved-golden.json`
+   - `mcp/packages/server/data/fixtures/collaboration-remove-thread-golden.json`
+2. Extended `mcp/scripts/verify-collaboration-context`:
+   - now loads collaboration fixtures and uses them as fake-plugin return payloads,
+   - added strict payload contract validators for:
+     - `inspect_threads` (`page`/`filters`/`threadCount`/`threads[]`),
+     - `inspect_awareness` (`currentUser`/`activeUsers`/`metrics`),
+     - `create_thread`,
+     - `reply_thread`,
+     - `set_thread_resolved`,
+     - `remove_thread`,
+   - added canonical deep-equality fixture checks for all success operations,
+   - added default-value semantics assertions for inspect calls invoked without optional args:
+     - `inspect_threads` defaults (`onlyYours=false`, `includeResolved=true`),
+     - `inspect_awareness` defaults (`includeCurrentUser=true`, `includeActiveUsers=true`),
+   - preserved deterministic diagnostics checks:
+     - permission denied (`PERMISSION_DENIED`),
+     - missing thread (`RESOURCE_NOT_FOUND`).
+3. Updated traceability docs:
+   - capability matrix, parity backlog, and `mcp/README.md` now reference collaboration strict-contract + golden-fixture regression coverage.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - fixture baseline consistency for collaboration inspect/mutation payloads,
+  - strict contract compatibility for awareness/thread schemas,
+  - regression safety of permission/not-found diagnostics.
+- **Issues found during review**
+  1. None; targeted collaboration probe and full check pipeline passed on first implementation.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - `VERIFY_COLLAB_SKIP_BUILD=true pnpm run verify:collaboration-context` passes with strict contract + fixture equality assertions.
+  - `bash mcp/scripts/check` passes with collaboration fixture regression gate enabled.
+
+## Unit WS-A-36: Export PNG golden-fidelity + artifact parity gate
+
+### Planned objective
+
+Deepen P1-002 export stability by extending fixture-based fidelity checks from SVG-only coverage to PNG output and persisted artifact parity.
+
+### Implemented changes
+
+1. Added PNG golden fixture:
+   - `mcp/packages/server/data/fixtures/export-shape-golden.png`
+   - canonical expected PNG bytes used by export-workflow probe.
+2. Extended `mcp/scripts/verify-export-workflows`:
+   - now loads both `export-shape-golden.svg` and `export-shape-golden.png`,
+   - validates in-memory PNG response payloads (`shape` and `fill`) match golden PNG bytes exactly,
+   - validates file-saved PNG artifact (`filePath`) matches golden PNG bytes exactly,
+   - preserves existing SVG in-memory + persisted fidelity checks and diagnostics matrix assertions.
+3. Updated traceability docs:
+   - capability matrix, parity backlog, and `mcp/README.md` now reference golden SVG/PNG fidelity regression coverage.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - PNG payload determinism for in-memory response paths (`shape` and `fill`),
+  - persisted PNG artifact parity with golden bytes,
+  - compatibility with existing SVG fidelity and diagnostics behavior.
+- **Issues found during review**
+  1. None; targeted export probe and full check pipeline passed on first implementation.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - `VERIFY_EXPORT_SKIP_BUILD=true pnpm run verify:export-workflows` passes with golden SVG/PNG fidelity assertions.
+  - `bash mcp/scripts/check` passes with export PNG artifact parity gate enabled.
+
+## Unit WS-A-37: Collaboration filter/toggle semantics fixture gate
+
+### Planned objective
+
+Deepen P1-001 collaboration contract confidence by adding explicit filter/toggle semantics coverage for thread/awareness inspect operations.
+
+### Implemented changes
+
+1. Added collaboration variant fixtures:
+   - `mcp/packages/server/data/fixtures/collaboration-inspect-threads-filtered-golden.json`
+   - `mcp/packages/server/data/fixtures/collaboration-inspect-awareness-minimal-golden.json`
+2. Extended `mcp/scripts/verify-collaboration-context`:
+   - fake-plugin router now parses inspect criteria/toggle flags from generated code and returns scenario-specific fixture payloads,
+   - added `inspect_threads` filtered scenario assertions:
+     - `onlyYours=true`,
+     - `includeResolved=false`,
+   - added `inspect_awareness` minimal scenario assertions:
+     - `includeCurrentUser=false`,
+     - `includeActiveUsers=false`,
+   - added fixture deep-equality checks for both variant scenarios,
+   - preserved strict contract checks + deterministic diagnostics checks.
+3. Updated traceability docs:
+   - capability matrix, parity backlog, and `mcp/README.md` now reference collaboration filter/toggle semantics coverage.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - inspect filter/toggle semantics determinism in collaboration payloads,
+  - compatibility with existing strict contract + fixture regression checks,
+  - regression safety of permission/not-found diagnostics.
+- **Issues found during review**
+  1. None; targeted collaboration probe passed after first implementation.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - `VERIFY_COLLAB_SKIP_BUILD=true pnpm run verify:collaboration-context` passes with filter/toggle + fixture assertions.
+  - `bash mcp/scripts/check` passes with collaboration variant-fixture gate enabled.
+
+## Unit WS-A-38: Cross-tool workflow acceptance continuity gate
+
+### Planned objective
+
+Reduce remaining P0 workflow-continuity risk by introducing a single-session acceptance gate that validates handoff continuity across project/file/canvas/inspect tools.
+
+### Implemented changes
+
+1. Added acceptance probe:
+   - `mcp/scripts/verify-workflow-acceptance`
+   - validates end-to-end chain in one MCP client session:
+     - `active_design_context` initial anchor,
+     - `file_lifecycle` inspect/create/open,
+     - `canvas_editing` create/move/resize/fill,
+     - `inspect_handoff` selection extract,
+     - `active_design_context` final context reconciliation.
+2. Integrated probe into quality pipeline:
+   - added `pnpm run verify:workflow-acceptance` in `mcp/package.json`,
+   - wired `VERIFY_WORKFLOW_SKIP_BUILD=true pnpm run verify:workflow-acceptance` into `mcp/scripts/check`.
+3. Updated traceability docs:
+   - capability matrix and parity backlog rows for P0-004/P0-005/P0-006/P0-008 now reference cross-tool acceptance-chain evidence.
+   - `mcp/README.md` now documents the new probe command.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - tool-chain continuity in a single runtime session (context -> file -> canvas -> inspect),
+  - payload-contract compatibility at each chain stage,
+  - check-pipeline integration safety.
+- **Issues found during review**
+  1. None; targeted acceptance probe and full check pipeline passed on first implementation.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - `pnpm run verify:workflow-acceptance` passes with chain continuity assertions.
+  - `bash mcp/scripts/check` passes with workflow acceptance gate enabled.
+
+## Unit WS-A-39: Live workspace workflow continuity probe
+
+### Planned objective
+
+Reduce remaining P0 live-environment uncertainty by adding a real plugin-session workflow probe that validates the project/file/canvas/inspect chain against an actual workspace context.
+
+### Implemented changes
+
+1. Added live workflow probe:
+   - `mcp/scripts/verify-workflow-live`
+   - boots MCP server and waits for a real plugin bridge connection (`/health.pluginBridge.connectedClients > 0`),
+   - executes live chain:
+     - `active_design_context` (pre),
+     - `file_lifecycle` inspect/create/open,
+     - `canvas_editing` create/move/resize/fill,
+     - `inspect_handoff` page-scope extract (`includeCss=false`),
+     - `file_lifecycle` inspect (post),
+     - `active_design_context` (post),
+   - validates strict contract and continuity invariants across chain boundaries.
+2. Added optional live payload capture mode:
+   - `VERIFY_WORKFLOW_LIVE_CAPTURE_DIR=<dir>`
+   - stores operation payload snapshots for live fixture curation.
+3. Added controlled no-plugin handling for dry-run environments:
+   - `VERIFY_WORKFLOW_LIVE_ALLOW_NO_PLUGIN=true`
+   - allows script to exit cleanly when no live plugin session is available (for local syntax/flow validation).
+4. Added package command:
+   - `pnpm run verify:workflow-live`
+5. Updated traceability docs:
+   - capability matrix/backlog/`mcp/README.md` now reference live workflow probe availability.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - live plugin-session precondition handling and failure guidance,
+  - cross-tool continuity assertions under real workspace context,
+  - compatibility with existing synthetic acceptance probe.
+- **Issues found during review**
+  1. No functional defects found in dry-run validation path.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - `VERIFY_WORKFLOW_LIVE_SKIP_BUILD=true VERIFY_WORKFLOW_LIVE_ALLOW_NO_PLUGIN=true VERIFY_WORKFLOW_LIVE_PLUGIN_WAIT_SECS=2 pnpm run verify:workflow-live` passes (dry-run mode).
+  - In live environment with connected plugin session, `pnpm run verify:workflow-live` passes with full chain assertions.
+
+## Unit WS-A-40: Live collaboration inspect/awareness probe
+
+### Planned objective
+
+Reduce remaining P1-001 live-environment uncertainty by adding a real plugin-session probe for collaboration inspect/awareness payload stability and diagnostics behavior.
+
+### Implemented changes
+
+1. Added live collaboration probe:
+   - `mcp/scripts/verify-collaboration-live`
+   - boots MCP server and waits for real plugin bridge connection (`/health.pluginBridge.connectedClients > 0`),
+   - validates live inspect operations:
+     - `inspect_threads` (default filters),
+     - `inspect_awareness` (default toggles),
+     - `inspect_awareness` (minimal toggles),
+   - validates deterministic missing-page diagnostic:
+     - `inspect_threads` with generated missing page id -> `RESOURCE_NOT_FOUND`.
+2. Added optional live payload capture mode:
+   - `VERIFY_COLLAB_LIVE_CAPTURE_DIR=<dir>`
+   - stores inspect payload snapshots for live-fixture curation.
+3. Added controlled no-plugin handling for dry-run environments:
+   - `VERIFY_COLLAB_LIVE_ALLOW_NO_PLUGIN=true`
+   - allows clean exit when no live plugin session is available.
+4. Added package command:
+   - `pnpm run verify:collaboration-live`
+5. Updated traceability docs:
+   - capability matrix/backlog/`mcp/README.md` now reference live collaboration probe availability.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - live plugin-session precondition handling and diagnostic clarity,
+  - collaboration inspect/awareness payload contract assertions,
+  - compatibility with synthetic collaboration regression probe.
+- **Issues found during review**
+  1. No functional defects found in dry-run validation path.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - `VERIFY_COLLAB_LIVE_SKIP_BUILD=true VERIFY_COLLAB_LIVE_ALLOW_NO_PLUGIN=true VERIFY_COLLAB_LIVE_PLUGIN_WAIT_SECS=2 pnpm run verify:collaboration-live` passes (dry-run mode).
+  - In live environment with connected plugin session, `pnpm run verify:collaboration-live` passes with inspect/awareness assertions.
+
+## Unit WS-A-41: Live export workflow probe
+
+### Planned objective
+
+Reduce remaining P1-002 live-environment uncertainty by adding a real plugin-session probe for export workflow behavior and artifact-save continuity.
+
+### Implemented changes
+
+1. Added live export probe:
+   - `mcp/scripts/verify-export-live`
+   - boots MCP server and waits for real plugin bridge connection (`/health.pluginBridge.connectedClients > 0`),
+   - creates a live rectangle via `canvas_editing`,
+   - validates export paths on that shape:
+     - `export_shape` as PNG (in-memory image payload),
+     - `export_shape` as SVG (in-memory text payload),
+     - file-save for PNG and SVG (artifact existence + non-empty content),
+   - validates deterministic missing-shape diagnostic:
+     - `shapeId=missing-live-shape-*` -> `RESOURCE_NOT_FOUND`.
+2. Added optional live payload capture mode:
+   - `VERIFY_EXPORT_LIVE_CAPTURE_DIR=<dir>`
+   - stores export response/artifact metadata for live-fixture curation.
+3. Added controlled no-plugin handling for dry-run environments:
+   - `VERIFY_EXPORT_LIVE_ALLOW_NO_PLUGIN=true`
+   - allows clean exit when no live plugin session is available.
+4. Added package command:
+   - `pnpm run verify:export-live`
+5. Updated traceability docs:
+   - capability matrix/backlog/`mcp/README.md` now reference live export probe availability.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - live plugin-session precondition handling and failure guidance,
+  - export in-memory and persisted artifact checks in real workspace context,
+  - compatibility with existing synthetic export regression probe.
+- **Issues found during review**
+  1. No functional defects found in dry-run validation path.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - `VERIFY_EXPORT_LIVE_SKIP_BUILD=true VERIFY_EXPORT_LIVE_ALLOW_NO_PLUGIN=true VERIFY_EXPORT_LIVE_PLUGIN_WAIT_SECS=2 pnpm run verify:export-live` passes (dry-run mode).
+  - In live environment with connected plugin session, `pnpm run verify:export-live` passes with export assertions.
+
+## Unit WS-A-42: Live evidence bundle + report gate
+
+### Planned objective
+
+Improve closure readiness by providing a single command that runs all live probes and emits a normalized evidence report for review/audit.
+
+### Implemented changes
+
+1. Added live evidence bundle script:
+   - `mcp/scripts/verify-live-evidence`
+   - runs:
+     - `verify:workflow-live`
+     - `verify:collaboration-live`
+     - `verify:export-live`
+   - writes per-probe logs and capture dirs under one evidence root.
+2. Added summary outputs:
+   - `summary.json`
+   - `summary.md`
+   - includes probe status (`captured`/`skipped`/`failed`), captured JSON count, and log paths.
+3. Added execution controls:
+   - `VERIFY_LIVE_EVIDENCE_ALLOW_NO_PLUGIN` (default `true`),
+   - `VERIFY_LIVE_EVIDENCE_REQUIRE_CAPTURE` (default `false`),
+   - `VERIFY_LIVE_EVIDENCE_SKIP_BUILD` (default `true`),
+   - `VERIFY_LIVE_EVIDENCE_PLUGIN_WAIT_SECS`,
+   - `VERIFY_LIVE_EVIDENCE_DIR`.
+4. Added package command:
+   - `pnpm run verify:live-evidence`
+5. Updated traceability docs:
+   - capability matrix/backlog and `mcp/README.md` now reference the live evidence bundle entrypoint.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - multi-probe orchestration behavior and status derivation logic,
+  - summary artifact completeness and readability,
+  - compatibility with no-plugin dry-run and live capture modes.
+- **Issues found during review**
+  1. Initial markdown summary template contained malformed formatting in evidence-directory lines.
+  2. Initial probe-result parsing was empty because progress logs were written to stdout inside command substitution, producing invalid `summary.json` fields.
+- **Fix applied**
+  1. Simplified and corrected summary markdown block output to deterministic plain lines.
+  2. Redirected per-probe progress logs to stderr so machine-readable probe result lines remain parse-safe.
+- **Post-fix validation criteria**
+  - `VERIFY_LIVE_EVIDENCE_ALLOW_NO_PLUGIN=true VERIFY_LIVE_EVIDENCE_SKIP_BUILD=true pnpm run verify:live-evidence` passes (dry-run mode) and writes summary artifacts.
+  - In live environment with connected plugin session and `VERIFY_LIVE_EVIDENCE_REQUIRE_CAPTURE=true`, `pnpm run verify:live-evidence` passes with all probes in `captured` status.
+
 ## Remaining Phase A gaps after this execution
 
-- Workflow parity for project/file/canvas/inspect domains still needs contract-level acceptance tests.
-- Collaboration context still needs live workspace fixtures for awareness payload stability before row closure.
-- Export workflows still need live fixture-based fidelity metrics before row closure.
+- Workflow parity for project/file/canvas/inspect domains still needs captured live fixture evidence and closure criteria sign-off (`verify:workflow-live` + `verify:live-evidence` entrypoints shipped).
+- Collaboration context still needs captured live workspace fixture evidence for awareness payload stability before row closure (`verify:collaboration-live` + `verify:live-evidence` entrypoints shipped).
+- Export workflows still need captured live fixture-based fidelity metrics before row closure (`verify:export-live` + `verify:live-evidence` entrypoints shipped).
 - Matrix row completion claims still require merged test evidence per row.

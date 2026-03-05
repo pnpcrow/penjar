@@ -10,6 +10,7 @@ VERIFY_AUTH_SKIP_BUILD=true pnpm run verify:auth-session;
 VERIFY_PROJECT_SKIP_BUILD=true pnpm run verify:project-lifecycle;
 VERIFY_FILE_SKIP_BUILD=true pnpm run verify:file-lifecycle;
 VERIFY_CANVAS_SKIP_BUILD=true pnpm run verify:canvas-editing;
+VERIFY_WORKFLOW_SKIP_BUILD=true pnpm run verify:workflow-acceptance;
 VERIFY_ASSET_SKIP_BUILD=true pnpm run verify:asset-management;
 VERIFY_INSPECT_SKIP_BUILD=true pnpm run verify:inspect-handoff;
 VERIFY_BRIDGE_SKIP_BUILD=true pnpm run verify:bridge-recovery;

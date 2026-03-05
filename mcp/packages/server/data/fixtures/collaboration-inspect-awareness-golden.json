@@ -1,0 +1,45 @@
+{
+  "operation": "inspect_awareness",
+  "page": {
+    "id": "page-1",
+    "name": "Collaboration Page"
+  },
+  "currentUser": {
+    "id": "user-1",
+    "name": "Current User",
+    "avatarUrl": null,
+    "color": "#0ea5e9"
+  },
+  "activeUsers": [
+    {
+      "id": "user-1",
+      "name": "Current User",
+      "avatarUrl": null,
+      "color": "#0ea5e9",
+      "sessionId": "session-1",
+      "position": {
+        "x": 300,
+        "y": 120
+      },
+      "zoom": 1.25
+    },
+    {
+      "id": "user-2",
+      "name": "Reviewer",
+      "avatarUrl": null,
+      "color": "#f97316",
+      "sessionId": "session-2",
+      "position": {
+        "x": 480,
+        "y": 260
+      },
+      "zoom": 0.9
+    }
+  ],
+  "metrics": {
+    "includesCurrentUser": true,
+    "includesActiveUsers": true,
+    "activeUserCount": 2,
+    "currentUserActive": true
+  }
+}

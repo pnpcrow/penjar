@@ -1,0 +1,259 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SERVER_DIR="$PROJECT_ROOT/packages/server"
+
+HEALTH_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/health"
+MCP_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/mcp"
+
+PLUGIN_WAIT_SECS="${VERIFY_COLLAB_LIVE_PLUGIN_WAIT_SECS:-60}"
+ALLOW_NO_PLUGIN="${VERIFY_COLLAB_LIVE_ALLOW_NO_PLUGIN:-false}"
+CAPTURE_DIR="${VERIFY_COLLAB_LIVE_CAPTURE_DIR:-}"
+
+TMP_BASE="${TMPDIR:-/tmp}"
+SERVER_LOG="$TMP_BASE/penjar-mcp-collaboration-live-$$.log"
+HEALTH_BODY="$TMP_BASE/penjar-mcp-collaboration-live-health-$$.json"
+SERVER_PID=""
+
+log_step() {
+    printf "\n[COLLAB-LIVE] %s\n" "$1"
+}
+
+cleanup() {
+    if [ -n "$SERVER_PID" ] && kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+        kill "$SERVER_PID" >/dev/null 2>&1 || true
+        wait "$SERVER_PID" >/dev/null 2>&1 || true
+    fi
+
+    rm -f "$SERVER_LOG" "$HEALTH_BODY"
+}
+
+trap cleanup EXIT
+
+if [ "${VERIFY_COLLAB_LIVE_SKIP_BUILD:-false}" = "true" ]; then
+    log_step "Skip build step (VERIFY_COLLAB_LIVE_SKIP_BUILD=true)"
+else
+    log_step "Build required packages for live collaboration probe"
+    cd "$PROJECT_ROOT"
+    pnpm --filter mcp-common run build
+    pnpm --filter mcp-server run build
+fi
+
+if [ -n "$CAPTURE_DIR" ]; then
+    mkdir -p "$CAPTURE_DIR"
+    log_step "Capture directory enabled: $CAPTURE_DIR"
+fi
+
+log_step "Start MCP server (single-user)"
+cd "$SERVER_DIR"
+node dist/index.js >"$SERVER_LOG" 2>&1 &
+SERVER_PID="$!"
+
+log_step "Wait for /health endpoint"
+for _ in $(seq 1 20); do
+    if curl -sS "$HEALTH_URL" >"$HEALTH_BODY" 2>/dev/null; then
+        break
+    fi
+    sleep 1
+done
+
+if ! curl -sS "$HEALTH_URL" >"$HEALTH_BODY" 2>/dev/null; then
+    echo "[COLLAB-LIVE][FAIL] server did not become healthy."
+    echo "[COLLAB-LIVE][INFO] Server log:"
+    cat "$SERVER_LOG"
+    exit 1
+fi
+
+log_step "Wait for live plugin bridge connection (timeout=${PLUGIN_WAIT_SECS}s)"
+CONNECTED="false"
+for _ in $(seq 1 "$PLUGIN_WAIT_SECS"); do
+    if ! curl -sS "$HEALTH_URL" >"$HEALTH_BODY" 2>/dev/null; then
+        sleep 1
+        continue
+    fi
+
+    CONNECTED="$(node -e 'const fs=require("node:fs");const p=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));process.stdout.write(String((p.pluginBridge?.connectedClients ?? 0) > 0));' "$HEALTH_BODY" 2>/dev/null || echo false)"
+
+    if [ "$CONNECTED" = "true" ]; then
+        break
+    fi
+    sleep 1
+done
+
+if [ "$CONNECTED" != "true" ]; then
+    if [ "$ALLOW_NO_PLUGIN" = "true" ]; then
+        echo "[COLLAB-LIVE][WARN] no live plugin connection detected; skipping probe because VERIFY_COLLAB_LIVE_ALLOW_NO_PLUGIN=true"
+        exit 0
+    fi
+
+    echo "[COLLAB-LIVE][FAIL] no live plugin connection detected within ${PLUGIN_WAIT_SECS}s."
+    echo "[COLLAB-LIVE][INFO] Connect the Penjar MCP plugin to ws://<host>:${PENJAR_MCP_WEBSOCKET_PORT:-4402} and retry."
+    echo "[COLLAB-LIVE][INFO] Last /health payload:"
+    cat "$HEALTH_BODY"
+    echo
+    exit 1
+fi
+
+log_step "Run live collaboration inspect probe"
+node --input-type=module - "$MCP_URL" "$CAPTURE_DIR" <<'EOF_JS'
+import fs from "node:fs";
+import path from "node:path";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
+
+const [mcpUrl, captureDirRaw] = process.argv.slice(2);
+const captureDir = captureDirRaw && captureDirRaw.length > 0 ? captureDirRaw : null;
+
+const client = new Client({ name: "collaboration-live-check", version: "1.0.0" }, { capabilities: {} });
+const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
+
+function assert(condition, message) {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function isNullableString(value) {
+  return value === null || typeof value === "string";
+}
+
+function writeCapture(name, payload) {
+  if (!captureDir) {
+    return;
+  }
+  const filePath = path.join(captureDir, `${name}.json`);
+  fs.writeFileSync(filePath, JSON.stringify(payload, null, 2));
+}
+
+async function callToolText(name, args) {
+  const result = await client.request(
+    { method: "tools/call", params: { name, arguments: args } },
+    CallToolResultSchema
+  );
+  return result.content.find((item) => item.type === "text")?.text ?? "";
+}
+
+async function callToolJson(name, args) {
+  const text = await callToolText(name, args);
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`Tool ${name} returned non-JSON payload: ${text}`);
+  }
+}
+
+function assertInspectThreads(payload, expected) {
+  assert(payload && typeof payload === "object", "inspect_threads: payload must be object");
+  assert(payload.operation === "inspect_threads", "inspect_threads: operation mismatch");
+  assert(payload.page && typeof payload.page === "object", "inspect_threads: page missing");
+  assert(typeof payload.page.id === "string" && payload.page.id.length > 0, "inspect_threads: page.id missing");
+  assert(isNullableString(payload.page.name), "inspect_threads: page.name must be string|null");
+  assert(payload.filters && typeof payload.filters === "object", "inspect_threads: filters missing");
+  assert(payload.filters.onlyYours === expected.onlyYours, "inspect_threads: onlyYours mismatch");
+  assert(payload.filters.includeResolved === expected.includeResolved, "inspect_threads: includeResolved mismatch");
+  assert(Array.isArray(payload.threads), "inspect_threads: threads must be array");
+  assert(Number.isInteger(payload.threadCount), "inspect_threads: threadCount must be integer");
+  assert(payload.threadCount === payload.threads.length, "inspect_threads: threadCount must match threads.length");
+
+  payload.threads.forEach((thread, idx) => {
+    assert(thread && typeof thread === "object", `inspect_threads: thread[${idx}] must be object`);
+    assert(Number.isInteger(thread.seqNumber) && thread.seqNumber > 0, `inspect_threads: thread[${idx}].seqNumber invalid`);
+    assert(typeof thread.resolved === "boolean", `inspect_threads: thread[${idx}].resolved invalid`);
+    assert(Number.isInteger(thread.commentCount) && thread.commentCount >= 0, `inspect_threads: thread[${idx}].commentCount invalid`);
+    assert(thread.position === null || typeof thread.position === "object", `inspect_threads: thread[${idx}].position invalid`);
+    assert(thread.owner === null || typeof thread.owner === "object", `inspect_threads: thread[${idx}].owner invalid`);
+    assert(thread.lastComment === null || typeof thread.lastComment === "object", `inspect_threads: thread[${idx}].lastComment invalid`);
+  });
+}
+
+function assertInspectAwareness(payload, expected) {
+  assert(payload && typeof payload === "object", "inspect_awareness: payload must be object");
+  assert(payload.operation === "inspect_awareness", "inspect_awareness: operation mismatch");
+  assert(payload.page && typeof payload.page === "object", "inspect_awareness: page missing");
+  assert(typeof payload.page.id === "string" && payload.page.id.length > 0, "inspect_awareness: page.id missing");
+  assert(isNullableString(payload.page.name), "inspect_awareness: page.name must be string|null");
+
+  assert(payload.currentUser === null || typeof payload.currentUser === "object", "inspect_awareness: currentUser invalid");
+  assert(Array.isArray(payload.activeUsers), "inspect_awareness: activeUsers must be array");
+
+  payload.activeUsers.forEach((user, idx) => {
+    assert(user && typeof user === "object", `inspect_awareness: activeUsers[${idx}] invalid`);
+    assert(isNullableString(user.id), `inspect_awareness: activeUsers[${idx}].id invalid`);
+    assert(isNullableString(user.name), `inspect_awareness: activeUsers[${idx}].name invalid`);
+    assert(isNullableString(user.avatarUrl), `inspect_awareness: activeUsers[${idx}].avatarUrl invalid`);
+    assert(isNullableString(user.color), `inspect_awareness: activeUsers[${idx}].color invalid`);
+    assert(isNullableString(user.sessionId), `inspect_awareness: activeUsers[${idx}].sessionId invalid`);
+    assert(user.position === null || typeof user.position === "object", `inspect_awareness: activeUsers[${idx}].position invalid`);
+    assert(user.zoom === null || typeof user.zoom === "number", `inspect_awareness: activeUsers[${idx}].zoom invalid`);
+  });
+
+  assert(payload.metrics && typeof payload.metrics === "object", "inspect_awareness: metrics missing");
+  assert(payload.metrics.includesCurrentUser === expected.includesCurrentUser, "inspect_awareness: includesCurrentUser mismatch");
+  assert(payload.metrics.includesActiveUsers === expected.includesActiveUsers, "inspect_awareness: includesActiveUsers mismatch");
+  assert(Number.isInteger(payload.metrics.activeUserCount) && payload.metrics.activeUserCount >= 0, "inspect_awareness: activeUserCount invalid");
+  assert(payload.metrics.activeUserCount === payload.activeUsers.length, "inspect_awareness: activeUserCount must match activeUsers.length");
+  assert(typeof payload.metrics.currentUserActive === "boolean", "inspect_awareness: currentUserActive invalid");
+}
+
+try {
+  await client.connect(transport);
+
+  const threadsDefault = await callToolJson("collaboration_context", {
+    operation: "inspect_threads",
+    onlyYours: false,
+    includeResolved: true,
+  });
+  assertInspectThreads(threadsDefault, {
+    onlyYours: false,
+    includeResolved: true,
+  });
+  writeCapture("collab-live-inspect-threads-default", threadsDefault);
+
+  const awarenessDefault = await callToolJson("collaboration_context", {
+    operation: "inspect_awareness",
+    includeCurrentUser: true,
+    includeActiveUsers: true,
+  });
+  assertInspectAwareness(awarenessDefault, {
+    includesCurrentUser: true,
+    includesActiveUsers: true,
+  });
+  writeCapture("collab-live-inspect-awareness-default", awarenessDefault);
+
+  const awarenessMinimal = await callToolJson("collaboration_context", {
+    operation: "inspect_awareness",
+    includeCurrentUser: false,
+    includeActiveUsers: false,
+  });
+  assertInspectAwareness(awarenessMinimal, {
+    includesCurrentUser: false,
+    includesActiveUsers: false,
+  });
+  writeCapture("collab-live-inspect-awareness-minimal", awarenessMinimal);
+
+  const missingPageId = `missing-live-page-${Date.now()}`;
+  const missingText = await callToolText("collaboration_context", {
+    operation: "inspect_threads",
+    pageId: missingPageId,
+    onlyYours: false,
+    includeResolved: true,
+  });
+  assert(
+    missingText.includes("[Diagnostic RESOURCE_NOT_FOUND]"),
+    `inspect_threads missing-page diagnostic mismatch: ${missingText}`
+  );
+
+  console.log("[COLLAB-LIVE] Verified live collaboration inspect contracts + missing-page diagnostic");
+  if (captureDir) {
+    console.log(`[COLLAB-LIVE] Captured live payloads at ${captureDir}`);
+  }
+} finally {
+  await transport.close();
+}
+EOF_JS
+
+log_step "Live collaboration probe passed"

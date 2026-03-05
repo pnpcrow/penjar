@@ -84,9 +84,26 @@ function assert(condition, message) {
 
 assert(typeof payload.status === "string", "status must be a string");
 assert(payload.endpoints && payload.endpoints.health === "/health", "endpoints.health must be /health");
+assert(typeof payload.endpoints.websocketPort === "number", "endpoints.websocketPort must be number");
+assert(typeof payload.endpoints.replPort === "number", "endpoints.replPort must be number");
 assert(payload.pluginBridge && typeof payload.pluginBridge.connectedClients === "number", "pluginBridge.connectedClients must be number");
 assert(Array.isArray(payload.diagnosticsCatalog), "diagnosticsCatalog must be an array");
 assert(payload.diagnosticsCatalog.length > 0, "diagnosticsCatalog must not be empty");
+
+const seenCodes = new Set();
+for (const diagnostic of payload.diagnosticsCatalog) {
+  assert(typeof diagnostic.code === "string" && diagnostic.code.length > 0, "diagnostic code must be non-empty string");
+  assert(!seenCodes.has(diagnostic.code), `duplicate diagnostic code detected: ${diagnostic.code}`);
+  seenCodes.add(diagnostic.code);
+
+  assert(typeof diagnostic.title === "string" && diagnostic.title.length > 0, `diagnostic ${diagnostic.code} title missing`);
+  assert(typeof diagnostic.summary === "string" && diagnostic.summary.length > 0, `diagnostic ${diagnostic.code} summary missing`);
+  assert(Array.isArray(diagnostic.remediation), `diagnostic ${diagnostic.code} remediation must be array`);
+  assert(diagnostic.remediation.length > 0, `diagnostic ${diagnostic.code} remediation must not be empty`);
+  for (const remediationItem of diagnostic.remediation) {
+    assert(typeof remediationItem === "string" && remediationItem.length > 0, `diagnostic ${diagnostic.code} remediation item must be non-empty string`);
+  }
+}
 
 const requiredCodes = [
   "PLUGIN_DISCONNECTED",

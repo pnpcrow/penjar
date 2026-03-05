@@ -1,0 +1,15 @@
+{
+  "operation": "inspect_awareness",
+  "page": {
+    "id": "page-1",
+    "name": "Collaboration Page"
+  },
+  "currentUser": null,
+  "activeUsers": [],
+  "metrics": {
+    "includesCurrentUser": false,
+    "includesActiveUsers": false,
+    "activeUserCount": 0,
+    "currentUserActive": false
+  }
+}

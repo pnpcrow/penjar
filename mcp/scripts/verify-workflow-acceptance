@@ -1,0 +1,686 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SERVER_DIR="$PROJECT_ROOT/packages/server"
+
+HEALTH_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/health"
+MCP_URL="http://127.0.0.1:${PENJAR_MCP_SERVER_PORT:-4401}/mcp"
+WS_URL="ws://127.0.0.1:${PENJAR_MCP_WEBSOCKET_PORT:-4402}"
+
+TMP_BASE="${TMPDIR:-/tmp}"
+SERVER_LOG="$TMP_BASE/penjar-mcp-workflow-acceptance-$$.log"
+SERVER_PID=""
+
+log_step() {
+    printf "\n[WORKFLOW-CHECK] %s\n" "$1"
+}
+
+cleanup() {
+    if [ -n "$SERVER_PID" ] && kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+        kill "$SERVER_PID" >/dev/null 2>&1 || true
+        wait "$SERVER_PID" >/dev/null 2>&1 || true
+    fi
+
+    rm -f "$SERVER_LOG"
+}
+
+trap cleanup EXIT
+
+if [ "${VERIFY_WORKFLOW_SKIP_BUILD:-false}" = "true" ]; then
+    log_step "Skip build step (VERIFY_WORKFLOW_SKIP_BUILD=true)"
+else
+    log_step "Build required packages for workflow acceptance probe"
+    cd "$PROJECT_ROOT"
+    pnpm --filter mcp-common run build
+    pnpm --filter mcp-server run build
+fi
+
+log_step "Start MCP server (single-user)"
+cd "$SERVER_DIR"
+node dist/index.js >"$SERVER_LOG" 2>&1 &
+SERVER_PID="$!"
+
+log_step "Wait for /health endpoint"
+for _ in $(seq 1 20); do
+    if curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+done
+
+if ! curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
+    echo "[WORKFLOW-CHECK][FAIL] server did not become healthy."
+    echo "[WORKFLOW-CHECK][INFO] Server log:"
+    cat "$SERVER_LOG"
+    exit 1
+fi
+
+log_step "Run cross-tool workflow acceptance probe with fake plugin session"
+node --input-type=module - "$MCP_URL" "$WS_URL" <<'EOF_JS'
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
+import WebSocket from "ws";
+
+const [mcpUrl, wsUrl] = process.argv.slice(2);
+const observedScenarios = new Set();
+
+const state = {
+  file: {
+    id: "file-acceptance",
+    name: "Acceptance File",
+    revn: 7,
+  },
+  pages: [
+    { id: "page-cover", name: "Cover" },
+    { id: "page-spec", name: "Specs" },
+  ],
+  currentPageId: "page-cover",
+  shapes: new Map(),
+  selectionIds: [],
+  nextPageIndex: 3,
+  nextShapeIndex: 1,
+};
+
+function parseJsonLiteral(code, pattern, fallback = null) {
+  const match = code.match(pattern);
+  if (!match) {
+    return fallback;
+  }
+  try {
+    return JSON.parse(match[1]);
+  } catch {
+    return fallback;
+  }
+}
+
+function parseNumberLiteral(code, pattern, fallback) {
+  const match = code.match(pattern);
+  if (!match) {
+    return fallback;
+  }
+  const value = Number(match[1]);
+  return Number.isFinite(value) ? value : fallback;
+}
+
+function currentPage() {
+  return state.pages.find((page) => page.id === state.currentPageId) ?? null;
+}
+
+function currentSelectionShapes() {
+  return state.selectionIds.map((id) => state.shapes.get(id)).filter((shape) => shape);
+}
+
+function contextPayload() {
+  const page = currentPage();
+  const selection = currentSelectionShapes();
+  return {
+    file: {
+      id: state.file.id,
+      name: state.file.name,
+      pageCount: state.pages.length,
+    },
+    currentPage: page
+      ? {
+          id: page.id,
+          name: page.name,
+        }
+      : null,
+    selection: {
+      count: selection.length,
+      ids: selection.map((shape) => shape.id),
+      names: selection.map((shape) => shape.name),
+    },
+  };
+}
+
+function fileInspectPayload() {
+  return {
+    operation: "inspect",
+    file: {
+      id: state.file.id,
+      name: state.file.name,
+      revn: state.file.revn,
+      pageCount: state.pages.length,
+      pages: state.pages.map((page) => ({ id: page.id, name: page.name })),
+    },
+  };
+}
+
+function shapeStructure(shape, maxDepth) {
+  return {
+    id: shape.id,
+    name: shape.name,
+    type: "rectangle",
+    children: maxDepth > 1 ? [] : [],
+  };
+}
+
+const ws = new WebSocket(wsUrl);
+await new Promise((resolve, reject) => {
+  ws.once("open", resolve);
+  ws.once("error", reject);
+});
+
+ws.on("message", (payload) => {
+  try {
+    const request = JSON.parse(payload.toString());
+    if (!request || typeof request !== "object" || request.task !== "executeCode" || !request.id) {
+      return;
+    }
+
+    const code = request.params?.code ?? "";
+
+    if (
+      typeof code === "string" &&
+      code.includes("const file = penjar.file ?? null;") &&
+      code.includes("selection.map((shape) => shape.id)")
+    ) {
+      observedScenarios.add("active_design_context");
+      ws.send(JSON.stringify({ id: request.id, success: true, data: { result: contextPayload(), log: "" } }));
+      return;
+    }
+
+    if (typeof code !== "string") {
+      ws.send(JSON.stringify({ id: request.id, success: false, error: "Unknown workflow payload" }));
+      return;
+    }
+
+    if (code.includes("file_lifecycle_operation: inspect")) {
+      observedScenarios.add("file_inspect");
+      ws.send(JSON.stringify({ id: request.id, success: true, data: { result: fileInspectPayload(), log: "" } }));
+      return;
+    }
+
+    if (code.includes("file_lifecycle_operation: create_page")) {
+      observedScenarios.add("file_create_page");
+      const pageName = parseJsonLiteral(code, /page\.name = ("(?:\\.|[^"])*");/, "Untitled page");
+      const page = {
+        id: `page-${state.nextPageIndex}`,
+        name: pageName,
+      };
+      state.nextPageIndex += 1;
+      state.pages.push(page);
+      ws.send(
+        JSON.stringify({
+          id: request.id,
+          success: true,
+          data: {
+            result: {
+              operation: "create_page",
+              createdPage: { id: page.id, name: page.name },
+              file: {
+                id: state.file.id,
+                name: state.file.name,
+                pageCount: state.pages.length,
+              },
+            },
+            log: "",
+          },
+        })
+      );
+      return;
+    }
+
+    if (code.includes("file_lifecycle_operation: open_page")) {
+      observedScenarios.add("file_open_page");
+
+      const pageId = parseJsonLiteral(code, /page\.id === ("(?:\\.|[^"])*")/, null);
+      const pageNameLower = parseJsonLiteral(code, /toLowerCase\(\) === ("(?:\\.|[^"])*")/, null);
+
+      const page = pageId
+        ? state.pages.find((item) => item.id === pageId) ?? null
+        : state.pages.find((item) => item.name.toLowerCase() === pageNameLower) ?? null;
+
+      if (!page) {
+        ws.send(JSON.stringify({ id: request.id, success: false, error: "Target page was not found." }));
+        return;
+      }
+
+      state.currentPageId = page.id;
+      state.selectionIds = [];
+
+      ws.send(
+        JSON.stringify({
+          id: request.id,
+          success: true,
+          data: {
+            result: {
+              operation: "open_page",
+              page: {
+                id: page.id,
+                name: page.name,
+              },
+              file: {
+                id: state.file.id,
+                name: state.file.name,
+              },
+            },
+            log: "",
+          },
+        })
+      );
+      return;
+    }
+
+    if (code.includes("canvas_editing_operation: create_rectangle")) {
+      observedScenarios.add("canvas_create_rectangle");
+
+      const name = parseJsonLiteral(code, /rect\.name = ("(?:\\.|[^"])*");/, "Generated rectangle");
+      const x = parseNumberLiteral(code, /rect\.x = (-?\d+(?:\.\d+)?);/, 0);
+      const y = parseNumberLiteral(code, /rect\.y = (-?\d+(?:\.\d+)?);/, 0);
+
+      const resizeMatch = code.match(/rect\.resize\((-?\d+(?:\.\d+)?), (-?\d+(?:\.\d+)?)\);/);
+      const width = resizeMatch ? Number(resizeMatch[1]) : 100;
+      const height = resizeMatch ? Number(resizeMatch[2]) : 100;
+      const fillColor = parseJsonLiteral(code, /rect\.fills = \[\{ fillColor: ("(?:\\.|[^"])*") \}\];/, null);
+
+      const shape = {
+        id: `shape-${state.nextShapeIndex}`,
+        name,
+        x,
+        y,
+        width,
+        height,
+        fills: fillColor ? [{ fillColor }] : [],
+        pageId: state.currentPageId,
+      };
+      state.nextShapeIndex += 1;
+      state.shapes.set(shape.id, shape);
+      state.selectionIds = [shape.id];
+
+      ws.send(
+        JSON.stringify({
+          id: request.id,
+          success: true,
+          data: {
+            result: {
+              operation: "create_rectangle",
+              shape: {
+                id: shape.id,
+                name: shape.name,
+                x: shape.x,
+                y: shape.y,
+                width: shape.width,
+                height: shape.height,
+              },
+            },
+            log: "",
+          },
+        })
+      );
+      return;
+    }
+
+    if (code.includes("canvas_editing_operation: move_shape")) {
+      observedScenarios.add("canvas_move_shape");
+      const shapeId = parseJsonLiteral(code, /findShapeById\(("(?:\\.|[^"])*")\)/, null);
+      const shape = shapeId ? state.shapes.get(shapeId) ?? null : null;
+      if (!shape) {
+        ws.send(JSON.stringify({ id: request.id, success: false, error: "Target shape was not found." }));
+        return;
+      }
+
+      shape.x = parseNumberLiteral(code, /shape\.x = (-?\d+(?:\.\d+)?);/, shape.x);
+      shape.y = parseNumberLiteral(code, /shape\.y = (-?\d+(?:\.\d+)?);/, shape.y);
+
+      ws.send(
+        JSON.stringify({
+          id: request.id,
+          success: true,
+          data: {
+            result: {
+              operation: "move_shape",
+              shape: {
+                id: shape.id,
+                x: shape.x,
+                y: shape.y,
+              },
+            },
+            log: "",
+          },
+        })
+      );
+      return;
+    }
+
+    if (code.includes("canvas_editing_operation: resize_shape")) {
+      observedScenarios.add("canvas_resize_shape");
+      const shapeId = parseJsonLiteral(code, /findShapeById\(("(?:\\.|[^"])*")\)/, null);
+      const shape = shapeId ? state.shapes.get(shapeId) ?? null : null;
+      if (!shape) {
+        ws.send(JSON.stringify({ id: request.id, success: false, error: "Target shape was not found." }));
+        return;
+      }
+
+      const resizeMatch = code.match(/shape\.resize\((-?\d+(?:\.\d+)?), (-?\d+(?:\.\d+)?)\);/);
+      if (resizeMatch) {
+        shape.width = Number(resizeMatch[1]);
+        shape.height = Number(resizeMatch[2]);
+      }
+
+      ws.send(
+        JSON.stringify({
+          id: request.id,
+          success: true,
+          data: {
+            result: {
+              operation: "resize_shape",
+              shape: {
+                id: shape.id,
+                width: shape.width,
+                height: shape.height,
+              },
+            },
+            log: "",
+          },
+        })
+      );
+      return;
+    }
+
+    if (code.includes("canvas_editing_operation: set_fill_color")) {
+      observedScenarios.add("canvas_set_fill_color");
+      const shapeId = parseJsonLiteral(code, /findShapeById\(("(?:\\.|[^"])*")\)/, null);
+      const shape = shapeId ? state.shapes.get(shapeId) ?? null : null;
+      if (!shape) {
+        ws.send(JSON.stringify({ id: request.id, success: false, error: "Target shape was not found." }));
+        return;
+      }
+
+      const fillColor = parseJsonLiteral(code, /fillColor: ("(?:\\.|[^"])*")/, "#000000");
+      shape.fills = [{ fillColor }];
+
+      ws.send(
+        JSON.stringify({
+          id: request.id,
+          success: true,
+          data: {
+            result: {
+              operation: "set_fill_color",
+              shape: {
+                id: shape.id,
+                fills: shape.fills,
+              },
+            },
+            log: "",
+          },
+        })
+      );
+      return;
+    }
+
+    if (code.includes("inspect_handoff_operation: extract")) {
+      observedScenarios.add("inspect_handoff_selection");
+      const scope = parseJsonLiteral(code, /const scope = ("(?:\\.|[^"])*");/, "selection");
+      const includeCssMatch = code.match(/const includeCss = (true|false);/);
+      const includeCss = includeCssMatch ? includeCssMatch[1] === "true" : true;
+      const maxDepth = parseNumberLiteral(code, /const maxDepth = (\d+);/, 3);
+
+      const selectionTargets = currentSelectionShapes();
+      const fallbackUsed = scope === "selection" && selectionTargets.length === 0;
+      const targets = scope === "selection" ? (selectionTargets.length > 0 ? selectionTargets : []) : [];
+
+      const hierarchy =
+        targets.length > 0
+          ? targets.map((shape) => shapeStructure(shape, maxDepth))
+          : [
+              {
+                id: `${state.currentPageId}-root`,
+                name: `${currentPage()?.name ?? "Page"} Root`,
+                type: "group",
+                children: [],
+              },
+            ];
+
+      const payloadResult = {
+        operation: "inspect_handoff",
+        scope,
+        hierarchy,
+        layoutSemantics: {
+          maxDepth,
+          targetCount: targets.length > 0 ? targets.length : 1,
+          fallbackUsed,
+        },
+        style: includeCss ? ".workflow-shape { display:flex; }" : null,
+        tokenHints: ["workflow.acceptance"],
+      };
+
+      ws.send(JSON.stringify({ id: request.id, success: true, data: { result: payloadResult, log: "" } }));
+      return;
+    }
+
+    ws.send(JSON.stringify({ id: request.id, success: false, error: "Unknown workflow acceptance payload" }));
+  } catch {
+    // ignore malformed probe payloads
+  }
+});
+
+const client = new Client({ name: "workflow-acceptance-check", version: "1.0.0" }, { capabilities: {} });
+const transport = new StreamableHTTPClientTransport(new URL(mcpUrl));
+
+async function callToolText(name, args) {
+  const result = await client.request(
+    { method: "tools/call", params: { name, arguments: args } },
+    CallToolResultSchema
+  );
+  return result.content.find((item) => item.type === "text")?.text ?? "";
+}
+
+async function callToolJson(name, args) {
+  const text = await callToolText(name, args);
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`Tool ${name} returned non-JSON payload: ${text}`);
+  }
+}
+
+function assertContextContract(payload, expectation) {
+  if (!payload || typeof payload !== "object") {
+    throw new Error(`active_design_context payload must be object: ${JSON.stringify(payload)}`);
+  }
+  if (!payload.file || typeof payload.file !== "object") {
+    throw new Error(`active_design_context file must be object: ${JSON.stringify(payload)}`);
+  }
+  if (payload.file.id !== expectation.fileId || payload.file.pageCount !== expectation.pageCount) {
+    throw new Error(`active_design_context file mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (!payload.currentPage || typeof payload.currentPage !== "object") {
+    throw new Error(`active_design_context currentPage must be object: ${JSON.stringify(payload)}`);
+  }
+  if (payload.currentPage.id !== expectation.currentPageId) {
+    throw new Error(`active_design_context currentPage mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (!payload.selection || typeof payload.selection !== "object") {
+    throw new Error(`active_design_context selection must be object: ${JSON.stringify(payload)}`);
+  }
+  if (!Array.isArray(payload.selection.ids) || !Array.isArray(payload.selection.names)) {
+    throw new Error(`active_design_context selection arrays mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (
+    payload.selection.count !== expectation.selectionCount ||
+    payload.selection.ids.length !== expectation.selectionCount ||
+    payload.selection.names.length !== expectation.selectionCount
+  ) {
+    throw new Error(`active_design_context selection count mismatch: ${JSON.stringify(payload)}`);
+  }
+}
+
+function assertFileInspectContract(payload, expectedPageCount) {
+  if (!payload || typeof payload !== "object" || payload.operation !== "inspect") {
+    throw new Error(`file inspect payload mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (!payload.file || typeof payload.file !== "object") {
+    throw new Error(`file inspect file payload mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (!Array.isArray(payload.file.pages) || payload.file.pages.length !== expectedPageCount) {
+    throw new Error(`file inspect pages mismatch: ${JSON.stringify(payload)}`);
+  }
+}
+
+function assertInspectHandoffContract(payload, expectedShapeId) {
+  if (!payload || typeof payload !== "object" || payload.operation !== "inspect_handoff") {
+    throw new Error(`inspect_handoff payload mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (payload.scope !== "selection") {
+    throw new Error(`inspect_handoff scope mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (!Array.isArray(payload.hierarchy) || payload.hierarchy.length !== 1) {
+    throw new Error(`inspect_handoff hierarchy mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (payload.hierarchy[0]?.id !== expectedShapeId) {
+    throw new Error(`inspect_handoff hierarchy id mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (payload.layoutSemantics?.fallbackUsed !== false || payload.layoutSemantics?.maxDepth !== 2) {
+    throw new Error(`inspect_handoff layoutSemantics mismatch: ${JSON.stringify(payload)}`);
+  }
+  if (typeof payload.style !== "string" || payload.style.length === 0) {
+    throw new Error(`inspect_handoff style mismatch: ${JSON.stringify(payload)}`);
+  }
+}
+
+try {
+  await client.connect(transport);
+
+  const initialContext = await callToolJson("active_design_context", {});
+  assertContextContract(initialContext, {
+    fileId: "file-acceptance",
+    pageCount: 2,
+    currentPageId: "page-cover",
+    selectionCount: 0,
+  });
+
+  const inspectBefore = await callToolJson("file_lifecycle", { operation: "inspect" });
+  assertFileInspectContract(inspectBefore, 2);
+
+  const createPagePayload = await callToolJson("file_lifecycle", {
+    operation: "create_page",
+    pageName: "Handoff",
+  });
+  if (
+    createPagePayload?.operation !== "create_page" ||
+    createPagePayload?.createdPage?.name !== "Handoff" ||
+    createPagePayload?.file?.pageCount !== 3
+  ) {
+    throw new Error(`create_page payload mismatch: ${JSON.stringify(createPagePayload)}`);
+  }
+
+  const openPagePayload = await callToolJson("file_lifecycle", {
+    operation: "open_page",
+    pageName: "handoff",
+  });
+  if (
+    openPagePayload?.operation !== "open_page" ||
+    openPagePayload?.page?.id !== createPagePayload.createdPage.id ||
+    openPagePayload?.page?.name !== "Handoff"
+  ) {
+    throw new Error(`open_page payload mismatch: ${JSON.stringify(openPagePayload)}`);
+  }
+
+  const createShapePayload = await callToolJson("canvas_editing", {
+    operation: "create_rectangle",
+    name: "CTA",
+    x: 32,
+    y: 48,
+    width: 220,
+    height: 64,
+    fillColor: "#0ea5e9",
+  });
+  const shapeId = createShapePayload?.shape?.id;
+  if (
+    createShapePayload?.operation !== "create_rectangle" ||
+    typeof shapeId !== "string" ||
+    createShapePayload?.shape?.name !== "CTA"
+  ) {
+    throw new Error(`create_rectangle payload mismatch: ${JSON.stringify(createShapePayload)}`);
+  }
+
+  const moveShapePayload = await callToolJson("canvas_editing", {
+    operation: "move_shape",
+    shapeId,
+    x: 64,
+    y: 96,
+  });
+  if (
+    moveShapePayload?.operation !== "move_shape" ||
+    moveShapePayload?.shape?.x !== 64 ||
+    moveShapePayload?.shape?.y !== 96
+  ) {
+    throw new Error(`move_shape payload mismatch: ${JSON.stringify(moveShapePayload)}`);
+  }
+
+  const resizeShapePayload = await callToolJson("canvas_editing", {
+    operation: "resize_shape",
+    shapeId,
+    width: 240,
+    height: 72,
+  });
+  if (
+    resizeShapePayload?.operation !== "resize_shape" ||
+    resizeShapePayload?.shape?.width !== 240 ||
+    resizeShapePayload?.shape?.height !== 72
+  ) {
+    throw new Error(`resize_shape payload mismatch: ${JSON.stringify(resizeShapePayload)}`);
+  }
+
+  const setFillPayload = await callToolJson("canvas_editing", {
+    operation: "set_fill_color",
+    shapeId,
+    fillColor: "#0284c7",
+  });
+  if (
+    setFillPayload?.operation !== "set_fill_color" ||
+    setFillPayload?.shape?.fills?.[0]?.fillColor !== "#0284c7"
+  ) {
+    throw new Error(`set_fill_color payload mismatch: ${JSON.stringify(setFillPayload)}`);
+  }
+
+  const inspectSelectionPayload = await callToolJson("inspect_handoff", {
+    scope: "selection",
+    includeCss: true,
+    maxDepth: 2,
+  });
+  assertInspectHandoffContract(inspectSelectionPayload, shapeId);
+
+  const finalContext = await callToolJson("active_design_context", {});
+  assertContextContract(finalContext, {
+    fileId: "file-acceptance",
+    pageCount: 3,
+    currentPageId: createPagePayload.createdPage.id,
+    selectionCount: 1,
+  });
+  if (finalContext.selection.ids[0] !== shapeId || finalContext.selection.names[0] !== "CTA") {
+    throw new Error(`final context selection mismatch: ${JSON.stringify(finalContext)}`);
+  }
+
+  const requiredScenarios = [
+    "active_design_context",
+    "file_inspect",
+    "file_create_page",
+    "file_open_page",
+    "canvas_create_rectangle",
+    "canvas_move_shape",
+    "canvas_resize_shape",
+    "canvas_set_fill_color",
+    "inspect_handoff_selection",
+  ];
+
+  for (const scenario of requiredScenarios) {
+    if (!observedScenarios.has(scenario)) {
+      throw new Error(`Expected scenario ${scenario} to be observed by fake plugin.`);
+    }
+  }
+
+  console.log("[WORKFLOW-CHECK] Verified cross-tool acceptance chain (project/file/canvas/inspect)");
+} finally {
+  await transport.close();
+  ws.close();
+  await new Promise((resolve) => ws.once("close", resolve));
+}
+EOF_JS
+
+log_step "Workflow acceptance probe passed"

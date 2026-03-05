@@ -13,6 +13,8 @@ WS_URL="ws://127.0.0.1:${PENJAR_MCP_WEBSOCKET_PORT:-4402}"
 TMP_BASE="${TMPDIR:-/tmp}"
 EXPORT_TMP_DIR="$TMP_BASE/penjar-mcp-export-workflows-$$"
 SERVER_LOG="$TMP_BASE/penjar-mcp-export-workflows-$$.log"
+GOLDEN_SVG="$SERVER_DIR/data/fixtures/export-shape-golden.svg"
+GOLDEN_PNG="$SERVER_DIR/data/fixtures/export-shape-golden.png"
 SERVER_PID=""
 
 log_step() {
@@ -63,7 +65,7 @@ if ! curl -sS "$HEALTH_URL" >/dev/null 2>&1; then
 fi
 
 log_step "Run export_shape format-matrix + diagnostics probe with fake plugin session"
-node --input-type=module - "$MCP_URL" "$WS_URL" "$EXPORT_TMP_DIR" <<'EOF_JS'
+node --input-type=module - "$MCP_URL" "$WS_URL" "$EXPORT_TMP_DIR" "$GOLDEN_SVG" "$GOLDEN_PNG" <<'EOF_JS'
 import fs from "node:fs";
 import path from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -71,14 +73,13 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
 import WebSocket from "ws";
 
-const [mcpUrl, wsUrl, exportTmpDir] = process.argv.slice(2);
+const [mcpUrl, wsUrl, exportTmpDir, goldenSvgPath, goldenPngPath] = process.argv.slice(2);
 const observedOps = new Set();
 let unsupportedFillSvgPluginCall = false;
-
-const pngBytes = Buffer.from(
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO6Xf9sAAAAASUVORK5CYII=",
-    "base64"
-);
+const goldenSvg = fs.readFileSync(goldenSvgPath, "utf8").trim();
+const goldenPngBytes = fs.readFileSync(goldenPngPath);
+const goldenPngBase64 = goldenPngBytes.toString("base64");
+const pngBytes = Buffer.from(goldenPngBytes);
 const pngByteObject = Object.fromEntries(Array.from(pngBytes).map((value, index) => [index, value]));
 
 const ws = new WebSocket(wsUrl);
@@ -143,7 +144,7 @@ ws.on("message", (payload) => {
                     id: request.id,
                     success: true,
                     data: {
-                        result: '<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"><rect width="2" height="2" fill="#0ea5e9"/></svg>',
+                        result: goldenSvg,
                         log: "",
                     },
                 })
@@ -188,7 +189,7 @@ try {
         pngShapeImage?.type !== "image" ||
         pngShapeImage?.mimeType !== "image/png" ||
         typeof pngShapeImage?.data !== "string" ||
-        pngShapeImage.data.length === 0
+        pngShapeImage.data !== goldenPngBase64
     ) {
         throw new Error(`PNG shape export payload mismatch: ${JSON.stringify(pngShape)}`);
     }
@@ -198,8 +199,8 @@ try {
         mode: "shape",
         format: "svg",
     });
-    const svgShapeText = firstText(svgShape);
-    if (!svgShapeText.includes("<svg")) {
+    const svgShapeText = firstText(svgShape).trim();
+    if (svgShapeText !== goldenSvg) {
         throw new Error(`SVG shape export payload mismatch: ${JSON.stringify(svgShape)}`);
     }
 
@@ -213,7 +214,7 @@ try {
         pngFillImage?.type !== "image" ||
         pngFillImage?.mimeType !== "image/png" ||
         typeof pngFillImage?.data !== "string" ||
-        pngFillImage.data.length === 0
+        pngFillImage.data !== goldenPngBase64
     ) {
         throw new Error(`PNG fill export payload mismatch: ${JSON.stringify(pngFill)}`);
     }
@@ -263,9 +264,26 @@ try {
     if (!saveText.includes(svgExportPath) || !fs.existsSync(svgExportPath)) {
         throw new Error(`Expected svg file export at ${svgExportPath}, got response: ${saveText}`);
     }
-    const savedSvg = fs.readFileSync(svgExportPath, "utf8");
-    if (!savedSvg.includes("<svg")) {
+    const savedSvg = fs.readFileSync(svgExportPath, "utf8").trim();
+    if (savedSvg !== goldenSvg) {
         throw new Error(`Saved SVG file content mismatch: ${savedSvg}`);
+    }
+
+    const pngExportPath = path.join(exportTmpDir, "shape-export.png");
+    const pngSaveText = firstText(
+        await callTool("export_shape", {
+            shapeId: "shape-1",
+            mode: "shape",
+            format: "png",
+            filePath: pngExportPath,
+        })
+    );
+    if (!pngSaveText.includes(pngExportPath) || !fs.existsSync(pngExportPath)) {
+        throw new Error(`Expected png file export at ${pngExportPath}, got response: ${pngSaveText}`);
+    }
+    const savedPngBase64 = fs.readFileSync(pngExportPath).toString("base64");
+    if (savedPngBase64 !== goldenPngBase64) {
+        throw new Error(`Saved PNG file content mismatch: ${savedPngBase64}`);
     }
 
     const requiredOps = ["png_shape", "svg_shape", "png_fill", "missing_shape", "permission_denied_shape"];
@@ -279,7 +297,7 @@ try {
         throw new Error("fill+svg unsupported path unexpectedly reached plugin runtime.");
     }
 
-    console.log("[EXPORT-CHECK] Verified export_shape format matrix + diagnostics");
+    console.log("[EXPORT-CHECK] Verified export_shape format matrix + diagnostics + golden svg/png fidelity");
 } finally {
     await transport.close();
     ws.close();

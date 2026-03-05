@@ -9,7 +9,7 @@ This roadmap defines an **implementation-first** delivery strategy for the follo
 
 1. Make web client + MCP bridge support complete and reliable.
 2. Make installation and setup simple for operators and end users.
-3. Evolve all web-client-capable workflows into a Flutter desktop app (macOS/Windows).
+3. Fully port all desktop user-facing workflows into a Flutter desktop app (macOS/Windows).
 4. Embed MCP directly in the desktop app so users can run features without separate MCP setup.
 5. Ensure deployable server environments include required user management features.
 6. Persist in-progress work periodically to storage so users can resume editing safely.
@@ -18,6 +18,11 @@ This roadmap defines an **implementation-first** delivery strategy for the follo
 
 > Delivery rule: avoid skeleton-only handoffs. Features should be shipped end-to-end unless a dependency is genuinely unknown or blocked.
 
+## Documentation continuity
+
+Use the [Web + MCP + Desktop Documentation Map](/technical-guide/developer/web-mcp-documentation-map/)
+as the canonical navigation and update protocol across roadmap, plan, backlog, matrix, contracts, and execution logs.
+
 ## Guiding principles
 
 - **Parity before expansion**: maintain feature parity across Web, MCP, and Desktop first.
@@ -25,6 +30,7 @@ This roadmap defines an **implementation-first** delivery strategy for the follo
 - **Secure-by-default**: require explicit authN/authZ paths for browser, API, MCP, and desktop channels.
 - **Recoverability by design**: autosave and object storage durability are baseline requirements, not optional add-ons.
 - **Code generation with traceability**: every LLM-oriented export should preserve component identity, design token references, and layout semantics.
+- **Flutter full-port mandate**: desktop user-facing workflows are delivered via Flutter implementation, not hybrid legacy shells, except explicitly blocked temporary paths with removal dates.
 
 ## Target architecture
 
@@ -108,12 +114,14 @@ This roadmap defines an **implementation-first** delivery strategy for the follo
 
 - Feature parity matrix indicates no critical missing workflow compared to web baseline.
 - Desktop app can be installed and first-run configured without manual MCP tooling.
+- Desktop release scope is fully Flutter-rendered/Flutter-controlled for user-facing workflows included in the parity checklist.
 
 ### Phase D — Embedded MCP in Desktop
 
 - Integrate MCP runtime directly in desktop distribution.
 - Provide one-click (or zero-config) MCP enablement for local assistant clients.
 - Add MCP runtime health checks and self-healing restart behavior.
+- Maintain Flutter-native desktop runtime as the primary distribution path while embedding MCP.
 
 **Exit criteria**
 
@@ -147,6 +155,7 @@ A task is considered complete only when:
 ## Suggested delivery tracking artifacts
 
 - **Capability matrix**: Web ↔ MCP ↔ Desktop parity table.
+- **Desktop parity acceptance baseline**: workflow-level Flutter parity gates and evidence expectations.
 - **Resilience test suite**: autosave/recovery/storage durability scenarios.
 - **Install scorecard**: time-to-first-run, setup failure rate, and remediation quality.
 - **LLM handoff benchmark**: design-to-structured-code fidelity metrics.
@@ -160,9 +169,14 @@ A task is considered complete only when:
 5. Create an LLM export contract with golden sample fixtures for regression checks.
 ## Tracking artifacts published
 
+- [Web + MCP + Desktop Documentation Map](/technical-guide/developer/web-mcp-documentation-map/)
 - [Web + MCP + Desktop Detailed Implementation Plan](/technical-guide/developer/web-mcp-desktop-implementation-plan/)
 - [Web ↔ MCP Capability Matrix](/technical-guide/developer/web-mcp-capability-matrix/)
 - [Web ↔ MCP Parity Backlog](/technical-guide/developer/web-mcp-parity-backlog/)
 - [Web + MCP Phase A Execution Log](/technical-guide/developer/web-mcp-phase-a-execution-log/)
+- [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/)
 - [Web ↔ MCP Auth/Session Recovery Contract](/technical-guide/developer/web-mcp-auth-session-recovery-contract/)
 - [Web + MCP Phase A Ticket Seed](/technical-guide/developer/web-mcp-phase-a-ticket-seed/)
+- [Desktop Flutter Parity Checklist](/technical-guide/developer/desktop-flutter-parity-checklist/)
+- [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/)
+- [Desktop Flutter Parity Acceptance Baseline](/technical-guide/developer/desktop-flutter-parity-acceptance-baseline/)

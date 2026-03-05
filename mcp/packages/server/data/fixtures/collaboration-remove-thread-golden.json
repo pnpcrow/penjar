@@ -1,0 +1,10 @@
+{
+  "operation": "remove_thread",
+  "page": {
+    "id": "page-1",
+    "name": "Collaboration Page"
+  },
+  "removed": {
+    "seqNumber": 2
+  }
+}

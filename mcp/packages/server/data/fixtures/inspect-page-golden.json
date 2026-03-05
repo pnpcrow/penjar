@@ -1,0 +1,19 @@
+{
+  "operation": "inspect_handoff",
+  "scope": "page",
+  "hierarchy": [
+    {
+      "id": "page-root",
+      "name": "Page Root",
+      "type": "group",
+      "children": []
+    }
+  ],
+  "layoutSemantics": {
+    "maxDepth": 4,
+    "targetCount": 1,
+    "fallbackUsed": false
+  },
+  "style": null,
+  "tokenHints": []
+}

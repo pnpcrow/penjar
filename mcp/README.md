@@ -307,14 +307,19 @@ you may set the following environment variables to configure the two servers
 
 * The [contribution guidelines for Penjar](../CONTRIBUTING.md) apply
 * Auto-formatting: Use `pnpm run fmt`
-* Phase A automated parity checks (P0-001/P0-002): Use `pnpm run verify:phase-a`
+* Phase A automated parity checks (P0-001/P0-002 payload + diagnostics-catalog contract): Use `pnpm run verify:phase-a`
 * Bridge disconnect/reconnect recovery probe (P0-002 scenario): Use `pnpm run verify:bridge-recovery`
 * Auth/session runtime checks in multi-user mode (P0-003 baseline + duplicate-token conflict): Use `pnpm run verify:auth-session`
 * Project lifecycle context probe (P0-004 contract invariants + transitions + diagnostics): Use `pnpm run verify:project-lifecycle`
 * File lifecycle tool probe (P0-005 strict contract + defaults + open-by-name + diagnostics): Use `pnpm run verify:file-lifecycle`
 * Canvas editing tool probe (P0-006 strict contract + defaults + denied/missing diagnostics): Use `pnpm run verify:canvas-editing`
-* Asset import/resilience probe (P0-007 baseline + reconnect recovery): Use `pnpm run verify:asset-management`
-* Inspect/code handoff probe (P0-008 required/optional contract + fallback + diagnostics): Use `pnpm run verify:inspect-handoff`
-* Collaboration context probe (P1-001 threads + awareness metadata + diagnostics): Use `pnpm run verify:collaboration-context`
-* Export workflows probe (P1-002 format matrix + diagnostics + artifact save path): Use `pnpm run verify:export-workflows`
+* Cross-tool acceptance probe (P0-004/P0-005/P0-006/P0-008 continuity chain): Use `pnpm run verify:workflow-acceptance`
+* Live workspace cross-tool probe (P0-004/P0-005/P0-006/P0-008 live chain; requires connected plugin session): Use `pnpm run verify:workflow-live`
+* Asset import/resilience probe (P0-007 contract + idempotency + reconnect recovery): Use `pnpm run verify:asset-management`
+* Inspect/code handoff probe (P0-008 contract + fallback + diagnostics + golden fixtures): Use `pnpm run verify:inspect-handoff`
+* Collaboration context probe (P1-001 strict contracts + filter/toggle semantics + golden fixtures + diagnostics): Use `pnpm run verify:collaboration-context`
+* Live collaboration inspect probe (P1-001 live awareness/threads contracts; requires connected plugin session): Use `pnpm run verify:collaboration-live`
+* Export workflows probe (P1-002 format matrix + diagnostics + artifact save + golden SVG/PNG fidelity): Use `pnpm run verify:export-workflows`
+* Live export probe (P1-002 live PNG/SVG + artifact-save + missing-shape diagnostic; requires connected plugin session): Use `pnpm run verify:export-live`
+* Live evidence bundle (workflow/collaboration/export live probes + summary report): Use `pnpm run verify:live-evidence`
 * Generating API type data: See [types-generator/README.md](types-generator/README.md)
