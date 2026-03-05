@@ -1059,27 +1059,27 @@ void main() {
       () {
         final List<RemoteStubHttpBackendExecutionRequest> executedRequests =
             <RemoteStubHttpBackendExecutionRequest>[];
-        final RemoteStubHttpTransportClient transportClient =
-            RemoteStubHttpTransportClient(
-              backendBaseUrl: 'https://api.penjar.app',
-              backendEndpointOverrides: <String, String>{
-                RemoteStubOperationIds.signIn: '/v2/auth/custom-sign-in',
-              },
-              executionProbe: (RemoteStubHttpBackendExecutionRequest request) {
-                executedRequests.add(request);
-                expect(
-                  request.transportRequest.endpoint,
-                  '/v2/auth/custom-sign-in',
-                );
-                expect(
-                  request.endpointUrl,
-                  'https://api.penjar.app/v2/auth/custom-sign-in',
-                );
-                return const RemoteStubHttpBackendExecutionResult.blocked(
-                  'Remote backend execution failed: sign-in. overridden endpoint unreachable',
-                );
-              },
+        final RemoteStubHttpTransportClient
+        transportClient = RemoteStubHttpTransportClient(
+          backendBaseUrl: 'https://api.penjar.app',
+          backendEndpointOverrides: <String, String>{
+            RemoteStubOperationIds.signIn: '/v2/auth/custom-sign-in',
+          },
+          executionProbe: (RemoteStubHttpBackendExecutionRequest request) {
+            executedRequests.add(request);
+            expect(
+              request.transportRequest.endpoint,
+              '/v2/auth/custom-sign-in',
             );
+            expect(
+              request.endpointUrl,
+              'https://api.penjar.app/v2/auth/custom-sign-in',
+            );
+            return const RemoteStubHttpBackendExecutionResult.blocked(
+              'Remote backend execution failed: sign-in. overridden endpoint unreachable',
+            );
+          },
+        );
         final RemoteStubAuthSessionContract authContract =
             RemoteStubAuthSessionContract(transportClient: transportClient);
 
@@ -1370,8 +1370,8 @@ void main() {
       final _BackendResponseTransportClient transportClient =
           _BackendResponseTransportClient(<String, Map<String, Object?>>{
             RemoteStubOperationIds.signIn: <String, Object?>{
-              'message': 'Backend auth envelope applied.',
-              'data': <String, Object?>{
+              'payload': <String, Object?>{
+                'detail': 'Backend auth payload envelope applied.',
                 'authState': <String, Object?>{
                   'rememberSession': true,
                   'signedIn': true,
@@ -1380,16 +1380,18 @@ void main() {
             },
             RemoteStubOperationIds.createProject: <String, Object?>{
               'result': <String, Object?>{
-                'message': 'Backend project envelope applied.',
-                'workflowState': <String, Object?>{
-                  'projects': <Map<String, Object?>>[
-                    <String, Object?>{
-                      'id': 'project-envelope',
-                      'name': 'Envelope Project',
-                      'files': <String>['envelope.penjar'],
-                    },
-                  ],
-                  'selectedProjectIndex': 0,
+                'payload': <String, Object?>{
+                  'message': 'Backend project nested payload envelope applied.',
+                  'workflowState': <String, Object?>{
+                    'projects': <Map<String, Object?>>[
+                      <String, Object?>{
+                        'id': 'project-envelope',
+                        'name': 'Envelope Project',
+                        'files': <String>['envelope.penjar'],
+                      },
+                    ],
+                    'selectedProjectIndex': 0,
+                  },
                 },
               },
             },
@@ -1409,7 +1411,7 @@ void main() {
       expect(authContract.state.signedIn, isTrue);
       expect(
         authContract.state.status,
-        '[remote-stub] Backend auth envelope applied.',
+        '[remote-stub] Backend auth payload envelope applied.',
       );
 
       projectContract.createProject('ignored');
@@ -1420,7 +1422,7 @@ void main() {
       ]);
       expect(
         projectContract.state.status,
-        '[remote-stub] Backend project envelope applied.',
+        '[remote-stub] Backend project nested payload envelope applied.',
       );
     });
 
@@ -1697,6 +1699,43 @@ void main() {
         expectedRememberSession: true,
         expectedStatus:
             '[remote-stub] Fixture sign-in result envelope applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name: 'sign-in payload envelope with authState alias success',
+        operationId: RemoteStubOperationIds.signIn,
+        responsePayload: <String, Object?>{
+          'payload': <String, Object?>{
+            'detail': 'Fixture sign-in payload envelope applied.',
+            'authState': <String, Object?>{
+              'signed_in': true,
+              'remember_session': true,
+              'tokens': <String, Object?>{
+                'accessToken': 'fixture-payload-envelope-token',
+              },
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture sign-in payload envelope applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'refresh-token result payload envelope authState signed_out alias maps fallback status',
+        operationId: RemoteStubOperationIds.refreshToken,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'payload': <String, Object?>{
+              'authState': <String, Object?>{
+                'signed_out': true,
+                'sessionToken': 'fixture-signed-out-result-payload-token',
+              },
+            },
+          },
+        },
+        expectedSignedIn: false,
+        expectedStatus: '[remote-stub] Authentication required.',
       ),
       const _AuthBackendFixtureCase(
         name:

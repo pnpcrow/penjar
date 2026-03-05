@@ -775,15 +775,24 @@ Map<String, Object?> _extractBackendSuccessPayload(String rawBody) {
 Map<String, Object?> _extractBackendEnvelopePayload(
   Map<String, Object?> responsePayload,
 ) {
-  for (final String key in const <String>['result', 'data']) {
-    final Map<String, Object?> nestedPayload = _coerceStringKeyedMap(
-      responsePayload[key],
-    );
-    if (nestedPayload.isNotEmpty) {
-      return nestedPayload;
+  Map<String, Object?> currentPayload = responsePayload;
+  for (int depth = 0; depth < 4; depth += 1) {
+    Map<String, Object?>? nextPayload;
+    for (final String key in const <String>['result', 'data', 'payload']) {
+      final Map<String, Object?> nestedPayload = _coerceStringKeyedMap(
+        currentPayload[key],
+      );
+      if (nestedPayload.isNotEmpty) {
+        nextPayload = nestedPayload;
+        break;
+      }
     }
+    if (nextPayload == null) {
+      break;
+    }
+    currentPayload = nextPayload;
   }
-  return responsePayload;
+  return currentPayload;
 }
 
 Map<String, Object?> _extractBackendStatePayload(
@@ -977,6 +986,7 @@ bool _containsExplicitFalseInContainer(Object? value, List<String> aliases) {
       'meta',
       'result',
       'data',
+      'payload',
       'state',
       'auth',
       'authentication',
@@ -1380,10 +1390,10 @@ AuthSessionState? _authStateFromBackendPayload(
     _authCredentialAliases,
   );
   final bool hasUserPayload = _coerceStringKeyedMap(
-    _firstPresentValueInSources(
-      <Map<String, Object?>>[statePayload, authPayload],
-      _authUserPayloadAliases,
-    ),
+    _firstPresentValueInSources(<Map<String, Object?>>[
+      statePayload,
+      authPayload,
+    ], _authUserPayloadAliases),
   ).isNotEmpty;
   final bool hasExplicitFailureFlag = _containsExplicitFalseInSources(
     <Map<String, Object?>>[responsePayload, envelopePayload, ...authSources],
@@ -2115,8 +2125,8 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
   RemoteStubTransportRequest _requestWithBackendEndpointOverride(
     RemoteStubTransportRequest request,
   ) {
-    final String? endpointOverride =
-        backendEndpointOverrides[request.operation]?.trim();
+    final String? endpointOverride = backendEndpointOverrides[request.operation]
+        ?.trim();
     if (endpointOverride == null ||
         endpointOverride.isEmpty ||
         endpointOverride == request.endpoint) {
