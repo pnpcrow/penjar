@@ -2,17 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:penjar_desktop/contracts/desktop_contract_bundle.dart';
 import 'package:penjar_desktop/contracts/workflow_contracts.dart';
 
-void main() {
-  runApp(const PenjarDesktopApp());
+const String kDefaultInitialSectionId = String.fromEnvironment(
+  'PENJAR_DESKTOP_INITIAL_SECTION',
+);
+
+void main(List<String> args) {
+  runApp(
+    PenjarDesktopApp(
+      initialSectionId: resolveInitialSectionId(launchArgs: args),
+    ),
+  );
 }
 
 class PenjarDesktopApp extends StatelessWidget {
   const PenjarDesktopApp({
     super.key,
     this.contracts,
-    this.initialSectionId = const String.fromEnvironment(
-      'PENJAR_DESKTOP_INITIAL_SECTION',
-    ),
+    this.initialSectionId = kDefaultInitialSectionId,
   });
 
   final DesktopContractBundle? contracts;
@@ -139,6 +145,124 @@ const List<WorkflowSection> kSections = <WorkflowSection>[
     icon: Icons.health_and_safety_outlined,
   ),
 ];
+
+final Set<String> _knownSectionIds = kSections
+    .map((WorkflowSection section) => section.id)
+    .toSet();
+
+String resolveInitialSectionId({
+  required List<String> launchArgs,
+  String envInitialSectionId = kDefaultInitialSectionId,
+}) {
+  for (final String launchArg in launchArgs) {
+    final String? parsedFromArgs = _parseSectionIdFromLaunchArg(launchArg);
+    if (parsedFromArgs != null) {
+      return parsedFromArgs;
+    }
+  }
+  return _normalizeSectionId(envInitialSectionId) ?? '';
+}
+
+String? _parseSectionIdFromLaunchArg(String launchArg) {
+  final String normalizedArg = launchArg.trim();
+  if (normalizedArg.isEmpty) {
+    return null;
+  }
+  const String sectionPrefix = '--penjar-section=';
+  if (normalizedArg.startsWith(sectionPrefix)) {
+    return _normalizeSectionId(normalizedArg.substring(sectionPrefix.length));
+  }
+  const String routePrefix = '--penjar-route=';
+  if (normalizedArg.startsWith(routePrefix)) {
+    return _parseSectionIdFromRouteExpression(
+      normalizedArg.substring(routePrefix.length),
+    );
+  }
+  return _parseSectionIdFromRouteExpression(normalizedArg);
+}
+
+String? _parseSectionIdFromRouteExpression(String routeExpression) {
+  final String trimmed = routeExpression.trim();
+  if (trimmed.isEmpty) {
+    return null;
+  }
+
+  final String? directSectionId = _normalizeSectionId(trimmed);
+  if (directSectionId != null) {
+    return directSectionId;
+  }
+
+  final Uri? uri = Uri.tryParse(trimmed);
+  if (uri == null) {
+    return null;
+  }
+
+  final String? querySectionId = _normalizeSectionId(
+    uri.queryParameters['section'] ?? '',
+  );
+  if (querySectionId != null) {
+    return querySectionId;
+  }
+
+  if (uri.host.isNotEmpty) {
+    if (uri.host == 'section' && uri.pathSegments.isNotEmpty) {
+      final String? hostedSection = _normalizeSectionId(uri.pathSegments.first);
+      if (hostedSection != null) {
+        return hostedSection;
+      }
+    }
+    final String? hostSection = _normalizeSectionId(uri.host);
+    if (hostSection != null) {
+      return hostSection;
+    }
+  }
+
+  return _extractSectionIdFromPath(uri.pathSegments);
+}
+
+String? _extractSectionIdFromPath(List<String> pathSegments) {
+  if (pathSegments.isEmpty) {
+    return null;
+  }
+
+  final List<String> normalized = pathSegments
+      .map((String item) => item.trim().toLowerCase())
+      .where((String item) => item.isNotEmpty)
+      .toList(growable: false);
+  if (normalized.isEmpty) {
+    return null;
+  }
+
+  final int sectionKeywordIndex = normalized.indexOf('section');
+  if (sectionKeywordIndex >= 0 && sectionKeywordIndex + 1 < normalized.length) {
+    final String? sectionFromKeyword = _normalizeSectionId(
+      normalized[sectionKeywordIndex + 1],
+    );
+    if (sectionFromKeyword != null) {
+      return sectionFromKeyword;
+    }
+  }
+
+  for (final String candidate in normalized) {
+    final String? parsed = _normalizeSectionId(candidate);
+    if (parsed != null) {
+      return parsed;
+    }
+  }
+
+  return null;
+}
+
+String? _normalizeSectionId(String rawSectionId) {
+  final String normalized = rawSectionId.trim().toLowerCase();
+  if (normalized.isEmpty) {
+    return null;
+  }
+  if (!_knownSectionIds.contains(normalized)) {
+    return null;
+  }
+  return normalized;
+}
 
 int _sectionIndexFromId(String sectionId) {
   final String normalized = sectionId.trim().toLowerCase();

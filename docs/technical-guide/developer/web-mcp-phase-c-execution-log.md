@@ -5231,8 +5231,56 @@ Bridge remote-stub auth snapshot persistence into OS credential-store workflows 
   - command-hook path is regression-covered without depending on real shell/environment side effects.
   - full verification gate (`desktop:verify:full`) remains green after command-hook bridge integration.
 
+## Unit WS-D-119: Launch-argument deep-link/window-route parser baseline
+
+### Planned objective
+
+Reduce desktop shell route-interoperability gap by introducing a deterministic launch-argument parser for section-route deep links, so native app launches can map protocol/route payloads into Flutter shell initial navigation without manual environment toggles.
+
+### Implemented changes
+
+1. Added launch-route parser bridge in `desktop/lib/main.dart`:
+   - switched bootstrap entrypoint to `main(List<String> args)`,
+   - introduced `resolveInitialSectionId(...)` as canonical section-route resolver,
+   - added parser support for:
+     - `--penjar-section=<section-id>`,
+     - `--penjar-route=<route-or-uri>`,
+     - direct `penjar://...` route arguments.
+2. Added route normalization and validation:
+   - introduced known-section ID validation against `kSections` to reject unknown route payloads,
+   - parser now supports host/path/query route forms (for example `penjar://section/auth`, `penjar://open?section=inspect`, `/workspace/section/export`).
+3. Wired parser output into shell initialization:
+   - `PenjarDesktopApp` now receives parser-resolved initial section from entrypoint,
+   - existing `PENJAR_DESKTOP_INITIAL_SECTION` environment fallback remains preserved when launch args are absent/invalid.
+4. Expanded regression coverage in `desktop/test/widget_test.dart`:
+   - `resolveInitialSectionId prioritizes launch args over env section`,
+   - `resolveInitialSectionId parses penjar deep-link routes`,
+   - `desktop shell honors launch route parser output`.
+5. Re-ran validation commands:
+   - `cd desktop && flutter test test/widget_test.dart test/parity/shell_contract_persistence_parity_test.dart`,
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - launch-time deep-link section-route parsing correctness across argument forms,
+  - compatibility with existing section restoration and env-seeded startup behavior,
+  - non-regression of shell parity flows and full desktop verification chain.
+- **Issues found during review**
+  1. Shell startup route override relied on compile-time env (`PENJAR_DESKTOP_INITIAL_SECTION`) only, which is not suitable for runtime protocol/launch payload handoff.
+  2. Route payload shapes vary (CLI flag, URI host/path, query-based section key), requiring a single deterministic parser to avoid divergent startup behavior.
+  3. Unknown/invalid route payloads needed strict validation to prevent invalid navigation state initialization.
+- **Fix applied**
+  1. Added a centralized launch-route parser with deterministic precedence (launch args first, env fallback second).
+  2. Implemented URI/path/query parsing coverage for `penjar://...` and `--penjar-route=...` payload forms.
+  3. Enforced section allowlist validation against shell section catalog before applying startup route.
+- **Post-fix validation criteria**
+  - desktop shell can initialize from protocol/route launch arguments in a deterministic, test-covered way.
+  - invalid launch-route payloads fall back safely without corrupting initial shell state.
+  - parity persistence behavior and full verification gate remain green after launch-route parser integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata, shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline, backend envelope/schema compatibility normalization, auth snapshot store/seed seam, file-backed auth snapshot persistence path, command-hook secure-store bridge path, and runtime mode parity/matrix gates, but native deep-link/window-route interoperability and first-class OS keychain/credential-manager provider integration are still pending.
+- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata, shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline plus launch-argument deep-link parser bridge, backend envelope/schema compatibility normalization, auth snapshot store/seed seam, file-backed auth snapshot persistence path, command-hook secure-store bridge path, and runtime mode parity/matrix gates, but OS-level deep-link protocol registration/window-event dispatch interoperability and first-class OS keychain/credential-manager provider integration are still pending.
 - Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard plus coverage-contract regression guard (set-diff optimized uncovered/missing detection), desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks with in-memory duplicate-key tracking + base-check markdown report emission) plus evidence-index contract regression guard (including dedicated missing-base-check-report attachment, missing-index-file, invalid-decision, and promoted-placeholder cases, dedicated tests workflow release-evidence guard base+contract enforcement/upload, and parity matrix base-check artifact retention), update-manifest guard automation with validation + contract report artifacts (including dedicated tests workflow update-manifest guard job contract enforcement/upload), on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
