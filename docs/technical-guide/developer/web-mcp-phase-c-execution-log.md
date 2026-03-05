@@ -1717,8 +1717,56 @@ Reduce desktop release pipeline gaps by adding executable installer/update smoke
   - Manual smoke workflow is available with macOS/Windows matrix jobs and report/archive uploads.
   - Full-fast desktop verification remains green after smoke automation integration.
 
+## Unit WS-D-43: Release evidence row generation automation
+
+### Planned objective
+
+Eliminate manual release-evidence table row drafting by generating per-platform markdown row snippets directly from installer/update smoke reports.
+
+### Implemented changes
+
+1. Added release evidence row generator:
+   - `desktop/scripts/generate_release_evidence_row.sh`.
+2. Implemented row-generation semantics:
+   - validates required smoke report fields (`platform`, `version`, archive path/hash),
+   - maps platform labels to evidence-table format (`macOS`/`Windows`),
+   - emits markdown row with escaped table cell values,
+   - supports CI run URL / execution log ref / decision overrides.
+3. Extended manual installer smoke workflow:
+   - `.github/workflows/release-desktop-installer-smoke.yml` now accepts `rc_id` input,
+   - generates release evidence row snippets after smoke report generation,
+   - uploads row snippet artifacts per platform.
+4. Added root command surfaces:
+   - `desktop:release:evidence:row:macos`,
+   - `desktop:release:evidence:row:windows`.
+5. Updated release/runbook/index docs:
+   - `desktop-flutter-release-validation-baseline.md` protocol now includes row-generation review before evidence recording,
+   - `desktop-flutter-release-evidence-index.md` maintenance rules now include row-generation command,
+   - `desktop-flutter-development-runbook.md` command inventory now includes evidence-row generation commands.
+6. Re-ran validation commands:
+   - `pnpm run desktop:release:update-manifest:check`,
+   - `cd desktop && SKIP_PUB_GET=1 ./scripts/release_installer_update_smoke.sh macos debug`,
+   - `pnpm run desktop:release:evidence:row:macos`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of smoke-report JSON parsing and required field enforcement,
+  - row formatting safety for markdown table insertion,
+  - CI artifact continuity for generated row snippets.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - `desktop:release:evidence:row:macos` generates stable markdown row snippet from smoke report.
+  - Installer smoke workflow uploads report/archive/row triplet artifacts per matrix platform.
+  - Full-fast desktop verification remains green after row-generation automation integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, and on-demand installer/update smoke build-report workflow, but signed installer packaging/notarization and automated production update-promotion pipelines are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, and automated release-evidence row snippet generation, but signed installer packaging/notarization and automated production update-promotion/appcast publication pipelines are not yet configured.

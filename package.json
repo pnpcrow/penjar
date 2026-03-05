@@ -27,7 +27,9 @@
     "desktop:release:evidence:check": "cd desktop && ./scripts/check_release_evidence_index.sh",
     "desktop:release:update-manifest:check": "cd desktop && ./scripts/check_update_manifest.sh",
     "desktop:release:installer-smoke:macos": "cd desktop && ./scripts/release_installer_update_smoke.sh macos release",
-    "desktop:release:installer-smoke:windows": "cd desktop && ./scripts/release_installer_update_smoke.sh windows release"
+    "desktop:release:installer-smoke:windows": "cd desktop && ./scripts/release_installer_update_smoke.sh windows release",
+    "desktop:release:evidence:row:macos": "cd desktop && ./scripts/generate_release_evidence_row.sh release/reports/installer_update_report_macos.json",
+    "desktop:release:evidence:row:windows": "cd desktop && ./scripts/generate_release_evidence_row.sh release/reports/installer_update_report_windows.json"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",

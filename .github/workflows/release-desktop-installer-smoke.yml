@@ -3,6 +3,11 @@ name: "Desktop Installer/Update Smoke"
 on:
   workflow_dispatch:
     inputs:
+      rc_id:
+        description: "Release candidate identifier"
+        type: string
+        required: true
+        default: RC-DRAFT
       build_mode:
         description: "Build mode for smoke packaging"
         type: choice
@@ -60,3 +65,22 @@ jobs:
         with:
           name: desktop-installer-smoke-archive-${{ matrix.label }}
           path: desktop/release/reports/penjar-${{ matrix.label }}-${{ inputs.build_mode }}.zip
+
+      - name: Generate release evidence row snippet
+        working-directory: ./desktop
+        env:
+          CI_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -eo pipefail
+          ./scripts/generate_release_evidence_row.sh \
+            "release/reports/installer_update_report_${{ matrix.label }}.json" \
+            "${{ inputs.rc_id }}" \
+            "${CI_RUN_URL}" \
+            "WS-D-43" \
+            "blocked (unsigned smoke baseline)"
+
+      - name: Upload release evidence row snippet
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-release-evidence-row-${{ matrix.label }}
+          path: desktop/release/reports/release_evidence_row_${{ matrix.label }}.md

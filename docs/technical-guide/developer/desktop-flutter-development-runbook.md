@@ -34,6 +34,8 @@ This runbook defines the repeatable execution loop for the Flutter desktop full-
    - `pnpm run desktop:release:update-manifest:check`
    - `pnpm run desktop:release:installer-smoke:macos`
    - `pnpm run desktop:release:installer-smoke:windows`
+   - `pnpm run desktop:release:evidence:row:macos`
+   - `pnpm run desktop:release:evidence:row:windows`
 
 ## 2) Unit execution loop
 
@@ -93,4 +95,4 @@ Before pausing or transferring work:
 
 1. Backend transport wiring for runtime-switchable contract adapters.
 2. Signed packaging + notarization integration in installer smoke workflow.
-3. Automated release evidence index row generation from smoke report outputs.
+3. Release evidence table auto-append/update workflow using generated row snippets.

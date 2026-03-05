@@ -74,14 +74,19 @@ This baseline defines minimum release validation requirements for desktop distri
      - `.github/workflows/release-desktop-installer-smoke.yml` (`workflow_dispatch`).
 3. Run release evidence index guard: `pnpm run desktop:release:evidence:check`.
 4. Run update manifest guard: `pnpm run desktop:release:update-manifest:check`.
-5. Record evidence in release checklist ticket and Phase C execution log.
-6. Block release promotion if any required gate is missing or only manually asserted without evidence.
+5. Generate and review evidence row snippets:
+   - `pnpm run desktop:release:evidence:row:macos`
+   - `pnpm run desktop:release:evidence:row:windows`
+6. Record evidence in release checklist ticket and Phase C execution log.
+7. Block release promotion if any required gate is missing or only manually asserted without evidence.
 
 CI baseline note:
 - `.github/workflows/tests-desktop-flutter.yml` includes `release-evidence-guard` and `release-update-manifest-guard` jobs, and uploads parity/build artifacts for audit traceability.
 - `.github/workflows/release-desktop-installer-smoke.yml` builds macOS/Windows release artifacts on demand and uploads installer/update smoke archives + JSON reports.
+- `.github/workflows/release-desktop-installer-smoke.yml` also uploads platform release-evidence row snippet artifacts generated from smoke reports.
 - Update manifest baseline file: `desktop/release/update_manifest.example.json`.
 - Installer/update smoke report generator: `desktop/scripts/generate_installer_update_report.sh`.
+- Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 
 ## 5) Implementation backlog seeds
 
