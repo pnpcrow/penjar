@@ -944,6 +944,7 @@ String _resolveAuthBackendStatusValue({
   required String fallbackStatus,
   required bool signedIn,
   required bool signedOutByCode,
+  required bool signedOutByStateAlias,
   required bool hasExplicitFailureFlag,
   required String? backendCode,
   List<Map<String, Object?>> additionalPayloads =
@@ -961,6 +962,7 @@ String _resolveAuthBackendStatusValue({
   final String? fallbackMappedStatus = _resolveAuthBackendFallbackStatus(
     signedIn: signedIn,
     signedOutByCode: signedOutByCode,
+    signedOutByStateAlias: signedOutByStateAlias,
     hasExplicitFailureFlag: hasExplicitFailureFlag,
     backendCode: backendCode,
   );
@@ -970,6 +972,7 @@ String _resolveAuthBackendStatusValue({
 String? _resolveAuthBackendFallbackStatus({
   required bool signedIn,
   required bool signedOutByCode,
+  required bool signedOutByStateAlias,
   required bool hasExplicitFailureFlag,
   required String? backendCode,
 }) {
@@ -980,6 +983,9 @@ String? _resolveAuthBackendFallbackStatus({
     if (_backendCodeIndicatesSessionExpired(backendCode)) {
       return 'Backend session expired.';
     }
+    return 'Authentication required.';
+  }
+  if (signedOutByStateAlias) {
     return 'Authentication required.';
   }
   if (hasExplicitFailureFlag) {
@@ -1280,6 +1286,10 @@ AuthSessionState? _authStateFromBackendPayload(
       'is_authenticated',
     },
   );
+  final bool hasSignedOutFields = _containsAnyKeyInSources(
+    authSources,
+    const <String>{'signedOut', 'isSignedOut', 'signed_out', 'is_signed_out'},
+  );
   final bool hasCredentialFields = _containsAnyNonEmptyStringInSources(
     authSources,
     const <String>[
@@ -1304,6 +1314,7 @@ AuthSessionState? _authStateFromBackendPayload(
   final bool hasFields =
       hasRememberSessionFields ||
       hasSignedInFields ||
+      hasSignedOutFields ||
       hasCredentialFields ||
       hasUserPayload;
   final bool hasStatus = _hasBackendStatus(
@@ -1334,6 +1345,14 @@ AuthSessionState? _authStateFromBackendPayload(
       'is_authenticated',
     ]),
   );
+  final bool? resolvedSignedOut = _coerceBool(
+    _firstPresentValueInSources(authSources, const <String>[
+      'signedOut',
+      'isSignedOut',
+      'signed_out',
+      'is_signed_out',
+    ]),
+  );
   final String? backendCode = _resolveBackendCodeValue(
     responsePayload: responsePayload,
     envelopePayload: envelopePayload,
@@ -1345,6 +1364,8 @@ AuthSessionState? _authStateFromBackendPayload(
   final bool nextSignedIn;
   if (resolvedSignedIn != null) {
     nextSignedIn = resolvedSignedIn;
+  } else if (resolvedSignedOut == true) {
+    nextSignedIn = false;
   } else if (signedOutByCode || hasExplicitFailureFlag) {
     nextSignedIn = false;
   } else if (hasCredentialFields || hasUserPayload) {
@@ -1363,6 +1384,7 @@ AuthSessionState? _authStateFromBackendPayload(
       fallbackStatus: currentState.status,
       signedIn: nextSignedIn,
       signedOutByCode: signedOutByCode,
+      signedOutByStateAlias: resolvedSignedOut == true,
       hasExplicitFailureFlag: hasExplicitFailureFlag,
       backendCode: backendCode,
       additionalPayloads: authSources,

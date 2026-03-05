@@ -1533,6 +1533,54 @@ void main() {
     );
 
     test(
+      'auth backend signed_out alias without explicit status maps authentication-required fallback status',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'state': <String, Object?>{
+                  'signed_out': true,
+                  'sessionToken': 'stale-session-token',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Authentication required.',
+        );
+      },
+    );
+
+    test(
+      'auth backend explicit signedIn alias overrides signed_out alias',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'state': <String, Object?>{
+                  'signedIn': true,
+                  'signed_out': true,
+                  'remember_session': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
+
+    test(
       'auth backend nested explicit signed-out aliases override token inference',
       () {
         final _BackendResponseTransportClient transportClient =

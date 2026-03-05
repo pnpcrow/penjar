@@ -182,6 +182,34 @@ class _AuthBackendSnakeCaseStateAliasParityTransportClient
   }
 }
 
+class _AuthBackendSignedOutAliasParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendSignedOutAliasParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend sign-in snapshot applied.',
+          'state': <String, Object?>{'signedIn': true, 'rememberSession': true},
+        },
+      );
+    }
+    if (request.operation == RemoteStubOperationIds.refreshToken) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'state': <String, Object?>{
+            'signed_out': true,
+            'sessionToken': 'expired-session',
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 class _AuthBackendSessionTimeoutParityTransportClient
     extends RemoteStubTransportClient {
   const _AuthBackendSessionTimeoutParityTransportClient();
@@ -574,6 +602,48 @@ void main() {
       expect(rememberSessionTile.value, isTrue);
 
       expect(find.textContaining('Signed in (simulated).'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'auth/session parity maps signed_out alias to deterministic auth-required status',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendSignedOutAliasParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Status: [remote-stub] Backend sign-in snapshot applied.'),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Status: [remote-stub] Authentication required.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
     },
   );
 
