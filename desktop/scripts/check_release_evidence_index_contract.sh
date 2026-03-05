@@ -55,6 +55,22 @@ setup_missing_index_file_case() {
   rm -f "$case_index"
 }
 
+setup_invalid_decision_case() {
+  local source_index="$1"
+  local case_index="$2"
+  local rewritten_index
+  cp "$source_index" "$case_index"
+  rewritten_index="$(mktemp)"
+  awk -F'|' 'BEGIN { OFS="|"; updated=0 } {
+    if (updated == 0 && $0 ~ /^\| RC-/) {
+      $9 = " reviewing "
+      updated = 1
+    }
+    print
+  }' "$case_index" > "$rewritten_index"
+  mv "$rewritten_index" "$case_index"
+}
+
 setup_duplicate_key_case() {
   local source_index="$1"
   local case_index="$2"
@@ -154,6 +170,14 @@ run_case \
   setup_missing_index_file_case \
   "missing index file:" \
   "Status: failed"
+
+run_case \
+  "invalid-decision-fail" \
+  "fail" \
+  "Invalid decision value must fail release-evidence guard." \
+  setup_invalid_decision_case \
+  "has invalid decision value" \
+  "has invalid decision value"
 
 run_case \
   "duplicate-rc-platform-fail" \
