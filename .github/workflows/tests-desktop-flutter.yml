@@ -119,6 +119,14 @@ jobs:
           path: desktop/release/reports/desktop_command_inventory_report.md
           if-no-files-found: warn
 
+      - name: Upload desktop command inventory contract report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-command-inventory-contract-report-${{ matrix.label }}
+          path: desktop/release/reports/desktop_command_inventory_contract_report.md
+          if-no-files-found: warn
+
       - name: Upload update manifest validation report (verify matrix)
         if: always()
         uses: actions/upload-artifact@v4

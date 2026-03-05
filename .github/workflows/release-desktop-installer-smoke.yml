@@ -128,6 +128,10 @@ jobs:
         working-directory: ./desktop
         run: ./scripts/check_desktop_command_inventory.sh
 
+      - name: Run desktop command inventory contract check
+        working-directory: ./desktop
+        run: ./scripts/check_desktop_command_inventory_contract.sh
+
       - name: Run update manifest check
         working-directory: ./desktop
         run: ./scripts/check_update_manifest.sh
@@ -241,6 +245,14 @@ jobs:
         with:
           name: desktop-command-inventory-report-smoke
           path: desktop/release/reports/desktop_command_inventory_report.md
+          if-no-files-found: warn
+
+      - name: Upload desktop command inventory contract report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-command-inventory-contract-report-smoke
+          path: desktop/release/reports/desktop_command_inventory_contract_report.md
           if-no-files-found: warn
 
       - name: Upload update manifest validation report

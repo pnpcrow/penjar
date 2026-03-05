@@ -65,3 +65,4 @@ Each release candidate record should include:
 30. Attach release smoke gate policy contract report (`release/reports/release_smoke_gate_policy_contract_report.md`) before promotion decision.
 31. Attach release script syntax contract report (`release/reports/release_script_syntax_contract_report.md`) before promotion decision.
 32. Attach release evidence index contract report (`release/reports/release_evidence_index_contract_report.md`) before promotion decision.
+33. Attach desktop command inventory contract report (`release/reports/desktop_command_inventory_contract_report.md`) before promotion decision.

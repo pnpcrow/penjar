@@ -18,6 +18,7 @@
     "desktop:test:contracts:no-pub": "cd desktop && FLUTTER_NO_PUB=1 ./scripts/run_contract_tests.sh",
     "desktop:test:coverage:check": "cd desktop && ./scripts/check_verify_test_coverage.sh",
     "desktop:docs:command-inventory:check": "cd desktop && ./scripts/check_desktop_command_inventory.sh",
+    "desktop:docs:command-inventory:contract:check": "cd desktop && ./scripts/check_desktop_command_inventory_contract.sh",
     "desktop:test:parity": "cd desktop && ./scripts/run_parity_tests.sh",
     "desktop:test:parity:no-pub": "cd desktop && FLUTTER_NO_PUB=1 ./scripts/run_parity_tests.sh",
     "desktop:test:mode-matrix": "cd desktop && ./scripts/run_mode_matrix_tests.sh",
