@@ -73,7 +73,7 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
    - diagnostics remote profile can surface `auth-backend-state: required`,
    - parity UI coverage now includes required-state fallback blocking behavior.
 13. Auth-session parity backend integration coverage expansion:
-   - `desktop/test/parity/auth_session_parity_test.dart` now includes backend snapshot sign-in/signed-out transition coverage, required-state fallback-block coverage, snake-case/isOk failure-flag status mapping coverage, snake_case signed-in/remember alias normalization coverage, and signed-out alias variant fallback-status coverage (`signedOut` / `isSignedOut` / `signed_out` / `is_signed_out`).
+   - `desktop/test/parity/auth_session_parity_test.dart` now includes backend snapshot sign-in/signed-out transition coverage, required-state fallback-block coverage, snake-case/isOk failure-flag status mapping coverage, snake_case signed-in/remember alias normalization coverage, signed-out alias variant fallback-status coverage (`signedOut` / `isSignedOut` / `signed_out` / `is_signed_out`), and payload-envelope parity coverage for top-level/nested wrapper paths (`payload`, `result -> payload`).
 14. Auth backend failure-taxonomy fallback status mapping baseline:
    - when backend auth payloads signal signed-out/failure without explicit status/message, deterministic fallback status text is now applied (`Authentication required.`, `Backend session expired.`, `Backend auth request failed.`),
    - session-expiry taxonomy coverage now includes additional backend code variants (for example `SESSION_TIMEOUT`, `EXPIRED_TOKEN`) in both signed-out detection and session-expired fallback classification,

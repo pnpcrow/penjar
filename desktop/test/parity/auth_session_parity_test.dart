@@ -205,11 +205,9 @@ class _AuthBackendSignedOutAliasParityTransportClient
         signedOutAlias: true,
         'sessionToken': 'expired-session',
       };
-      return RemoteStubTransportResult.allowedWithPayload(
-        <String, Object?>{
-          'state': statePayload,
-        },
-      );
+      return RemoteStubTransportResult.allowedWithPayload(<String, Object?>{
+        'state': statePayload,
+      });
     }
     return RemoteStubTransportResult.allow;
   }
@@ -234,6 +232,43 @@ class _AuthBackendSessionTimeoutParityTransportClient
         const <String, Object?>{
           'code': 'SESSION_TIMEOUT',
           'state': <String, Object?>{'sessionToken': 'timed-out-session'},
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
+class _AuthBackendPayloadEnvelopeParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendPayloadEnvelopeParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'payload': <String, Object?>{
+            'detail': 'Backend payload sign-in snapshot applied.',
+            'authState': <String, Object?>{
+              'signed_in': true,
+              'remember_session': true,
+            },
+          },
+        },
+      );
+    }
+    if (request.operation == RemoteStubOperationIds.refreshToken) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'result': <String, Object?>{
+            'payload': <String, Object?>{
+              'authState': <String, Object?>{
+                'signed_out': true,
+                'sessionToken': 'payload-envelope-expired-session',
+              },
+            },
+          },
         },
       );
     }
@@ -658,7 +693,10 @@ void main() {
           find.textContaining('Status: [remote-stub] Authentication required.'),
           findsOneWidget,
         );
-        expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
+        expect(
+          find.textContaining('Token refreshed (simulated).'),
+          findsNothing,
+        );
       },
     );
   }
@@ -701,6 +739,54 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         find.textContaining('Status: [remote-stub] Backend session expired.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'auth/session parity applies payload envelope backend snapshots and nested signed-out fallback',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendPayloadEnvelopeParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend payload sign-in snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+      final CheckboxListTile rememberSessionTile = tester.widget(
+        find.byKey(const ValueKey<String>('auth-remember')),
+      );
+      expect(rememberSessionTile.value, isTrue);
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Status: [remote-stub] Authentication required.'),
         findsOneWidget,
       );
       expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
