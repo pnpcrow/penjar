@@ -1582,6 +1582,30 @@ void main() {
       },
     );
 
+    test('auth backend loggedIn and persistSession aliases are normalized', () {
+      final _BackendResponseTransportClient transportClient =
+          _BackendResponseTransportClient(<String, Map<String, Object?>>{
+            RemoteStubOperationIds.restoreSession: <String, Object?>{
+              'detail': 'Backend loggedIn auth payload applied.',
+              'state': <String, Object?>{
+                'loggedIn': true,
+                'persistSession': true,
+              },
+            },
+          });
+      final RemoteStubAuthSessionContract authContract =
+          RemoteStubAuthSessionContract(transportClient: transportClient);
+
+      authContract.restoreSession();
+
+      expect(authContract.state.rememberSession, isTrue);
+      expect(authContract.state.signedIn, isTrue);
+      expect(
+        authContract.state.status,
+        '[remote-stub] Backend loggedIn auth payload applied.',
+      );
+    });
+
     test(
       'auth backend snake_case signed_in alias overrides unauthorized code inference',
       () {
@@ -1615,6 +1639,29 @@ void main() {
                 'state': <String, Object?>{
                   'is_logged_in': true,
                   'persist_session': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
+
+    test(
+      'auth backend isLoggedIn alias overrides unauthorized code inference',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'code': 'AUTH_REQUIRED',
+                'state': <String, Object?>{
+                  'isLoggedIn': true,
+                  'persistSession': true,
                 },
               },
             });
