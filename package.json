@@ -14,6 +14,8 @@
     "lint": "./scripts/lint",
     "fmt": "./scripts/fmt",
     "desktop:test": "cd desktop && flutter test",
+    "desktop:test:contracts": "cd desktop && ./scripts/run_contract_tests.sh",
+    "desktop:test:contracts:no-pub": "cd desktop && FLUTTER_NO_PUB=1 ./scripts/run_contract_tests.sh",
     "desktop:test:parity": "cd desktop && ./scripts/run_parity_tests.sh",
     "desktop:test:parity:no-pub": "cd desktop && FLUTTER_NO_PUB=1 ./scripts/run_parity_tests.sh",
     "desktop:test:mode-matrix": "cd desktop && ./scripts/run_mode_matrix_tests.sh",

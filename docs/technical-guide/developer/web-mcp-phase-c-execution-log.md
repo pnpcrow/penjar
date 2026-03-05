@@ -2727,8 +2727,57 @@ Introduce a dedicated release-script syntax gate and integrate it into canonical
   - Syntax reports are generated and uploaded in desktop CI matrix jobs.
   - Full-fast desktop verification remains green after syntax-gate integration.
 
+## Unit WS-D-64: Verification test-chain de-duplication baseline
+
+### Planned objective
+
+Reduce duplicate test execution time in desktop verification while preserving full coverage and mode-matrix behavior.
+
+### Implemented changes
+
+1. Added dedicated contract-test runner:
+   - `desktop/scripts/run_contract_tests.sh`.
+2. Implemented contract-runner semantics:
+   - executes only `test/contracts/desktop_contract_bundle_test.dart` and `test/contracts/workflow_contracts_test.dart`,
+   - preserves `FLUTTER_NO_PUB=1` behavior for CI/local fast loops.
+3. Optimized canonical verification chain:
+   - `desktop/scripts/verify_desktop.sh` now runs:
+     - release script syntax checks,
+     - contract tests (`run_contract_tests.sh`),
+     - parity tests (`run_parity_tests.sh`),
+     - mode matrix tests (`run_mode_matrix_tests.sh`),
+     - analyze/build.
+   - removed redundant whole-suite `flutter test --no-pub` invocation that overlapped parity/mode matrix runs.
+4. Added root command surface:
+   - `desktop:test:contracts`,
+   - `desktop:test:contracts:no-pub`.
+5. Updated release/runbook docs:
+   - `desktop-flutter-development-runbook.md` command inventory now includes contract test commands,
+   - `desktop-flutter-release-validation-baseline.md` now documents de-duplicated verify-chain test routing and contract-runner script index reference.
+6. Re-ran validation commands:
+   - `pnpm run desktop:test:contracts:no-pub`,
+   - `pnpm run desktop:test:parity:no-pub`,
+   - `pnpm run desktop:test:mode-matrix:no-pub`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - test coverage parity after removing whole-suite duplicate run in `verify_desktop.sh`,
+  - `--no-pub` behavior consistency across contract/parity/matrix scripts,
+  - documentation and command surface alignment for maintainers.
+- **Issues found during review**
+  1. `verify_desktop.sh` executed parity and widget coverage multiple times because it ran full-suite tests before parity/mode-matrix scripts.
+- **Fix applied**
+  1. Replaced whole-suite test execution with dedicated contract-test runner to keep unique coverage only once while retaining matrix checks.
+- **Post-fix validation criteria**
+  - Contract, parity, and mode-matrix suites all pass under `FLUTTER_NO_PUB=1`.
+  - Full-fast desktop verification remains green with the optimized test chain.
+  - Release evidence guard remains green after verify-chain refactor.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, de-duplicated contract/parity/mode-matrix verification chain, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
