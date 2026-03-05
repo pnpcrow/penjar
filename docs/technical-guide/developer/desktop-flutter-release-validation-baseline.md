@@ -146,6 +146,7 @@ This baseline defines minimum release validation requirements for desktop distri
      - `APPCAST_EXTERNAL_IDENTITY_CHECK_COMMAND` (credential identity validation command),
      - `APPCAST_EXTERNAL_INVALIDATION_CHECK_COMMAND` (invalidation validation command),
      - `APPCAST_CACHE_INVALIDATION_COMMAND` (actual invalidation execution command).
+   - strict mode also rejects placeholder command hooks (for example `echo ...`, `<...>`, `todo`/`tbd` markers) for identity/invalidation/invalidation-execution checks.
 14. Run external publication dry-run report:
    - `pnpm run desktop:release:appcast:publish:external:dry-run`
 15. Record evidence in release checklist ticket and Phase C execution log.
@@ -193,6 +194,7 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict external publication readiness enforcement via `enforce_appcast_external_readiness` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job runs external publication readiness checks and uploads readiness report artifacts.
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview readiness step accepts production identity/invalidation validation command hooks (`APPCAST_EXTERNAL_IDENTITY_CHECK_COMMAND`, `APPCAST_EXTERNAL_INVALIDATION_CHECK_COMMAND`).
+- `.github/workflows/release-desktop-installer-smoke.yml` strict external readiness mode now enforces placeholder-hygiene checks for identity/invalidation/cache-invalidation command hooks.
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job optionally runs external publication stage and uploads publication report artifact.
 - `desktop/scripts/check_release_evidence_index.sh` now enforces release evidence table schema (8 columns), RC+platform uniqueness, and decision value validity.
 - Update manifest baseline file: `desktop/release/update_manifest.example.json`.

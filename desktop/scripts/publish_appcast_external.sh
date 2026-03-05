@@ -64,6 +64,8 @@ mkdir -p "$(dirname "$report_file")"
 status="skipped"
 error_message=""
 operations_log=""
+invalidation_command="${APPCAST_CACHE_INVALIDATION_COMMAND:-}"
+invalidation_status="not-applicable"
 
 run_op() {
   local line="$1"
@@ -76,6 +78,7 @@ run_op() {
 
 if [[ "$provider" == "none" ]]; then
   status="skipped"
+  invalidation_status="skipped-provider-none"
   run_op "provider=none; external publish skipped."
 elif [[ "$provider" == "s3" ]]; then
   s3_bucket="${APPCAST_S3_BUCKET:-}"
@@ -83,6 +86,7 @@ elif [[ "$provider" == "s3" ]]; then
   if [[ -z "$s3_bucket" ]]; then
     error_message="APPCAST_S3_BUCKET is required for s3 provider"
     status="failed"
+    invalidation_status="not-executed"
   else
     status="published"
     while IFS= read -r target_path; do
@@ -105,24 +109,38 @@ elif [[ "$provider" == "s3" ]]; then
         run_op "dry-run aws s3 cp \"$target_path\" \"$destination\" --cache-control \"$cache_control\" --content-type application/json"
       else
         run_op "aws s3 cp \"$target_path\" \"$destination\" --cache-control \"$cache_control\" --content-type application/json"
-        aws s3 cp "$target_path" "$destination" --cache-control "$cache_control" --content-type application/json
+        if ! aws s3 cp "$target_path" "$destination" --cache-control "$cache_control" --content-type application/json; then
+          error_message="aws upload failed for target: $target_path"
+          status="failed"
+          invalidation_status="not-executed"
+          break
+        fi
       fi
     done <<< "$target_paths"
 
     if [[ "$status" == "published" ]]; then
-      invalidate_command="${APPCAST_CACHE_INVALIDATION_COMMAND:-}"
-      if [[ -n "$invalidate_command" ]]; then
+      if [[ -n "$invalidation_command" ]]; then
         if [[ "$dry_run" -eq 1 ]]; then
-          run_op "dry-run ${invalidate_command}"
+          run_op "dry-run ${invalidation_command}"
+          invalidation_status="skipped-dry-run"
         else
-          run_op "$invalidate_command"
-          bash -lc "$invalidate_command"
+          run_op "$invalidation_command"
+          if bash -lc "$invalidation_command"; then
+            invalidation_status="executed"
+          else
+            error_message="cache invalidation command failed"
+            invalidation_status="failed"
+            status="failed"
+          fi
         fi
+      else
+        invalidation_status="skipped-not-configured"
       fi
     fi
   fi
 else
   status="failed"
+  invalidation_status="not-executed"
   error_message="unsupported provider: $provider"
 fi
 
@@ -134,6 +152,8 @@ fi
   echo "- Dry-run: $dry_run"
   echo "- Channel: $channel"
   echo "- Version: $version"
+  echo "- Invalidation command configured: $([[ -n "$invalidation_command" ]] && echo yes || echo no)"
+  echo "- Invalidation status: $invalidation_status"
   echo "- Status: $status"
   if [[ -n "$error_message" ]]; then
     echo "- Error: $error_message"
