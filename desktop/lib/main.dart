@@ -135,7 +135,8 @@ class DesktopShellPage extends StatefulWidget {
 }
 
 class _DesktopShellPageState extends State<DesktopShellPage> {
-  final DesktopContractBundle _contracts = DesktopContractBundle.inMemory();
+  final DesktopContractBundle _contracts =
+      DesktopContractBundle.fromEnvironment();
   int _selectedIndex = 0;
 
   @override
@@ -202,6 +203,11 @@ class _DesktopShellPageState extends State<DesktopShellPage> {
                                     label: Text('Status: ${section.status}'),
                                   ),
                                   Chip(label: Text('Owner: ${section.owner}')),
+                                  Chip(
+                                    label: Text(
+                                      'Contract Mode: ${_contracts.mode.label}',
+                                    ),
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 20),

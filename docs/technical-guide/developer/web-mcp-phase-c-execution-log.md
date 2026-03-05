@@ -1107,8 +1107,49 @@ Improve parity-suite maintainability and reduce repetitive test setup code by in
   - Full verification chain remains green with build path included.
   - Parity suite navigation semantics remain unchanged while setup duplication is reduced.
 
+## Unit WS-D-28: Runtime contract mode baseline
+
+### Planned objective
+
+Prepare backend-adapter rollout path by introducing runtime-selectable contract mode wiring (`in-memory` vs `remote-stub`) while keeping current behavior stable.
+
+### Implemented changes
+
+1. Extended desktop contract bundle model:
+   - `desktop/lib/contracts/desktop_contract_bundle.dart`.
+2. Added runtime mode enum and parser:
+   - `DesktopContractMode` with `inMemory` and `remoteStub`,
+   - env parser via `PENJAR_DESKTOP_CONTRACT_MODE`.
+3. Added environment-aware bundle factory:
+   - `DesktopContractBundle.fromEnvironment()`,
+   - `DesktopContractBundle.remoteStub()` baseline path (currently mapped to in-memory adapters with explicit stub intent).
+4. Updated shell initialization:
+   - `DesktopShellPage` now loads contract bundle through environment factory.
+5. Added runtime mode visibility in shell UI:
+   - contract mode chip rendered in section metadata (`Contract Mode: in-memory|remote-stub`).
+6. Added/expanded tests:
+   - `desktop/test/contracts/desktop_contract_bundle_test.dart` now verifies mode parser aliases and in-memory mode baseline.
+   - `desktop/test/widget_test.dart` now validates contract mode chip visibility.
+7. Re-ran consolidated full verification:
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of runtime mode resolution and fallback behavior,
+  - regression risk on shell metadata rendering after chip expansion,
+  - compatibility with existing parity and verify chains.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Mode parser and shell mode indicators are covered by tests.
+  - Full verification chain remains green with runtime-mode changes applied.
+  - Contract mode switch path exists for upcoming remote adapter integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, contract-boundary pilots, and shared contract-bundle injection, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
+- All workflow domains now have Flutter parity scaffolds/harnesses, contract-boundary pilots, shared contract-bundle injection, and runtime mode routing baseline, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
 - Desktop parity CI baseline is now configured on Linux with consolidated verification scripts, but macOS/Windows build-matrix coverage and release-grade installer/update validation are not yet configured.

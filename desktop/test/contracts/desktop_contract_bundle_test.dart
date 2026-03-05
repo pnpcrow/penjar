@@ -6,6 +6,7 @@ void main() {
   test('in-memory bundle exposes reusable workflow contracts', () {
     final DesktopContractBundle bundle = DesktopContractBundle.inMemory();
 
+    expect(bundle.mode, DesktopContractMode.inMemory);
     expect(bundle.authSession.state.status, 'Idle');
     bundle.authSession.signIn(
       const AuthSignInRequest(
@@ -22,5 +23,25 @@ void main() {
     expect(bundle.inspectHandoff.state.status, 'Idle');
     expect(bundle.exportWorkflow.state.status, 'Idle');
     expect(bundle.diagnosticsRecovery.state.status, 'Idle');
+  });
+
+  test('contract mode parser supports remote-stub aliases', () {
+    expect(
+      DesktopContractMode.fromEnv('remote-stub'),
+      DesktopContractMode.remoteStub,
+    );
+    expect(
+      DesktopContractMode.fromEnv('remote_stub'),
+      DesktopContractMode.remoteStub,
+    );
+    expect(
+      DesktopContractMode.fromEnv('remote'),
+      DesktopContractMode.remoteStub,
+    );
+    expect(
+      DesktopContractMode.fromEnv('in-memory'),
+      DesktopContractMode.inMemory,
+    );
+    expect(DesktopContractMode.fromEnv(null), DesktopContractMode.inMemory);
   });
 }

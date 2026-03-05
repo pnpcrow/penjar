@@ -12,11 +12,13 @@ void main() {
     expect(find.text('Penjar Desktop'), findsOneWidget);
     expect(find.text('Desktop Shell Runtime'), findsAtLeastNWidgets(1));
     expect(find.textContaining('Status: In progress'), findsOneWidget);
+    expect(find.textContaining('Contract Mode: in-memory'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey<String>('nav-inspect')));
     await tester.pumpAndSettle();
 
     expect(find.text('Inspect & Code Handoff'), findsAtLeastNWidgets(1));
     expect(find.textContaining('Status: In progress'), findsOneWidget);
+    expect(find.textContaining('Contract Mode: in-memory'), findsOneWidget);
   });
 }
