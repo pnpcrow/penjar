@@ -128,8 +128,18 @@ jobs:
         working-directory: ./desktop
         run: ./scripts/check_appcast.sh
 
+      - name: Publish appcast dry-run targets
+        working-directory: ./desktop
+        run: ./scripts/publish_appcast.sh
+
       - name: Upload appcast preview
         uses: actions/upload-artifact@v4
         with:
           name: desktop-appcast-preview
           path: desktop/release/reports/appcast_preview.json
+
+      - name: Upload appcast published dry-run targets
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-appcast-published-dry-run
+          path: desktop/release/published/

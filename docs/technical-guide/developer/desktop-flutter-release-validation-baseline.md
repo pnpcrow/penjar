@@ -83,8 +83,10 @@ This baseline defines minimum release validation requirements for desktop distri
 7. Generate and validate appcast preview:
    - `pnpm run desktop:release:appcast:generate`
    - `pnpm run desktop:release:appcast:check`
-8. Record evidence in release checklist ticket and Phase C execution log.
-9. Block release promotion if any required gate is missing or only manually asserted without evidence.
+8. Publish appcast dry-run targets:
+   - `pnpm run desktop:release:appcast:publish:dry-run`
+9. Record evidence in release checklist ticket and Phase C execution log.
+10. Block release promotion if any required gate is missing or only manually asserted without evidence.
 
 CI baseline note:
 - `.github/workflows/tests-desktop-flutter.yml` includes `release-evidence-guard` and `release-update-manifest-guard` jobs, and uploads parity/build artifacts for audit traceability.
@@ -92,15 +94,17 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` also uploads platform release-evidence row snippet artifacts generated from smoke reports.
 - `.github/workflows/release-desktop-installer-smoke.yml` also uploads release-evidence index preview artifacts generated from row snippets.
 - `.github/workflows/release-desktop-installer-smoke.yml` runs an `appcast-preview` job that generates/checks/uploads appcast preview JSON from smoke reports.
+- `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job also produces channel/version appcast publish dry-run targets.
 - Update manifest baseline file: `desktop/release/update_manifest.example.json`.
 - Installer/update smoke report generator: `desktop/scripts/generate_installer_update_report.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence index updater: `desktop/scripts/update_release_evidence_index.sh`.
 - Appcast preview generator/checker: `desktop/scripts/generate_appcast_from_reports.sh`, `desktop/scripts/check_appcast.sh`.
+- Appcast publish dry-run script: `desktop/scripts/publish_appcast.sh`.
 
 ## 5) Implementation backlog seeds
 
 1. Extend installer smoke workflow with platform signing/notarization steps backed by release secrets.
 2. Promote Windows runner output from app-directory bundle to signed installer package (`.msi`/`exe`) artifact.
-3. Add target publication integration for appcast preview outputs (storage upload + rollout controls).
+3. Add external publication integration for appcast outputs (object storage upload + rollout controls).
 4. Promote evidence index preview automation into governed auto-apply (PR/comment gate) workflow.

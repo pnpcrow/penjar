@@ -1861,8 +1861,55 @@ Establish executable appcast preview generation/validation pipeline from install
   - Appcast checker rejects malformed appcast fields and passes generated preview.
   - Full-fast desktop verification remains green after appcast automation integration.
 
+## Unit WS-D-46: Appcast publish dry-run automation baseline
+
+### Planned objective
+
+Add executable appcast publication dry-run automation so channel/version publication payloads are produced and audited before integrating external publication targets.
+
+### Implemented changes
+
+1. Added appcast publish dry-run script:
+   - `desktop/scripts/publish_appcast.sh`.
+2. Implemented publish dry-run semantics:
+   - validates appcast channel/version fields,
+   - writes channel latest payload (`appcast-<channel>-latest.json`),
+   - writes version-pinned payload (`appcast-<channel>-<version>.json`).
+3. Extended release artifact ignore/layout policy:
+   - `desktop/release/.gitignore` now manages `published/` generated outputs,
+   - `desktop/release/published/.gitkeep` added for stable workspace structure.
+4. Added root command surface:
+   - `desktop:release:appcast:publish:dry-run`.
+5. Extended appcast-preview CI job:
+   - `.github/workflows/release-desktop-installer-smoke.yml` now executes publish dry-run after appcast validation and uploads publish-target artifacts.
+6. Updated release/runbook/index docs:
+   - `desktop-flutter-release-validation-baseline.md` now includes publish dry-run step and CI note,
+   - `desktop-flutter-development-runbook.md` command inventory now includes publish dry-run command,
+   - `desktop-flutter-release-evidence-index.md` maintenance rules now include publish dry-run artifact checks.
+7. Re-ran validation commands:
+   - `pnpm run desktop:release:appcast:generate`,
+   - `pnpm run desktop:release:appcast:check`,
+   - `pnpm run desktop:release:appcast:publish:dry-run`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - channel/version publish-target naming determinism,
+  - generated artifact handling/ignore policy safety,
+  - CI continuity for dry-run publication outputs.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Dry-run publish command emits both latest and version-pinned appcast payload files.
+  - Appcast-preview workflow uploads dry-run publication artifacts.
+  - Full-fast desktop verification remains green after publish dry-run automation integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, and appcast preview generation/validation workflow, but signed installer packaging/notarization and automated production update/appcast publication pipelines are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, appcast preview generation/validation workflow, and appcast publish dry-run automation, but signed installer packaging/notarization and external production update/appcast publication integrations are not yet configured.

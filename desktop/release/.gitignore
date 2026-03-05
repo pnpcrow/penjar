@@ -1,2 +1,4 @@
 reports/*
 !reports/.gitkeep
+published/*
+!published/.gitkeep
