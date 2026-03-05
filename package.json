@@ -33,7 +33,9 @@
     "desktop:release:evidence:index:preview:macos": "cd desktop && ./scripts/update_release_evidence_index.sh release/reports/release_evidence_row_macos.md ../docs/technical-guide/developer/desktop-flutter-release-evidence-index.md release/reports/release_evidence_index_preview_macos.md",
     "desktop:release:evidence:index:preview:windows": "cd desktop && ./scripts/update_release_evidence_index.sh release/reports/release_evidence_row_windows.md ../docs/technical-guide/developer/desktop-flutter-release-evidence-index.md release/reports/release_evidence_index_preview_windows.md",
     "desktop:release:evidence:index:apply:macos": "cd desktop && ./scripts/update_release_evidence_index.sh release/reports/release_evidence_row_macos.md ../docs/technical-guide/developer/desktop-flutter-release-evidence-index.md",
-    "desktop:release:evidence:index:apply:windows": "cd desktop && ./scripts/update_release_evidence_index.sh release/reports/release_evidence_row_windows.md ../docs/technical-guide/developer/desktop-flutter-release-evidence-index.md"
+    "desktop:release:evidence:index:apply:windows": "cd desktop && ./scripts/update_release_evidence_index.sh release/reports/release_evidence_row_windows.md ../docs/technical-guide/developer/desktop-flutter-release-evidence-index.md",
+    "desktop:release:appcast:generate": "cd desktop && ./scripts/generate_appcast_from_reports.sh",
+    "desktop:release:appcast:check": "cd desktop && ./scripts/check_appcast.sh"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",

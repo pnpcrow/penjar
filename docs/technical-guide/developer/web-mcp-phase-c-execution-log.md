@@ -1811,8 +1811,58 @@ Automate release-evidence index preview/apply updates from generated row snippet
   - Installer smoke workflow uploads index preview artifacts for both matrix platforms.
   - Full-fast desktop verification remains green after index-update automation integration.
 
+## Unit WS-D-45: Appcast preview generation and validation baseline
+
+### Planned objective
+
+Establish executable appcast preview generation/validation pipeline from installer smoke reports to reduce update-promotion pipeline risk before publication integration.
+
+### Implemented changes
+
+1. Added appcast preview generator script:
+   - `desktop/scripts/generate_appcast_from_reports.sh`.
+2. Added appcast validation script:
+   - `desktop/scripts/check_appcast.sh`.
+3. Implemented appcast-generation semantics:
+   - reads `update_manifest.example.json`,
+   - ingests platform smoke reports (`installer_update_report_*.json`),
+   - enforces version/channel consistency between manifest and smoke reports,
+   - emits `appcast_preview.json` with artifact URL/hash/size metadata.
+4. Added root command surfaces:
+   - `desktop:release:appcast:generate`,
+   - `desktop:release:appcast:check`.
+5. Extended manual installer smoke workflow:
+   - `.github/workflows/release-desktop-installer-smoke.yml` now includes `appcast-preview` job,
+   - downloads smoke report artifacts,
+   - generates/checks appcast preview,
+   - uploads appcast preview artifact.
+6. Updated release/runbook/index docs:
+   - `desktop-flutter-release-validation-baseline.md` now includes appcast preview protocol and CI baseline note,
+   - `desktop-flutter-development-runbook.md` command inventory now includes appcast commands,
+   - `desktop-flutter-release-evidence-index.md` maintenance rules now include appcast preview checks.
+7. Re-ran validation commands:
+   - `pnpm run desktop:release:appcast:generate`,
+   - `pnpm run desktop:release:appcast:check`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - consistency guards between manifest metadata and smoke report payloads,
+  - appcast schema safety checks (channel/version/timestamps/URL/hash/size/platform uniqueness),
+  - CI artifact continuity for appcast preview pipeline.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Appcast preview generation succeeds from smoke reports and manifest baseline.
+  - Appcast checker rejects malformed appcast fields and passes generated preview.
+  - Full-fast desktop verification remains green after appcast automation integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, and evidence-index preview/apply automation, but signed installer packaging/notarization and automated production update-promotion/appcast publication pipelines are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, evidence-index preview/apply automation, and appcast preview generation/validation workflow, but signed installer packaging/notarization and automated production update/appcast publication pipelines are not yet configured.

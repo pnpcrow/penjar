@@ -99,3 +99,37 @@ jobs:
         with:
           name: desktop-release-evidence-index-preview-${{ matrix.label }}
           path: desktop/release/reports/release_evidence_index_preview_${{ matrix.label }}.md
+
+  appcast-preview:
+    name: "Appcast Preview"
+    runs-on: ubuntu-latest
+    needs: installer-smoke
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download installer smoke reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: desktop-installer-smoke-report-*
+          merge-multiple: true
+          path: desktop/release/reports
+
+      - name: Generate appcast preview
+        working-directory: ./desktop
+        run: ./scripts/generate_appcast_from_reports.sh
+
+      - name: Check appcast preview
+        working-directory: ./desktop
+        run: ./scripts/check_appcast.sh
+
+      - name: Upload appcast preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-appcast-preview
+          path: desktop/release/reports/appcast_preview.json
