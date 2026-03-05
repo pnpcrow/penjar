@@ -9133,6 +9133,56 @@ contract/parity evidence.
   - explicit signed-in aliases remain authoritative over `success=false` failure-flag signals.
   - targeted auth contract/parity tests and full desktop verification remain green after the lock.
 
+## Unit WS-D-199: Auth `success` explicit signed-in parity precedence lock
+
+### Planned objective
+
+Extend WS-D-198 by adding a dedicated parity regression where backend payloads include
+`success=false` and explicit `signedIn=true`, so UI-level behavior is locked to signed-in
+precedence rather than failure-flag fallback.
+
+### Implemented changes
+
+1. Added dedicated parity transport/test in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - `_AuthBackendFailureFlagSuccessSignedInOverrideParityTransportClient`,
+   - `auth/session parity keeps signed-in state when success failure flag has explicit signed-in override`.
+2. Kept contract-side precedence evidence intact from WS-D-198 and revalidated both suites using
+   the same targeted auth command chain.
+3. Synced continuity docs so success-alias coverage wording now explicitly includes parity-level
+   signed-in override evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - UI-level precedence behavior under `success=false` + `signedIn=true` backend payloads,
+  - consistency between contract precedence locks and parity surface behavior,
+  - documentation accuracy for success-alias parity/override evidence.
+- **Issues found during review**
+  1. WS-D-198 added contract precedence lock for `success=false` + `signedIn=true`, but parity
+     suite did not yet include a dedicated UI lock for the same collision.
+  2. Without parity-level precedence evidence, future UI/state wiring changes could regress to
+     auth-failed fallback even when contract inference remained correct.
+- **Fix applied**
+  1. Added dedicated parity transport fixture carrying `success=false` with explicit signed-in
+     state payload.
+  2. Added parity assertion that signed-in status is preserved and auth-failed fallback text is not
+     shown for that collision case.
+  3. Updated continuity docs to reflect that success-alias evidence now includes both fallback and
+     explicit signed-in override parity coverage.
+- **Post-fix validation criteria**
+  - `success=false` + explicit `signedIn=true` payloads preserve signed-in precedence in parity UI.
+  - auth-failed fallback status is not shown for that explicit signed-in override case.
+  - targeted auth tests and full desktop verification remain green after the parity lock.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
