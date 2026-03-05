@@ -3806,6 +3806,40 @@ Protect increasingly complex gate-policy dependency rules from silent regression
   - Verify chain includes contract checker stage and remains green.
   - CI/workflow artifact chain retains gate-policy contract report outputs.
 
+## Unit WS-D-89: Recursive release-script syntax coverage hardening
+
+### Planned objective
+
+Ensure release-script syntax gating covers shared helper modules under nested script directories so syntax regressions in helper layers cannot bypass preflight checks.
+
+### Implemented changes
+
+1. Hardened release-script syntax scanner scope:
+   - updated `desktop/scripts/check_release_script_syntax.sh` to scan `desktop/scripts/**/*.sh` recursively instead of top-level-only scanning.
+   - report metadata now includes `Scan mode: recursive` to make scope explicit in generated artifacts.
+2. Updated continuity documentation:
+   - `desktop-flutter-release-validation-baseline.md` script index now documents recursive syntax coverage and explicit inclusion of `desktop/scripts/lib/`.
+3. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_release_script_syntax.sh`,
+   - `cd desktop && rg -n "scripts/lib/placeholder_hygiene.sh|Scan mode: recursive" release/reports/release_script_syntax_report.md`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - syntax-gate coverage boundaries for nested helper scripts,
+  - report traceability of scanner scope for audit/debug use,
+  - downstream verify-chain compatibility after scanner scope expansion.
+- **Issues found during review**
+  1. Existing syntax scanner used `find ... -maxdepth 1`, so nested helper scripts (for example `scripts/lib/placeholder_hygiene.sh`) were excluded from syntax preflight coverage.
+- **Fix applied**
+  1. Switched syntax scanner to recursive shell-script discovery and added explicit recursive-scan metadata in generated report.
+- **Post-fix validation criteria**
+  - Generated syntax report includes recursive scan marker and helper-script path entries.
+  - Release evidence guard remains green after syntax-gate scope expansion.
+  - Full-fast desktop verification remains green with recursive syntax scanning enabled.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

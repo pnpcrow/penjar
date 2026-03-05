@@ -35,7 +35,7 @@ while IFS= read -r script_path; do
     failed_count=$((failed_count + 1))
     failed_list="$(append_line "$failed_list" "$script_path")"
   fi
-done < <(find "$scripts_dir" -maxdepth 1 -type f -name '*.sh' | sort)
+done < <(find "$scripts_dir" -type f -name '*.sh' | sort)
 
 status="passed"
 if [[ "$failed_count" -gt 0 ]]; then
@@ -47,6 +47,7 @@ fi
   echo
   echo "- Generated at (UTC): $timestamp"
   echo "- Scripts directory: $scripts_dir"
+  echo "- Scan mode: recursive"
   echo "- Checked script count: $checked_count"
   echo "- Failed script count: $failed_count"
   echo "- Status: $status"

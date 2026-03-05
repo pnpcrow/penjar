@@ -223,7 +223,7 @@ CI baseline note:
 - Installer/update smoke report generator: `desktop/scripts/generate_installer_update_report.sh`.
 - Release smoke gate policy checker: `desktop/scripts/check_release_smoke_gate_policy.sh`.
 - Release smoke gate policy contract checker: `desktop/scripts/check_release_smoke_gate_policy_contract.sh`.
-- Release script syntax checker: `desktop/scripts/check_release_script_syntax.sh`.
+- Release script syntax checker: `desktop/scripts/check_release_script_syntax.sh` (recursive scan across `desktop/scripts/**/*.sh`, including shared helper modules under `desktop/scripts/lib/`).
 - Verify test coverage checker: `desktop/scripts/check_verify_test_coverage.sh`.
 - Desktop command inventory checker: `desktop/scripts/check_desktop_command_inventory.sh`.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
