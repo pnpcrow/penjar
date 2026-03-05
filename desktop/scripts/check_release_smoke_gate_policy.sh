@@ -77,6 +77,10 @@ if [[ "$strict_windows_installer_provenance" -eq 1 && "$strict_windows_installer
   add_required "STRICT_WINDOWS_INSTALLER_PROVENANCE requires STRICT_WINDOWS_INSTALLER_EXECUTION=1."
 fi
 
+if [[ "$strict_windows_installer_provenance" -eq 1 && "$strict_windows_installer_packaging" -eq 0 ]]; then
+  add_required "STRICT_WINDOWS_INSTALLER_PROVENANCE requires STRICT_WINDOWS_INSTALLER_PACKAGING=1."
+fi
+
 if [[ "$strict_release_evidence_bundle" -eq 1 && "$strict_signing_provenance" -eq 0 ]]; then
   add_required "STRICT_RELEASE_EVIDENCE_BUNDLE requires STRICT_SIGNING_PROVENANCE=1."
 fi

@@ -186,6 +186,7 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer provenance enforcement via `enforce_windows_installer_provenance` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer execution enforcement via `enforce_windows_installer_execution` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` strict Windows installer execution/provenance checks now include placeholder-hygiene enforcement for command hooks.
+- `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now requires `STRICT_WINDOWS_INSTALLER_PACKAGING=1` when `STRICT_WINDOWS_INSTALLER_PROVENANCE=1`.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict release evidence bundle enforcement via `enforce_release_evidence_bundle` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now models `STRICT_RELEASE_EVIDENCE_BUNDLE` dependencies (`STRICT_SIGNING_PROVENANCE=1` and `STRICT_WINDOWS_INSTALLER_PROVENANCE=1`).
 - `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now requires configured external provider when `publish_appcast_external=true`, and for non-dry-run external publication requires `enforce_appcast_external_readiness=true` plus `enforce_release_evidence_bundle=true`.
