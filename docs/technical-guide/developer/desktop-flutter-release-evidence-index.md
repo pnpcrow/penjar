@@ -68,3 +68,4 @@ Each release candidate record should include:
 33. Attach desktop command inventory contract report (`release/reports/desktop_command_inventory_contract_report.md`) before promotion decision.
 34. Attach update manifest contract report (`release/reports/update_manifest_contract_report.md`) before promotion decision.
 35. Attach verify test coverage contract report (`release/reports/verify_test_coverage_contract_report.md`) before promotion decision.
+36. Attach release evidence index check report (`release/reports/release_evidence_index_check_report.md`) before promotion decision.

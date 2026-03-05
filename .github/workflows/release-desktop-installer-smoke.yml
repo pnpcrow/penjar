@@ -168,6 +168,10 @@ jobs:
         working-directory: ./desktop
         run: ./scripts/check_release_smoke_gate_policy_contract.sh
 
+      - name: Run release evidence index check
+        working-directory: ./desktop
+        run: ./scripts/check_release_evidence_index.sh
+
       - name: Run release evidence index contract check
         working-directory: ./desktop
         run: ./scripts/check_release_evidence_index_contract.sh
@@ -221,6 +225,14 @@ jobs:
         with:
           name: desktop-release-evidence-index-contract-report-smoke
           path: desktop/release/reports/release_evidence_index_contract_report.md
+          if-no-files-found: warn
+
+      - name: Upload release evidence index check report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-release-evidence-index-check-report-smoke
+          path: desktop/release/reports/release_evidence_index_check_report.md
           if-no-files-found: warn
 
       - name: Upload release script syntax report

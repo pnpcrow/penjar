@@ -90,6 +90,7 @@ run_stage "desktop command inventory contract check" ./scripts/check_desktop_com
 run_stage "update manifest check" ./scripts/check_update_manifest.sh
 run_stage "update manifest contract check" ./scripts/check_update_manifest_contract.sh
 run_stage "release smoke gate policy contract check" ./scripts/check_release_smoke_gate_policy_contract.sh
+run_stage "release evidence index check" ./scripts/check_release_evidence_index.sh
 run_stage "release evidence index contract check" ./scripts/check_release_evidence_index_contract.sh
 
 run_stage "contract tests" env FLUTTER_NO_PUB=1 ./scripts/run_contract_tests.sh

@@ -16,9 +16,10 @@ append_case_row() {
   local expected="$2"
   local actual="$3"
   local log_assertion="$4"
-  local result="$5"
-  local summary="$6"
-  case_rows+="| ${case_name} | ${expected} | ${actual} | ${log_assertion} | ${result} | ${summary} |"$'\n'
+  local report_assertion="$5"
+  local result="$6"
+  local summary="$7"
+  case_rows+="| ${case_name} | ${expected} | ${actual} | ${log_assertion} | ${report_assertion} | ${result} | ${summary} |"$'\n'
 }
 
 setup_baseline_case() {
@@ -55,15 +56,17 @@ run_case() {
   local summary="$3"
   local setup_fn="$4"
   local required_log_pattern="${5:-}"
+  local required_report_pattern="${6:-}"
 
-  local tmp_index tmp_log rc actual result log_assertion
+  local tmp_index tmp_report tmp_log rc actual result log_assertion report_assertion
   tmp_index="$(mktemp)"
+  tmp_report="$(mktemp)"
   tmp_log="$(mktemp)"
 
   "$setup_fn" "$source_index_file" "$tmp_index"
 
   set +e
-  ./scripts/check_release_evidence_index.sh "$tmp_index" >"$tmp_log" 2>&1
+  ./scripts/check_release_evidence_index.sh "$tmp_index" "$tmp_report" >"$tmp_log" 2>&1
   rc=$?
   set -e
 
@@ -79,16 +82,23 @@ run_case() {
     fi
   fi
 
+  report_assertion="ok"
+  if [[ -n "$required_report_pattern" ]]; then
+    if ! grep -Fq "$required_report_pattern" "$tmp_report"; then
+      report_assertion="missing: ${required_report_pattern}"
+    fi
+  fi
+
   result="ok"
-  if [[ "$expected" != "$actual" || "$log_assertion" != "ok" ]]; then
+  if [[ "$expected" != "$actual" || "$log_assertion" != "ok" || "$report_assertion" != "ok" ]]; then
     result="mismatch"
     failure_count=$((failure_count + 1))
   fi
 
   total_cases=$((total_cases + 1))
-  append_case_row "$case_name" "$expected" "$actual" "$log_assertion" "$result" "$summary"
+  append_case_row "$case_name" "$expected" "$actual" "$log_assertion" "$report_assertion" "$result" "$summary"
 
-  rm -f "$tmp_index" "$tmp_log"
+  rm -f "$tmp_index" "$tmp_report" "$tmp_log"
 }
 
 if [[ ! -f "$source_index_file" ]]; then
@@ -100,13 +110,16 @@ run_case \
   "baseline-current-index-pass" \
   "pass" \
   "Current evidence index should pass guard checks." \
-  setup_baseline_case
+  setup_baseline_case \
+  "" \
+  "Status: passed"
 
 run_case \
   "missing-required-attachment-fail" \
   "fail" \
   "Removing required attachment reference must fail guard checks." \
   setup_missing_attachment_case \
+  "missing required attachment reference: release/reports/release_script_syntax_contract_report.md" \
   "missing required attachment reference: release/reports/release_script_syntax_contract_report.md"
 
 run_case \
@@ -114,6 +127,7 @@ run_case \
   "fail" \
   "Duplicated RC+platform entry must fail uniqueness guard." \
   setup_duplicate_key_case \
+  "duplicate RC+platform key detected" \
   "duplicate RC+platform key detected"
 
 status="passed"
@@ -130,12 +144,12 @@ fi
   echo "- Failures: $failure_count"
   echo "- Status: $status"
   echo
-  echo "| Case | Expected | Actual | Log assertion | Result | Summary |"
-  echo "|---|---|---|---|---|---|"
+  echo "| Case | Expected | Actual | Log assertion | Report assertion | Result | Summary |"
+  echo "|---|---|---|---|---|---|---|"
   if [[ -n "$case_rows" ]]; then
     printf '%s' "$case_rows"
   else
-    echo "| none | n/a | n/a | n/a | n/a | no cases executed |"
+    echo "| none | n/a | n/a | n/a | n/a | n/a | no cases executed |"
   fi
 } > "$report_file"
 

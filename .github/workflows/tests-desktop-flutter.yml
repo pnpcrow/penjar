@@ -159,6 +159,14 @@ jobs:
           path: desktop/release/reports/release_smoke_gate_policy_contract_report.md
           if-no-files-found: warn
 
+      - name: Upload release evidence index check report (verify matrix)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-release-evidence-index-check-report-${{ matrix.label }}
+          path: desktop/release/reports/release_evidence_index_check_report.md
+          if-no-files-found: warn
+
       - name: Upload release evidence index contract report (verify matrix)
         if: always()
         uses: actions/upload-artifact@v4
@@ -193,6 +201,14 @@ jobs:
       - name: Run release evidence contract guard
         working-directory: ./desktop
         run: ./scripts/check_release_evidence_index_contract.sh
+
+      - name: Upload release evidence index check report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-release-evidence-index-check-report-guard
+          path: desktop/release/reports/release_evidence_index_check_report.md
+          if-no-files-found: warn
 
       - name: Upload release evidence index contract report
         if: always()
