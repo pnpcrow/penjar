@@ -9337,6 +9337,63 @@ behavior where payloads include nested `errors[].is_success=false` signals along
   - auth-failed fallback status is not shown for that nested explicit signed-in override case.
   - targeted auth tests and full desktop verification remain green after the new lock.
 
+## Unit WS-D-203: Auth unauthorized code explicit signed-in parity precedence locks
+
+### Planned objective
+
+Extend parity explicit signed-in override coverage from failure-flag collisions to unauthorized-code
+collisions so parity behavior matches contract precedence for `code`, `statusCode`, and
+`status_code` variants.
+
+### Implemented changes
+
+1. Added dedicated parity transport fixtures/tests in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - `_AuthBackendCodeOnlySignedInOverrideParityTransportClient`,
+   - `_AuthBackendStatusCodeSignedInOverrideParityTransportClient`,
+   - `_AuthBackendStatusCodeSnakeCaseSignedInOverrideParityTransportClient`,
+   - `auth/session parity keeps signed-in state when code-only backend failure has explicit signed-in override`,
+   - `auth/session parity keeps signed-in state when statusCode backend failure has explicit signed-in override`,
+   - `auth/session parity keeps signed-in state when status_code backend failure has explicit signed-in override`.
+2. Synced continuity docs so explicit signed-in override parity wording now includes unauthorized
+   code alias coverage in addition to failure-flag aliases:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+3. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - parity precedence behavior for unauthorized-code aliases under explicit signed-in snapshots,
+  - parity/contract alignment for explicit signed-in code-variant regression matrix,
+  - continuity doc correctness for override coverage breadth.
+- **Issues found during review**
+  1. Contract suite already locked explicit signed-in precedence for unauthorized code aliases
+     (`code`, `statusCode`, `status_code`), but parity suite only covered fallback mapping for those
+     aliases.
+  2. Continuity docs emphasized failure-flag explicit override parity locks while code-alias
+     explicit override parity evidence remained unstated.
+- **Fix applied**
+  1. Added three dedicated parity transport fixtures combining unauthorized code aliases with
+     explicit signed-in snapshots.
+  2. Added three parity assertions proving signed-in status retention and absence of
+     `Authentication required.` fallback for each alias variant.
+  3. Updated continuity docs so explicit override parity coverage includes code/status aliases.
+- **Post-fix validation criteria**
+  - `code` unauthorized payloads with explicit `signedIn=true` preserve signed-in precedence in
+    parity UI.
+  - `statusCode` unauthorized payloads with explicit `signedIn=true` preserve signed-in precedence
+    in parity UI.
+  - `status_code` unauthorized payloads with explicit `signedIn=true` preserve signed-in precedence
+    in parity UI.
+  - `Authentication required.` fallback is not shown for those explicit signed-in override cases.
+  - targeted auth tests and full desktop verification remain green after the new locks.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
