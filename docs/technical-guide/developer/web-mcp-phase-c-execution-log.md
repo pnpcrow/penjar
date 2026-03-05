@@ -9229,9 +9229,63 @@ precedence behavior for `ok=false` and `isSuccess=false` payloads when backend s
   3. Updated continuity docs to state explicit signed-in override parity locks for
      success/ok/isSuccess aliases.
 - **Post-fix validation criteria**
-  - `ok=false` + explicit `signedIn=true` payloads preserve signed-in precedence in parity UI.
-  - `isSuccess=false` + explicit `signedIn=true` payloads preserve signed-in precedence in parity
-    UI.
+- `ok=false` + explicit `signedIn=true` payloads preserve signed-in precedence in parity UI.
+- `isSuccess=false` + explicit `signedIn=true` payloads preserve signed-in precedence in parity
+  UI.
+- auth-failed fallback status is not shown for those explicit signed-in override cases.
+- targeted auth tests and full desktop verification remain green after the new locks.
+
+## Unit WS-D-201: Auth snake/isOk failure-flag explicit signed-in parity precedence lock
+
+### Planned objective
+
+Close remaining parity gaps for explicit signed-in override behavior by adding dedicated UI-level
+collision locks for `is_success=false`, `is_ok=false`, and `isOk=false` payloads that also carry
+explicit `signedIn=true`.
+
+### Implemented changes
+
+1. Added dedicated parity transport fixtures/tests in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - `_AuthBackendFailureFlagSnakeCaseSignedInOverrideParityTransportClient`,
+   - `_AuthBackendFailureFlagIsOkSnakeCaseSignedInOverrideParityTransportClient`,
+   - `_AuthBackendFailureFlagIsOkSignedInOverrideParityTransportClient`,
+   - `auth/session parity keeps signed-in state when snake-case failure flag has explicit signed-in override`,
+   - `auth/session parity keeps signed-in state when is_ok failure flag has explicit signed-in override`,
+   - `auth/session parity keeps signed-in state when isOk failure flag has explicit signed-in override`.
+2. Synced continuity docs so explicit signed-in override parity wording now tracks
+   success/ok/isSuccess/is_success/is_ok/isOk alias coverage:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+3. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - parity precedence behavior for snake_case/camelCase failure-flag alias collisions,
+  - parity/contract alignment for explicit signed-in override matrix completeness,
+  - documentation precision for alias-level parity lock inventory.
+- **Issues found during review**
+  1. After WS-D-200, parity explicit signed-in override coverage existed for `success`/`ok`/`isSuccess`,
+     but `is_success`/`is_ok`/`isOk` collisions were still contract-only.
+  2. Continuity docs still implied narrower explicit override parity lock coverage than the updated
+     full alias matrix target.
+- **Fix applied**
+  1. Added three dedicated parity transport fixtures for `is_success`, `is_ok`, and `isOk`
+     failure-flag collisions with explicit signed-in snapshots.
+  2. Added three parity assertions verifying signed-in status retention and absence of auth-failed
+     fallback text for each collision variant.
+  3. Updated continuity docs to enumerate explicit signed-in override parity locks for the full
+     failure-flag alias set.
+- **Post-fix validation criteria**
+  - `is_success=false` + explicit `signedIn=true` preserves signed-in precedence in parity UI.
+  - `is_ok=false` + explicit `signedIn=true` preserves signed-in precedence in parity UI.
+  - `isOk=false` + explicit `signedIn=true` preserves signed-in precedence in parity UI.
   - auth-failed fallback status is not shown for those explicit signed-in override cases.
   - targeted auth tests and full desktop verification remain green after the new locks.
 
