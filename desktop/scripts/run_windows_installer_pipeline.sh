@@ -8,10 +8,16 @@ source "${script_dir}/lib/placeholder_hygiene.sh"
 strict_input="${1:-0}"
 build_mode="${2:-release}"
 report_file="${3:-release/reports/windows_installer_pipeline_report.md}"
+strict_protocol_input="${STRICT_WINDOWS_PROTOCOL_REGISTRATION:-0}"
 
 strict_mode=0
 case "$(printf '%s' "$strict_input" | tr '[:upper:]' '[:lower:]')" in
   1|true|yes|strict) strict_mode=1 ;;
+esac
+
+strict_protocol_mode=0
+case "$(printf '%s' "$strict_protocol_input" | tr '[:upper:]' '[:lower:]')" in
+  1|true|yes|strict) strict_protocol_mode=1 ;;
 esac
 
 mode_dir=""
@@ -51,8 +57,13 @@ if [[ ! -d "$runner_dir" ]]; then
     execution_status="skipped"
     error_message="runner directory not found; installer pipeline skipped"
   fi
-  protocol_execution_status="skipped"
-  protocol_error_message="runner directory not found; protocol registration skipped"
+  if [[ "$strict_protocol_mode" -eq 1 ]]; then
+    protocol_execution_status="failed"
+    protocol_error_message="missing runner directory for strict protocol registration: ${runner_dir}"
+  else
+    protocol_execution_status="skipped"
+    protocol_error_message="runner directory not found; protocol registration skipped"
+  fi
 elif [[ -n "$installer_command" ]]; then
   export PENJAR_WINDOWS_RUNNER_DIR="$runner_dir"
   export PENJAR_WINDOWS_INSTALLER_OUTPUT_PATH="$installer_output_path"
@@ -83,7 +94,7 @@ if [[ -d "$runner_dir" && -n "$protocol_register_command" ]]; then
   export PENJAR_WINDOWS_PROTOCOL_TARGET_PATH="$protocol_target_path"
   if is_placeholder_command "$protocol_register_command"; then
     protocol_placeholder_status="detected"
-    if [[ "$strict_mode" -eq 1 ]]; then
+    if [[ "$strict_mode" -eq 1 || "$strict_protocol_mode" -eq 1 ]]; then
       protocol_execution_status="failed"
       protocol_error_message="protocol register command appears to be a placeholder in strict mode"
     else
@@ -98,6 +109,9 @@ if [[ -d "$runner_dir" && -n "$protocol_register_command" ]]; then
     protocol_execution_status="failed"
     protocol_error_message="protocol register command failed"
   fi
+elif [[ -d "$runner_dir" && "$strict_protocol_mode" -eq 1 ]]; then
+  protocol_execution_status="failed"
+  protocol_error_message="protocol register command missing in strict protocol mode"
 fi
 
 {
@@ -105,6 +119,7 @@ fi
   echo
   echo "- Generated at (UTC): $timestamp"
   echo "- Strict mode: $strict_mode"
+  echo "- Strict protocol registration mode: $strict_protocol_mode"
   echo "- Build mode: $build_mode"
   echo "- Runner directory: $runner_dir"
   echo "- Installer output path: $installer_output_path"
@@ -124,7 +139,7 @@ fi
   fi
 } > "$report_file"
 
-if [[ "$strict_mode" -eq 1 && ( "$execution_status" == "failed" || "$protocol_execution_status" == "failed" ) ]]; then
+if [[ ( "$strict_mode" -eq 1 || "$strict_protocol_mode" -eq 1 ) && ( "$execution_status" == "failed" || "$protocol_execution_status" == "failed" ) ]]; then
   echo "[windows-installer-pipeline] strict mode failed. report: $report_file" >&2
   exit 1
 fi

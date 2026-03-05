@@ -77,6 +77,12 @@ run_case \
   STRICT_WINDOWS_INSTALLER_PACKAGING=1
 
 run_case \
+  "strict-windows-protocol-without-execution" \
+  "fail" \
+  "Strict Windows protocol registration must require strict installer execution mode." \
+  STRICT_WINDOWS_PROTOCOL_REGISTRATION=1
+
+run_case \
   "production-publication-without-strict-evidence-bundle" \
   "fail" \
   "Non-dry-run external publication must require strict evidence bundle enforcement." \
@@ -99,6 +105,7 @@ run_case \
   STRICT_WINDOWS_INSTALLER_PACKAGING=1 \
   STRICT_WINDOWS_INSTALLER_NAMING=1 \
   STRICT_WINDOWS_INSTALLER_PROVENANCE=1 \
+  STRICT_WINDOWS_PROTOCOL_REGISTRATION=1 \
   STRICT_RELEASE_EVIDENCE_BUNDLE=1 \
   PUBLISH_APPCAST_EXTERNAL=1 \
   APPCAST_PUBLISH_PROVIDER=s3 \

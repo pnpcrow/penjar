@@ -81,6 +81,11 @@ on:
         type: boolean
         required: true
         default: false
+      enforce_windows_protocol_registration:
+        description: "Fail workflow when Windows protocol registration command is missing/fails"
+        type: boolean
+        required: true
+        default: false
       enforce_release_evidence_bundle:
         description: "Fail workflow when release evidence bundle check reports risky statuses"
         type: boolean
@@ -156,6 +161,7 @@ jobs:
           STRICT_WINDOWS_INSTALLER_PACKAGING: ${{ inputs.enforce_windows_installer_packaging }}
           STRICT_WINDOWS_INSTALLER_NAMING: ${{ inputs.enforce_windows_installer_naming }}
           STRICT_WINDOWS_INSTALLER_PROVENANCE: ${{ inputs.enforce_windows_installer_provenance }}
+          STRICT_WINDOWS_PROTOCOL_REGISTRATION: ${{ inputs.enforce_windows_protocol_registration }}
           STRICT_RELEASE_EVIDENCE_BUNDLE: ${{ inputs.enforce_release_evidence_bundle }}
           PUBLISH_APPCAST_EXTERNAL: ${{ inputs.publish_appcast_external }}
           APPCAST_PUBLISH_PROVIDER: ${{ inputs.appcast_external_provider }}
@@ -194,6 +200,7 @@ jobs:
           PENJAR_MACOS_SIGN_VERIFY_COMMAND: ${{ secrets.PENJAR_MACOS_SIGN_VERIFY_COMMAND }}
           PENJAR_WINDOWS_SIGN_VERIFY_COMMAND: ${{ secrets.PENJAR_WINDOWS_SIGN_VERIFY_COMMAND }}
           PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND: ${{ secrets.PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND }}
+          PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND: ${{ secrets.PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND }}
         run: ./scripts/check_signing_readiness.sh
 
       - name: Upload signing readiness report
@@ -335,6 +342,7 @@ jobs:
           STRICT_WINDOWS_INSTALLER_EXECUTION: ${{ inputs.enforce_windows_installer_execution }}
           STRICT_WINDOWS_INSTALLER_NAMING: ${{ inputs.enforce_windows_installer_naming }}
           STRICT_WINDOWS_INSTALLER_PROVENANCE: ${{ inputs.enforce_windows_installer_provenance }}
+          STRICT_WINDOWS_PROTOCOL_REGISTRATION: ${{ inputs.enforce_windows_protocol_registration }}
           PENJAR_MACOS_SIGN_IDENTITY: ${{ secrets.PENJAR_MACOS_SIGN_IDENTITY }}
           PENJAR_MACOS_TEAM_ID: ${{ secrets.PENJAR_MACOS_TEAM_ID }}
           PENJAR_MACOS_NOTARY_PROFILE: ${{ secrets.PENJAR_MACOS_NOTARY_PROFILE }}
@@ -345,6 +353,7 @@ jobs:
           PENJAR_WINDOWS_SIGN_COMMAND: ${{ secrets.PENJAR_WINDOWS_SIGN_COMMAND }}
           PENJAR_WINDOWS_INSTALLER_COMMAND: ${{ secrets.PENJAR_WINDOWS_INSTALLER_COMMAND }}
           PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND: ${{ secrets.PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND }}
+          PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND: ${{ secrets.PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND }}
           PENJAR_MACOS_SIGN_VERIFY_COMMAND: ${{ secrets.PENJAR_MACOS_SIGN_VERIFY_COMMAND }}
           PENJAR_WINDOWS_SIGN_VERIFY_COMMAND: ${{ secrets.PENJAR_WINDOWS_SIGN_VERIFY_COMMAND }}
         run: |

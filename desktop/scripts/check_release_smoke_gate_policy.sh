@@ -19,6 +19,7 @@ strict_windows_installer_execution="$(to_bool "${STRICT_WINDOWS_INSTALLER_EXECUT
 strict_windows_installer_packaging="$(to_bool "${STRICT_WINDOWS_INSTALLER_PACKAGING:-0}")"
 strict_windows_installer_naming="$(to_bool "${STRICT_WINDOWS_INSTALLER_NAMING:-0}")"
 strict_windows_installer_provenance="$(to_bool "${STRICT_WINDOWS_INSTALLER_PROVENANCE:-0}")"
+strict_windows_protocol_registration="$(to_bool "${STRICT_WINDOWS_PROTOCOL_REGISTRATION:-0}")"
 strict_release_evidence_bundle="$(to_bool "${STRICT_RELEASE_EVIDENCE_BUNDLE:-0}")"
 publish_appcast_external="$(to_bool "${PUBLISH_APPCAST_EXTERNAL:-0}")"
 appcast_publish_provider="$(printf '%s' "${APPCAST_PUBLISH_PROVIDER:-none}" | tr '[:upper:]' '[:lower:]')"
@@ -107,12 +108,20 @@ if [[ "$strict_windows_installer_provenance" -eq 1 && "$strict_windows_installer
   add_required "STRICT_WINDOWS_INSTALLER_PROVENANCE requires STRICT_WINDOWS_INSTALLER_NAMING=1."
 fi
 
+if [[ "$strict_windows_protocol_registration" -eq 1 && "$strict_windows_installer_execution" -eq 0 ]]; then
+  add_required "STRICT_WINDOWS_PROTOCOL_REGISTRATION requires STRICT_WINDOWS_INSTALLER_EXECUTION=1."
+fi
+
 if [[ "$strict_release_evidence_bundle" -eq 1 && "$strict_signing_provenance" -eq 0 ]]; then
   add_required "STRICT_RELEASE_EVIDENCE_BUNDLE requires STRICT_SIGNING_PROVENANCE=1."
 fi
 
 if [[ "$strict_release_evidence_bundle" -eq 1 && "$strict_windows_installer_provenance" -eq 0 ]]; then
   add_required "STRICT_RELEASE_EVIDENCE_BUNDLE requires STRICT_WINDOWS_INSTALLER_PROVENANCE=1."
+fi
+
+if [[ "$strict_release_evidence_bundle" -eq 1 && "$strict_windows_protocol_registration" -eq 0 ]]; then
+  add_required "STRICT_RELEASE_EVIDENCE_BUNDLE requires STRICT_WINDOWS_PROTOCOL_REGISTRATION=1."
 fi
 
 if [[ "$publish_appcast_external" -eq 1 && "$appcast_publish_dry_run" -eq 0 && "$allow_appcast_external_production" -eq 0 ]]; then
@@ -171,6 +180,7 @@ fi
   echo "- STRICT_WINDOWS_INSTALLER_PACKAGING: $strict_windows_installer_packaging"
   echo "- STRICT_WINDOWS_INSTALLER_NAMING: $strict_windows_installer_naming"
   echo "- STRICT_WINDOWS_INSTALLER_PROVENANCE: $strict_windows_installer_provenance"
+  echo "- STRICT_WINDOWS_PROTOCOL_REGISTRATION: $strict_windows_protocol_registration"
   echo "- STRICT_RELEASE_EVIDENCE_BUNDLE: $strict_release_evidence_bundle"
   echo "- PUBLISH_APPCAST_EXTERNAL: $publish_appcast_external"
   echo "- APPCAST_PUBLISH_PROVIDER: $appcast_publish_provider"

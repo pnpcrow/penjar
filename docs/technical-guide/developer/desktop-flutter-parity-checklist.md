@@ -41,7 +41,7 @@ This checklist tracks user-facing workflow parity for the Flutter desktop full-p
 
 ## Cross-cutting shell/release routing note
 
-- Windows deep-link runtime handoff is covered by running-instance relay (`WM_COPYDATA` -> `onLaunchRoute`) and installer-pipeline protocol registration command-hook baseline (`PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND` with scheme/target overrides), while production registry/installer command provisioning remains tracked as pending.
+- Windows deep-link runtime handoff is covered by running-instance relay (`WM_COPYDATA` -> `onLaunchRoute`) and installer-pipeline protocol registration command-hook baseline (`PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND` with scheme/target overrides), with strict gate control (`STRICT_WINDOWS_PROTOCOL_REGISTRATION`) available for release-smoke policy enforcement; production registry/installer command provisioning remains tracked as pending.
 
 ## Completion criteria per row
 

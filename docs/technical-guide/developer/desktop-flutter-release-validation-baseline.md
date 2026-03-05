@@ -108,7 +108,9 @@ This baseline defines minimum release validation requirements for desktop distri
      - set `STRICT_WINDOWS_INSTALLER_PROVENANCE=1` (or workflow input `enforce_windows_installer_provenance=true`) to enforce installer provenance verification and command evidence.
    - windows installer execution strict mode:
      - set `STRICT_WINDOWS_INSTALLER_EXECUTION=1` (or workflow input `enforce_windows_installer_execution=true`) to enforce installer command execution.
-   - strict Windows installer execution/provenance modes reject placeholder command hooks (for example `echo ...`, `<...>`, `todo`/`tbd` markers).
+   - windows protocol registration strict mode:
+     - set `STRICT_WINDOWS_PROTOCOL_REGISTRATION=1` (or workflow input `enforce_windows_protocol_registration=true`) to enforce protocol registration command execution.
+   - strict Windows installer execution/provenance/protocol-registration modes reject placeholder command hooks (for example `echo ...`, `<...>`, `todo`/`tbd` markers).
    - standalone Windows installer generation command check:
      - `pnpm run desktop:release:windows-installer:run`.
    - optional Windows protocol registration command hook:
@@ -204,7 +206,7 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job runs release smoke gate policy preflight and uploads gate policy report artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing command-hook enforcement via `enforce_signing_command_hooks` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing placeholder hygiene enforcement via `enforce_signing_placeholder_hygiene` input.
-- `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness command-hook checks include sign-verify/provenance hooks (`PENJAR_MACOS_SIGN_VERIFY_COMMAND`, `PENJAR_WINDOWS_SIGN_VERIFY_COMMAND`, `PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND`).
+- `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness command-hook checks include sign-verify/provenance/protocol hooks (`PENJAR_MACOS_SIGN_VERIFY_COMMAND`, `PENJAR_WINDOWS_SIGN_VERIFY_COMMAND`, `PENJAR_WINDOWS_INSTALLER_PROVENANCE_COMMAND`, `PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND`).
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing execution enforcement via `enforce_signing_execution` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now requires `enforce_signing_placeholder_hygiene=true` when `enforce_signing_execution=true`.
 - `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now requires `enforce_signing_readiness=true` when `enforce_signing_execution=true` or `enforce_signing_provenance=true`.
@@ -215,13 +217,15 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer naming enforcement via `enforce_windows_installer_naming` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer provenance enforcement via `enforce_windows_installer_provenance` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer execution enforcement via `enforce_windows_installer_execution` input.
-- `.github/workflows/release-desktop-installer-smoke.yml` strict Windows installer execution/provenance checks now include placeholder-hygiene enforcement for command hooks.
+- `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows protocol registration enforcement via `enforce_windows_protocol_registration` input.
+- `.github/workflows/release-desktop-installer-smoke.yml` strict Windows installer execution/provenance/protocol-registration checks now include placeholder-hygiene enforcement for command hooks.
 - `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now requires `STRICT_WINDOWS_INSTALLER_PACKAGING=1` when `STRICT_WINDOWS_INSTALLER_PROVENANCE=1`.
 - `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now models `STRICT_WINDOWS_INSTALLER_NAMING` and requires:
   - `STRICT_WINDOWS_INSTALLER_NAMING=1` -> `STRICT_WINDOWS_INSTALLER_EXECUTION=1` + `STRICT_WINDOWS_INSTALLER_PACKAGING=1`,
   - `STRICT_WINDOWS_INSTALLER_PROVENANCE=1` -> `STRICT_WINDOWS_INSTALLER_NAMING=1`.
+- `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now requires `STRICT_WINDOWS_INSTALLER_EXECUTION=1` when `STRICT_WINDOWS_PROTOCOL_REGISTRATION=1`.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict release evidence bundle enforcement via `enforce_release_evidence_bundle` input.
-- `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now models `STRICT_RELEASE_EVIDENCE_BUNDLE` dependencies (`STRICT_SIGNING_PROVENANCE=1` and `STRICT_WINDOWS_INSTALLER_PROVENANCE=1`).
+- `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now models `STRICT_RELEASE_EVIDENCE_BUNDLE` dependencies (`STRICT_SIGNING_PROVENANCE=1`, `STRICT_WINDOWS_INSTALLER_PROVENANCE=1`, and `STRICT_WINDOWS_PROTOCOL_REGISTRATION=1`).
 - `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now requires configured external provider when `publish_appcast_external=true`, and for non-dry-run external publication requires `enforce_appcast_external_readiness=true` plus `enforce_release_evidence_bundle=true`.
 - `.github/workflows/release-desktop-installer-smoke.yml` builds macOS/Windows release artifacts on demand and uploads installer/update smoke archives + JSON reports.
 - `.github/workflows/release-desktop-installer-smoke.yml` uploads per-platform signing pipeline reports generated during smoke execution.
