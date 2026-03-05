@@ -4098,8 +4098,62 @@ Add executable contract tests for update-manifest validation logic so baseline/f
   - Verify chain executes update-manifest contract stage and remains green.
   - Evidence-index guard enforces update-manifest contract report attachment requirement.
 
+## Unit WS-D-95: Verify test coverage contract gate integration
+
+### Planned objective
+
+Add executable contract tests for verify-test-coverage guard behavior so coverage-regression fail modes are enforced via deterministic case profiles and linked into verify, CI artifacts, and evidence requirements.
+
+### Implemented changes
+
+1. Added verify test coverage contract checker:
+   - new `desktop/scripts/check_verify_test_coverage_contract.sh`,
+   - runs deterministic workspace-scoped cases for:
+     - baseline pass,
+     - uncovered test fail,
+     - missing referenced test fail,
+     - unexpected duplicate reference fail,
+     - allowed duplicate reference pass,
+   - emits `release/reports/verify_test_coverage_contract_report.md`.
+2. Integrated into canonical verify chain:
+   - `desktop/scripts/verify_desktop.sh` now runs `verify test coverage contract check` immediately after base coverage check.
+3. Added root command surface:
+   - `desktop:test:coverage:contract:check`.
+4. Extended CI/workflow artifact chain:
+   - `.github/workflows/tests-desktop-flutter.yml` verify matrix now uploads `desktop-verify-test-coverage-contract-report-*` artifacts.
+   - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job now runs verify-test-coverage contract checker and uploads `desktop-verify-test-coverage-contract-report-smoke`.
+5. Hardened evidence requirements alignment:
+   - `check_release_evidence_index.sh` required attachment list now enforces `release/reports/verify_test_coverage_contract_report.md`.
+   - `desktop-flutter-release-evidence-index.md` now requires verify-test-coverage contract report attachment.
+6. Updated continuity docs:
+   - `desktop-flutter-development-runbook.md` command inventory includes coverage-contract command.
+   - `desktop-flutter-release-validation-baseline.md` operating protocol/CI/script-index notes include verify-test-coverage contract stage + artifacts.
+7. Re-ran validation commands:
+   - syntax checks (`bash -n`) for updated/new scripts,
+   - `pnpm run desktop:test:coverage:contract:check`,
+   - `cd desktop && rg -n "baseline-pass|uncovered-test-fail|missing-referenced-test-fail|unexpected-duplicate-fail|allowed-duplicate-pass|Status: passed" release/reports/verify_test_coverage_contract_report.md`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - deterministic regression coverage for verify-test-coverage fail/pass modes,
+  - verify/CI artifact continuity for coverage-contract reports,
+  - synchronization between evidence requirements and coverage-contract report path.
+- **Issues found during review**
+  1. Existing coverage checker lacked contract-level regression automation for uncovered/missing/duplicate edge cases.
+  2. Coverage contract report path was not yet enforced in release evidence required attachment checks.
+- **Fix applied**
+  1. Added verify-test-coverage contract checker and integrated it into verify + CI artifact chains.
+  2. Added coverage-contract report path to evidence requirements and guard enforcement list.
+- **Post-fix validation criteria**
+  - Contract report includes expected baseline/fail-mode case rows with passing contract status.
+  - Verify chain executes coverage-contract stage and remains green.
+  - Evidence-index guard enforces verify-test-coverage contract report attachment requirement.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard, desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks) plus evidence-index contract regression guard, update-manifest guard automation with validation + contract report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard plus coverage-contract regression guard, desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks) plus evidence-index contract regression guard, update-manifest guard automation with validation + contract report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

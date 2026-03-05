@@ -69,6 +69,7 @@ This baseline defines minimum release validation requirements for desktop distri
    - run release script syntax check: `pnpm run desktop:release:scripts:syntax:check`.
    - run release script syntax contract check: `pnpm run desktop:release:scripts:syntax:contract:check`.
    - run verify test coverage check: `pnpm run desktop:test:coverage:check`.
+   - run verify test coverage contract check: `pnpm run desktop:test:coverage:contract:check`.
    - run desktop command inventory check: `pnpm run desktop:docs:command-inventory:check`.
    - run desktop command inventory contract check: `pnpm run desktop:docs:command-inventory:contract:check`.
 2. Run signing readiness preflight:
@@ -173,6 +174,7 @@ CI baseline note:
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads release script syntax report artifacts (`desktop-release-script-syntax-report-*`).
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads release script syntax contract report artifacts (`desktop-release-script-syntax-contract-report-*`).
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads verify test coverage report artifacts (`desktop-verify-test-coverage-report-*`).
+- `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads verify test coverage contract report artifacts (`desktop-verify-test-coverage-contract-report-*`).
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads desktop command inventory report artifacts (`desktop-command-inventory-report-*`).
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads desktop command inventory contract report artifacts (`desktop-command-inventory-contract-report-*`).
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads update manifest validation report artifacts (`desktop-update-manifest-validation-report-*`).
@@ -181,6 +183,7 @@ CI baseline note:
 - `.github/workflows/tests-desktop-flutter.yml` desktop parity matrix uploads release evidence index contract report artifacts (`desktop-release-evidence-index-contract-report-*`).
 - `.github/workflows/release-desktop-installer-smoke.yml` includes `signing-readiness` job with optional strict enforcement via workflow input.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job runs release script syntax and verify test coverage checks, and uploads `desktop-release-script-syntax-report-smoke` + `desktop-verify-test-coverage-report-smoke` artifacts.
+- `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs verify test coverage contract checks and uploads `desktop-verify-test-coverage-contract-report-smoke` artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs release script syntax contract checks and uploads `desktop-release-script-syntax-contract-report-smoke` artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs desktop command inventory checks and uploads `desktop-command-inventory-report-smoke` artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs desktop command inventory contract checks and uploads `desktop-command-inventory-contract-report-smoke` artifact.
@@ -188,7 +191,7 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs update manifest contract checks and uploads `desktop-update-manifest-contract-report-smoke` artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs release smoke gate policy contract checks and uploads `desktop-release-smoke-gate-policy-contract-report` artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs release evidence index contract checks and uploads `desktop-release-evidence-index-contract-report-smoke` artifact.
-- `desktop/scripts/verify_desktop.sh` now runs release script syntax checks, release script syntax contract checks, verify test coverage checks, desktop command inventory checks, desktop command inventory contract checks, update manifest checks, update manifest contract checks, release smoke gate policy contract checks, and release evidence index contract checks before test/analyze/build phases, and executes contract/parity/mode-matrix tests through dedicated scripts to avoid duplicate suite execution.
+- `desktop/scripts/verify_desktop.sh` now runs release script syntax checks, release script syntax contract checks, verify test coverage checks, verify test coverage contract checks, desktop command inventory checks, desktop command inventory contract checks, update manifest checks, update manifest contract checks, release smoke gate policy contract checks, and release evidence index contract checks before test/analyze/build phases, and executes contract/parity/mode-matrix tests through dedicated scripts to avoid duplicate suite execution.
 - `desktop/scripts/verify_desktop.sh` emits verify stage timing reports (`release/reports/verify_stage_timing_report.md`) including stage-level durations and status.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job runs release smoke gate policy preflight and uploads gate policy report artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing command-hook enforcement via `enforce_signing_command_hooks` input.
@@ -241,6 +244,7 @@ CI baseline note:
 - Release script syntax checker: `desktop/scripts/check_release_script_syntax.sh` (recursive scan across `desktop/scripts/**/*.sh`, including shared helper modules under `desktop/scripts/lib/`).
 - Release script syntax contract checker: `desktop/scripts/check_release_script_syntax_contract.sh`.
 - Verify test coverage checker: `desktop/scripts/check_verify_test_coverage.sh`.
+- Verify test coverage contract checker: `desktop/scripts/check_verify_test_coverage_contract.sh`.
 - Desktop command inventory checker: `desktop/scripts/check_desktop_command_inventory.sh`.
 - Desktop command inventory contract checker: `desktop/scripts/check_desktop_command_inventory_contract.sh`.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.

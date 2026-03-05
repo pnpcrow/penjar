@@ -111,6 +111,14 @@ jobs:
           path: desktop/release/reports/verify_test_coverage_report.md
           if-no-files-found: warn
 
+      - name: Upload verify test coverage contract report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-verify-test-coverage-contract-report-${{ matrix.label }}
+          path: desktop/release/reports/verify_test_coverage_contract_report.md
+          if-no-files-found: warn
+
       - name: Upload desktop command inventory report
         if: always()
         uses: actions/upload-artifact@v4

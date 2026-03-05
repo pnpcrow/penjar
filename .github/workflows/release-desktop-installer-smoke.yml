@@ -124,6 +124,10 @@ jobs:
         working-directory: ./desktop
         run: ./scripts/check_verify_test_coverage.sh
 
+      - name: Run verify test coverage contract check
+        working-directory: ./desktop
+        run: ./scripts/check_verify_test_coverage_contract.sh
+
       - name: Run desktop command inventory check
         working-directory: ./desktop
         run: ./scripts/check_desktop_command_inventory.sh
@@ -241,6 +245,14 @@ jobs:
         with:
           name: desktop-verify-test-coverage-report-smoke
           path: desktop/release/reports/verify_test_coverage_report.md
+          if-no-files-found: warn
+
+      - name: Upload verify test coverage contract report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-verify-test-coverage-contract-report-smoke
+          path: desktop/release/reports/verify_test_coverage_contract_report.md
           if-no-files-found: warn
 
       - name: Upload desktop command inventory report

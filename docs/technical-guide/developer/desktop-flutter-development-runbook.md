@@ -31,6 +31,7 @@ This runbook defines the repeatable execution loop for the Flutter desktop full-
    - `pnpm run desktop:test:contracts`
    - `pnpm run desktop:test:contracts:no-pub`
    - `pnpm run desktop:test:coverage:check`
+   - `pnpm run desktop:test:coverage:contract:check`
    - `pnpm run desktop:docs:command-inventory:check`
    - `pnpm run desktop:docs:command-inventory:contract:check`
    - `pnpm run desktop:test:parity`

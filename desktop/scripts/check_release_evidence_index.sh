@@ -106,6 +106,7 @@ done < "$index_file"
 required_attachment_paths=(
   "release/reports/release_script_syntax_report.md"
   "release/reports/release_script_syntax_contract_report.md"
+  "release/reports/verify_test_coverage_contract_report.md"
   "release/reports/desktop_command_inventory_contract_report.md"
   "release/reports/verify_test_coverage_report.md"
   "release/reports/desktop_command_inventory_report.md"
