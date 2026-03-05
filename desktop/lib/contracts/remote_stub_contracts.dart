@@ -97,6 +97,211 @@ class RemoteStubOperationIds {
   };
 }
 
+class RemoteStubBackendRoute {
+  const RemoteStubBackendRoute({
+    required this.workflow,
+    required this.method,
+    required this.endpoint,
+  });
+
+  final String workflow;
+  final String method;
+  final String endpoint;
+}
+
+class RemoteStubBackendRouteCatalog {
+  const RemoteStubBackendRouteCatalog._();
+
+  static const RemoteStubBackendRoute _defaultRoute = RemoteStubBackendRoute(
+    workflow: 'contracts',
+    method: 'POST',
+    endpoint: '/api/desktop/contracts/operation',
+  );
+
+  static const Map<String, RemoteStubBackendRoute> _routes =
+      <String, RemoteStubBackendRoute>{
+        RemoteStubOperationIds.setRememberSession: RemoteStubBackendRoute(
+          workflow: 'auth',
+          method: 'PATCH',
+          endpoint: '/api/desktop/auth/session/preferences',
+        ),
+        RemoteStubOperationIds.signIn: RemoteStubBackendRoute(
+          workflow: 'auth',
+          method: 'POST',
+          endpoint: '/api/desktop/auth/sign-in',
+        ),
+        RemoteStubOperationIds.restoreSession: RemoteStubBackendRoute(
+          workflow: 'auth',
+          method: 'POST',
+          endpoint: '/api/desktop/auth/session/restore',
+        ),
+        RemoteStubOperationIds.refreshToken: RemoteStubBackendRoute(
+          workflow: 'auth',
+          method: 'POST',
+          endpoint: '/api/desktop/auth/token/refresh',
+        ),
+        RemoteStubOperationIds.createProject: RemoteStubBackendRoute(
+          workflow: 'projects',
+          method: 'POST',
+          endpoint: '/api/desktop/projects',
+        ),
+        RemoteStubOperationIds.switchProject: RemoteStubBackendRoute(
+          workflow: 'projects',
+          method: 'POST',
+          endpoint: '/api/desktop/projects/select',
+        ),
+        RemoteStubOperationIds.createFile: RemoteStubBackendRoute(
+          workflow: 'projects',
+          method: 'POST',
+          endpoint: '/api/desktop/projects/files',
+        ),
+        RemoteStubOperationIds.deleteFile: RemoteStubBackendRoute(
+          workflow: 'projects',
+          method: 'DELETE',
+          endpoint: '/api/desktop/projects/files/first',
+        ),
+        RemoteStubOperationIds.createRectangle: RemoteStubBackendRoute(
+          workflow: 'canvas',
+          method: 'POST',
+          endpoint: '/api/desktop/canvas/shapes/rectangle',
+        ),
+        RemoteStubOperationIds.selectShape: RemoteStubBackendRoute(
+          workflow: 'canvas',
+          method: 'POST',
+          endpoint: '/api/desktop/canvas/shapes/select',
+        ),
+        RemoteStubOperationIds.moveShape: RemoteStubBackendRoute(
+          workflow: 'canvas',
+          method: 'POST',
+          endpoint: '/api/desktop/canvas/shapes/move',
+        ),
+        RemoteStubOperationIds.resizeShape: RemoteStubBackendRoute(
+          workflow: 'canvas',
+          method: 'POST',
+          endpoint: '/api/desktop/canvas/shapes/resize',
+        ),
+        RemoteStubOperationIds.toggleFill: RemoteStubBackendRoute(
+          workflow: 'canvas',
+          method: 'POST',
+          endpoint: '/api/desktop/canvas/shapes/fill/toggle',
+        ),
+        RemoteStubOperationIds.importAsset: RemoteStubBackendRoute(
+          workflow: 'assets',
+          method: 'POST',
+          endpoint: '/api/desktop/assets/import',
+        ),
+        RemoteStubOperationIds.selectAsset: RemoteStubBackendRoute(
+          workflow: 'assets',
+          method: 'POST',
+          endpoint: '/api/desktop/assets/select',
+        ),
+        RemoteStubOperationIds.useAsset: RemoteStubBackendRoute(
+          workflow: 'assets',
+          method: 'POST',
+          endpoint: '/api/desktop/assets/use',
+        ),
+        RemoteStubOperationIds.removeAsset: RemoteStubBackendRoute(
+          workflow: 'assets',
+          method: 'DELETE',
+          endpoint: '/api/desktop/assets/selected',
+        ),
+        RemoteStubOperationIds.togglePeerPresence: RemoteStubBackendRoute(
+          workflow: 'collaboration',
+          method: 'POST',
+          endpoint: '/api/desktop/collaboration/presence/toggle',
+        ),
+        RemoteStubOperationIds.createThread: RemoteStubBackendRoute(
+          workflow: 'collaboration',
+          method: 'POST',
+          endpoint: '/api/desktop/collaboration/threads',
+        ),
+        RemoteStubOperationIds.selectThread: RemoteStubBackendRoute(
+          workflow: 'collaboration',
+          method: 'POST',
+          endpoint: '/api/desktop/collaboration/threads/select',
+        ),
+        RemoteStubOperationIds.resolveThread: RemoteStubBackendRoute(
+          workflow: 'collaboration',
+          method: 'POST',
+          endpoint: '/api/desktop/collaboration/threads/resolve',
+        ),
+        RemoteStubOperationIds.setInspectTarget: RemoteStubBackendRoute(
+          workflow: 'inspect',
+          method: 'POST',
+          endpoint: '/api/desktop/inspect/target',
+        ),
+        RemoteStubOperationIds.generateSnippet: RemoteStubBackendRoute(
+          workflow: 'inspect',
+          method: 'POST',
+          endpoint: '/api/desktop/inspect/snippet',
+        ),
+        RemoteStubOperationIds.copyMetadata: RemoteStubBackendRoute(
+          workflow: 'inspect',
+          method: 'POST',
+          endpoint: '/api/desktop/inspect/metadata/copy',
+        ),
+        RemoteStubOperationIds.runExport: RemoteStubBackendRoute(
+          workflow: 'export',
+          method: 'POST',
+          endpoint: '/api/desktop/export/run',
+        ),
+        RemoteStubOperationIds.saveExport: RemoteStubBackendRoute(
+          workflow: 'export',
+          method: 'POST',
+          endpoint: '/api/desktop/export/save',
+        ),
+        RemoteStubOperationIds.clearExportArtifacts: RemoteStubBackendRoute(
+          workflow: 'export',
+          method: 'DELETE',
+          endpoint: '/api/desktop/export/artifacts',
+        ),
+        RemoteStubOperationIds.runHealthCheck: RemoteStubBackendRoute(
+          workflow: 'diagnostics',
+          method: 'POST',
+          endpoint: '/api/desktop/diagnostics/health-check',
+        ),
+        RemoteStubOperationIds.simulateDisconnect: RemoteStubBackendRoute(
+          workflow: 'diagnostics',
+          method: 'POST',
+          endpoint: '/api/desktop/diagnostics/disconnect/simulate',
+        ),
+        RemoteStubOperationIds.attemptReconnect: RemoteStubBackendRoute(
+          workflow: 'diagnostics',
+          method: 'POST',
+          endpoint: '/api/desktop/diagnostics/reconnect',
+        ),
+        RemoteStubOperationIds.openRecoveryGuide: RemoteStubBackendRoute(
+          workflow: 'diagnostics',
+          method: 'POST',
+          endpoint: '/api/desktop/diagnostics/recovery-guide/open',
+        ),
+      };
+
+  static RemoteStubBackendRoute resolve(String operation) {
+    final String normalized = _normalizeOperation(operation);
+    return _routes[normalized] ?? _defaultRoute;
+  }
+}
+
+RemoteStubTransportRequest _buildTransportRequest(
+  String operation, {
+  Map<String, Object?> payload = const <String, Object?>{},
+}) {
+  final String normalizedOperation = _normalizeOperation(operation);
+  final RemoteStubBackendRoute route = RemoteStubBackendRouteCatalog.resolve(
+    normalizedOperation,
+  );
+  return RemoteStubTransportRequest(
+    operation: normalizedOperation,
+    workflow: route.workflow,
+    method: route.method,
+    endpoint: route.endpoint,
+    payload: payload.isEmpty
+        ? const <String, Object?>{}
+        : Map<String, Object?>.unmodifiable(payload),
+  );
+}
+
 String _decorateStatus(String status) {
   if (status.startsWith(_kRemoteStubPrefix)) {
     return status;
@@ -130,9 +335,19 @@ class RemoteStubFaultProfile {
 }
 
 class RemoteStubTransportRequest {
-  const RemoteStubTransportRequest({required this.operation});
+  const RemoteStubTransportRequest({
+    required this.operation,
+    this.workflow = 'contracts',
+    this.method = 'POST',
+    this.endpoint = '/api/desktop/contracts/operation',
+    this.payload = const <String, Object?>{},
+  });
 
   final String operation;
+  final String workflow;
+  final String method;
+  final String endpoint;
+  final Map<String, Object?> payload;
 }
 
 class RemoteStubTransportResult {
@@ -213,16 +428,22 @@ class RemoteStubScriptedTransportClient extends RemoteStubTransportClient {
 
 class RemoteStubHttpTransportProbeRequest {
   const RemoteStubHttpTransportProbeRequest({
-    required this.operation,
+    required this.transportRequest,
     required this.healthUrl,
     required this.timeout,
     required this.allowedStatusCodes,
   });
 
-  final String operation;
+  final RemoteStubTransportRequest transportRequest;
   final String healthUrl;
   final Duration timeout;
   final Set<int> allowedStatusCodes;
+
+  String get operation => transportRequest.operation;
+  String get workflow => transportRequest.workflow;
+  String get method => transportRequest.method;
+  String get endpoint => transportRequest.endpoint;
+  Map<String, Object?> get payload => transportRequest.payload;
 }
 
 class RemoteStubHttpTransportProbeResult {
@@ -337,7 +558,7 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
     }
     final RemoteStubHttpTransportProbeResult probeResult = _probe(
       RemoteStubHttpTransportProbeRequest(
-        operation: request.operation,
+        transportRequest: request,
         healthUrl: healthUrl,
         timeout: timeout,
         allowedStatusCodes: _effectiveAllowedStatusCodes,
@@ -355,20 +576,21 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
 bool _allowRemoteStubOperation({
   required RemoteStubFaultProfile faultProfile,
   required RemoteStubTransportClient transportClient,
-  required String operation,
+  required RemoteStubTransportRequest transportRequest,
   required void Function(String status) setStatusOverride,
 }) {
-  if (faultProfile.blocksOperation(operation)) {
-    setStatusOverride(_blockedStatus(faultProfile, operation));
+  if (faultProfile.blocksOperation(transportRequest.operation)) {
+    setStatusOverride(_blockedStatus(faultProfile, transportRequest.operation));
     return false;
   }
 
   final RemoteStubTransportResult transportResult = transportClient.execute(
-    RemoteStubTransportRequest(operation: operation),
+    transportRequest,
   );
   if (!transportResult.allowed) {
     final String deniedStatus =
-        transportResult.status ?? '${faultProfile.reason}: $operation.';
+        transportResult.status ??
+        '${faultProfile.reason}: ${transportRequest.operation}.';
     setStatusOverride(_decorateStatus(deniedStatus));
     return false;
   }
@@ -463,11 +685,14 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
   AuthSessionState get state =>
       _decorateAuthState(_delegate.state, status: _statusOverride);
 
-  bool _allowOperation(String operation) {
+  bool _allowOperation(
+    String operation, {
+    Map<String, Object?> payload = const <String, Object?>{},
+  }) {
     return _allowRemoteStubOperation(
       faultProfile: faultProfile,
       transportClient: transportClient,
-      operation: operation,
+      transportRequest: _buildTransportRequest(operation, payload: payload),
       setStatusOverride: (String status) {
         _statusOverride = status;
       },
@@ -480,7 +705,10 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
 
   @override
   AuthSessionState setRememberSession(bool enabled) {
-    if (!_allowOperation(RemoteStubOperationIds.setRememberSession)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.setRememberSession,
+      payload: <String, Object?>{'rememberSession': enabled},
+    )) {
       return state;
     }
     _clearOverride();
@@ -489,7 +717,13 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
 
   @override
   AuthSessionState signIn(AuthSignInRequest request) {
-    if (!_allowOperation(RemoteStubOperationIds.signIn)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.signIn,
+      payload: <String, Object?>{
+        'email': request.email.trim(),
+        'passwordLength': request.password.length,
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -498,7 +732,12 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
 
   @override
   AuthSessionState restoreSession() {
-    if (!_allowOperation(RemoteStubOperationIds.restoreSession)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.restoreSession,
+      payload: <String, Object?>{
+        'rememberSessionEnabled': _delegate.state.rememberSession,
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -507,7 +746,10 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
 
   @override
   AuthSessionState refreshToken() {
-    if (!_allowOperation(RemoteStubOperationIds.refreshToken)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.refreshToken,
+      payload: <String, Object?>{'signedIn': _delegate.state.signedIn},
+    )) {
       return state;
     }
     _clearOverride();
@@ -531,11 +773,14 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
   ProjectLifecycleState get state =>
       _decorateProjectState(_delegate.state, status: _statusOverride);
 
-  bool _allowOperation(String operation) {
+  bool _allowOperation(
+    String operation, {
+    Map<String, Object?> payload = const <String, Object?>{},
+  }) {
     return _allowRemoteStubOperation(
       faultProfile: faultProfile,
       transportClient: transportClient,
-      operation: operation,
+      transportRequest: _buildTransportRequest(operation, payload: payload),
       setStatusOverride: (String status) {
         _statusOverride = status;
       },
@@ -548,7 +793,10 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
 
   @override
   ProjectLifecycleState createProject(String projectName) {
-    if (!_allowOperation(RemoteStubOperationIds.createProject)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.createProject,
+      payload: <String, Object?>{'projectName': projectName.trim()},
+    )) {
       return state;
     }
     _clearOverride();
@@ -557,7 +805,13 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
 
   @override
   ProjectLifecycleState switchProject(int index) {
-    if (!_allowOperation(RemoteStubOperationIds.switchProject)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.switchProject,
+      payload: <String, Object?>{
+        'index': index,
+        'projectCount': _delegate.state.projects.length,
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -566,7 +820,13 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
 
   @override
   ProjectLifecycleState createFile(String fileName) {
-    if (!_allowOperation(RemoteStubOperationIds.createFile)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.createFile,
+      payload: <String, Object?>{
+        'fileName': fileName.trim(),
+        'selectedProjectId': _delegate.state.selectedProject.id,
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -575,7 +835,13 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
 
   @override
   ProjectLifecycleState deleteFirstFile() {
-    if (!_allowOperation(RemoteStubOperationIds.deleteFile)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.deleteFile,
+      payload: <String, Object?>{
+        'selectedProjectId': _delegate.state.selectedProject.id,
+        'hasFiles': _delegate.state.selectedProject.files.isNotEmpty,
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -599,11 +865,14 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
   CanvasEditingState get state =>
       _decorateCanvasState(_delegate.state, status: _statusOverride);
 
-  bool _allowOperation(String operation) {
+  bool _allowOperation(
+    String operation, {
+    Map<String, Object?> payload = const <String, Object?>{},
+  }) {
     return _allowRemoteStubOperation(
       faultProfile: faultProfile,
       transportClient: transportClient,
-      operation: operation,
+      transportRequest: _buildTransportRequest(operation, payload: payload),
       setStatusOverride: (String status) {
         _statusOverride = status;
       },
@@ -616,7 +885,10 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState createRectangle() {
-    if (!_allowOperation(RemoteStubOperationIds.createRectangle)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.createRectangle,
+      payload: const <String, Object?>{'shapeType': 'rectangle'},
+    )) {
       return state;
     }
     _clearOverride();
@@ -625,7 +897,13 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState selectShape(int index) {
-    if (!_allowOperation(RemoteStubOperationIds.selectShape)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.selectShape,
+      payload: <String, Object?>{
+        'index': index,
+        'shapeCount': _delegate.state.shapes.length,
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -634,7 +912,12 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState moveSelected() {
-    if (!_allowOperation(RemoteStubOperationIds.moveShape)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.moveShape,
+      payload: <String, Object?>{
+        'selectedShapeId': _delegate.state.selectedShape?.id ?? '',
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -643,7 +926,12 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState resizeSelected() {
-    if (!_allowOperation(RemoteStubOperationIds.resizeShape)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.resizeShape,
+      payload: <String, Object?>{
+        'selectedShapeId': _delegate.state.selectedShape?.id ?? '',
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -652,7 +940,13 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
 
   @override
   CanvasEditingState toggleFillSelected() {
-    if (!_allowOperation(RemoteStubOperationIds.toggleFill)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.toggleFill,
+      payload: <String, Object?>{
+        'selectedShapeId': _delegate.state.selectedShape?.id ?? '',
+        'currentFill': _delegate.state.selectedShape?.fillHex ?? '',
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -676,11 +970,14 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
   AssetManagementState get state =>
       _decorateAssetState(_delegate.state, status: _statusOverride);
 
-  bool _allowOperation(String operation) {
+  bool _allowOperation(
+    String operation, {
+    Map<String, Object?> payload = const <String, Object?>{},
+  }) {
     return _allowRemoteStubOperation(
       faultProfile: faultProfile,
       transportClient: transportClient,
-      operation: operation,
+      transportRequest: _buildTransportRequest(operation, payload: payload),
       setStatusOverride: (String status) {
         _statusOverride = status;
       },
@@ -693,7 +990,13 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
 
   @override
   AssetManagementState importAsset(String assetName, String assetType) {
-    if (!_allowOperation(RemoteStubOperationIds.importAsset)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.importAsset,
+      payload: <String, Object?>{
+        'assetName': assetName.trim(),
+        'assetType': assetType,
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -702,7 +1005,13 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
 
   @override
   AssetManagementState selectAsset(int index) {
-    if (!_allowOperation(RemoteStubOperationIds.selectAsset)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.selectAsset,
+      payload: <String, Object?>{
+        'index': index,
+        'assetCount': _delegate.state.assets.length,
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -711,7 +1020,12 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
 
   @override
   AssetManagementState useSelectedAsset() {
-    if (!_allowOperation(RemoteStubOperationIds.useAsset)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.useAsset,
+      payload: <String, Object?>{
+        'selectedAssetId': _delegate.state.selectedAsset?.id ?? '',
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -720,7 +1034,12 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
 
   @override
   AssetManagementState removeSelectedAsset() {
-    if (!_allowOperation(RemoteStubOperationIds.removeAsset)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.removeAsset,
+      payload: <String, Object?>{
+        'selectedAssetId': _delegate.state.selectedAsset?.id ?? '',
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -745,11 +1064,14 @@ class RemoteStubCollaborationContextContract
   CollaborationContextState get state =>
       _decorateCollaborationState(_delegate.state, status: _statusOverride);
 
-  bool _allowOperation(String operation) {
+  bool _allowOperation(
+    String operation, {
+    Map<String, Object?> payload = const <String, Object?>{},
+  }) {
     return _allowRemoteStubOperation(
       faultProfile: faultProfile,
       transportClient: transportClient,
-      operation: operation,
+      transportRequest: _buildTransportRequest(operation, payload: payload),
       setStatusOverride: (String status) {
         _statusOverride = status;
       },
@@ -762,7 +1084,10 @@ class RemoteStubCollaborationContextContract
 
   @override
   CollaborationContextState togglePeerPresence() {
-    if (!_allowOperation(RemoteStubOperationIds.togglePeerPresence)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.togglePeerPresence,
+      payload: <String, Object?>{'peerActive': _delegate.state.peerActive},
+    )) {
       return state;
     }
     _clearOverride();
@@ -771,7 +1096,10 @@ class RemoteStubCollaborationContextContract
 
   @override
   CollaborationContextState createThread(String title) {
-    if (!_allowOperation(RemoteStubOperationIds.createThread)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.createThread,
+      payload: <String, Object?>{'title': title.trim()},
+    )) {
       return state;
     }
     _clearOverride();
@@ -780,7 +1108,13 @@ class RemoteStubCollaborationContextContract
 
   @override
   CollaborationContextState selectThread(int index) {
-    if (!_allowOperation(RemoteStubOperationIds.selectThread)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.selectThread,
+      payload: <String, Object?>{
+        'index': index,
+        'threadCount': _delegate.state.threads.length,
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -789,7 +1123,12 @@ class RemoteStubCollaborationContextContract
 
   @override
   CollaborationContextState resolveSelectedThread() {
-    if (!_allowOperation(RemoteStubOperationIds.resolveThread)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.resolveThread,
+      payload: <String, Object?>{
+        'selectedThreadId': _delegate.state.selectedThread?.id ?? '',
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -813,11 +1152,14 @@ class RemoteStubInspectHandoffContract implements InspectHandoffContract {
   InspectHandoffState get state =>
       _decorateInspectState(_delegate.state, status: _statusOverride);
 
-  bool _allowOperation(String operation) {
+  bool _allowOperation(
+    String operation, {
+    Map<String, Object?> payload = const <String, Object?>{},
+  }) {
     return _allowRemoteStubOperation(
       faultProfile: faultProfile,
       transportClient: transportClient,
-      operation: operation,
+      transportRequest: _buildTransportRequest(operation, payload: payload),
       setStatusOverride: (String status) {
         _statusOverride = status;
       },
@@ -830,7 +1172,10 @@ class RemoteStubInspectHandoffContract implements InspectHandoffContract {
 
   @override
   InspectHandoffState setTarget(String target) {
-    if (!_allowOperation(RemoteStubOperationIds.setInspectTarget)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.setInspectTarget,
+      payload: <String, Object?>{'target': target},
+    )) {
       return state;
     }
     _clearOverride();
@@ -839,7 +1184,13 @@ class RemoteStubInspectHandoffContract implements InspectHandoffContract {
 
   @override
   InspectHandoffState generateSnippet(String elementId) {
-    if (!_allowOperation(RemoteStubOperationIds.generateSnippet)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.generateSnippet,
+      payload: <String, Object?>{
+        'elementId': elementId.trim(),
+        'target': _delegate.state.target,
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -848,7 +1199,10 @@ class RemoteStubInspectHandoffContract implements InspectHandoffContract {
 
   @override
   InspectHandoffState copyMetadata(String elementId) {
-    if (!_allowOperation(RemoteStubOperationIds.copyMetadata)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.copyMetadata,
+      payload: <String, Object?>{'elementId': elementId.trim()},
+    )) {
       return state;
     }
     _clearOverride();
@@ -872,11 +1226,14 @@ class RemoteStubExportWorkflowContract implements ExportWorkflowContract {
   ExportWorkflowState get state =>
       _decorateExportState(_delegate.state, status: _statusOverride);
 
-  bool _allowOperation(String operation) {
+  bool _allowOperation(
+    String operation, {
+    Map<String, Object?> payload = const <String, Object?>{},
+  }) {
     return _allowRemoteStubOperation(
       faultProfile: faultProfile,
       transportClient: transportClient,
-      operation: operation,
+      transportRequest: _buildTransportRequest(operation, payload: payload),
       setStatusOverride: (String status) {
         _statusOverride = status;
       },
@@ -889,7 +1246,15 @@ class RemoteStubExportWorkflowContract implements ExportWorkflowContract {
 
   @override
   ExportWorkflowState runExport(ExportRequest request) {
-    if (!_allowOperation(RemoteStubOperationIds.runExport)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.runExport,
+      payload: <String, Object?>{
+        'fileName': request.fileName.trim(),
+        'format': request.format,
+        'scale': request.scale,
+        'includeBackground': request.includeBackground,
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -898,7 +1263,12 @@ class RemoteStubExportWorkflowContract implements ExportWorkflowContract {
 
   @override
   ExportWorkflowState saveLatest() {
-    if (!_allowOperation(RemoteStubOperationIds.saveExport)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.saveExport,
+      payload: <String, Object?>{
+        'hasArtifact': _delegate.state.latestArtifact != null,
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -907,7 +1277,12 @@ class RemoteStubExportWorkflowContract implements ExportWorkflowContract {
 
   @override
   ExportWorkflowState clearArtifacts() {
-    if (!_allowOperation(RemoteStubOperationIds.clearExportArtifacts)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.clearExportArtifacts,
+      payload: <String, Object?>{
+        'artifactCount': _delegate.state.artifacts.length,
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -932,11 +1307,14 @@ class RemoteStubDiagnosticsRecoveryContract
   DiagnosticsRecoveryState get state =>
       _decorateDiagnosticsState(_delegate.state, status: _statusOverride);
 
-  bool _allowOperation(String operation) {
+  bool _allowOperation(
+    String operation, {
+    Map<String, Object?> payload = const <String, Object?>{},
+  }) {
     return _allowRemoteStubOperation(
       faultProfile: faultProfile,
       transportClient: transportClient,
-      operation: operation,
+      transportRequest: _buildTransportRequest(operation, payload: payload),
       setStatusOverride: (String status) {
         _statusOverride = status;
       },
@@ -949,7 +1327,13 @@ class RemoteStubDiagnosticsRecoveryContract
 
   @override
   DiagnosticsRecoveryState runHealthCheck() {
-    if (!_allowOperation(RemoteStubOperationIds.runHealthCheck)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.runHealthCheck,
+      payload: <String, Object?>{
+        'websocketHealthy': _delegate.state.websocketHealthy,
+        'mcpHealthy': _delegate.state.mcpHealthy,
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -958,7 +1342,13 @@ class RemoteStubDiagnosticsRecoveryContract
 
   @override
   DiagnosticsRecoveryState simulateDisconnect() {
-    if (!_allowOperation(RemoteStubOperationIds.simulateDisconnect)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.simulateDisconnect,
+      payload: <String, Object?>{
+        'websocketHealthy': _delegate.state.websocketHealthy,
+        'mcpHealthy': _delegate.state.mcpHealthy,
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -967,7 +1357,12 @@ class RemoteStubDiagnosticsRecoveryContract
 
   @override
   DiagnosticsRecoveryState attemptReconnect() {
-    if (!_allowOperation(RemoteStubOperationIds.attemptReconnect)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.attemptReconnect,
+      payload: <String, Object?>{
+        'reconnectAttempts': _delegate.state.reconnectAttempts,
+      },
+    )) {
       return state;
     }
     _clearOverride();
@@ -976,7 +1371,13 @@ class RemoteStubDiagnosticsRecoveryContract
 
   @override
   DiagnosticsRecoveryState openRecoveryGuide() {
-    if (!_allowOperation(RemoteStubOperationIds.openRecoveryGuide)) {
+    if (!_allowOperation(
+      RemoteStubOperationIds.openRecoveryGuide,
+      payload: <String, Object?>{
+        'reconnectAttempts': _delegate.state.reconnectAttempts,
+        'websocketHealthy': _delegate.state.websocketHealthy,
+      },
+    )) {
       return state;
     }
     _clearOverride();

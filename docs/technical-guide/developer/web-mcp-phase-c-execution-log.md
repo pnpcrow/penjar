@@ -4782,8 +4782,64 @@ Introduce a real backend transport path for runtime-switchable remote-stub adapt
   - Remote profile summary surfaces transport label when HTTP transport is configured.
   - Full desktop verification gate (`desktop:verify:full`) remains green after transport integration.
 
+## Unit WS-D-111: Workflow-level backend request metadata mapping for remote-stub transport
+
+### Planned objective
+
+Complete workflow-specific backend payload transport integration by mapping every remote-stub operation to explicit backend request metadata (workflow, method, endpoint, payload) while preserving existing synchronous contract signatures and degraded-path behavior.
+
+### Implemented changes
+
+1. Expanded transport request contract in `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `RemoteStubTransportRequest` now carries `workflow`, `method`, `endpoint`, and `payload` metadata in addition to `operation`.
+   - added `RemoteStubBackendRoute` + `RemoteStubBackendRouteCatalog` for operation-to-endpoint/method mapping across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics domains.
+2. Rewired operation preflight to request-driven transport execution:
+   - `_allowRemoteStubOperation(...)` now receives `RemoteStubTransportRequest` directly rather than operation ID only.
+   - all remote-stub adapter `_allowOperation(...)` helpers now build transport requests via `_buildTransportRequest(...)`.
+3. Added workflow payload mapping for all operations:
+   - auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics mutation operations now populate backend request payload metadata per operation.
+   - auth sign-in payload is sanitized (`passwordLength`) instead of sending raw password content.
+4. Extended HTTP transport probe request visibility:
+   - `RemoteStubHttpTransportProbeRequest` now exposes `workflow/method/endpoint/payload` via forwarded transport request metadata.
+   - `RemoteStubHttpTransportClient` now forwards full transport request metadata to probe hooks.
+5. Added/updated regression tests:
+   - `desktop/test/contracts/workflow_contracts_test.dart`:
+     - new `maps all operations to backend request metadata` test validates:
+       - all `RemoteStubOperationIds.all` operations emit transport requests,
+       - no operation falls back to default route endpoint,
+       - representative route-method-payload assertions (auth/project/delete/export).
+     - existing HTTP transport tests now verify workflow/method/endpoint/payload metadata in probe callbacks.
+6. Synced continuity docs:
+   - `desktop-flutter-migration-inventory.md` now reflects workflow-level backend request metadata mapping completion.
+   - `desktop-flutter-parity-checklist.md` now includes backend request metadata mapping status in workflow notes.
+   - `desktop-flutter-parity-acceptance-baseline.md` now documents transport-request metadata parity contract.
+   - `desktop-flutter-development-runbook.md` next-unit candidate now targets real backend execution/response mapping on top of current request metadata path.
+7. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/contracts/desktop_contract_bundle_test.dart`,
+   - `cd desktop && flutter test test/parity/remote_stub_mode_parity_test.dart test/parity/remote_stub_unavailable_parity_test.dart`,
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - completeness of operation-to-backend route mapping coverage across all workflow domains,
+  - correctness of transport-request metadata propagation into HTTP probe hooks,
+  - non-regression of existing remote-stub blocked/unavailable/decorated-status behavior.
+- **Issues found during review**
+  1. Remote-stub transport path previously exposed only operation IDs, leaving no route/payload contract for backend execution handoff.
+  2. HTTP probe callbacks could not inspect per-operation request shape, making backend request parity validation impossible.
+  3. Sign-in payload mapping risked over-sharing sensitive material if raw password were propagated.
+- **Fix applied**
+  1. Added backend route catalog + request metadata carrier and rewired all adapters to emit request-shaped transport metadata.
+  2. Extended HTTP probe request contract to include workflow/method/endpoint/payload views and added assertion coverage.
+  3. Enforced sanitized auth payload mapping by recording `passwordLength` instead of password plaintext.
+- **Post-fix validation criteria**
+  - Every operation in `RemoteStubOperationIds.all` emits a mapped backend request metadata record.
+  - HTTP probe hooks can assert endpoint/method/payload parity per operation.
+  - Existing remote-stub behavior and full desktop verification gate remain green after metadata integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata, shared contract-bundle injection, and runtime mode parity/matrix gates, but workflow-specific real backend payload integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
+- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata, shared contract-bundle injection, operation-level backend request metadata mapping, and runtime mode parity/matrix gates, but real backend execution/response integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
 - Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard plus coverage-contract regression guard (set-diff optimized uncovered/missing detection), desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks with in-memory duplicate-key tracking + base-check markdown report emission) plus evidence-index contract regression guard (including dedicated missing-base-check-report attachment, missing-index-file, invalid-decision, and promoted-placeholder cases, dedicated tests workflow release-evidence guard base+contract enforcement/upload, and parity matrix base-check artifact retention), update-manifest guard automation with validation + contract report artifacts (including dedicated tests workflow update-manifest guard job contract enforcement/upload), on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

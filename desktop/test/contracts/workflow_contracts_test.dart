@@ -2,6 +2,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:penjar_desktop/contracts/remote_stub_contracts.dart';
 import 'package:penjar_desktop/contracts/workflow_contracts.dart';
 
+class _CaptureTransportClient extends RemoteStubTransportClient {
+  final List<RemoteStubTransportRequest> executed =
+      <RemoteStubTransportRequest>[];
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    executed.add(request);
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 void main() {
   group('InMemoryAuthSessionContract', () {
     test('requires email and password to sign in', () {
@@ -617,6 +628,140 @@ void main() {
       );
     });
 
+    test('maps all operations to backend request metadata', () {
+      final _CaptureTransportClient transportClient = _CaptureTransportClient();
+      final RemoteStubAuthSessionContract authContract =
+          RemoteStubAuthSessionContract(transportClient: transportClient);
+      final RemoteStubProjectLifecycleContract projectContract =
+          RemoteStubProjectLifecycleContract(transportClient: transportClient);
+      final RemoteStubCanvasEditingContract canvasContract =
+          RemoteStubCanvasEditingContract(transportClient: transportClient);
+      final RemoteStubAssetManagementContract assetContract =
+          RemoteStubAssetManagementContract(transportClient: transportClient);
+      final RemoteStubCollaborationContextContract collaborationContract =
+          RemoteStubCollaborationContextContract(
+            transportClient: transportClient,
+          );
+      final RemoteStubInspectHandoffContract inspectContract =
+          RemoteStubInspectHandoffContract(transportClient: transportClient);
+      final RemoteStubExportWorkflowContract exportContract =
+          RemoteStubExportWorkflowContract(transportClient: transportClient);
+      final RemoteStubDiagnosticsRecoveryContract diagnosticsContract =
+          RemoteStubDiagnosticsRecoveryContract(
+            transportClient: transportClient,
+          );
+
+      authContract.setRememberSession(true);
+      authContract.signIn(
+        const AuthSignInRequest(
+          email: 'designer@penjar.app',
+          password: 'desktop-pass',
+        ),
+      );
+      authContract.restoreSession();
+      authContract.refreshToken();
+
+      projectContract.createProject('Route Catalog');
+      projectContract.switchProject(0);
+      projectContract.createFile('routes.penjar');
+      projectContract.deleteFirstFile();
+
+      canvasContract.createRectangle();
+      canvasContract.selectShape(0);
+      canvasContract.moveSelected();
+      canvasContract.resizeSelected();
+      canvasContract.toggleFillSelected();
+
+      assetContract.importAsset('hero.png', 'image');
+      assetContract.selectAsset(0);
+      assetContract.useSelectedAsset();
+      assetContract.removeSelectedAsset();
+
+      collaborationContract.togglePeerPresence();
+      collaborationContract.createThread('Route metadata');
+      collaborationContract.selectThread(0);
+      collaborationContract.resolveSelectedThread();
+
+      inspectContract.setTarget('css');
+      inspectContract.generateSnippet('button/primary');
+      inspectContract.copyMetadata('button/primary');
+
+      exportContract.runExport(
+        const ExportRequest(
+          fileName: 'landing',
+          format: 'png',
+          scale: '2x',
+          includeBackground: true,
+        ),
+      );
+      exportContract.saveLatest();
+      exportContract.clearArtifacts();
+
+      diagnosticsContract.runHealthCheck();
+      diagnosticsContract.simulateDisconnect();
+      diagnosticsContract.attemptReconnect();
+      diagnosticsContract.openRecoveryGuide();
+
+      expect(
+        transportClient.executed,
+        hasLength(RemoteStubOperationIds.all.length),
+      );
+      expect(
+        transportClient.executed
+            .map((RemoteStubTransportRequest item) => item.operation)
+            .toSet(),
+        RemoteStubOperationIds.all,
+      );
+      expect(
+        transportClient.executed
+            .where(
+              (RemoteStubTransportRequest item) =>
+                  item.endpoint == '/api/desktop/contracts/operation',
+            )
+            .toList(growable: false),
+        isEmpty,
+      );
+
+      final RemoteStubTransportRequest signInRequest = transportClient.executed
+          .firstWhere(
+            (RemoteStubTransportRequest item) =>
+                item.operation == RemoteStubOperationIds.signIn,
+          );
+      expect(signInRequest.workflow, 'auth');
+      expect(signInRequest.method, 'POST');
+      expect(signInRequest.endpoint, '/api/desktop/auth/sign-in');
+      expect(signInRequest.payload['email'], 'designer@penjar.app');
+      expect(signInRequest.payload['passwordLength'], 12);
+
+      final RemoteStubTransportRequest createProjectRequest = transportClient
+          .executed
+          .firstWhere(
+            (RemoteStubTransportRequest item) =>
+                item.operation == RemoteStubOperationIds.createProject,
+          );
+      expect(createProjectRequest.workflow, 'projects');
+      expect(createProjectRequest.endpoint, '/api/desktop/projects');
+      expect(createProjectRequest.payload['projectName'], 'Route Catalog');
+
+      final RemoteStubTransportRequest deleteFileRequest = transportClient
+          .executed
+          .firstWhere(
+            (RemoteStubTransportRequest item) =>
+                item.operation == RemoteStubOperationIds.deleteFile,
+          );
+      expect(deleteFileRequest.method, 'DELETE');
+      expect(deleteFileRequest.endpoint, '/api/desktop/projects/files/first');
+
+      final RemoteStubTransportRequest clearArtifactsRequest = transportClient
+          .executed
+          .firstWhere(
+            (RemoteStubTransportRequest item) =>
+                item.operation == RemoteStubOperationIds.clearExportArtifacts,
+          );
+      expect(clearArtifactsRequest.method, 'DELETE');
+      expect(clearArtifactsRequest.endpoint, '/api/desktop/export/artifacts');
+    });
+
     test('http transport client blocks operations when probe fails', () {
       final List<String> probedOperations = <String>[];
       final RemoteStubHttpTransportClient transportClient =
@@ -627,6 +772,11 @@ void main() {
               probedOperations.add(request.operation);
               expect(request.healthUrl, contains('/desktop/health'));
               expect(request.allowedStatusCodes, contains(200));
+              expect(request.workflow, 'auth');
+              expect(request.method, 'POST');
+              expect(request.endpoint, '/api/desktop/auth/sign-in');
+              expect(request.payload['email'], 'designer@penjar.app');
+              expect(request.payload['passwordLength'], 12);
               return const RemoteStubHttpTransportProbeResult.blocked();
             },
           );
@@ -659,6 +809,10 @@ void main() {
             allowedStatusCodes: const <int>{200, 204},
             probe: (RemoteStubHttpTransportProbeRequest request) {
               expect(request.allowedStatusCodes, contains(204));
+              expect(request.workflow, 'projects');
+              expect(request.method, 'POST');
+              expect(request.endpoint, '/api/desktop/projects');
+              expect(request.payload['projectName'], 'HTTP Transport Ready');
               return const RemoteStubHttpTransportProbeResult.allowed();
             },
           );
