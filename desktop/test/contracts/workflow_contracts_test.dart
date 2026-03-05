@@ -1502,6 +1502,43 @@ void main() {
     );
 
     test(
+      'auth backend envelope traversal skips cyclic wrapper keys when alternates exist',
+      () {
+        final Map<String, Object?> responsePayload = <String, Object?>{
+          'data': <String, Object?>{
+            'detail': 'Backend alternate envelope auth snapshot applied.',
+            'authState': <String, Object?>{
+              'signedIn': true,
+              'rememberSession': true,
+            },
+          },
+        };
+        responsePayload['result'] = responsePayload;
+
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.signIn: responsePayload,
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.signIn(
+          const AuthSignInRequest(
+            email: 'designer@penjar.app',
+            password: 'desktop-pass',
+          ),
+        );
+
+        expect(authContract.state.rememberSession, isTrue);
+        expect(authContract.state.signedIn, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend alternate envelope auth snapshot applied.',
+        );
+      },
+    );
+
+    test(
       'auth backend payload infers signed-in from token/session aliases',
       () {
         final _BackendResponseTransportClient transportClient =

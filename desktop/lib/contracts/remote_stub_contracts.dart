@@ -785,6 +785,9 @@ Map<String, Object?> _extractBackendEnvelopePayload(
         currentPayload[key],
       );
       if (nestedPayload.isNotEmpty) {
+        if (visitedPayloads.contains(nestedPayload)) {
+          continue;
+        }
         nextPayload = nestedPayload;
         break;
       }
@@ -792,9 +795,7 @@ Map<String, Object?> _extractBackendEnvelopePayload(
     if (nextPayload == null) {
       break;
     }
-    if (!visitedPayloads.add(nextPayload)) {
-      break;
-    }
+    visitedPayloads.add(nextPayload);
     currentPayload = nextPayload;
   }
   return currentPayload;

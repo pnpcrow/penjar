@@ -376,6 +376,29 @@ class _AuthBackendDeepEnvelopeParityTransportClient
   }
 }
 
+class _AuthBackendAlternateEnvelopeAfterCycleParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendAlternateEnvelopeAfterCycleParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      final Map<String, Object?> responsePayload = <String, Object?>{
+        'data': <String, Object?>{
+          'detail': 'Backend alternate envelope payload handled.',
+          'authState': <String, Object?>{
+            'isAuthenticated': true,
+            'remember_session': true,
+          },
+        },
+      };
+      responsePayload['result'] = responsePayload;
+      return RemoteStubTransportResult.allowedWithPayload(responsePayload);
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 class _AuthBackendPayloadEnvelopeParityTransportClient
     extends RemoteStubTransportClient {
   const _AuthBackendPayloadEnvelopeParityTransportClient();
@@ -1003,6 +1026,44 @@ void main() {
 
     expect(find.textContaining('Signed in (simulated).'), findsNothing);
   });
+
+  testWidgets(
+    'auth/session parity skips cyclic primary envelope when data envelope is available',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendAlternateEnvelopeAfterCycleParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend alternate envelope payload handled.',
+        ),
+        findsOneWidget,
+      );
+      final CheckboxListTile rememberSessionTile = tester.widget(
+        find.byKey(const ValueKey<String>('auth-remember')),
+      );
+      expect(rememberSessionTile.value, isTrue);
+
+      expect(find.textContaining('Signed in (simulated).'), findsNothing);
+    },
+  );
 
   for (final String signedOutAlias in const <String>[
     'signedOut',
