@@ -9083,6 +9083,56 @@ precedence are guaranteed across all parser-recognized boolean failure-flag vari
   - explicit signed-in aliases remain authoritative over `ok=false` / `isSuccess=false` signals.
   - targeted auth contract/parity tests and full desktop verification remain green after the lock.
 
+## Unit WS-D-198: Auth `success` failure-flag parity/override regression lock
+
+### Planned objective
+
+Close remaining alias-matrix drift by adding dedicated `success=false` parity mapping and explicit
+signed-in override regression locks, so the full failure-flag alias set is covered by direct
+contract/parity evidence.
+
+### Implemented changes
+
+1. Added dedicated `success` override regression in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend explicit signed-in state overrides success failure flag`.
+2. Added dedicated `success` parity coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - `_AuthBackendFailureFlagSuccessParityTransportClient`,
+   - `auth/session parity maps success failure flag to deterministic auth-failed status`.
+3. Synced continuity docs to reflect direct `success=false` alias lock coverage:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - direct parity mapping evidence for `success=false` fallback behavior,
+  - explicit signed-in precedence evidence for top-level `success=false` collisions,
+  - consistency between documented alias coverage claims and concrete regression inventory.
+- **Issues found during review**
+  1. Contract coverage included `success=false` fallback mapping, but parity suite lacked a
+     dedicated `success=false` transport lock.
+  2. Explicit signed-in override matrix did not include a direct top-level `success=false` case.
+- **Fix applied**
+  1. Added dedicated parity transport/test proving deterministic auth-failed status mapping under
+     `success=false` backend payloads.
+  2. Added dedicated contract test proving explicit `signedIn=true` remains authoritative over
+     top-level `success=false`.
+  3. Updated continuity docs so full alias coverage statements explicitly include direct
+     `success=false` parity/override lock evidence.
+- **Post-fix validation criteria**
+  - `success=false` payloads without explicit signed-in aliases resolve as signed-out with
+    deterministic fallback status (`Backend auth request failed.`).
+  - explicit signed-in aliases remain authoritative over `success=false` failure-flag signals.
+  - targeted auth contract/parity tests and full desktop verification remain green after the lock.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

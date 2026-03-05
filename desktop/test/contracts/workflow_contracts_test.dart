@@ -3258,6 +3258,26 @@ void main() {
       },
     );
 
+    test('auth backend explicit signed-in state overrides success failure flag', () {
+      final _BackendResponseTransportClient transportClient =
+          _BackendResponseTransportClient(<String, Map<String, Object?>>{
+            RemoteStubOperationIds.restoreSession: <String, Object?>{
+              'success': false,
+              'state': <String, Object?>{
+                'signedIn': true,
+                'rememberSession': true,
+              },
+            },
+          });
+      final RemoteStubAuthSessionContract authContract =
+          RemoteStubAuthSessionContract(transportClient: transportClient);
+
+      authContract.restoreSession();
+
+      expect(authContract.state.signedIn, isTrue);
+      expect(authContract.state.rememberSession, isTrue);
+    });
+
     test('auth backend explicit signed-in state overrides ok failure flag', () {
       final _BackendResponseTransportClient transportClient =
           _BackendResponseTransportClient(<String, Map<String, Object?>>{
