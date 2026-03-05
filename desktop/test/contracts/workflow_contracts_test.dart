@@ -1539,6 +1539,43 @@ void main() {
     );
 
     test(
+      'auth backend sibling data envelope is used when result envelope lacks state',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.signIn: <String, Object?>{
+                'result': <String, Object?>{
+                  'meta': <String, Object?>{'requestId': 'req-1'},
+                },
+                'data': <String, Object?>{
+                  'detail': 'Backend sibling data auth snapshot applied.',
+                  'authState': <String, Object?>{
+                    'signedIn': true,
+                    'rememberSession': true,
+                  },
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.signIn(
+          const AuthSignInRequest(
+            email: 'designer@penjar.app',
+            password: 'desktop-pass',
+          ),
+        );
+
+        expect(authContract.state.rememberSession, isTrue);
+        expect(authContract.state.signedIn, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend sibling data auth snapshot applied.',
+        );
+      },
+    );
+
+    test(
       'auth backend payload infers signed-in from token/session aliases',
       () {
         final _BackendResponseTransportClient transportClient =

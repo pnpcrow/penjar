@@ -801,14 +801,61 @@ Map<String, Object?> _extractBackendEnvelopePayload(
   return currentPayload;
 }
 
+List<Map<String, Object?>> _collectBackendEnvelopePayloads(
+  Map<String, Object?> responsePayload,
+) {
+  final List<Map<String, Object?>> collectedPayloads = <Map<String, Object?>>[];
+  final List<Map<String, Object?>> queue = <Map<String, Object?>>[
+    responsePayload,
+  ];
+  final Set<Object> visitedPayloads = Set<Object>.identity()
+    ..add(responsePayload);
+  for (int index = 0; index < queue.length; index += 1) {
+    final Map<String, Object?> currentPayload = queue[index];
+    for (final String key in const <String>['result', 'data', 'payload']) {
+      final Map<String, Object?> nestedPayload = _coerceStringKeyedMap(
+        currentPayload[key],
+      );
+      if (nestedPayload.isEmpty || visitedPayloads.contains(nestedPayload)) {
+        continue;
+      }
+      visitedPayloads.add(nestedPayload);
+      collectedPayloads.add(nestedPayload);
+      queue.add(nestedPayload);
+    }
+  }
+  return collectedPayloads;
+}
+
+List<Map<String, Object?>> _dedupeBackendPayloads(
+  Iterable<Map<String, Object?>> payloads, {
+  Iterable<Map<String, Object?>> excludedPayloads =
+      const <Map<String, Object?>>[],
+}) {
+  final Set<Object> visitedPayloads = Set<Object>.identity();
+  for (final Map<String, Object?> payload in excludedPayloads) {
+    visitedPayloads.add(payload);
+  }
+  final List<Map<String, Object?>> dedupedPayloads = <Map<String, Object?>>[];
+  for (final Map<String, Object?> payload in payloads) {
+    if (visitedPayloads.add(payload)) {
+      dedupedPayloads.add(payload);
+    }
+  }
+  return dedupedPayloads;
+}
+
 Map<String, Object?> _extractBackendStatePayload(
   Map<String, Object?> responsePayload, {
   required Map<String, Object?> envelopePayload,
   required List<String> aliases,
+  List<Map<String, Object?>> additionalPayloads =
+      const <Map<String, Object?>>[],
 }) {
   for (final Map<String, Object?> source in <Map<String, Object?>>[
     responsePayload,
     envelopePayload,
+    ...additionalPayloads,
   ]) {
     for (final String alias in <String>['state', 'workflowState', ...aliases]) {
       final Map<String, Object?> aliasPayload = _coerceStringKeyedMap(
@@ -1418,10 +1465,19 @@ AuthSessionState? _authStateFromBackendPayload(
   final Map<String, Object?> envelopePayload = _extractBackendEnvelopePayload(
     responsePayload,
   );
+  final List<Map<String, Object?>> additionalEnvelopePayloads =
+      _dedupeBackendPayloads(
+        _collectBackendEnvelopePayloads(responsePayload),
+        excludedPayloads: <Map<String, Object?>>[
+          responsePayload,
+          envelopePayload,
+        ],
+      );
   final Map<String, Object?> statePayload = _extractBackendStatePayload(
     responsePayload,
     envelopePayload: envelopePayload,
     aliases: const <String>['authState'],
+    additionalPayloads: additionalEnvelopePayloads,
   );
   final Map<String, Object?> sessionPayload = _coerceStringKeyedMap(
     _firstPresentValue(statePayload, const <String>[
@@ -1446,6 +1502,15 @@ AuthSessionState? _authStateFromBackendPayload(
     sessionPayload,
     tokenPayload,
   ];
+  final List<Map<String, Object?>> statusDetectionSources =
+      _dedupeBackendPayloads(
+        <Map<String, Object?>>[...additionalEnvelopePayloads, ...authSources],
+        excludedPayloads: <Map<String, Object?>>[
+          responsePayload,
+          envelopePayload,
+          statePayload,
+        ],
+      );
 
   final bool hasRememberSessionFields = _containsAnyKeyInSources(
     authSources,
@@ -1470,7 +1535,12 @@ AuthSessionState? _authStateFromBackendPayload(
     ], _authUserPayloadAliases),
   ).isNotEmpty;
   final bool hasExplicitFailureFlag = _containsExplicitFalseInSources(
-    <Map<String, Object?>>[responsePayload, envelopePayload, ...authSources],
+    <Map<String, Object?>>[
+      responsePayload,
+      envelopePayload,
+      ...statusDetectionSources,
+      statePayload,
+    ],
     _authFailureFlagAliases,
   );
   final bool hasFields =
@@ -1483,7 +1553,7 @@ AuthSessionState? _authStateFromBackendPayload(
     responsePayload: responsePayload,
     envelopePayload: envelopePayload,
     statePayload: statePayload,
-    additionalPayloads: authSources,
+    additionalPayloads: statusDetectionSources,
   );
   if (!hasFields && !hasStatus) {
     return null;
@@ -1502,7 +1572,7 @@ AuthSessionState? _authStateFromBackendPayload(
     responsePayload: responsePayload,
     envelopePayload: envelopePayload,
     statePayload: statePayload,
-    additionalPayloads: authSources,
+    additionalPayloads: statusDetectionSources,
   );
   final bool signedOutByCode =
       backendCode != null && _backendCodeIndicatesSignedOut(backendCode);
@@ -1536,7 +1606,7 @@ AuthSessionState? _authStateFromBackendPayload(
       sessionExpiredByCode: sessionExpiredByCode,
       signedOutByStateAlias: resolvedSignedOut == true,
       hasExplicitFailureFlag: hasExplicitFailureFlag,
-      additionalPayloads: authSources,
+      additionalPayloads: statusDetectionSources,
     ),
   );
 }
@@ -1551,10 +1621,19 @@ ProjectLifecycleState? _projectStateFromBackendPayload(
   final Map<String, Object?> envelopePayload = _extractBackendEnvelopePayload(
     responsePayload,
   );
+  final List<Map<String, Object?>> additionalEnvelopePayloads =
+      _dedupeBackendPayloads(
+        _collectBackendEnvelopePayloads(responsePayload),
+        excludedPayloads: <Map<String, Object?>>[
+          responsePayload,
+          envelopePayload,
+        ],
+      );
   final Map<String, Object?> statePayload = _extractBackendStatePayload(
     responsePayload,
     envelopePayload: envelopePayload,
     aliases: const <String>['projectState', 'projectsState'],
+    additionalPayloads: additionalEnvelopePayloads,
   );
   final bool hasFields = _containsAnyKey(statePayload, const <String>{
     'projects',
@@ -1564,6 +1643,7 @@ ProjectLifecycleState? _projectStateFromBackendPayload(
     responsePayload: responsePayload,
     envelopePayload: envelopePayload,
     statePayload: statePayload,
+    additionalPayloads: additionalEnvelopePayloads,
   );
   if (!hasFields && !hasStatus) {
     return null;
@@ -1606,6 +1686,7 @@ ProjectLifecycleState? _projectStateFromBackendPayload(
       envelopePayload: envelopePayload,
       statePayload: statePayload,
       fallbackStatus: currentState.status,
+      additionalPayloads: additionalEnvelopePayloads,
     ),
   );
 }
@@ -1620,10 +1701,19 @@ CanvasEditingState? _canvasStateFromBackendPayload(
   final Map<String, Object?> envelopePayload = _extractBackendEnvelopePayload(
     responsePayload,
   );
+  final List<Map<String, Object?>> additionalEnvelopePayloads =
+      _dedupeBackendPayloads(
+        _collectBackendEnvelopePayloads(responsePayload),
+        excludedPayloads: <Map<String, Object?>>[
+          responsePayload,
+          envelopePayload,
+        ],
+      );
   final Map<String, Object?> statePayload = _extractBackendStatePayload(
     responsePayload,
     envelopePayload: envelopePayload,
     aliases: const <String>['canvasState'],
+    additionalPayloads: additionalEnvelopePayloads,
   );
   final bool hasFields = _containsAnyKey(statePayload, const <String>{
     'shapes',
@@ -1633,6 +1723,7 @@ CanvasEditingState? _canvasStateFromBackendPayload(
     responsePayload: responsePayload,
     envelopePayload: envelopePayload,
     statePayload: statePayload,
+    additionalPayloads: additionalEnvelopePayloads,
   );
   if (!hasFields && !hasStatus) {
     return null;
@@ -1673,6 +1764,7 @@ CanvasEditingState? _canvasStateFromBackendPayload(
       envelopePayload: envelopePayload,
       statePayload: statePayload,
       fallbackStatus: currentState.status,
+      additionalPayloads: additionalEnvelopePayloads,
     ),
   );
 }
@@ -1687,10 +1779,19 @@ AssetManagementState? _assetStateFromBackendPayload(
   final Map<String, Object?> envelopePayload = _extractBackendEnvelopePayload(
     responsePayload,
   );
+  final List<Map<String, Object?>> additionalEnvelopePayloads =
+      _dedupeBackendPayloads(
+        _collectBackendEnvelopePayloads(responsePayload),
+        excludedPayloads: <Map<String, Object?>>[
+          responsePayload,
+          envelopePayload,
+        ],
+      );
   final Map<String, Object?> statePayload = _extractBackendStatePayload(
     responsePayload,
     envelopePayload: envelopePayload,
     aliases: const <String>['assetState', 'assetsState'],
+    additionalPayloads: additionalEnvelopePayloads,
   );
   final bool hasFields = _containsAnyKey(statePayload, const <String>{
     'assets',
@@ -1700,6 +1801,7 @@ AssetManagementState? _assetStateFromBackendPayload(
     responsePayload: responsePayload,
     envelopePayload: envelopePayload,
     statePayload: statePayload,
+    additionalPayloads: additionalEnvelopePayloads,
   );
   if (!hasFields && !hasStatus) {
     return null;
@@ -1739,6 +1841,7 @@ AssetManagementState? _assetStateFromBackendPayload(
       envelopePayload: envelopePayload,
       statePayload: statePayload,
       fallbackStatus: currentState.status,
+      additionalPayloads: additionalEnvelopePayloads,
     ),
   );
 }
@@ -1753,10 +1856,19 @@ CollaborationContextState? _collaborationStateFromBackendPayload(
   final Map<String, Object?> envelopePayload = _extractBackendEnvelopePayload(
     responsePayload,
   );
+  final List<Map<String, Object?>> additionalEnvelopePayloads =
+      _dedupeBackendPayloads(
+        _collectBackendEnvelopePayloads(responsePayload),
+        excludedPayloads: <Map<String, Object?>>[
+          responsePayload,
+          envelopePayload,
+        ],
+      );
   final Map<String, Object?> statePayload = _extractBackendStatePayload(
     responsePayload,
     envelopePayload: envelopePayload,
     aliases: const <String>['collaborationState'],
+    additionalPayloads: additionalEnvelopePayloads,
   );
   final bool hasFields = _containsAnyKey(statePayload, const <String>{
     'peerActive',
@@ -1767,6 +1879,7 @@ CollaborationContextState? _collaborationStateFromBackendPayload(
     responsePayload: responsePayload,
     envelopePayload: envelopePayload,
     statePayload: statePayload,
+    additionalPayloads: additionalEnvelopePayloads,
   );
   if (!hasFields && !hasStatus) {
     return null;
@@ -1808,6 +1921,7 @@ CollaborationContextState? _collaborationStateFromBackendPayload(
       envelopePayload: envelopePayload,
       statePayload: statePayload,
       fallbackStatus: currentState.status,
+      additionalPayloads: additionalEnvelopePayloads,
     ),
   );
 }
@@ -1822,10 +1936,19 @@ InspectHandoffState? _inspectStateFromBackendPayload(
   final Map<String, Object?> envelopePayload = _extractBackendEnvelopePayload(
     responsePayload,
   );
+  final List<Map<String, Object?>> additionalEnvelopePayloads =
+      _dedupeBackendPayloads(
+        _collectBackendEnvelopePayloads(responsePayload),
+        excludedPayloads: <Map<String, Object?>>[
+          responsePayload,
+          envelopePayload,
+        ],
+      );
   final Map<String, Object?> statePayload = _extractBackendStatePayload(
     responsePayload,
     envelopePayload: envelopePayload,
     aliases: const <String>['inspectState'],
+    additionalPayloads: additionalEnvelopePayloads,
   );
   final bool hasFields = _containsAnyKey(statePayload, const <String>{
     'target',
@@ -1835,6 +1958,7 @@ InspectHandoffState? _inspectStateFromBackendPayload(
     responsePayload: responsePayload,
     envelopePayload: envelopePayload,
     statePayload: statePayload,
+    additionalPayloads: additionalEnvelopePayloads,
   );
   if (!hasFields && !hasStatus) {
     return null;
@@ -1849,6 +1973,7 @@ InspectHandoffState? _inspectStateFromBackendPayload(
       envelopePayload: envelopePayload,
       statePayload: statePayload,
       fallbackStatus: currentState.status,
+      additionalPayloads: additionalEnvelopePayloads,
     ),
   );
 }
@@ -1863,10 +1988,19 @@ ExportWorkflowState? _exportStateFromBackendPayload(
   final Map<String, Object?> envelopePayload = _extractBackendEnvelopePayload(
     responsePayload,
   );
+  final List<Map<String, Object?>> additionalEnvelopePayloads =
+      _dedupeBackendPayloads(
+        _collectBackendEnvelopePayloads(responsePayload),
+        excludedPayloads: <Map<String, Object?>>[
+          responsePayload,
+          envelopePayload,
+        ],
+      );
   final Map<String, Object?> statePayload = _extractBackendStatePayload(
     responsePayload,
     envelopePayload: envelopePayload,
     aliases: const <String>['exportState'],
+    additionalPayloads: additionalEnvelopePayloads,
   );
   final bool hasFields = _containsAnyKey(statePayload, const <String>{
     'artifacts',
@@ -1875,6 +2009,7 @@ ExportWorkflowState? _exportStateFromBackendPayload(
     responsePayload: responsePayload,
     envelopePayload: envelopePayload,
     statePayload: statePayload,
+    additionalPayloads: additionalEnvelopePayloads,
   );
   if (!hasFields && !hasStatus) {
     return null;
@@ -1912,6 +2047,7 @@ ExportWorkflowState? _exportStateFromBackendPayload(
       envelopePayload: envelopePayload,
       statePayload: statePayload,
       fallbackStatus: currentState.status,
+      additionalPayloads: additionalEnvelopePayloads,
     ),
   );
 }
@@ -1926,10 +2062,19 @@ DiagnosticsRecoveryState? _diagnosticsStateFromBackendPayload(
   final Map<String, Object?> envelopePayload = _extractBackendEnvelopePayload(
     responsePayload,
   );
+  final List<Map<String, Object?>> additionalEnvelopePayloads =
+      _dedupeBackendPayloads(
+        _collectBackendEnvelopePayloads(responsePayload),
+        excludedPayloads: <Map<String, Object?>>[
+          responsePayload,
+          envelopePayload,
+        ],
+      );
   final Map<String, Object?> statePayload = _extractBackendStatePayload(
     responsePayload,
     envelopePayload: envelopePayload,
     aliases: const <String>['diagnosticsState'],
+    additionalPayloads: additionalEnvelopePayloads,
   );
   final bool hasFields = _containsAnyKey(statePayload, const <String>{
     'websocketHealthy',
@@ -1940,6 +2085,7 @@ DiagnosticsRecoveryState? _diagnosticsStateFromBackendPayload(
     responsePayload: responsePayload,
     envelopePayload: envelopePayload,
     statePayload: statePayload,
+    additionalPayloads: additionalEnvelopePayloads,
   );
   if (!hasFields && !hasStatus) {
     return null;
@@ -1958,6 +2104,7 @@ DiagnosticsRecoveryState? _diagnosticsStateFromBackendPayload(
       envelopePayload: envelopePayload,
       statePayload: statePayload,
       fallbackStatus: currentState.status,
+      additionalPayloads: additionalEnvelopePayloads,
     ),
   );
 }

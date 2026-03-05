@@ -8359,6 +8359,64 @@ alternate wrapper keys (`data`/`payload`) at the same scope.
     envelope payloads.
   - targeted tests and full desktop verification remain green after traversal correction.
 
+## Unit WS-D-184: Sibling-envelope fallback coverage for metadata-only primary chains
+
+### Planned objective
+
+Prevent backend auth/workflow snapshot drops when the primary envelope chain resolves to
+metadata-only payloads (for example `result.meta`) while state/status fields are present in
+sibling wrappers (for example `data.authState`).
+
+### Implemented changes
+
+1. Expanded envelope-candidate handling in `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - added `_collectBackendEnvelopePayloads(...)` for cycle-safe collection of reachable
+     `result`/`data`/`payload` wrapper maps,
+   - added `_dedupeBackendPayloads(...)` for identity-based candidate deduplication,
+   - extended `_extractBackendStatePayload(...)` with `additionalPayloads` support.
+2. Wired additional envelope candidates into all backend state parsers:
+   - auth/project/canvas/asset/collaboration/inspect/export/diagnostics now pass sibling-envelope
+     candidates into state extraction and backend-status resolution paths.
+3. Hardened auth-specific inference paths with sibling-envelope candidates:
+   - auth status/code/failure-flag detection now includes additional envelope candidates so
+     metadata-only primary wrapper chains no longer hide auth snapshots or fallback signals.
+4. Added/locked contract regression in `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend sibling data envelope is used when result envelope lacks state`.
+5. Added parity regression in `desktop/test/parity/auth_session_parity_test.dart`:
+   - `_AuthBackendSiblingDataEnvelopeParityTransportClient`,
+   - `auth/session parity uses sibling data envelope when result envelope lacks state`.
+6. Synced continuity docs for WS-D-184 evidence linkage:
+   - `desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `desktop-flutter-development-runbook.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+7. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - state/status extraction behavior when primary envelope chain is metadata-only,
+  - auth signed-in/status/failure inference continuity under sibling envelope layouts,
+  - regression impact on deep/cyclic envelope compatibility and full verification chain.
+- **Issues found during review**
+  1. Envelope extraction priority could select `result` as primary payload even when it only held
+     metadata, causing sibling `data.authState` payloads to be ignored.
+  2. Auth status/code/failure detection only considered response + primary envelope + derived state,
+     which could miss signals in sibling wrapper payloads.
+- **Fix applied**
+  1. Added cycle-safe multi-envelope candidate collection and identity deduplication for wrapper
+     payload scanning.
+  2. Extended state/status/code/failure detection paths to include additional envelope candidates in
+     parser evaluation order.
+  3. Added contract + parity regressions to lock metadata-primary sibling-fallback behavior.
+- **Post-fix validation criteria**
+  - metadata-only primary envelopes no longer suppress sibling backend auth/workflow snapshots.
+  - deep/cyclic envelope compatibility remains stable under the expanded candidate scan.
+  - targeted tests and full desktop verification remain green after sibling-fallback hardening.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

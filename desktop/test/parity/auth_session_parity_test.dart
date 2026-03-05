@@ -399,6 +399,32 @@ class _AuthBackendAlternateEnvelopeAfterCycleParityTransportClient
   }
 }
 
+class _AuthBackendSiblingDataEnvelopeParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendSiblingDataEnvelopeParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'result': <String, Object?>{
+            'meta': <String, Object?>{'requestId': 'req-1'},
+          },
+          'data': <String, Object?>{
+            'detail': 'Backend sibling data envelope payload handled.',
+            'authState': <String, Object?>{
+              'isAuthenticated': true,
+              'remember_session': true,
+            },
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 class _AuthBackendPayloadEnvelopeParityTransportClient
     extends RemoteStubTransportClient {
   const _AuthBackendPayloadEnvelopeParityTransportClient();
@@ -1053,6 +1079,44 @@ void main() {
       expect(
         find.textContaining(
           'Status: [remote-stub] Backend alternate envelope payload handled.',
+        ),
+        findsOneWidget,
+      );
+      final CheckboxListTile rememberSessionTile = tester.widget(
+        find.byKey(const ValueKey<String>('auth-remember')),
+      );
+      expect(rememberSessionTile.value, isTrue);
+
+      expect(find.textContaining('Signed in (simulated).'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'auth/session parity uses sibling data envelope when result envelope lacks state',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendSiblingDataEnvelopeParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend sibling data envelope payload handled.',
         ),
         findsOneWidget,
       );
