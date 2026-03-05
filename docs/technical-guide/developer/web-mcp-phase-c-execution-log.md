@@ -3035,8 +3035,59 @@ Improve update-manifest validation robustness and traceability by replacing text
   - Update manifest validation reports are published in CI and smoke preflight workflows.
   - Full-fast desktop verification remains green after checker hardening.
 
+## Unit WS-D-71: Signing placeholder hygiene strict mode
+
+### Planned objective
+
+Reduce false-ready signing states by detecting placeholder/dummy signing inputs and allowing strict failure enforcement in release smoke workflows.
+
+### Implemented changes
+
+1. Extended signing readiness checker:
+   - `desktop/scripts/check_signing_readiness.sh` now supports strict placeholder mode via `STRICT_SIGNING_PLACEHOLDERS` (or fourth positional argument).
+2. Implemented placeholder semantics:
+   - detects placeholder-like values (`echo ...`, `<...>`, `todo/tbd/placeholder/changeme/replace_me/example/dummy/sample` patterns),
+   - tracks placeholder counts separately for required fields and command hooks,
+   - writes placeholder counts into signing readiness report,
+   - fails in strict placeholder mode when placeholder values are present.
+3. Added root command surface:
+   - `desktop:release:signing:readiness:placeholders:strict`.
+4. Extended release smoke workflow controls:
+   - `.github/workflows/release-desktop-installer-smoke.yml` now supports `enforce_signing_placeholder_hygiene` input,
+   - passes `STRICT_SIGNING_PLACEHOLDERS` into gate-policy and signing-readiness checks.
+5. Extended gate-policy preflight dependencies:
+   - `desktop/scripts/check_release_smoke_gate_policy.sh` now models `STRICT_SIGNING_PLACEHOLDERS` and requires `STRICT_SIGNING_COMMAND_HOOKS=1` when enabled.
+6. Updated release/runbook/index docs:
+   - `desktop-flutter-development-runbook.md` command inventory now includes placeholder strict signing readiness command,
+   - `desktop-flutter-release-validation-baseline.md` now documents placeholder strict mode and workflow input support,
+   - `desktop-flutter-release-evidence-index.md` now includes placeholder strict variant in signing readiness evidence rule.
+7. Re-ran validation commands:
+   - `pnpm run desktop:release:signing:readiness`,
+   - strict expected-fail scenario with placeholder signing command in strict mode,
+   - strict pass scenario with non-placeholder signing readiness values,
+   - `cd desktop && STRICT_SIGNING_PLACEHOLDERS=1 ./scripts/check_release_smoke_gate_policy.sh` (expected failure without strict command-hook gate),
+   - `cd desktop && STRICT_SIGNING_PLACEHOLDERS=1 STRICT_SIGNING_COMMAND_HOOKS=1 ./scripts/check_release_smoke_gate_policy.sh`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - placeholder detection accuracy and strict-mode failure behavior,
+  - gate-policy dependency coherence for new strict toggle,
+  - documentation alignment for new strict command/workflow input.
+- **Issues found during review**
+  1. Signing readiness could report non-missing but placeholder/dummy values as effectively ready.
+- **Fix applied**
+  1. Added placeholder status detection/counting and strict placeholder failure mode with workflow+policy integration.
+- **Post-fix validation criteria**
+  - Placeholder values are explicitly marked in readiness reports.
+  - Strict placeholder mode fails on placeholder values.
+  - Gate policy blocks strict placeholder mode when strict command-hook gate is disabled.
+  - Full-fast desktop verification remains green after placeholder-hygiene integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode plus placeholder hygiene strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

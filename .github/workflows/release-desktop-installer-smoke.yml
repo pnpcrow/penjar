@@ -28,6 +28,11 @@ on:
         type: boolean
         required: true
         default: false
+      enforce_signing_placeholder_hygiene:
+        description: "Fail workflow when signing readiness inputs contain placeholder/dummy values"
+        type: boolean
+        required: true
+        default: false
       publish_appcast_external:
         description: "Run external appcast publication stage"
         type: boolean
@@ -123,6 +128,7 @@ jobs:
         env:
           STRICT_SIGNING_EXECUTION: ${{ inputs.enforce_signing_execution }}
           STRICT_SIGNING_COMMAND_HOOKS: ${{ inputs.enforce_signing_command_hooks }}
+          STRICT_SIGNING_PLACEHOLDERS: ${{ inputs.enforce_signing_placeholder_hygiene }}
           STRICT_SIGNING_PROVENANCE: ${{ inputs.enforce_signing_provenance }}
           STRICT_WINDOWS_INSTALLER_EXECUTION: ${{ inputs.enforce_windows_installer_execution }}
           STRICT_WINDOWS_INSTALLER_PACKAGING: ${{ inputs.enforce_windows_installer_packaging }}
@@ -138,6 +144,7 @@ jobs:
         env:
           STRICT_SIGNING: ${{ inputs.enforce_signing_readiness }}
           STRICT_SIGNING_COMMAND_HOOKS: ${{ inputs.enforce_signing_command_hooks }}
+          STRICT_SIGNING_PLACEHOLDERS: ${{ inputs.enforce_signing_placeholder_hygiene }}
           PENJAR_MACOS_SIGN_IDENTITY: ${{ secrets.PENJAR_MACOS_SIGN_IDENTITY }}
           PENJAR_MACOS_TEAM_ID: ${{ secrets.PENJAR_MACOS_TEAM_ID }}
           PENJAR_MACOS_NOTARY_PROFILE: ${{ secrets.PENJAR_MACOS_NOTARY_PROFILE }}

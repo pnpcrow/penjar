@@ -61,6 +61,7 @@ This runbook defines the repeatable execution loop for the Flutter desktop full-
    - `pnpm run desktop:release:signing:readiness`
    - `pnpm run desktop:release:signing:readiness:strict`
    - `pnpm run desktop:release:signing:readiness:command-hooks:strict`
+   - `pnpm run desktop:release:signing:readiness:placeholders:strict`
    - `pnpm run desktop:release:signing:provenance:macos`
    - `pnpm run desktop:release:signing:provenance:windows`
    - `pnpm run desktop:release:signing:run:macos`

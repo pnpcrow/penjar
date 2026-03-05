@@ -55,6 +55,7 @@
     "desktop:release:signing:readiness": "cd desktop && ./scripts/check_signing_readiness.sh",
     "desktop:release:signing:readiness:strict": "cd desktop && ./scripts/check_signing_readiness.sh 1",
     "desktop:release:signing:readiness:command-hooks:strict": "cd desktop && STRICT_SIGNING_COMMAND_HOOKS=1 ./scripts/check_signing_readiness.sh",
+    "desktop:release:signing:readiness:placeholders:strict": "cd desktop && STRICT_SIGNING_PLACEHOLDERS=1 ./scripts/check_signing_readiness.sh",
     "desktop:release:signing:provenance:macos": "cd desktop && ./scripts/check_signing_artifact_provenance.sh macos",
     "desktop:release:signing:provenance:windows": "cd desktop && ./scripts/check_signing_artifact_provenance.sh windows",
     "desktop:release:signing:run:macos": "cd desktop && SKIP_PUB_GET=1 ./scripts/run_signing_with_build.sh macos 0 release",

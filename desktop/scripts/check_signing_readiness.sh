@@ -4,6 +4,7 @@ set -eo pipefail
 strict_input="${1:-${STRICT_SIGNING:-0}}"
 report_file="${2:-release/reports/signing_readiness_report.md}"
 strict_command_hooks_input="${3:-${STRICT_SIGNING_COMMAND_HOOKS:-0}}"
+strict_placeholders_input="${4:-${STRICT_SIGNING_PLACEHOLDERS:-0}}"
 
 strict_mode=0
 case "$(printf '%s' "$strict_input" | tr '[:upper:]' '[:lower:]')" in
@@ -15,11 +16,38 @@ case "$(printf '%s' "$strict_command_hooks_input" | tr '[:upper:]' '[:lower:]')"
   1|true|yes|strict) strict_command_hooks_mode=1 ;;
 esac
 
+strict_placeholders_mode=0
+case "$(printf '%s' "$strict_placeholders_input" | tr '[:upper:]' '[:lower:]')" in
+  1|true|yes|strict) strict_placeholders_mode=1 ;;
+esac
+
 mkdir -p "$(dirname "$report_file")"
 timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
 missing_required_count=0
 missing_command_hook_count=0
+placeholder_required_count=0
+placeholder_command_hook_count=0
+
+is_placeholder_value() {
+  local value="$1"
+  local lowered
+  lowered="$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')"
+
+  if [[ "$lowered" =~ ^echo($|[[:space:]]) ]]; then
+    return 0
+  fi
+
+  if [[ "$lowered" =~ ^\<.*\>$ ]]; then
+    return 0
+  fi
+
+  if [[ "$lowered" =~ (changeme|change_me|replace_me|replace-this|replace_this|todo|tbd|placeholder|dummy|sample|example) ]]; then
+    return 0
+  fi
+
+  return 1
+}
 
 write_row() {
   local requirement="$1"
@@ -34,6 +62,13 @@ write_row() {
     elif [[ "$category" == "command-hook" ]]; then
       missing_command_hook_count=$((missing_command_hook_count + 1))
     fi
+  elif is_placeholder_value "$value"; then
+    status="placeholder"
+    if [[ "$category" == "required" ]]; then
+      placeholder_required_count=$((placeholder_required_count + 1))
+    elif [[ "$category" == "command-hook" ]]; then
+      placeholder_command_hook_count=$((placeholder_command_hook_count + 1))
+    fi
   fi
 
   printf '| %s | `%s` | %s | %s |\n' "$requirement" "$env_name" "$category" "$status" >> "$report_file"
@@ -45,6 +80,7 @@ write_row() {
   echo "- Generated at (UTC): $timestamp"
   echo "- Strict mode: $strict_mode"
   echo "- Strict command hooks mode: $strict_command_hooks_mode"
+  echo "- Strict placeholder mode: $strict_placeholders_mode"
   echo
   echo "| Requirement | Environment Variable | Category | Status |"
   echo "|---|---|---|---|"
@@ -64,6 +100,8 @@ write_row "Windows installer command hook" "PENJAR_WINDOWS_INSTALLER_COMMAND" "c
   echo
   echo "- Missing required count: $missing_required_count"
   echo "- Missing command-hook count: $missing_command_hook_count"
+  echo "- Placeholder required count: $placeholder_required_count"
+  echo "- Placeholder command-hook count: $placeholder_command_hook_count"
 } >> "$report_file"
 
 if [[ "$missing_required_count" -gt 0 && "$strict_mode" -eq 1 ]]; then
@@ -76,9 +114,15 @@ if [[ "$missing_command_hook_count" -gt 0 && "$strict_command_hooks_mode" -eq 1 
   exit 1
 fi
 
-if [[ "$missing_required_count" -gt 0 || "$missing_command_hook_count" -gt 0 ]]; then
-  total_missing=$((missing_required_count + missing_command_hook_count))
-  echo "[signing-readiness] warning: $total_missing requirement(s) missing. report: $report_file"
+placeholder_total=$((placeholder_required_count + placeholder_command_hook_count))
+if [[ "$placeholder_total" -gt 0 && "$strict_placeholders_mode" -eq 1 ]]; then
+  echo "[signing-readiness] failed with $placeholder_total placeholder value(s). report: $report_file" >&2
+  exit 1
+fi
+
+missing_total=$((missing_required_count + missing_command_hook_count))
+if [[ "$missing_total" -gt 0 || "$placeholder_total" -gt 0 ]]; then
+  echo "[signing-readiness] warning: missing=$missing_total placeholder=$placeholder_total. report: $report_file"
   exit 0
 fi
 

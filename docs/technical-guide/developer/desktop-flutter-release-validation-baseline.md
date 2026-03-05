@@ -73,6 +73,7 @@ This baseline defines minimum release validation requirements for desktop distri
    - `pnpm run desktop:release:signing:readiness`
    - use strict mode when release secrets are expected: `pnpm run desktop:release:signing:readiness:strict`.
    - enforce command-hook presence when execution hooks are expected: `pnpm run desktop:release:signing:readiness:command-hooks:strict`.
+   - enforce placeholder hygiene when production-grade secrets/commands are expected: `pnpm run desktop:release:signing:readiness:placeholders:strict`.
 3. Execute platform-specific installer/update smoke automation:
    - preflight gate policy check:
      - `pnpm run desktop:release:smoke:gate-policy:check`.
@@ -157,6 +158,7 @@ CI baseline note:
 - `desktop/scripts/verify_desktop.sh` now runs release script syntax checks, verify test coverage checks, and desktop command inventory checks before test/analyze/build phases, and executes contract/parity/mode-matrix tests through dedicated scripts to avoid duplicate suite execution.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job runs release smoke gate policy preflight and uploads gate policy report artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing command-hook enforcement via `enforce_signing_command_hooks` input.
+- `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing placeholder hygiene enforcement via `enforce_signing_placeholder_hygiene` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing execution enforcement via `enforce_signing_execution` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing provenance enforcement via `enforce_signing_provenance` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer artifact enforcement via `enforce_windows_installer_packaging` input.
