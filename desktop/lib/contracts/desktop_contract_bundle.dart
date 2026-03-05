@@ -19,6 +19,38 @@ bool _envFlagEnabled(String raw) {
 const String _kRemoteStubSecureStorageDefaultKey =
     'penjar.desktop.remote_stub.auth_state.v1';
 
+enum RemoteStubSecureStorageRolloutMode {
+  defaultOn,
+  explicitOn,
+  explicitOff;
+
+  static RemoteStubSecureStorageRolloutMode fromEnvRaw(String raw) {
+    final String trimmed = raw.trim();
+    if (trimmed.isEmpty) {
+      return RemoteStubSecureStorageRolloutMode.defaultOn;
+    }
+    return _envFlagEnabled(trimmed)
+        ? RemoteStubSecureStorageRolloutMode.explicitOn
+        : RemoteStubSecureStorageRolloutMode.explicitOff;
+  }
+
+  bool get secureStorageEnabled =>
+      this != RemoteStubSecureStorageRolloutMode.explicitOff;
+
+  bool get isDefaultEnabled =>
+      this == RemoteStubSecureStorageRolloutMode.defaultOn;
+}
+
+class _ResolvedRemoteStubAuthStateStore {
+  const _ResolvedRemoteStubAuthStateStore({
+    required this.store,
+    this.profileAuthStoreLabel = '',
+  });
+
+  final RemoteStubAuthStateStore store;
+  final String profileAuthStoreLabel;
+}
+
 Set<String> _parseBlockedOperations(
   String raw, {
   Set<String>? allowedOperations,
@@ -146,8 +178,12 @@ DesktopRemoteStubProfile _buildRemoteStubProfile({
   required RemoteStubFaultProfile faultProfile,
   required RemoteStubTransportClient transportClient,
   required RemoteStubAuthStateStore authStateStore,
+  String authStoreLabelOverride = '',
 }) {
   final RemoteStubTransportProfile transportProfile = transportClient.profile;
+  final String authStoreLabel = authStoreLabelOverride.trim().isNotEmpty
+      ? authStoreLabelOverride.trim()
+      : _describeAuthStateStore(authStateStore);
 
   return DesktopRemoteStubProfile(
     unavailable: faultProfile.unavailable,
@@ -157,7 +193,7 @@ DesktopRemoteStubProfile _buildRemoteStubProfile({
     ),
     transportBlockedReason: transportProfile.blockedReason,
     transportLabel: transportProfile.transportLabel,
-    authStoreLabel: _describeAuthStateStore(authStateStore),
+    authStoreLabel: authStoreLabel,
   );
 }
 
@@ -280,8 +316,9 @@ RemoteStubAuthStateStore _buildRemoteStubAuthStateStoreFromEnvironment() {
   return RemoteStubFileAuthStateStore(authStatePath);
 }
 
-bool _secureStorageAuthStateEnabledFromEnvironment() {
-  return _envFlagEnabled(
+RemoteStubSecureStorageRolloutMode
+_secureStorageAuthStateRolloutModeFromEnvironment() {
+  return RemoteStubSecureStorageRolloutMode.fromEnvRaw(
     const String.fromEnvironment(
       'PENJAR_DESKTOP_REMOTE_STUB_AUTH_SECURE_STORAGE_ENABLED',
     ),
@@ -311,14 +348,68 @@ bool _secureStorageAuthStateMirrorLegacyFromEnvironment() {
   );
 }
 
-Future<RemoteStubAuthStateStore>
-_buildRemoteStubAuthStateStoreFromEnvironmentAsync({
+String _legacyAuthStoreRolloutLabel(
+  RemoteStubAuthStateStore legacyStore, {
+  required String reason,
+  required RemoteStubSecureStorageRolloutMode rolloutMode,
+}) {
+  final String baseLabel = _describeAuthStateStore(legacyStore);
+  final String normalizedBase = baseLabel.isEmpty ? 'legacy' : baseLabel;
+  if (rolloutMode.isDefaultEnabled) {
+    return '$normalizedBase($reason,default-on)';
+  }
+  return '$normalizedBase($reason)';
+}
+
+_ResolvedRemoteStubAuthStateStore _resolvedRemoteStubAuthStateStore(
+  RemoteStubAuthStateStore store, {
+  required RemoteStubSecureStorageRolloutMode rolloutMode,
+  required bool strictMode,
+  String? reason,
+}) {
+  final String baseLabel = _describeAuthStateStore(store);
+  String label = baseLabel;
+
+  if (reason != null && reason.trim().isNotEmpty) {
+    label = _legacyAuthStoreRolloutLabel(
+      store,
+      reason: reason.trim(),
+      rolloutMode: rolloutMode,
+    );
+  } else {
+    if (rolloutMode == RemoteStubSecureStorageRolloutMode.defaultOn &&
+        baseLabel.isNotEmpty) {
+      label = '$baseLabel(default-on)';
+    } else if (rolloutMode == RemoteStubSecureStorageRolloutMode.explicitOn &&
+        baseLabel.isNotEmpty) {
+      label = '$baseLabel(explicit-on)';
+    }
+    if (strictMode && label.isNotEmpty) {
+      label = '$label+strict';
+    }
+  }
+
+  return _ResolvedRemoteStubAuthStateStore(
+    store: store,
+    profileAuthStoreLabel: label,
+  );
+}
+
+Future<_ResolvedRemoteStubAuthStateStore>
+_resolveRemoteStubAuthStateStoreFromEnvironmentAsync({
   FlutterSecureStorage? secureStorage,
 }) async {
   final RemoteStubAuthStateStore legacyStore =
       _buildRemoteStubAuthStateStoreFromEnvironment();
-  if (!_secureStorageAuthStateEnabledFromEnvironment()) {
-    return legacyStore;
+  final RemoteStubSecureStorageRolloutMode rolloutMode =
+      _secureStorageAuthStateRolloutModeFromEnvironment();
+  if (!rolloutMode.secureStorageEnabled) {
+    return _resolvedRemoteStubAuthStateStore(
+      legacyStore,
+      rolloutMode: rolloutMode,
+      strictMode: false,
+      reason: 'secure-storage-disabled',
+    );
   }
 
   final FlutterSecureStorage storage =
@@ -335,7 +426,12 @@ _buildRemoteStubAuthStateStoreFromEnvironmentAsync({
   }
 
   if (readError != null && !strictMode) {
-    return legacyStore;
+    return _resolvedRemoteStubAuthStateStore(
+      legacyStore,
+      rolloutMode: rolloutMode,
+      strictMode: strictMode,
+      reason: 'secure-read-fallback',
+    );
   }
 
   final RemoteStubSecureSnapshotAuthStateStore secureStore =
@@ -348,12 +444,21 @@ _buildRemoteStubAuthStateStoreFromEnvironmentAsync({
 
   if (_secureStorageAuthStateMirrorLegacyFromEnvironment() &&
       legacyStore is! RemoteStubNoopAuthStateStore) {
-    return RemoteStubCompositeAuthStateStore(
-      primary: secureStore,
-      secondary: legacyStore,
+    return _resolvedRemoteStubAuthStateStore(
+      RemoteStubCompositeAuthStateStore(
+        primary: secureStore,
+        secondary: legacyStore,
+      ),
+      rolloutMode: rolloutMode,
+      strictMode: strictMode,
     );
   }
-  return secureStore;
+
+  return _resolvedRemoteStubAuthStateStore(
+    secureStore,
+    rolloutMode: rolloutMode,
+    strictMode: strictMode,
+  );
 }
 
 enum DesktopContractMode {
@@ -495,10 +600,12 @@ class DesktopContractBundle {
     );
     final RemoteStubTransportClient transportClient =
         _buildRemoteStubTransportClientFromEnvironment();
-    final RemoteStubAuthStateStore remoteStubAuthStateStore =
-        await _buildRemoteStubAuthStateStoreFromEnvironmentAsync(
+    final _ResolvedRemoteStubAuthStateStore remoteStubAuthStateStoreResolution =
+        await _resolveRemoteStubAuthStateStoreFromEnvironmentAsync(
           secureStorage: secureStorage,
         );
+    final RemoteStubAuthStateStore remoteStubAuthStateStore =
+        remoteStubAuthStateStoreResolution.store;
     final AuthSessionState? remoteStubAuthInitialState =
         _parseRemoteStubAuthInitialState(
           const String.fromEnvironment(
@@ -515,6 +622,16 @@ class DesktopContractBundle {
       remoteStubTransportClient: transportClient,
       remoteStubAuthStateStore: remoteStubAuthStateStore,
       remoteStubAuthInitialState: remoteStubAuthInitialState,
+      remoteStubProfile: _buildRemoteStubProfile(
+        faultProfile: RemoteStubFaultProfile(
+          unavailable: remoteStubUnavailable,
+          blockedOperations: blockedOperations,
+        ),
+        transportClient: transportClient,
+        authStateStore: remoteStubAuthStateStore,
+        authStoreLabelOverride:
+            remoteStubAuthStateStoreResolution.profileAuthStoreLabel,
+      ),
     );
   }
 

@@ -47,6 +47,44 @@ void main() {
     expect(DesktopContractMode.fromEnv(null), DesktopContractMode.inMemory);
   });
 
+  test(
+    'secure storage rollout mode parser defaults on and supports explicit opt-out',
+    () {
+      expect(
+        RemoteStubSecureStorageRolloutMode.fromEnvRaw(''),
+        RemoteStubSecureStorageRolloutMode.defaultOn,
+      );
+      expect(
+        RemoteStubSecureStorageRolloutMode.fromEnvRaw('true'),
+        RemoteStubSecureStorageRolloutMode.explicitOn,
+      );
+      expect(
+        RemoteStubSecureStorageRolloutMode.fromEnvRaw('1'),
+        RemoteStubSecureStorageRolloutMode.explicitOn,
+      );
+      expect(
+        RemoteStubSecureStorageRolloutMode.fromEnvRaw('false'),
+        RemoteStubSecureStorageRolloutMode.explicitOff,
+      );
+      expect(
+        RemoteStubSecureStorageRolloutMode.fromEnvRaw('off'),
+        RemoteStubSecureStorageRolloutMode.explicitOff,
+      );
+      expect(
+        RemoteStubSecureStorageRolloutMode.defaultOn.secureStorageEnabled,
+        isTrue,
+      );
+      expect(
+        RemoteStubSecureStorageRolloutMode.explicitOn.secureStorageEnabled,
+        isTrue,
+      );
+      expect(
+        RemoteStubSecureStorageRolloutMode.explicitOff.secureStorageEnabled,
+        isFalse,
+      );
+    },
+  );
+
   test('remote-stub bundle uses dedicated adapters with prefixed statuses', () {
     final DesktopContractBundle bundle = DesktopContractBundle.remoteStub();
 

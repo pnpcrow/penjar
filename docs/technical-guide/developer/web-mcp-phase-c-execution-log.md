@@ -5599,8 +5599,54 @@ Close the remaining Windows deep-link packaging gap by adding protocol-registrat
   - strict mode now fails when protocol command is placeholder/failed (same governance level as installer hook).
   - remaining gaps now focus on real production command wiring rather than missing baseline protocol-hook surface.
 
+## Unit WS-D-127: Secure-store default-on rollout and auth-store diagnostics telemetry baseline
+
+### Planned objective
+
+Advance remote-stub auth persistence migration by promoting flutter_secure_storage rollout to default-on mode, while preserving explicit legacy opt-out and improving diagnostics visibility of rollout/fallback state through profile auth-store labeling.
+
+### Implemented changes
+
+1. Added secure-store rollout mode parser in `desktop/lib/contracts/desktop_contract_bundle.dart`:
+   - introduced `RemoteStubSecureStorageRolloutMode` (`defaultOn`, `explicitOn`, `explicitOff`),
+   - env parser now treats empty `PENJAR_DESKTOP_REMOTE_STUB_AUTH_SECURE_STORAGE_ENABLED` as `defaultOn`.
+2. Hardened async auth-store resolver and profile labeling flow:
+   - refactored async resolver to return both selected store + diagnostics label,
+   - default-on/explicit-on secure-store paths now surface rollout suffix labels in remote profile (`auth-store`),
+   - secure read error in non-strict mode now falls back to legacy store with explicit fallback label,
+   - explicit opt-out path (`..._SECURE_STORAGE_ENABLED=false`) now reports disabled rollout label.
+3. Extended profile builder seam:
+   - `_buildRemoteStubProfile(...)` now accepts auth-store label override so runtime profile diagnostics reflect rollout decision state, not only store type.
+4. Added rollout parser regression coverage:
+   - `desktop/test/contracts/desktop_contract_bundle_test.dart`:
+     - `secure storage rollout mode parser defaults on and supports explicit opt-out`.
+5. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/desktop_contract_bundle_test.dart test/contracts/workflow_contracts_test.dart`,
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - default-on secure-store rollout behavior under env unset/explicit toggle conditions,
+  - fallback safety when secure-store startup read fails in non-strict mode,
+  - diagnostics visibility of rollout/fallback/degradation state for runtime troubleshooting.
+- **Issues found during review**
+  1. Secure-store adoption still required explicit enable flag, leaving migration default state on legacy command/file/noop paths.
+  2. Runtime profile diagnostics exposed store type only, without rollout-policy/fallback context.
+  3. Legacy fallback from secure read failures had no explicit profile marker, reducing incident triage clarity.
+- **Fix applied**
+  1. Added rollout-mode parser with default-on semantics for secure-store enablement.
+  2. Added resolver result object carrying profile auth-store override label and wired it into `loadFromEnvironment(...)`.
+  3. Added reason-labeled legacy fallback/disabled labels and rollout suffixes for secure-store paths.
+  4. Added parser regression tests and verified full desktop chain.
+- **Post-fix validation criteria**
+  - `PENJAR_DESKTOP_REMOTE_STUB_AUTH_SECURE_STORAGE_ENABLED` unset now resolves secure-store rollout by default.
+  - explicit opt-out (`false`/`off`) keeps legacy auth-store path active with diagnostics label clarity.
+  - fallback from secure read failures in non-strict mode is visible through profile auth-store labeling.
+  - full verification gate remains green after rollout-policy and diagnostics updates.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata (including auth-store mode label), shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline plus launch-argument deep-link parser bridge, macOS protocol/channel route-dispatch baseline, Windows running-instance route relay baseline, and Windows protocol-registration command-hook baseline in installer flow, backend envelope/schema compatibility normalization, auth snapshot store/seed seam, file-backed auth snapshot persistence path, command-hook secure-store bridge path, flutter_secure_storage-backed native credential-store adapter path plus strict/fallback and legacy mirror rollout controls, and runtime mode parity/matrix gates, but production Windows protocol-registration command provisioning with signed installer chain wiring and secure-store default cutover/legacy mode deprecation + telemetry wiring are still pending.
+- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata (including auth-store mode label), shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline plus launch-argument deep-link parser bridge, macOS protocol/channel route-dispatch baseline, Windows running-instance route relay baseline, and Windows protocol-registration command-hook baseline in installer flow, backend envelope/schema compatibility normalization, auth snapshot store/seed seam, file-backed auth snapshot persistence path, command-hook secure-store bridge path, flutter_secure_storage-backed native credential-store adapter path plus strict/fallback and legacy mirror rollout controls, secure-store default-on rollout policy, and runtime mode parity/matrix gates, but production Windows protocol-registration command provisioning with signed installer chain wiring, explicit legacy command/file auth-store retirement enforcement, and backend auth contract integration are still pending.
 - Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard plus coverage-contract regression guard (set-diff optimized uncovered/missing detection), desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks with in-memory duplicate-key tracking + base-check markdown report emission) plus evidence-index contract regression guard (including dedicated missing-base-check-report attachment, missing-index-file, invalid-decision, and promoted-placeholder cases, dedicated tests workflow release-evidence guard base+contract enforcement/upload, and parity matrix base-check artifact retention), update-manifest guard automation with validation + contract report artifacts (including dedicated tests workflow update-manifest guard job contract enforcement/upload), on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
