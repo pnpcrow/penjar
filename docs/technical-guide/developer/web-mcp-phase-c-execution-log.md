@@ -3214,8 +3214,49 @@ Add automated status validation for release evidence bundle summaries so risky/m
   - Bundle-check reports are generated and uploaded in smoke workflow.
   - Full-fast desktop verification remains green after bundle-check integration.
 
+## Unit WS-D-75: Bundle strict gate-policy dependency wiring
+
+### Planned objective
+
+Ensure strict release evidence bundle enforcement is coherently modeled in smoke gate-policy preflight and workflow toggle propagation.
+
+### Implemented changes
+
+1. Extended gate-policy toggle model:
+   - `desktop/scripts/check_release_smoke_gate_policy.sh` now reads `STRICT_RELEASE_EVIDENCE_BUNDLE`.
+2. Added strict dependency checks:
+   - `STRICT_RELEASE_EVIDENCE_BUNDLE` now requires:
+     - `STRICT_SIGNING_PROVENANCE=1`,
+     - `STRICT_WINDOWS_INSTALLER_PROVENANCE=1`.
+3. Extended gate-policy report output:
+   - release smoke gate policy report now includes effective `STRICT_RELEASE_EVIDENCE_BUNDLE` value.
+4. Fixed workflow preflight env propagation:
+   - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness gate-policy step now passes `STRICT_RELEASE_EVIDENCE_BUNDLE: ${{ inputs.enforce_release_evidence_bundle }}`.
+5. Updated release baseline docs:
+   - `desktop-flutter-release-validation-baseline.md` now documents bundle strict dependencies inside gate-policy preflight behavior.
+6. Re-ran validation commands:
+   - `cd desktop && STRICT_RELEASE_EVIDENCE_BUNDLE=1 ./scripts/check_release_smoke_gate_policy.sh` (expected failure: missing strict provenance toggles),
+   - `cd desktop && STRICT_RELEASE_EVIDENCE_BUNDLE=1 STRICT_SIGNING_PROVENANCE=1 STRICT_SIGNING_EXECUTION=1 STRICT_SIGNING_COMMAND_HOOKS=1 STRICT_WINDOWS_INSTALLER_PROVENANCE=1 STRICT_WINDOWS_INSTALLER_EXECUTION=1 ./scripts/check_release_smoke_gate_policy.sh`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - workflow input to gate-policy env propagation completeness,
+  - dependency coherence for strict release evidence bundle mode,
+  - report transparency for new strict toggle.
+- **Issues found during review**
+  1. `enforce_release_evidence_bundle` input existed for bundle check execution but was not propagated to gate-policy preflight, so dependency enforcement was bypassed.
+- **Fix applied**
+  1. Added `STRICT_RELEASE_EVIDENCE_BUNDLE` propagation and explicit provenance dependency checks in gate-policy script.
+- **Post-fix validation criteria**
+  - Gate-policy preflight fails when strict bundle mode is enabled without strict provenance prerequisites.
+  - Gate-policy report includes strict bundle toggle value.
+  - Full-fast desktop verification remains green after dependency wiring fix.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode plus placeholder hygiene strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, verify test coverage guard, desktop command inventory guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness), update-manifest guard automation with validation report artifacts, on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode plus placeholder hygiene strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

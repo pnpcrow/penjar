@@ -138,6 +138,7 @@ jobs:
           STRICT_WINDOWS_INSTALLER_EXECUTION: ${{ inputs.enforce_windows_installer_execution }}
           STRICT_WINDOWS_INSTALLER_PACKAGING: ${{ inputs.enforce_windows_installer_packaging }}
           STRICT_WINDOWS_INSTALLER_PROVENANCE: ${{ inputs.enforce_windows_installer_provenance }}
+          STRICT_RELEASE_EVIDENCE_BUNDLE: ${{ inputs.enforce_release_evidence_bundle }}
           PUBLISH_APPCAST_EXTERNAL: ${{ inputs.publish_appcast_external }}
           APPCAST_PUBLISH_DRY_RUN: ${{ inputs.appcast_external_dry_run }}
           ALLOW_APPCAST_EXTERNAL_PRODUCTION: ${{ inputs.allow_appcast_external_production }}

@@ -175,6 +175,7 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer provenance enforcement via `enforce_windows_installer_provenance` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict Windows installer execution enforcement via `enforce_windows_installer_execution` input.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict release evidence bundle enforcement via `enforce_release_evidence_bundle` input.
+- `.github/workflows/release-desktop-installer-smoke.yml` gate-policy preflight now models `STRICT_RELEASE_EVIDENCE_BUNDLE` dependencies (`STRICT_SIGNING_PROVENANCE=1` and `STRICT_WINDOWS_INSTALLER_PROVENANCE=1`).
 - `.github/workflows/release-desktop-installer-smoke.yml` builds macOS/Windows release artifacts on demand and uploads installer/update smoke archives + JSON reports.
 - `.github/workflows/release-desktop-installer-smoke.yml` uploads per-platform signing pipeline reports generated during smoke execution.
 - `.github/workflows/release-desktop-installer-smoke.yml` uploads per-platform signing provenance reports generated during smoke execution.

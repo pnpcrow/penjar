@@ -17,6 +17,7 @@ strict_signing_provenance="$(to_bool "${STRICT_SIGNING_PROVENANCE:-0}")"
 strict_windows_installer_execution="$(to_bool "${STRICT_WINDOWS_INSTALLER_EXECUTION:-0}")"
 strict_windows_installer_packaging="$(to_bool "${STRICT_WINDOWS_INSTALLER_PACKAGING:-0}")"
 strict_windows_installer_provenance="$(to_bool "${STRICT_WINDOWS_INSTALLER_PROVENANCE:-0}")"
+strict_release_evidence_bundle="$(to_bool "${STRICT_RELEASE_EVIDENCE_BUNDLE:-0}")"
 publish_appcast_external="$(to_bool "${PUBLISH_APPCAST_EXTERNAL:-0}")"
 appcast_publish_dry_run="$(to_bool "${APPCAST_PUBLISH_DRY_RUN:-1}")"
 allow_appcast_external_production="$(to_bool "${ALLOW_APPCAST_EXTERNAL_PRODUCTION:-0}")"
@@ -75,6 +76,14 @@ if [[ "$strict_windows_installer_provenance" -eq 1 && "$strict_windows_installer
   add_required "STRICT_WINDOWS_INSTALLER_PROVENANCE requires STRICT_WINDOWS_INSTALLER_EXECUTION=1."
 fi
 
+if [[ "$strict_release_evidence_bundle" -eq 1 && "$strict_signing_provenance" -eq 0 ]]; then
+  add_required "STRICT_RELEASE_EVIDENCE_BUNDLE requires STRICT_SIGNING_PROVENANCE=1."
+fi
+
+if [[ "$strict_release_evidence_bundle" -eq 1 && "$strict_windows_installer_provenance" -eq 0 ]]; then
+  add_required "STRICT_RELEASE_EVIDENCE_BUNDLE requires STRICT_WINDOWS_INSTALLER_PROVENANCE=1."
+fi
+
 if [[ "$publish_appcast_external" -eq 1 && "$appcast_publish_dry_run" -eq 0 && "$allow_appcast_external_production" -eq 0 ]]; then
   add_required "Non-dry-run external publication requires ALLOW_APPCAST_EXTERNAL_PRODUCTION=1."
 fi
@@ -109,6 +118,7 @@ fi
   echo "- STRICT_WINDOWS_INSTALLER_EXECUTION: $strict_windows_installer_execution"
   echo "- STRICT_WINDOWS_INSTALLER_PACKAGING: $strict_windows_installer_packaging"
   echo "- STRICT_WINDOWS_INSTALLER_PROVENANCE: $strict_windows_installer_provenance"
+  echo "- STRICT_RELEASE_EVIDENCE_BUNDLE: $strict_release_evidence_bundle"
   echo "- PUBLISH_APPCAST_EXTERNAL: $publish_appcast_external"
   echo "- APPCAST_PUBLISH_DRY_RUN: $appcast_publish_dry_run"
   echo "- ALLOW_APPCAST_EXTERNAL_PRODUCTION: $allow_appcast_external_production"
