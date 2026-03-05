@@ -65,7 +65,7 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
 1. Freeze expected backend auth response envelopes for sign-in/restore/refresh flows.
 2. Add contract fixtures covering success, signed-out, token-expiry, and unauthorized variants.
 3. Add strict parser assertions for required auth fields/aliases per flow.
-4. Status: in progress (fixture matrix baseline added in `workflow_contracts_test.dart`; schema fixture expansion remains).
+4. Status: in progress (fixture matrix baseline + `result/data` envelope and `authState` alias fixture coverage added in `workflow_contracts_test.dart`; broader schema fixture expansion remains).
 
 ### ABI-02: Real auth transport binding and state persistence continuity
 

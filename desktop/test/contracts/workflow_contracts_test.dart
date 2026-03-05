@@ -1444,6 +1444,42 @@ void main() {
             expectedRememberSession: true,
           ),
           const _AuthBackendFixtureCase(
+            name: 'sign-in result envelope with authState alias success',
+            operationId: RemoteStubOperationIds.signIn,
+            responsePayload: <String, Object?>{
+              'result': <String, Object?>{
+                'message': 'Fixture sign-in result envelope applied.',
+                'authState': <String, Object?>{
+                  'isAuthenticated': true,
+                  'remember': true,
+                  'tokens': <String, Object?>{
+                    'accessToken': 'fixture-result-envelope-token',
+                  },
+                },
+              },
+            },
+            expectedSignedIn: true,
+            expectedRememberSession: true,
+            expectedStatus: '[remote-stub] Fixture sign-in result envelope applied.',
+          ),
+          const _AuthBackendFixtureCase(
+            name: 'restore-session data envelope explicit signed-out overrides token',
+            operationId: RemoteStubOperationIds.restoreSession,
+            responsePayload: <String, Object?>{
+              'data': <String, Object?>{
+                'authState': <String, Object?>{
+                  'authentication': <String, Object?>{
+                    'authenticated': false,
+                  },
+                  'tokens': <String, Object?>{
+                    'accessToken': 'fixture-ignored-token',
+                  },
+                },
+              },
+            },
+            expectedSignedIn: false,
+          ),
+          const _AuthBackendFixtureCase(
             name: 'numeric unauthorized code overrides token inference',
             operationId: RemoteStubOperationIds.refreshToken,
             responsePayload: <String, Object?>{
@@ -1454,6 +1490,27 @@ void main() {
               },
             },
             expectedSignedIn: false,
+          ),
+          const _AuthBackendFixtureCase(
+            name: 'refresh-token data envelope nested error detail and code',
+            operationId: RemoteStubOperationIds.refreshToken,
+            responsePayload: <String, Object?>{
+              'data': <String, Object?>{
+                'state': <String, Object?>{
+                  'authentication': <String, Object?>{
+                    'error': <String, Object?>{
+                      'code': 'TOKEN_EXPIRED',
+                      'detail': 'Fixture data-envelope refresh expired.',
+                    },
+                  },
+                  'tokens': <String, Object?>{
+                    'accessToken': 'fixture-stale-token',
+                  },
+                },
+              },
+            },
+            expectedSignedIn: false,
+            expectedStatus: '[remote-stub] Fixture data-envelope refresh expired.',
           ),
           const _AuthBackendFixtureCase(
             name: 'error container code override respects explicit signed-in',
