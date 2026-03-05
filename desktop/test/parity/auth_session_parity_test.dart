@@ -1048,6 +1048,70 @@ class _AuthBackendPayloadEnvelopeParityTransportClient
   }
 }
 
+class _AuthBackendNestedErrorListSignedInAliasOverrideParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendNestedErrorListSignedInAliasOverrideParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend sign-in snapshot applied.',
+          'state': <String, Object?>{'signedIn': true, 'rememberSession': true},
+        },
+      );
+    }
+    if (request.operation == RemoteStubOperationIds.restoreSession) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'state': <String, Object?>{
+            'authentication': <String, Object?>{
+              'errors': <Map<String, Object?>>[
+                <String, Object?>{'reasonCode': 'TOKEN_EXPIRED'},
+              ],
+              'authenticated': true,
+              'rememberSession': true,
+            },
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
+class _AuthBackendNestedErrorCodeSignedInAliasOverrideParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendNestedErrorCodeSignedInAliasOverrideParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend sign-in snapshot applied.',
+          'state': <String, Object?>{'signedIn': true, 'rememberSession': true},
+        },
+      );
+    }
+    if (request.operation == RemoteStubOperationIds.restoreSession) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'state': <String, Object?>{
+            'authentication': <String, Object?>{
+              'errorCode': 'AUTH_REQUIRED',
+              'authenticated': true,
+              'remember': true,
+            },
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 void main() {
   testWidgets('auth/session parity scaffold interactions work', (
     WidgetTester tester,
@@ -2800,6 +2864,120 @@ void main() {
           'Status: [remote-stub] Backend sign-in snapshot applied.',
         ),
         findsOneWidget,
+      );
+      expect(
+        find.textContaining('Status: [remote-stub] Backend session expired.'),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets(
+    'auth/session parity keeps signed-in state when nested error-list code collides with authenticated alias',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendNestedErrorListSignedInAliasOverrideParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend sign-in snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-restore-session')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('auth-restore-session')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend sign-in snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+      final CheckboxListTile rememberSessionTile = tester.widget(
+        find.byKey(const ValueKey<String>('auth-remember')),
+      );
+      expect(rememberSessionTile.value, isTrue);
+      expect(
+        find.textContaining('Status: [remote-stub] Authentication required.'),
+        findsNothing,
+      );
+      expect(
+        find.textContaining('Status: [remote-stub] Backend session expired.'),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets(
+    'auth/session parity keeps signed-in state when nested error-code collides with authenticated alias',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendNestedErrorCodeSignedInAliasOverrideParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend sign-in snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-restore-session')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('auth-restore-session')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend sign-in snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+      final CheckboxListTile rememberSessionTile = tester.widget(
+        find.byKey(const ValueKey<String>('auth-remember')),
+      );
+      expect(rememberSessionTile.value, isTrue);
+      expect(
+        find.textContaining('Status: [remote-stub] Authentication required.'),
+        findsNothing,
       );
       expect(
         find.textContaining('Status: [remote-stub] Backend session expired.'),
