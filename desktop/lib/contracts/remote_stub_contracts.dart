@@ -1287,7 +1287,7 @@ AuthSessionState? _authStateFromBackendPayload(
   ).isNotEmpty;
   final bool hasExplicitFailureFlag = _containsExplicitFalseInSources(
     <Map<String, Object?>>[responsePayload, envelopePayload, ...authSources],
-    const <String>['success', 'ok', 'isSuccess'],
+    const <String>['success', 'ok', 'isSuccess', 'is_success', 'is_ok'],
   );
   final bool hasFields =
       hasRememberSessionFields ||
