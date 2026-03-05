@@ -555,11 +555,15 @@ String _buildHttpUrlLabel(String url, {required String prefix}) {
 String _buildCompositeHttpTransportLabel({
   required String healthUrl,
   required String backendBaseUrl,
+  int backendEndpointOverrideCount = 0,
 }) {
   final List<String> parts = <String>[
     _buildHttpUrlLabel(healthUrl, prefix: 'http-health'),
     _buildHttpUrlLabel(backendBaseUrl, prefix: 'http-backend'),
-  ].where((String value) => value.isNotEmpty).toList(growable: false);
+  ].where((String value) => value.isNotEmpty).toList(growable: true);
+  if (backendEndpointOverrideCount > 0) {
+    parts.add('http-backend-overrides:$backendEndpointOverrideCount');
+  }
   return parts.join(' · ');
 }
 
@@ -580,6 +584,30 @@ String _resolveBackendEndpointUrl(String baseUrl, String endpoint) {
       ? trimmedEndpoint
       : '/$trimmedEndpoint';
   return '$normalizedBase$normalizedEndpoint';
+}
+
+Map<String, String> _normalizeBackendEndpointOverrides(
+  Map<String, String> overrides,
+) {
+  if (overrides.isEmpty) {
+    return const <String, String>{};
+  }
+  final Map<String, String> normalized = <String, String>{};
+  for (final MapEntry<String, String> entry in overrides.entries) {
+    final String operation = _normalizeOperation(entry.key);
+    if (!RemoteStubOperationIds.all.contains(operation)) {
+      continue;
+    }
+    final String endpoint = entry.value.trim();
+    if (endpoint.isEmpty) {
+      continue;
+    }
+    normalized[operation] = endpoint;
+  }
+  if (normalized.isEmpty) {
+    return const <String, String>{};
+  }
+  return Map<String, String>.unmodifiable(normalized);
 }
 
 class _CurlHttpResponse {
@@ -1986,6 +2014,7 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
     this.allowedStatusCodes = const <int>{200},
     this.blockedReason = 'Remote transport unavailable',
     String backendBaseUrl = '',
+    Map<String, String> backendEndpointOverrides = const <String, String>{},
     this.backendTimeout = const Duration(seconds: 3),
     this.backendBlockedReason = 'Remote backend execution failed',
     this.backendAuthToken,
@@ -1993,11 +2022,15 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
     RemoteStubHttpBackendExecutionProbe? executionProbe,
   }) : healthUrl = healthUrl.trim(),
        backendBaseUrl = backendBaseUrl.trim(),
+       backendEndpointOverrides = _normalizeBackendEndpointOverrides(
+         backendEndpointOverrides,
+       ),
        _probe = probe ?? _defaultHttpTransportProbe,
        _executionProbe = executionProbe ?? _defaultHttpBackendExecutionProbe,
        transportLabel = _buildCompositeHttpTransportLabel(
          healthUrl: healthUrl,
          backendBaseUrl: backendBaseUrl,
+         backendEndpointOverrideCount: backendEndpointOverrides.length,
        );
 
   final String healthUrl;
@@ -2005,6 +2038,7 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
   final Set<int> allowedStatusCodes;
   final String blockedReason;
   final String backendBaseUrl;
+  final Map<String, String> backendEndpointOverrides;
   final Duration backendTimeout;
   final String backendBlockedReason;
   final String? backendAuthToken;
@@ -2029,10 +2063,12 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
 
   @override
   RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    final RemoteStubTransportRequest effectiveRequest =
+        _requestWithBackendEndpointOverride(request);
     if (healthUrl.isNotEmpty) {
       final RemoteStubHttpTransportProbeResult probeResult = _probe(
         RemoteStubHttpTransportProbeRequest(
-          transportRequest: request,
+          transportRequest: effectiveRequest,
           healthUrl: healthUrl,
           timeout: timeout,
           allowedStatusCodes: _effectiveAllowedStatusCodes,
@@ -2049,7 +2085,7 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
       final RemoteStubHttpBackendExecutionResult executionResult =
           _executionProbe(
             RemoteStubHttpBackendExecutionRequest(
-              transportRequest: request,
+              transportRequest: effectiveRequest,
               baseUrl: backendBaseUrl,
               timeout: backendTimeout,
               blockedReason: backendBlockedReason,
@@ -2074,6 +2110,25 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
     }
 
     return RemoteStubTransportResult.allow;
+  }
+
+  RemoteStubTransportRequest _requestWithBackendEndpointOverride(
+    RemoteStubTransportRequest request,
+  ) {
+    final String? endpointOverride =
+        backendEndpointOverrides[request.operation]?.trim();
+    if (endpointOverride == null ||
+        endpointOverride.isEmpty ||
+        endpointOverride == request.endpoint) {
+      return request;
+    }
+    return RemoteStubTransportRequest(
+      operation: request.operation,
+      workflow: request.workflow,
+      method: request.method,
+      endpoint: endpointOverride,
+      payload: request.payload,
+    );
   }
 }
 

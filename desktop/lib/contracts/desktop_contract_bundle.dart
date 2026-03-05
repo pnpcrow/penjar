@@ -237,6 +237,41 @@ bool _isBackendExecutionTransport(RemoteStubTransportClient transportClient) {
   return transportClient.profile.transportLabel.contains('http-backend:');
 }
 
+Map<String, String> _remoteStubBackendEndpointOverridesFromEnvironment() {
+  final Map<String, String> overrides = <String, String>{};
+
+  final String setRememberSessionEndpoint = const String.fromEnvironment(
+    'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BACKEND_ENDPOINT_SET_REMEMBER_SESSION',
+  ).trim();
+  if (setRememberSessionEndpoint.isNotEmpty) {
+    overrides[RemoteStubOperationIds.setRememberSession] =
+        setRememberSessionEndpoint;
+  }
+
+  final String signInEndpoint = const String.fromEnvironment(
+    'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BACKEND_ENDPOINT_SIGN_IN',
+  ).trim();
+  if (signInEndpoint.isNotEmpty) {
+    overrides[RemoteStubOperationIds.signIn] = signInEndpoint;
+  }
+
+  final String restoreSessionEndpoint = const String.fromEnvironment(
+    'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BACKEND_ENDPOINT_RESTORE_SESSION',
+  ).trim();
+  if (restoreSessionEndpoint.isNotEmpty) {
+    overrides[RemoteStubOperationIds.restoreSession] = restoreSessionEndpoint;
+  }
+
+  final String refreshTokenEndpoint = const String.fromEnvironment(
+    'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BACKEND_ENDPOINT_REFRESH_TOKEN',
+  ).trim();
+  if (refreshTokenEndpoint.isNotEmpty) {
+    overrides[RemoteStubOperationIds.refreshToken] = refreshTokenEndpoint;
+  }
+
+  return overrides;
+}
+
 RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
   final String healthUrl = const String.fromEnvironment(
     'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_HEALTH_URL',
@@ -261,6 +296,8 @@ RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
   final String backendAuthToken = const String.fromEnvironment(
     'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BACKEND_AUTH_TOKEN',
   ).trim();
+  final Map<String, String> backendEndpointOverrides =
+      _remoteStubBackendEndpointOverridesFromEnvironment();
 
   if (healthUrl.isNotEmpty || backendBaseUrl.isNotEmpty) {
     final int timeoutMillis = _parsePositiveIntOrDefault(
@@ -295,6 +332,7 @@ RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
           ? 'Remote backend execution failed'
           : backendBlockedReason,
       backendAuthToken: backendAuthToken.isEmpty ? null : backendAuthToken,
+      backendEndpointOverrides: backendEndpointOverrides,
     );
   }
 

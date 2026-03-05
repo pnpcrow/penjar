@@ -698,4 +698,30 @@ void main() {
       contains('transport: http-backend:https://api.penjar.app/v1'),
     );
   });
+
+  test('remote-stub profile exposes backend endpoint override label', () {
+    final DesktopContractBundle bundle = DesktopContractBundle.fromMode(
+      DesktopContractMode.remoteStub,
+      remoteStubTransportClient: RemoteStubHttpTransportClient(
+        backendBaseUrl: 'https://api.penjar.app/v1',
+        backendEndpointOverrides: <String, String>{
+          RemoteStubOperationIds.signIn: '/v2/auth/custom-sign-in',
+        },
+        executionProbe: (_) =>
+            const RemoteStubHttpBackendExecutionResult.allowed(),
+      ),
+    );
+
+    expect(bundle.remoteStubProfile?.isEmpty, isFalse);
+    expect(
+      bundle.remoteStubProfile?.transportLabel,
+      'http-backend:https://api.penjar.app/v1 · http-backend-overrides:1',
+    );
+    expect(
+      bundle.remoteStubProfile?.summaryLabel,
+      contains(
+        'transport: http-backend:https://api.penjar.app/v1 · http-backend-overrides:1',
+      ),
+    );
+  });
 }

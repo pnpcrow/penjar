@@ -1055,6 +1055,50 @@ void main() {
     );
 
     test(
+      'http transport client applies backend endpoint overrides for auth operations',
+      () {
+        final List<RemoteStubHttpBackendExecutionRequest> executedRequests =
+            <RemoteStubHttpBackendExecutionRequest>[];
+        final RemoteStubHttpTransportClient transportClient =
+            RemoteStubHttpTransportClient(
+              backendBaseUrl: 'https://api.penjar.app',
+              backendEndpointOverrides: <String, String>{
+                RemoteStubOperationIds.signIn: '/v2/auth/custom-sign-in',
+              },
+              executionProbe: (RemoteStubHttpBackendExecutionRequest request) {
+                executedRequests.add(request);
+                expect(
+                  request.transportRequest.endpoint,
+                  '/v2/auth/custom-sign-in',
+                );
+                expect(
+                  request.endpointUrl,
+                  'https://api.penjar.app/v2/auth/custom-sign-in',
+                );
+                return const RemoteStubHttpBackendExecutionResult.blocked(
+                  'Remote backend execution failed: sign-in. overridden endpoint unreachable',
+                );
+              },
+            );
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.signIn(
+          const AuthSignInRequest(
+            email: 'designer@penjar.app',
+            password: 'desktop-pass',
+          ),
+        );
+
+        expect(executedRequests, hasLength(1));
+        expect(
+          authContract.state.status,
+          '[remote-stub] Remote backend execution failed: sign-in. overridden endpoint unreachable',
+        );
+      },
+    );
+
+    test(
       'http transport client executes backend request and allows operation on success',
       () {
         final List<RemoteStubHttpBackendExecutionRequest> executedRequests =
