@@ -2258,6 +2258,7 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
     this.transportClient = const RemoteStubNoopTransportClient(),
     this.authStateStore = const RemoteStubNoopAuthStateStore(),
     this.strictBackendSchema = false,
+    this.requireBackendState = false,
     this.forwardSignInCredentials = false,
     AuthSessionState? initialState,
   }) : _delegate = delegate ?? InMemoryAuthSessionContract() {
@@ -2273,6 +2274,7 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
   final RemoteStubTransportClient transportClient;
   final RemoteStubAuthStateStore authStateStore;
   final bool strictBackendSchema;
+  final bool requireBackendState;
   final bool forwardSignInCredentials;
   AuthSessionState? _stateSnapshot;
   String? _statusOverride;
@@ -2335,6 +2337,11 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
       _stateSnapshot = _decorateAuthState(
         previousState,
         status: 'Backend auth schema validation failed.',
+      );
+    } else if (requireBackendState) {
+      _stateSnapshot = _decorateAuthState(
+        previousState,
+        status: 'Backend auth state payload required.',
       );
     } else {
       _stateSnapshot = _decorateAuthState(delegateFallback());

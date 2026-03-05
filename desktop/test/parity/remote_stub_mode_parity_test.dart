@@ -115,6 +115,26 @@ void main() {
     );
   });
 
+  testWidgets(
+    'remote-stub mode surfaces required backend auth state profile label',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubAuthRequireBackendState: true,
+        ),
+      );
+
+      await openWorkflowSection(tester, 'diagnostics');
+      expect(find.textContaining('Contract mode: remote-stub'), findsOneWidget);
+      expect(
+        find.textContaining('Remote profile: auth-backend-state: required'),
+        findsOneWidget,
+      );
+    },
+  );
+
   testWidgets('strict schema mode blocks malformed auth sign-in fallback', (
     WidgetTester tester,
   ) async {
@@ -219,6 +239,38 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'required backend auth state mode blocks empty sign-in delegate fallback',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubAuthRequireBackendState: true,
+        ),
+      );
+
+      await openWorkflowSection(tester, 'auth');
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend auth state payload required.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Signed in (simulated).'), findsNothing);
     },
   );
 

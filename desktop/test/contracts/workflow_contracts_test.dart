@@ -2178,6 +2178,67 @@ void main() {
     );
 
     test(
+      'auth backend required-state mode blocks delegate fallback on empty payload',
+      () {
+        final _TrackingAuthSessionContract trackingDelegate =
+            _TrackingAuthSessionContract();
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(
+              delegate: trackingDelegate,
+              requireBackendState: true,
+            );
+
+        authContract.signIn(
+          const AuthSignInRequest(
+            email: 'designer@penjar.app',
+            password: 'desktop-pass',
+          ),
+        );
+
+        expect(trackingDelegate.signInCallCount, 0);
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend auth state payload required.',
+        );
+      },
+    );
+
+    test(
+      'auth backend required-state mode blocks delegate fallback on malformed payload',
+      () {
+        final _TrackingAuthSessionContract trackingDelegate =
+            _TrackingAuthSessionContract();
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.signIn: <String, Object?>{
+                'unexpected': <String, Object?>{'shape': true},
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(
+              delegate: trackingDelegate,
+              transportClient: transportClient,
+              requireBackendState: true,
+            );
+
+        authContract.signIn(
+          const AuthSignInRequest(
+            email: 'designer@penjar.app',
+            password: 'desktop-pass',
+          ),
+        );
+
+        expect(trackingDelegate.signInCallCount, 0);
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend auth state payload required.',
+        );
+      },
+    );
+
+    test(
       'skips auth delegate mutation when backend response snapshot is present',
       () {
         final _TrackingAuthSessionContract trackingDelegate =

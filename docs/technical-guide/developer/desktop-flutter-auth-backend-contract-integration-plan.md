@@ -65,12 +65,17 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
    - signed-out signals (error-code / failure-flag) now force signed-out transition even from previously signed-in snapshots when explicit signed-in aliases are absent.
    - HTTP backend auth non-2xx responses are normalized into auth payload snapshots (including `code` / `message`) so auth parser state/error rules can run instead of transport-only block status.
    - parity UI coverage now includes signed-in -> signed-out transition on backend unauthorized refresh (`desktop/test/parity/remote_stub_mode_parity_test.dart`).
+12. Optional backend-auth required-state runtime gate:
+   - `RemoteStubAuthSessionContract.requireBackendState` blocks delegate fallback when backend auth state payload is missing/malformed,
+   - runtime toggle is available via `PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_REQUIRE_STATE`,
+   - diagnostics remote profile can surface `auth-backend-state: required`,
+   - parity UI coverage now includes required-state fallback blocking behavior.
 
 ## Remaining integration gaps (auth scope)
 
 | Gap | Current state | Target integrated state | Primary evidence gate |
 |---|---|---|---|
-| Real backend auth request/response contract handshake | Remote-stub backend transport supports request metadata/response normalization, opt-in sign-in credential forwarding, and HTTP auth non-2xx payload normalization, but auth flow still includes simulated fallback assumptions for backend payload gaps | Auth contract methods bind to production backend auth envelope/schema and error semantics | `desktop/test/contracts/workflow_contracts_test.dart` + auth backend integration tests in `desktop/test/parity/auth_session_parity_test.dart` |
+| Real backend auth request/response contract handshake | Remote-stub backend transport supports request metadata/response normalization, opt-in sign-in credential forwarding, HTTP auth non-2xx payload normalization, and optional required-state fallback blocking (`PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_REQUIRE_STATE`), but auth flow still includes simulated fallback assumptions when required-state mode is not enabled | Auth contract methods bind to production backend auth envelope/schema and error semantics | `desktop/test/contracts/workflow_contracts_test.dart` + auth backend integration tests in `desktop/test/parity/auth_session_parity_test.dart` |
 | Session/token persistence continuity under real backend lifecycle | Secure store path exists, but rotation/expiry behavior is still validated mainly through simulated payloads | Real backend token/session rotation and expiry handling validated with persisted secure-store state | `desktop:verify:full` with backend-auth integration fixtures/evidence |
 | Backend auth error-to-UX mapping policy | Signed-out/state/status normalization is broad and now includes forced signed-out transition from previously signed-in snapshots under signed-out code/failure-flag signals, but real backend contract mapping table is not yet fixed | Explicit backend auth failure taxonomy mapped to status text + signed-in state transitions | Execution-log unit evidence + parity gate updates |
 | Rollout and fallback policy for backend auth path | Runtime mode gate and strict malformed-schema toggle wiring (`PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_SCHEMA_STRICT`) exist, but backend-auth rollout stage/decommission criteria are not codified | Staged rollout criteria + decommission checklist for simulated-path assumptions | Inventory/checklist/acceptance baseline sync + runbook next-unit updates |

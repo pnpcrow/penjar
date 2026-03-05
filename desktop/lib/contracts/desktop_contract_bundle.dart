@@ -179,6 +179,7 @@ DesktopRemoteStubProfile _buildRemoteStubProfile({
   required RemoteStubTransportClient transportClient,
   required RemoteStubAuthStateStore authStateStore,
   bool authStrictBackendSchema = false,
+  bool authRequireBackendState = false,
   bool authForwardSignInCredentials = false,
   String authStoreLabelOverride = '',
 }) {
@@ -187,6 +188,9 @@ DesktopRemoteStubProfile _buildRemoteStubProfile({
       ? authStoreLabelOverride.trim()
       : _describeAuthStateStore(authStateStore);
   final String authBackendSchemaLabel = authStrictBackendSchema ? 'strict' : '';
+  final String authBackendStateLabel = authRequireBackendState
+      ? 'required'
+      : '';
   final String authSignInPayloadLabel = authForwardSignInCredentials
       ? 'forwarded'
       : '';
@@ -201,6 +205,7 @@ DesktopRemoteStubProfile _buildRemoteStubProfile({
     transportLabel: transportProfile.transportLabel,
     authStoreLabel: authStoreLabel,
     authBackendSchemaLabel: authBackendSchemaLabel,
+    authBackendStateLabel: authBackendStateLabel,
     authSignInPayloadLabel: authSignInPayloadLabel,
   );
 }
@@ -341,6 +346,14 @@ bool _remoteStubAuthBackendForwardCredentialsFromEnvironment() {
   );
 }
 
+bool _remoteStubAuthBackendRequireStateFromEnvironment() {
+  return _envFlagEnabled(
+    const String.fromEnvironment(
+      'PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_REQUIRE_STATE',
+    ),
+  );
+}
+
 _ResolvedRemoteStubAuthStateStore _resolvedRemoteStubAuthStateStore(
   RemoteStubAuthStateStore store, {
   required RemoteStubSecureStorageRolloutMode rolloutMode,
@@ -458,6 +471,7 @@ class DesktopRemoteStubProfile {
     this.transportLabel = '',
     this.authStoreLabel = '',
     this.authBackendSchemaLabel = '',
+    this.authBackendStateLabel = '',
     this.authSignInPayloadLabel = '',
   });
 
@@ -468,6 +482,7 @@ class DesktopRemoteStubProfile {
   final String transportLabel;
   final String authStoreLabel;
   final String authBackendSchemaLabel;
+  final String authBackendStateLabel;
   final String authSignInPayloadLabel;
 
   bool get isEmpty =>
@@ -477,6 +492,7 @@ class DesktopRemoteStubProfile {
       transportLabel.trim().isEmpty &&
       authStoreLabel.trim().isEmpty &&
       authBackendSchemaLabel.trim().isEmpty &&
+      authBackendStateLabel.trim().isEmpty &&
       authSignInPayloadLabel.trim().isEmpty;
 
   String get summaryLabel {
@@ -504,6 +520,9 @@ class DesktopRemoteStubProfile {
     }
     if (authBackendSchemaLabel.trim().isNotEmpty) {
       parts.add('auth-backend-schema: $authBackendSchemaLabel');
+    }
+    if (authBackendStateLabel.trim().isNotEmpty) {
+      parts.add('auth-backend-state: $authBackendStateLabel');
     }
     if (authSignInPayloadLabel.trim().isNotEmpty) {
       parts.add('auth-sign-in-payload: $authSignInPayloadLabel');
@@ -549,6 +568,8 @@ class DesktopContractBundle {
         );
     final bool remoteStubAuthStrictBackendSchema =
         _remoteStubAuthBackendSchemaStrictModeFromEnvironment();
+    final bool remoteStubAuthRequireBackendState =
+        _remoteStubAuthBackendRequireStateFromEnvironment();
     final bool remoteStubAuthForwardSignInCredentials =
         _remoteStubAuthBackendForwardCredentialsFromEnvironment();
 
@@ -562,6 +583,7 @@ class DesktopContractBundle {
       remoteStubAuthStateStore: const RemoteStubNoopAuthStateStore(),
       remoteStubAuthInitialState: remoteStubAuthInitialState,
       remoteStubAuthStrictBackendSchema: remoteStubAuthStrictBackendSchema,
+      remoteStubAuthRequireBackendState: remoteStubAuthRequireBackendState,
       remoteStubAuthForwardSignInCredentials:
           remoteStubAuthForwardSignInCredentials,
     );
@@ -598,6 +620,8 @@ class DesktopContractBundle {
         );
     final bool remoteStubAuthStrictBackendSchema =
         _remoteStubAuthBackendSchemaStrictModeFromEnvironment();
+    final bool remoteStubAuthRequireBackendState =
+        _remoteStubAuthBackendRequireStateFromEnvironment();
     final bool remoteStubAuthForwardSignInCredentials =
         _remoteStubAuthBackendForwardCredentialsFromEnvironment();
 
@@ -611,6 +635,7 @@ class DesktopContractBundle {
       remoteStubAuthStateStore: remoteStubAuthStateStore,
       remoteStubAuthInitialState: remoteStubAuthInitialState,
       remoteStubAuthStrictBackendSchema: remoteStubAuthStrictBackendSchema,
+      remoteStubAuthRequireBackendState: remoteStubAuthRequireBackendState,
       remoteStubAuthForwardSignInCredentials:
           remoteStubAuthForwardSignInCredentials,
       remoteStubProfile: _buildRemoteStubProfile(
@@ -621,6 +646,7 @@ class DesktopContractBundle {
         transportClient: transportClient,
         authStateStore: remoteStubAuthStateStore,
         authStrictBackendSchema: remoteStubAuthStrictBackendSchema,
+        authRequireBackendState: remoteStubAuthRequireBackendState,
         authForwardSignInCredentials: remoteStubAuthForwardSignInCredentials,
         authStoreLabelOverride:
             remoteStubAuthStateStoreResolution.profileAuthStoreLabel,
@@ -638,6 +664,7 @@ class DesktopContractBundle {
         const RemoteStubNoopAuthStateStore(),
     AuthSessionState? remoteStubAuthInitialState,
     bool remoteStubAuthStrictBackendSchema = false,
+    bool remoteStubAuthRequireBackendState = false,
     bool remoteStubAuthForwardSignInCredentials = false,
     DesktopRemoteStubProfile? remoteStubProfile,
   }) {
@@ -649,6 +676,7 @@ class DesktopContractBundle {
         authStateStore: remoteStubAuthStateStore,
         authInitialState: remoteStubAuthInitialState,
         authStrictBackendSchema: remoteStubAuthStrictBackendSchema,
+        authRequireBackendState: remoteStubAuthRequireBackendState,
         authForwardSignInCredentials: remoteStubAuthForwardSignInCredentials,
         remoteStubProfile:
             remoteStubProfile ??
@@ -657,6 +685,7 @@ class DesktopContractBundle {
               transportClient: remoteStubTransportClient,
               authStateStore: remoteStubAuthStateStore,
               authStrictBackendSchema: remoteStubAuthStrictBackendSchema,
+              authRequireBackendState: remoteStubAuthRequireBackendState,
               authForwardSignInCredentials:
                   remoteStubAuthForwardSignInCredentials,
             ),
@@ -686,6 +715,7 @@ class DesktopContractBundle {
         const RemoteStubNoopAuthStateStore(),
     AuthSessionState? authInitialState,
     bool authStrictBackendSchema = false,
+    bool authRequireBackendState = false,
     bool authForwardSignInCredentials = false,
     DesktopRemoteStubProfile? remoteStubProfile,
   }) {
@@ -696,6 +726,7 @@ class DesktopContractBundle {
         transportClient: transportClient,
         authStateStore: authStateStore,
         strictBackendSchema: authStrictBackendSchema,
+        requireBackendState: authRequireBackendState,
         forwardSignInCredentials: authForwardSignInCredentials,
         initialState: authInitialState,
       ),
@@ -734,6 +765,7 @@ class DesktopContractBundle {
             transportClient: transportClient,
             authStateStore: authStateStore,
             authStrictBackendSchema: authStrictBackendSchema,
+            authRequireBackendState: authRequireBackendState,
             authForwardSignInCredentials: authForwardSignInCredentials,
           ),
     );

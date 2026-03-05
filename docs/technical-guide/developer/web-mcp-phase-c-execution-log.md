@@ -6945,8 +6945,71 @@ into parser-consumable payload snapshots so auth-state/status rules run consiste
   - backend-auth error-path state/status handling remains parser-driven and parity-covered.
   - targeted tests and full desktop verification remain green after signed-out precedence hardening.
 
+## Unit WS-D-157: Optional required-state backend auth fallback gate and diagnostics visibility
+
+### Planned objective
+
+Further reduce ABI-02 simulated-fallback risk by introducing an explicit runtime gate that requires
+backend auth state payloads for auth operations, preventing delegate fallback on empty/malformed
+backend responses, while exposing this mode in diagnostics profile and parity coverage.
+
+### Implemented changes
+
+1. Extended auth contract fallback policy in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - added `RemoteStubAuthSessionContract.requireBackendState` (default `false`),
+   - when enabled, auth operations with missing/malformed backend state payload now surface
+     `Backend auth state payload required.` instead of delegate fallback mutation.
+2. Extended desktop bundle/runtime wiring in
+   `desktop/lib/contracts/desktop_contract_bundle.dart`:
+   - added env toggle parser `PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_REQUIRE_STATE`,
+   - `fromEnvironment()` / `loadFromEnvironment()` / `fromMode(...)` / `remoteStub(...)` now
+     propagate required-state auth mode.
+3. Added diagnostics profile visibility for required-state mode:
+   - `DesktopRemoteStubProfile` now includes `authBackendStateLabel`,
+   - profile summary now renders `auth-backend-state: required` when enabled.
+4. Added/expanded regression coverage:
+   - `desktop/test/contracts/workflow_contracts_test.dart`:
+     - `auth backend required-state mode blocks delegate fallback on empty payload`,
+     - `auth backend required-state mode blocks delegate fallback on malformed payload`.
+   - `desktop/test/contracts/desktop_contract_bundle_test.dart`:
+     - `fromMode forwards required backend auth state mode`,
+     - `remote-stub profile exposes required auth backend state label`.
+   - `desktop/test/parity/remote_stub_mode_parity_test.dart`:
+     - `remote-stub mode surfaces required backend auth state profile label`,
+     - `required backend auth state mode blocks empty sign-in delegate fallback`.
+5. Updated continuity docs:
+   - `desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`,
+   - `desktop-flutter-development-runbook.md`.
+6. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/contracts/desktop_contract_bundle_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - simulated delegate-fallback leakage risk under backend payload gaps,
+  - runtime observability of backend-required auth mode at diagnostics surface.
+- **Issues found during review**
+  1. Auth backend integration path still allowed delegate fallback under empty/malformed backend
+     payloads in non-strict mode, preserving simulated behavior risk during integration runs.
+  2. There was no diagnostics-visible profile signal to confirm whether backend-required auth mode
+     was active.
+- **Fix applied**
+  1. Added optional required-state gate to block delegate fallback for missing/malformed backend
+     auth state payloads.
+  2. Wired required-state mode through bundle factories/environment loading and profile builders.
+  3. Added contract + parity regression coverage for required-state behavior and profile visibility.
+- **Post-fix validation criteria**
+  - required-state mode now blocks simulated delegate fallback on backend auth payload gaps.
+  - diagnostics profile now surfaces `auth-backend-state: required` when mode is enabled.
+  - targeted tests and full desktop verification remain green after required-state gate integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata (including auth-store mode label, strict backend-schema label, and forwarding payload label) with parity UI coverage, shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline plus launch-argument deep-link parser bridge, macOS protocol/channel route-dispatch baseline, Windows running-instance route relay baseline, Windows protocol-registration command-hook baseline in installer flow with strict release gate control and helper script template, backend envelope/schema compatibility normalization, auth snapshot store/seed seam, flutter_secure_storage-backed native credential-store adapter path with strict rollout/fallback controls, secure-store default-on rollout policy, runtime legacy auth-store command/file/mirror path physical decommission execution, legacy auth-store decommission guard automation baseline, runtime source-level auth-store decommission guard automation baseline, backend auth normalization baseline (flat+nested alias payloads + flat+nested signed-out error-code precedence + nested error/error-list container extraction + numeric unauthorized/session-expiry code handling + nested status-detail message extraction + explicit failure-flag precedence including nested failure-flag containers + forced signed-out transition from prior signed-in snapshots under signed-out code/failure signals + HTTP auth non-2xx payload normalization path + strict malformed-backend-auth schema fallback gate + runtime bundle strict-schema wiring with `PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_SCHEMA_STRICT` env toggle + optional credential-forwarding toggle `PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_FORWARD_CREDENTIALS` with default sanitized payload policy + diagnostics-visible strict-schema/profile forwarding labels + strict-label parity UI coverage including strict malformed-payload auth behavior and backend unauthorized refresh signed-out transition + auth backend contract fixture matrix baseline including `result/data` envelope + `authState` alias coverage), runtime mode parity/matrix gates, and document continuity coupling matrix/release-linkage protocol baseline are implemented, and backend-auth integration plan anchor is now published (`desktop-flutter-auth-backend-contract-integration-plan.md`), but production Windows protocol-registration command provisioning with signed installer chain wiring and full backend auth contract integration are still pending.
+- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata (including auth-store mode label, strict backend-schema label, required backend-state label, and forwarding payload label) with parity UI coverage, shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, shell section-route initialization/restoration bridge baseline plus launch-argument deep-link parser bridge, macOS protocol/channel route-dispatch baseline, Windows running-instance route relay baseline, Windows protocol-registration command-hook baseline in installer flow with strict release gate control and helper script template, backend envelope/schema compatibility normalization, auth snapshot store/seed seam, flutter_secure_storage-backed native credential-store adapter path with strict rollout/fallback controls, secure-store default-on rollout policy, runtime legacy auth-store command/file/mirror path physical decommission execution, legacy auth-store decommission guard automation baseline, runtime source-level auth-store decommission guard automation baseline, backend auth normalization baseline (flat+nested alias payloads + flat+nested signed-out error-code precedence + nested error/error-list container extraction + numeric unauthorized/session-expiry code handling + nested status-detail message extraction + explicit failure-flag precedence including nested failure-flag containers + forced signed-out transition from prior signed-in snapshots under signed-out code/failure signals + HTTP auth non-2xx payload normalization path + strict malformed-backend-auth schema fallback gate + runtime bundle strict-schema wiring with `PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_SCHEMA_STRICT` env toggle + optional required-state toggle `PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_REQUIRE_STATE` with diagnostics-visible `auth-backend-state: required` profile surface + optional credential-forwarding toggle `PENJAR_DESKTOP_REMOTE_STUB_AUTH_BACKEND_FORWARD_CREDENTIALS` with default sanitized payload policy + diagnostics-visible strict-schema/profile forwarding labels + strict-label parity UI coverage including strict malformed-payload auth behavior, required-state fallback blocking behavior, and backend unauthorized refresh signed-out transition + auth backend contract fixture matrix baseline including `result/data` envelope + `authState` alias coverage), runtime mode parity/matrix gates, and document continuity coupling matrix/release-linkage protocol baseline are implemented, and backend-auth integration plan anchor is now published (`desktop-flutter-auth-backend-contract-integration-plan.md`), but production Windows protocol-registration command provisioning with signed installer chain wiring and full backend auth contract integration are still pending.
 - Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard plus coverage-contract regression guard (set-diff optimized uncovered/missing detection), auth-store legacy decommission guard + contract regression guard, auth-store runtime decommission guard + contract regression guard, desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks with in-memory duplicate-key tracking + base-check markdown report emission) plus evidence-index contract regression guard (including dedicated missing-base-check-report attachment, missing-index-file, invalid-decision, and promoted-placeholder cases, dedicated tests workflow release-evidence guard base+contract enforcement/upload, and parity matrix base-check artifact retention), update-manifest guard automation with validation + contract report artifacts (including dedicated tests workflow update-manifest guard job contract enforcement/upload), on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

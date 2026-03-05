@@ -242,6 +242,26 @@ void main() {
     );
   });
 
+  test('fromMode forwards required backend auth state mode', () {
+    final DesktopContractBundle requiredBundle = DesktopContractBundle.fromMode(
+      DesktopContractMode.remoteStub,
+      remoteStubAuthRequireBackendState: true,
+    );
+
+    requiredBundle.authSession.signIn(
+      const AuthSignInRequest(
+        email: 'designer@penjar.app',
+        password: 'desktop-pass',
+      ),
+    );
+
+    expect(requiredBundle.authSession.state.signedIn, isFalse);
+    expect(
+      requiredBundle.authSession.state.status,
+      '[remote-stub] Backend auth state payload required.',
+    );
+  });
+
   test('fromMode forwards auth sign-in credential payload mode', () {
     final _BundleCaptureTransportClient sanitizedTransportClient =
         _BundleCaptureTransportClient();
@@ -298,6 +318,20 @@ void main() {
     expect(
       bundle.remoteStubProfile?.summaryLabel,
       contains('auth-backend-schema: strict'),
+    );
+  });
+
+  test('remote-stub profile exposes required auth backend state label', () {
+    final DesktopContractBundle bundle = DesktopContractBundle.fromMode(
+      DesktopContractMode.remoteStub,
+      remoteStubAuthRequireBackendState: true,
+    );
+
+    expect(bundle.remoteStubProfile?.isEmpty, isFalse);
+    expect(bundle.remoteStubProfile?.authBackendStateLabel, 'required');
+    expect(
+      bundle.remoteStubProfile?.summaryLabel,
+      contains('auth-backend-state: required'),
     );
   });
 
