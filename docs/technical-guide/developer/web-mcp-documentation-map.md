@@ -29,6 +29,7 @@ This document is the canonical navigation map to keep development continuity wit
    - [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/)
    - [Desktop Flutter Parity Acceptance Baseline](/technical-guide/developer/desktop-flutter-parity-acceptance-baseline/)
    - [Desktop Flutter Development Runbook](/technical-guide/developer/desktop-flutter-development-runbook/)
+   - [Desktop Flutter Auth Backend Contract Integration Plan](/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan/)
    - [Desktop Flutter Release Validation Baseline](/technical-guide/developer/desktop-flutter-release-validation-baseline/)
    - [Desktop Flutter Release Evidence Index](/technical-guide/developer/desktop-flutter-release-evidence-index/)
 
@@ -72,6 +73,7 @@ This document is the canonical navigation map to keep development continuity wit
 - Incident/recovery work: contract doc -> diagnostics probes -> execution log.
 - Desktop parity planning work: roadmap phase C/D sections -> implementation plan WS-D -> matrix/backlog impact rows.
 - Desktop migration execution work: roadmap full-port mandate -> desktop flutter development runbook -> WS-D migration inventory/decommission plan -> acceptance baseline -> execution log evidence.
+- Desktop auth backend integration work: desktop flutter development runbook -> desktop flutter auth backend contract integration plan -> parity checklist/inventory/acceptance baseline -> execution log evidence.
 - Desktop release-readiness work: release validation baseline -> execution log -> CI/release workflow evidence.
 - Desktop release audit/reporting work: release evidence index -> execution log references -> release decision traceability.
 
@@ -80,6 +82,7 @@ This document is the canonical navigation map to keep development continuity wit
 | Triggered document update | Required companion updates | Purpose |
 |---|---|---|
 | Desktop Phase C unit implementation (`web-mcp-phase-c-execution-log`) | `desktop-flutter-development-runbook` next-unit queue, `desktop-flutter-parity-checklist`, `desktop-flutter-migration-inventory`, `desktop-flutter-parity-acceptance-baseline` | Keep implementation evidence, parity state, and migration exceptions synchronized. |
+| Desktop auth backend integration plan update (`desktop-flutter-auth-backend-contract-integration-plan`) | `desktop-flutter-development-runbook`, `desktop-flutter-parity-checklist`, `desktop-flutter-migration-inventory`, `desktop-flutter-parity-acceptance-baseline`, `web-mcp-phase-c-execution-log` | Keep auth integration sequencing, acceptance gates, and implementation evidence synchronized. |
 | Desktop release gate/protocol change (`desktop-flutter-release-validation-baseline`) | `desktop-flutter-release-evidence-index`, `web-mcp-phase-c-execution-log` | Ensure release evidence requirements and executed-unit traceability stay aligned. |
 | Release evidence schema/report requirement change (`desktop-flutter-release-evidence-index`) | `desktop-flutter-release-validation-baseline`, `web-mcp-phase-c-execution-log` | Prevent release audits from diverging from current validation protocol. |
 | Desktop roadmap/backlog priority shift (`web-mcp-parity-backlog`, roadmap/plan docs) | `desktop-flutter-development-runbook` candidates, `web-mcp-phase-c-execution-log` remaining gaps | Keep active execution queue aligned with planning priority changes. |

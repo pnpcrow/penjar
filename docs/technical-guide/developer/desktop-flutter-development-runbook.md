@@ -14,6 +14,7 @@ This runbook defines the repeatable execution loop for the Flutter desktop full-
 - [Desktop Flutter Parity Checklist](/technical-guide/developer/desktop-flutter-parity-checklist/)
 - [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/)
 - [Desktop Flutter Parity Acceptance Baseline](/technical-guide/developer/desktop-flutter-parity-acceptance-baseline/)
+- [Desktop Flutter Auth Backend Contract Integration Plan](/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan/)
 - [Desktop Flutter Release Validation Baseline](/technical-guide/developer/desktop-flutter-release-validation-baseline/)
 - [Desktop Flutter Release Evidence Index](/technical-guide/developer/desktop-flutter-release-evidence-index/)
 - [Web + MCP + Desktop Detailed Implementation Plan](/technical-guide/developer/web-mcp-desktop-implementation-plan/)
@@ -142,7 +143,7 @@ Before pausing or transferring work:
 
 ## 7) Current next-unit candidates
 
-1. Backend auth contract integration for Flutter desktop auth/session workflows (replace remote-stub simulated auth state transitions with real backend session/token contract wiring).
+1. Backend auth contract integration for Flutter desktop auth/session workflows (replace remote-stub simulated auth state transitions with real backend session/token contract wiring), executed via [Desktop Flutter Auth Backend Contract Integration Plan](/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan/).
 2. Production Windows protocol-registration command provisioning and signed installer wiring validation (command-hook + strict protocol gate + PowerShell helper baseline are complete; real registry/installer command secrets and release execution evidence remain pending).
 3. Real command wiring for signed packaging/notarization/verification in installer smoke workflow (`PENJAR_*_SIGN_COMMAND`, `PENJAR_*_SIGN_VERIFY_COMMAND` paths).
 4. Real Windows signed installer generation (`.msi/.exe`) command chain and provenance command/secret wiring.

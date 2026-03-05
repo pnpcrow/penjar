@@ -18,6 +18,7 @@ the [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-pha
 - [Desktop Flutter Parity Checklist](/technical-guide/developer/desktop-flutter-parity-checklist/)
 - [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/)
 - [Desktop Flutter Development Runbook](/technical-guide/developer/desktop-flutter-development-runbook/)
+- [Desktop Flutter Auth Backend Contract Integration Plan](/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan/)
 - [Desktop Flutter Release Validation Baseline](/technical-guide/developer/desktop-flutter-release-validation-baseline/)
 
 ## Gate status legend
@@ -32,7 +33,7 @@ the [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-pha
 
 | Workflow domain | Current evidence anchor | Required Flutter acceptance gate | Initial gate target | Status | Owner | Evidence |
 |---|---|---|---|---|---|---|
-| Authentication/session | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) (`Auth/session UI`) | Sign-in, session restore, token refresh parity integration test | `desktop/test/parity/auth_session_parity_test.dart` via `flutter test` | In progress | Auth + Desktop Integration | [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/) |
+| Authentication/session | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) (`Auth/session UI`) | Sign-in, session restore, token refresh parity integration test aligned with [Desktop Flutter Auth Backend Contract Integration Plan](/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan/) | `desktop/test/parity/auth_session_parity_test.dart` via `flutter test` | In progress | Auth + Desktop Integration | [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/) |
 | Project lifecycle | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) (`Project lifecycle`) | Open/switch project parity integration test | `desktop/test/parity/project_lifecycle_parity_test.dart` via `flutter test` | In progress | Workspace Navigation | [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/) |
 | File lifecycle | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) (`File lifecycle`) | File CRUD/navigation parity integration test | `desktop/test/parity/file_lifecycle_parity_test.dart` via `flutter test` | In progress | Workspace Navigation | [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/) |
 | Canvas editing | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) (`Canvas interaction`) | Canvas edit semantics parity integration test | `desktop/test/parity/canvas_editing_parity_test.dart` via `flutter test` | In progress | Workspace Core | [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/) |
