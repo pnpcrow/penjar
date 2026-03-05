@@ -2683,8 +2683,52 @@ Add platform-level release evidence bundle summaries so smoke outputs can be rev
   - Installer smoke workflow publishes bundle summary artifacts for each platform.
   - Full-fast desktop verification remains green after bundle-summary automation integration.
 
+## Unit WS-D-63: Release script syntax gate baseline
+
+### Planned objective
+
+Introduce a dedicated release-script syntax gate and integrate it into canonical desktop verification to catch shell syntax regressions before test/build stages.
+
+### Implemented changes
+
+1. Added release script syntax checker:
+   - `desktop/scripts/check_release_script_syntax.sh`.
+2. Implemented syntax-gate semantics:
+   - scans top-level `desktop/scripts/*.sh`,
+   - runs `bash -n` against each script,
+   - emits syntax report (`release/reports/release_script_syntax_report.md`) with checked/failed script lists.
+3. Integrated syntax gate into canonical verification chain:
+   - `desktop/scripts/verify_desktop.sh` now runs release script syntax checks before test/analyze/build phases.
+4. Added root command surface:
+   - `desktop:release:scripts:syntax:check`.
+5. Extended CI artifact chain:
+   - `.github/workflows/tests-desktop-flutter.yml` now uploads release script syntax reports per platform matrix run.
+6. Updated release/runbook/index docs:
+   - `desktop-flutter-development-runbook.md` command inventory now includes release script syntax check command,
+   - `desktop-flutter-release-validation-baseline.md` now includes syntax gate protocol and CI/script references,
+   - `desktop-flutter-release-evidence-index.md` now includes release script syntax report attachment rule.
+7. Re-ran validation commands:
+   - `pnpm run desktop:release:scripts:syntax:check`,
+   - `pnpm run desktop:release:evidence:check`,
+   - `pnpm run desktop:verify:full:fast`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - syntax checker coverage and failure semantics across release scripts,
+  - verify-chain ordering impact (syntax gate before tests),
+  - CI artifact continuity for syntax reports across matrix platforms.
+- **Issues found during review**
+  1. None.
+- **Fix applied**
+  1. Not required.
+- **Post-fix validation criteria**
+  - Syntax regressions in release scripts fail verification before test/build stages.
+  - Syntax reports are generated and uploaded in desktop CI matrix jobs.
+  - Full-fast desktop verification remains green after syntax-gate integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
 - All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates, shared contract-bundle injection, and runtime mode parity/matrix gates, but real backend/service integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
-- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
+- Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate, macOS build validation, verification log/app artifact upload automation, release-evidence guard automation, update-manifest guard automation, on-demand installer/update smoke build-report workflow, automated release-evidence row snippet generation, release-evidence bundle summary automation, evidence-index preview/apply automation, appcast preview generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with command-hook strict mode, command-hooked signing execution baseline with signing provenance gate, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline, Windows installer provenance gate baseline, and platform-scoped Windows report upload normalization, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.

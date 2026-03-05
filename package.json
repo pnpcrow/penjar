@@ -20,6 +20,7 @@
     "desktop:test:mode-matrix:no-pub": "cd desktop && FLUTTER_NO_PUB=1 ./scripts/run_mode_matrix_tests.sh",
     "desktop:analyze": "cd desktop && flutter analyze",
     "desktop:build:macos:debug": "cd desktop && flutter build macos --debug",
+    "desktop:release:scripts:syntax:check": "cd desktop && ./scripts/check_release_script_syntax.sh",
     "desktop:verify": "cd desktop && ./scripts/verify_desktop.sh",
     "desktop:verify:fast": "cd desktop && SKIP_PUB_GET=1 ./scripts/verify_desktop.sh",
     "desktop:verify:full": "cd desktop && INCLUDE_BUILD=1 ./scripts/verify_desktop.sh",

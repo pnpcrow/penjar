@@ -56,3 +56,4 @@ Each release candidate record should include:
 21. Attach Windows installer provenance report (`release/reports/windows_installer_provenance_report.md`) before promotion decision when installer smoke is executed.
 22. Attach release smoke gate policy report (`release/reports/release_smoke_gate_policy_report.md`) before promotion decision.
 23. Attach platform release evidence bundle summaries (`release/reports/release_evidence_bundle_macos.md`, `release/reports/release_evidence_bundle_windows.md`) before promotion decision.
+24. Attach release script syntax report (`release/reports/release_script_syntax_report.md`) before promotion decision.
