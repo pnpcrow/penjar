@@ -138,7 +138,7 @@ Before pausing or transferring work:
 
 ## 7) Current next-unit candidates
 
-1. Workflow-level backend response-to-state integration for remote-stub adapters (replace in-memory delegate mutation fallback with backend response-driven state transitions while preserving diagnostics/profile visibility).
+1. Flutter shell route/state bridge integration (connect navigation/runtime state restoration to contract bundle snapshots and remote profile surfaces).
 2. Real command wiring for signed packaging/notarization/verification in installer smoke workflow (`PENJAR_*_SIGN_COMMAND`, `PENJAR_*_SIGN_VERIFY_COMMAND` paths).
 3. Real Windows signed installer generation (`.msi/.exe`) command chain and provenance command/secret wiring.
 4. External appcast publication production rollout with real credentials/invalidation execution.

@@ -68,5 +68,6 @@ the [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-pha
 - Scripted transport-level operation blocking remains available via `PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BLOCKED_OPERATIONS` when HTTP health-probe URL is not configured.
 - Remote-stub transport request contract now carries workflow/method/endpoint/payload metadata per operation so transport probes and future backend executors can validate request-shape parity.
 - Backend execution failures now propagate operation-scoped remote-stub status text to workflow state surfaces via transport denial status.
+- Backend execution success payloads can now drive workflow state transitions across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics remote-stub adapters, with delegate mutation fallback preserved when backend state payload is absent.
 - Environment-driven blocked-operation lists are filtered against `RemoteStubOperationIds` catalog in `desktop/lib/contracts/remote_stub_contracts.dart` to avoid unsupported operation keys.
 - Diagnostics parity surface now includes runtime remote profile summary text (`Remote profile: ...`) for remote-stub mode visibility during degraded-path validation.

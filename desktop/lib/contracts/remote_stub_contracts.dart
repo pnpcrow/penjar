@@ -352,15 +352,26 @@ class RemoteStubTransportRequest {
 }
 
 class RemoteStubTransportResult {
-  const RemoteStubTransportResult({this.allowed = true, this.status});
+  const RemoteStubTransportResult({
+    this.allowed = true,
+    this.status,
+    this.responsePayload = const <String, Object?>{},
+  });
 
   static const RemoteStubTransportResult allow = RemoteStubTransportResult();
+
+  factory RemoteStubTransportResult.allowedWithPayload(
+    Map<String, Object?> responsePayload,
+  ) => RemoteStubTransportResult(
+    responsePayload: Map<String, Object?>.unmodifiable(responsePayload),
+  );
 
   factory RemoteStubTransportResult.blocked(String status) =>
       RemoteStubTransportResult(allowed: false, status: status);
 
   final bool allowed;
   final String? status;
+  final Map<String, Object?> responsePayload;
 }
 
 class RemoteStubTransportProfile {
@@ -480,17 +491,28 @@ class RemoteStubHttpBackendExecutionResult {
   const RemoteStubHttpBackendExecutionResult({
     required this.allowed,
     this.status,
+    this.responsePayload = const <String, Object?>{},
   });
 
-  const RemoteStubHttpBackendExecutionResult.allowed()
-    : allowed = true,
-      status = null;
+  const RemoteStubHttpBackendExecutionResult.allowed({
+    this.responsePayload = const <String, Object?>{},
+  }) : allowed = true,
+       status = null;
+
+  factory RemoteStubHttpBackendExecutionResult.allowedWithPayload(
+    Map<String, Object?> responsePayload,
+  ) => RemoteStubHttpBackendExecutionResult(
+    allowed: true,
+    responsePayload: Map<String, Object?>.unmodifiable(responsePayload),
+  );
 
   const RemoteStubHttpBackendExecutionResult.blocked([this.status])
-    : allowed = false;
+    : allowed = false,
+      responsePayload = const <String, Object?>{};
 
   final bool allowed;
   final String? status;
+  final Map<String, Object?> responsePayload;
 }
 
 typedef RemoteStubHttpTransportProbe =
@@ -599,6 +621,572 @@ String _extractBackendErrorMessage(String rawBody) {
   return trimmed;
 }
 
+Map<String, Object?> _coerceStringKeyedMap(Object? value) {
+  if (value is Map<String, Object?>) {
+    return value;
+  }
+  if (value is Map) {
+    final Map<String, Object?> mapped = <String, Object?>{};
+    value.forEach((Object? key, Object? entryValue) {
+      mapped['$key'] = entryValue;
+    });
+    return mapped;
+  }
+  return const <String, Object?>{};
+}
+
+List<Map<String, Object?>> _coerceMapList(Object? value) {
+  if (value is! List) {
+    return const <Map<String, Object?>>[];
+  }
+  return value
+      .map(_coerceStringKeyedMap)
+      .where((Map<String, Object?> item) => item.isNotEmpty)
+      .toList(growable: false);
+}
+
+String? _coerceNonEmptyString(Object? value) {
+  if (value is! String) {
+    return null;
+  }
+  final String trimmed = value.trim();
+  return trimmed.isEmpty ? null : trimmed;
+}
+
+bool? _coerceBool(Object? value) {
+  if (value is bool) {
+    return value;
+  }
+  if (value is num) {
+    return value != 0;
+  }
+  if (value is String) {
+    final String lowered = value.trim().toLowerCase();
+    if (lowered == 'true' || lowered == '1') {
+      return true;
+    }
+    if (lowered == 'false' || lowered == '0') {
+      return false;
+    }
+  }
+  return null;
+}
+
+int? _coerceInt(Object? value) {
+  if (value is int) {
+    return value;
+  }
+  if (value is num) {
+    return value.toInt();
+  }
+  if (value is String) {
+    return int.tryParse(value.trim());
+  }
+  return null;
+}
+
+double? _coerceDouble(Object? value) {
+  if (value is double) {
+    return value;
+  }
+  if (value is num) {
+    return value.toDouble();
+  }
+  if (value is String) {
+    return double.tryParse(value.trim());
+  }
+  return null;
+}
+
+List<String> _coerceStringList(Object? value) {
+  if (value is! List) {
+    return const <String>[];
+  }
+  return value
+      .map(_coerceNonEmptyString)
+      .whereType<String>()
+      .toList(growable: false);
+}
+
+Map<String, Object?> _extractBackendSuccessPayload(String rawBody) {
+  final String trimmed = rawBody.trim();
+  if (trimmed.isEmpty) {
+    return const <String, Object?>{};
+  }
+  try {
+    final Object? decoded = jsonDecode(trimmed);
+    return _coerceStringKeyedMap(decoded);
+  } on FormatException {
+    return const <String, Object?>{};
+  }
+}
+
+Map<String, Object?> _extractBackendStatePayload(
+  Map<String, Object?> responsePayload, {
+  required List<String> aliases,
+}) {
+  for (final String alias in <String>['state', 'workflowState', ...aliases]) {
+    final Map<String, Object?> aliasPayload = _coerceStringKeyedMap(
+      responsePayload[alias],
+    );
+    if (aliasPayload.isNotEmpty) {
+      return aliasPayload;
+    }
+  }
+  return responsePayload;
+}
+
+bool _containsAnyKey(Map<String, Object?> payload, Set<String> keys) {
+  for (final String key in keys) {
+    if (payload.containsKey(key)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+String _resolveBackendStatusValue({
+  required Map<String, Object?> responsePayload,
+  required Map<String, Object?> statePayload,
+  required String fallbackStatus,
+}) {
+  return _coerceNonEmptyString(responsePayload['status']) ??
+      _coerceNonEmptyString(statePayload['status']) ??
+      fallbackStatus;
+}
+
+int _clampIndex(int index, {required int itemCount}) {
+  if (itemCount <= 0) {
+    return 0;
+  }
+  if (index < 0) {
+    return 0;
+  }
+  if (index >= itemCount) {
+    return itemCount - 1;
+  }
+  return index;
+}
+
+int _clampOptionalIndex(int index, {required int itemCount}) {
+  if (itemCount <= 0) {
+    return -1;
+  }
+  if (index < 0) {
+    return -1;
+  }
+  if (index >= itemCount) {
+    return itemCount - 1;
+  }
+  return index;
+}
+
+AuthSessionState? _authStateFromBackendPayload(
+  Map<String, Object?> responsePayload,
+  AuthSessionState currentState,
+) {
+  if (responsePayload.isEmpty) {
+    return null;
+  }
+  final Map<String, Object?> statePayload = _extractBackendStatePayload(
+    responsePayload,
+    aliases: const <String>['authState'],
+  );
+  final bool hasFields = _containsAnyKey(statePayload, const <String>{
+    'rememberSession',
+    'signedIn',
+  });
+  final bool hasStatus =
+      _coerceNonEmptyString(responsePayload['status']) != null ||
+      _coerceNonEmptyString(statePayload['status']) != null;
+  if (!hasFields && !hasStatus) {
+    return null;
+  }
+  return AuthSessionState(
+    rememberSession:
+        _coerceBool(statePayload['rememberSession']) ??
+        currentState.rememberSession,
+    signedIn: _coerceBool(statePayload['signedIn']) ?? currentState.signedIn,
+    status: _resolveBackendStatusValue(
+      responsePayload: responsePayload,
+      statePayload: statePayload,
+      fallbackStatus: currentState.status,
+    ),
+  );
+}
+
+ProjectLifecycleState? _projectStateFromBackendPayload(
+  Map<String, Object?> responsePayload,
+  ProjectLifecycleState currentState,
+) {
+  if (responsePayload.isEmpty) {
+    return null;
+  }
+  final Map<String, Object?> statePayload = _extractBackendStatePayload(
+    responsePayload,
+    aliases: const <String>['projectState', 'projectsState'],
+  );
+  final bool hasFields = _containsAnyKey(statePayload, const <String>{
+    'projects',
+    'selectedProjectIndex',
+  });
+  final bool hasStatus =
+      _coerceNonEmptyString(responsePayload['status']) != null ||
+      _coerceNonEmptyString(statePayload['status']) != null;
+  if (!hasFields && !hasStatus) {
+    return null;
+  }
+
+  List<ProjectRecord> projects = currentState.projects;
+  if (statePayload.containsKey('projects')) {
+    final List<Map<String, Object?>> projectItems = _coerceMapList(
+      statePayload['projects'],
+    );
+    final List<ProjectRecord> parsedProjects = <ProjectRecord>[];
+    for (int index = 0; index < projectItems.length; index += 1) {
+      final Map<String, Object?> item = projectItems[index];
+      parsedProjects.add(
+        ProjectRecord(
+          id:
+              _coerceNonEmptyString(item['id']) ??
+              'project-backend-${index + 1}',
+          name: _coerceNonEmptyString(item['name']) ?? 'Backend Project',
+          files: List<String>.unmodifiable(_coerceStringList(item['files'])),
+        ),
+      );
+    }
+    if (parsedProjects.isNotEmpty) {
+      projects = List<ProjectRecord>.unmodifiable(parsedProjects);
+    }
+  }
+
+  final int selectedProjectIndex = _clampIndex(
+    _coerceInt(statePayload['selectedProjectIndex']) ??
+        currentState.selectedProjectIndex,
+    itemCount: projects.length,
+  );
+
+  return ProjectLifecycleState(
+    projects: projects,
+    selectedProjectIndex: selectedProjectIndex,
+    status: _resolveBackendStatusValue(
+      responsePayload: responsePayload,
+      statePayload: statePayload,
+      fallbackStatus: currentState.status,
+    ),
+  );
+}
+
+CanvasEditingState? _canvasStateFromBackendPayload(
+  Map<String, Object?> responsePayload,
+  CanvasEditingState currentState,
+) {
+  if (responsePayload.isEmpty) {
+    return null;
+  }
+  final Map<String, Object?> statePayload = _extractBackendStatePayload(
+    responsePayload,
+    aliases: const <String>['canvasState'],
+  );
+  final bool hasFields = _containsAnyKey(statePayload, const <String>{
+    'shapes',
+    'selectedIndex',
+  });
+  final bool hasStatus =
+      _coerceNonEmptyString(responsePayload['status']) != null ||
+      _coerceNonEmptyString(statePayload['status']) != null;
+  if (!hasFields && !hasStatus) {
+    return null;
+  }
+
+  List<CanvasShapeRecord> shapes = currentState.shapes;
+  if (statePayload.containsKey('shapes')) {
+    final List<Map<String, Object?>> shapeItems = _coerceMapList(
+      statePayload['shapes'],
+    );
+    final List<CanvasShapeRecord> parsedShapes = <CanvasShapeRecord>[];
+    for (int index = 0; index < shapeItems.length; index += 1) {
+      final Map<String, Object?> item = shapeItems[index];
+      parsedShapes.add(
+        CanvasShapeRecord(
+          id: _coerceNonEmptyString(item['id']) ?? 'rect-backend-${index + 1}',
+          x: _coerceDouble(item['x']) ?? 10,
+          y: _coerceDouble(item['y']) ?? 10,
+          width: _coerceDouble(item['width']) ?? 120,
+          height: _coerceDouble(item['height']) ?? 80,
+          fillHex: _coerceNonEmptyString(item['fillHex']) ?? '#007A61',
+        ),
+      );
+    }
+    shapes = List<CanvasShapeRecord>.unmodifiable(parsedShapes);
+  }
+
+  final int selectedIndex = _clampOptionalIndex(
+    _coerceInt(statePayload['selectedIndex']) ?? currentState.selectedIndex,
+    itemCount: shapes.length,
+  );
+
+  return CanvasEditingState(
+    shapes: shapes,
+    selectedIndex: selectedIndex,
+    status: _resolveBackendStatusValue(
+      responsePayload: responsePayload,
+      statePayload: statePayload,
+      fallbackStatus: currentState.status,
+    ),
+  );
+}
+
+AssetManagementState? _assetStateFromBackendPayload(
+  Map<String, Object?> responsePayload,
+  AssetManagementState currentState,
+) {
+  if (responsePayload.isEmpty) {
+    return null;
+  }
+  final Map<String, Object?> statePayload = _extractBackendStatePayload(
+    responsePayload,
+    aliases: const <String>['assetState', 'assetsState'],
+  );
+  final bool hasFields = _containsAnyKey(statePayload, const <String>{
+    'assets',
+    'selectedAssetIndex',
+  });
+  final bool hasStatus =
+      _coerceNonEmptyString(responsePayload['status']) != null ||
+      _coerceNonEmptyString(statePayload['status']) != null;
+  if (!hasFields && !hasStatus) {
+    return null;
+  }
+
+  List<AssetRecord> assets = currentState.assets;
+  if (statePayload.containsKey('assets')) {
+    final List<Map<String, Object?>> assetItems = _coerceMapList(
+      statePayload['assets'],
+    );
+    final List<AssetRecord> parsedAssets = <AssetRecord>[];
+    for (int index = 0; index < assetItems.length; index += 1) {
+      final Map<String, Object?> item = assetItems[index];
+      parsedAssets.add(
+        AssetRecord(
+          id: _coerceNonEmptyString(item['id']) ?? 'asset-backend-${index + 1}',
+          name: _coerceNonEmptyString(item['name']) ?? 'backend-asset',
+          type: _coerceNonEmptyString(item['type']) ?? 'image',
+          usedCount: (_coerceInt(item['usedCount']) ?? 0).clamp(0, 1 << 30),
+        ),
+      );
+    }
+    assets = List<AssetRecord>.unmodifiable(parsedAssets);
+  }
+
+  final int selectedAssetIndex = _clampOptionalIndex(
+    _coerceInt(statePayload['selectedAssetIndex']) ??
+        currentState.selectedAssetIndex,
+    itemCount: assets.length,
+  );
+
+  return AssetManagementState(
+    assets: assets,
+    selectedAssetIndex: selectedAssetIndex,
+    status: _resolveBackendStatusValue(
+      responsePayload: responsePayload,
+      statePayload: statePayload,
+      fallbackStatus: currentState.status,
+    ),
+  );
+}
+
+CollaborationContextState? _collaborationStateFromBackendPayload(
+  Map<String, Object?> responsePayload,
+  CollaborationContextState currentState,
+) {
+  if (responsePayload.isEmpty) {
+    return null;
+  }
+  final Map<String, Object?> statePayload = _extractBackendStatePayload(
+    responsePayload,
+    aliases: const <String>['collaborationState'],
+  );
+  final bool hasFields = _containsAnyKey(statePayload, const <String>{
+    'peerActive',
+    'threads',
+    'selectedThreadIndex',
+  });
+  final bool hasStatus =
+      _coerceNonEmptyString(responsePayload['status']) != null ||
+      _coerceNonEmptyString(statePayload['status']) != null;
+  if (!hasFields && !hasStatus) {
+    return null;
+  }
+
+  List<ThreadRecord> threads = currentState.threads;
+  if (statePayload.containsKey('threads')) {
+    final List<Map<String, Object?>> threadItems = _coerceMapList(
+      statePayload['threads'],
+    );
+    final List<ThreadRecord> parsedThreads = <ThreadRecord>[];
+    for (int index = 0; index < threadItems.length; index += 1) {
+      final Map<String, Object?> item = threadItems[index];
+      parsedThreads.add(
+        ThreadRecord(
+          id:
+              _coerceNonEmptyString(item['id']) ??
+              'thread-backend-${index + 1}',
+          title: _coerceNonEmptyString(item['title']) ?? 'Backend Thread',
+        ),
+      );
+    }
+    threads = List<ThreadRecord>.unmodifiable(parsedThreads);
+  }
+
+  final int selectedThreadIndex = _clampOptionalIndex(
+    _coerceInt(statePayload['selectedThreadIndex']) ??
+        currentState.selectedThreadIndex,
+    itemCount: threads.length,
+  );
+
+  return CollaborationContextState(
+    peerActive:
+        _coerceBool(statePayload['peerActive']) ?? currentState.peerActive,
+    threads: threads,
+    selectedThreadIndex: selectedThreadIndex,
+    status: _resolveBackendStatusValue(
+      responsePayload: responsePayload,
+      statePayload: statePayload,
+      fallbackStatus: currentState.status,
+    ),
+  );
+}
+
+InspectHandoffState? _inspectStateFromBackendPayload(
+  Map<String, Object?> responsePayload,
+  InspectHandoffState currentState,
+) {
+  if (responsePayload.isEmpty) {
+    return null;
+  }
+  final Map<String, Object?> statePayload = _extractBackendStatePayload(
+    responsePayload,
+    aliases: const <String>['inspectState'],
+  );
+  final bool hasFields = _containsAnyKey(statePayload, const <String>{
+    'target',
+    'snippet',
+  });
+  final bool hasStatus =
+      _coerceNonEmptyString(responsePayload['status']) != null ||
+      _coerceNonEmptyString(statePayload['status']) != null;
+  if (!hasFields && !hasStatus) {
+    return null;
+  }
+  return InspectHandoffState(
+    target:
+        _coerceNonEmptyString(statePayload['target']) ?? currentState.target,
+    snippet:
+        _coerceNonEmptyString(statePayload['snippet']) ?? currentState.snippet,
+    status: _resolveBackendStatusValue(
+      responsePayload: responsePayload,
+      statePayload: statePayload,
+      fallbackStatus: currentState.status,
+    ),
+  );
+}
+
+ExportWorkflowState? _exportStateFromBackendPayload(
+  Map<String, Object?> responsePayload,
+  ExportWorkflowState currentState,
+) {
+  if (responsePayload.isEmpty) {
+    return null;
+  }
+  final Map<String, Object?> statePayload = _extractBackendStatePayload(
+    responsePayload,
+    aliases: const <String>['exportState'],
+  );
+  final bool hasFields = _containsAnyKey(statePayload, const <String>{
+    'artifacts',
+  });
+  final bool hasStatus =
+      _coerceNonEmptyString(responsePayload['status']) != null ||
+      _coerceNonEmptyString(statePayload['status']) != null;
+  if (!hasFields && !hasStatus) {
+    return null;
+  }
+
+  List<ExportArtifact> artifacts = currentState.artifacts;
+  if (statePayload.containsKey('artifacts')) {
+    final List<Map<String, Object?>> artifactItems = _coerceMapList(
+      statePayload['artifacts'],
+    );
+    final List<ExportArtifact> parsedArtifacts = <ExportArtifact>[];
+    for (int index = 0; index < artifactItems.length; index += 1) {
+      final Map<String, Object?> item = artifactItems[index];
+      parsedArtifacts.add(
+        ExportArtifact(
+          id:
+              _coerceNonEmptyString(item['id']) ??
+              'export-backend-${index + 1}',
+          fileName:
+              _coerceNonEmptyString(item['fileName']) ??
+              'backend-artifact-${index + 1}',
+          format: _coerceNonEmptyString(item['format']) ?? 'png',
+          scale: _coerceNonEmptyString(item['scale']) ?? '1x',
+          includeBackground: _coerceBool(item['includeBackground']) ?? true,
+        ),
+      );
+    }
+    artifacts = List<ExportArtifact>.unmodifiable(parsedArtifacts);
+  }
+
+  return ExportWorkflowState(
+    artifacts: artifacts,
+    status: _resolveBackendStatusValue(
+      responsePayload: responsePayload,
+      statePayload: statePayload,
+      fallbackStatus: currentState.status,
+    ),
+  );
+}
+
+DiagnosticsRecoveryState? _diagnosticsStateFromBackendPayload(
+  Map<String, Object?> responsePayload,
+  DiagnosticsRecoveryState currentState,
+) {
+  if (responsePayload.isEmpty) {
+    return null;
+  }
+  final Map<String, Object?> statePayload = _extractBackendStatePayload(
+    responsePayload,
+    aliases: const <String>['diagnosticsState'],
+  );
+  final bool hasFields = _containsAnyKey(statePayload, const <String>{
+    'websocketHealthy',
+    'mcpHealthy',
+    'reconnectAttempts',
+  });
+  final bool hasStatus =
+      _coerceNonEmptyString(responsePayload['status']) != null ||
+      _coerceNonEmptyString(statePayload['status']) != null;
+  if (!hasFields && !hasStatus) {
+    return null;
+  }
+  return DiagnosticsRecoveryState(
+    websocketHealthy:
+        _coerceBool(statePayload['websocketHealthy']) ??
+        currentState.websocketHealthy,
+    mcpHealthy:
+        _coerceBool(statePayload['mcpHealthy']) ?? currentState.mcpHealthy,
+    reconnectAttempts:
+        _coerceInt(statePayload['reconnectAttempts']) ??
+        currentState.reconnectAttempts,
+    status: _resolveBackendStatusValue(
+      responsePayload: responsePayload,
+      statePayload: statePayload,
+      fallbackStatus: currentState.status,
+    ),
+  );
+}
+
 RemoteStubHttpTransportProbeResult _defaultHttpTransportProbe(
   RemoteStubHttpTransportProbeRequest request,
 ) {
@@ -696,6 +1284,14 @@ RemoteStubHttpBackendExecutionResult _defaultHttpBackendExecutionProbe(
     );
   }
   if (response.statusCode >= 200 && response.statusCode < 300) {
+    final Map<String, Object?> responsePayload = _extractBackendSuccessPayload(
+      response.body,
+    );
+    if (responsePayload.isNotEmpty) {
+      return RemoteStubHttpBackendExecutionResult.allowedWithPayload(
+        responsePayload,
+      );
+    }
     return const RemoteStubHttpBackendExecutionResult.allowed();
   }
 
@@ -793,6 +1389,11 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
               '$backendBlockedReason: ${request.operation}.',
         );
       }
+      if (executionResult.responsePayload.isNotEmpty) {
+        return RemoteStubTransportResult.allowedWithPayload(
+          executionResult.responsePayload,
+        );
+      }
     }
 
     if (healthUrl.isEmpty && backendBaseUrl.isEmpty) {
@@ -803,7 +1404,7 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
   }
 }
 
-bool _allowRemoteStubOperation({
+RemoteStubTransportResult? _allowRemoteStubOperation({
   required RemoteStubFaultProfile faultProfile,
   required RemoteStubTransportClient transportClient,
   required RemoteStubTransportRequest transportRequest,
@@ -811,7 +1412,7 @@ bool _allowRemoteStubOperation({
 }) {
   if (faultProfile.blocksOperation(transportRequest.operation)) {
     setStatusOverride(_blockedStatus(faultProfile, transportRequest.operation));
-    return false;
+    return null;
   }
 
   final RemoteStubTransportResult transportResult = transportClient.execute(
@@ -822,10 +1423,10 @@ bool _allowRemoteStubOperation({
         transportResult.status ??
         '${faultProfile.reason}: ${transportRequest.operation}.';
     setStatusOverride(_decorateStatus(deniedStatus));
-    return false;
+    return null;
   }
 
-  return true;
+  return transportResult;
 }
 
 AuthSessionState _decorateAuthState(AuthSessionState state, {String? status}) =>
@@ -909,13 +1510,22 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
   final AuthSessionContract _delegate;
   final RemoteStubFaultProfile faultProfile;
   final RemoteStubTransportClient transportClient;
+  AuthSessionState? _stateSnapshot;
   String? _statusOverride;
 
-  @override
-  AuthSessionState get state =>
-      _decorateAuthState(_delegate.state, status: _statusOverride);
+  AuthSessionState get _currentState =>
+      _stateSnapshot ?? _decorateAuthState(_delegate.state);
 
-  bool _allowOperation(
+  @override
+  AuthSessionState get state {
+    final AuthSessionState baseState = _currentState;
+    if (_statusOverride == null) {
+      return baseState;
+    }
+    return _decorateAuthState(baseState, status: _statusOverride);
+  }
+
+  RemoteStubTransportResult? _allowOperation(
     String operation, {
     Map<String, Object?> payload = const <String, Object?>{},
   }) {
@@ -933,57 +1543,88 @@ class RemoteStubAuthSessionContract implements AuthSessionContract {
     _statusOverride = null;
   }
 
+  AuthSessionState _resolveNextState({
+    required RemoteStubTransportResult transportResult,
+    required AuthSessionState Function() delegateFallback,
+  }) {
+    final AuthSessionState previousState = _currentState;
+    final AuthSessionState? backendState = _authStateFromBackendPayload(
+      transportResult.responsePayload,
+      previousState,
+    );
+    _stateSnapshot = _decorateAuthState(backendState ?? delegateFallback());
+    return _stateSnapshot!;
+  }
+
   @override
   AuthSessionState setRememberSession(bool enabled) {
-    if (!_allowOperation(
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.setRememberSession,
       payload: <String, Object?>{'rememberSession': enabled},
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateAuthState(_delegate.setRememberSession(enabled));
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: () => _delegate.setRememberSession(enabled),
+    );
   }
 
   @override
   AuthSessionState signIn(AuthSignInRequest request) {
-    if (!_allowOperation(
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.signIn,
       payload: <String, Object?>{
         'email': request.email.trim(),
         'passwordLength': request.password.length,
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateAuthState(_delegate.signIn(request));
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: () => _delegate.signIn(request),
+    );
   }
 
   @override
   AuthSessionState restoreSession() {
-    if (!_allowOperation(
+    final AuthSessionState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.restoreSession,
       payload: <String, Object?>{
-        'rememberSessionEnabled': _delegate.state.rememberSession,
+        'rememberSessionEnabled': current.rememberSession,
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateAuthState(_delegate.restoreSession());
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: _delegate.restoreSession,
+    );
   }
 
   @override
   AuthSessionState refreshToken() {
-    if (!_allowOperation(
+    final AuthSessionState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.refreshToken,
-      payload: <String, Object?>{'signedIn': _delegate.state.signedIn},
-    )) {
+      payload: <String, Object?>{'signedIn': current.signedIn},
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateAuthState(_delegate.refreshToken());
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: _delegate.refreshToken,
+    );
   }
 }
 
@@ -997,13 +1638,22 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
   final ProjectLifecycleContract _delegate;
   final RemoteStubFaultProfile faultProfile;
   final RemoteStubTransportClient transportClient;
+  ProjectLifecycleState? _stateSnapshot;
   String? _statusOverride;
 
-  @override
-  ProjectLifecycleState get state =>
-      _decorateProjectState(_delegate.state, status: _statusOverride);
+  ProjectLifecycleState get _currentState =>
+      _stateSnapshot ?? _decorateProjectState(_delegate.state);
 
-  bool _allowOperation(
+  @override
+  ProjectLifecycleState get state {
+    final ProjectLifecycleState baseState = _currentState;
+    if (_statusOverride == null) {
+      return baseState;
+    }
+    return _decorateProjectState(baseState, status: _statusOverride);
+  }
+
+  RemoteStubTransportResult? _allowOperation(
     String operation, {
     Map<String, Object?> payload = const <String, Object?>{},
   }) {
@@ -1021,61 +1671,93 @@ class RemoteStubProjectLifecycleContract implements ProjectLifecycleContract {
     _statusOverride = null;
   }
 
+  ProjectLifecycleState _resolveNextState({
+    required RemoteStubTransportResult transportResult,
+    required ProjectLifecycleState Function() delegateFallback,
+  }) {
+    final ProjectLifecycleState previousState = _currentState;
+    final ProjectLifecycleState? backendState = _projectStateFromBackendPayload(
+      transportResult.responsePayload,
+      previousState,
+    );
+    _stateSnapshot = _decorateProjectState(backendState ?? delegateFallback());
+    return _stateSnapshot!;
+  }
+
   @override
   ProjectLifecycleState createProject(String projectName) {
-    if (!_allowOperation(
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.createProject,
       payload: <String, Object?>{'projectName': projectName.trim()},
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateProjectState(_delegate.createProject(projectName));
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: () => _delegate.createProject(projectName),
+    );
   }
 
   @override
   ProjectLifecycleState switchProject(int index) {
-    if (!_allowOperation(
+    final ProjectLifecycleState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.switchProject,
       payload: <String, Object?>{
         'index': index,
-        'projectCount': _delegate.state.projects.length,
+        'projectCount': current.projects.length,
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateProjectState(_delegate.switchProject(index));
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: () => _delegate.switchProject(index),
+    );
   }
 
   @override
   ProjectLifecycleState createFile(String fileName) {
-    if (!_allowOperation(
+    final ProjectLifecycleState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.createFile,
       payload: <String, Object?>{
         'fileName': fileName.trim(),
-        'selectedProjectId': _delegate.state.selectedProject.id,
+        'selectedProjectId': current.selectedProject.id,
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateProjectState(_delegate.createFile(fileName));
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: () => _delegate.createFile(fileName),
+    );
   }
 
   @override
   ProjectLifecycleState deleteFirstFile() {
-    if (!_allowOperation(
+    final ProjectLifecycleState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.deleteFile,
       payload: <String, Object?>{
-        'selectedProjectId': _delegate.state.selectedProject.id,
-        'hasFiles': _delegate.state.selectedProject.files.isNotEmpty,
+        'selectedProjectId': current.selectedProject.id,
+        'hasFiles': current.selectedProject.files.isNotEmpty,
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateProjectState(_delegate.deleteFirstFile());
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: _delegate.deleteFirstFile,
+    );
   }
 }
 
@@ -1089,13 +1771,22 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
   final CanvasEditingContract _delegate;
   final RemoteStubFaultProfile faultProfile;
   final RemoteStubTransportClient transportClient;
+  CanvasEditingState? _stateSnapshot;
   String? _statusOverride;
 
-  @override
-  CanvasEditingState get state =>
-      _decorateCanvasState(_delegate.state, status: _statusOverride);
+  CanvasEditingState get _currentState =>
+      _stateSnapshot ?? _decorateCanvasState(_delegate.state);
 
-  bool _allowOperation(
+  @override
+  CanvasEditingState get state {
+    final CanvasEditingState baseState = _currentState;
+    if (_statusOverride == null) {
+      return baseState;
+    }
+    return _decorateCanvasState(baseState, status: _statusOverride);
+  }
+
+  RemoteStubTransportResult? _allowOperation(
     String operation, {
     Map<String, Object?> payload = const <String, Object?>{},
   }) {
@@ -1113,74 +1804,111 @@ class RemoteStubCanvasEditingContract implements CanvasEditingContract {
     _statusOverride = null;
   }
 
+  CanvasEditingState _resolveNextState({
+    required RemoteStubTransportResult transportResult,
+    required CanvasEditingState Function() delegateFallback,
+  }) {
+    final CanvasEditingState previousState = _currentState;
+    final CanvasEditingState? backendState = _canvasStateFromBackendPayload(
+      transportResult.responsePayload,
+      previousState,
+    );
+    _stateSnapshot = _decorateCanvasState(backendState ?? delegateFallback());
+    return _stateSnapshot!;
+  }
+
   @override
   CanvasEditingState createRectangle() {
-    if (!_allowOperation(
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.createRectangle,
       payload: const <String, Object?>{'shapeType': 'rectangle'},
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateCanvasState(_delegate.createRectangle());
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: _delegate.createRectangle,
+    );
   }
 
   @override
   CanvasEditingState selectShape(int index) {
-    if (!_allowOperation(
+    final CanvasEditingState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.selectShape,
       payload: <String, Object?>{
         'index': index,
-        'shapeCount': _delegate.state.shapes.length,
+        'shapeCount': current.shapes.length,
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateCanvasState(_delegate.selectShape(index));
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: () => _delegate.selectShape(index),
+    );
   }
 
   @override
   CanvasEditingState moveSelected() {
-    if (!_allowOperation(
+    final CanvasEditingState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.moveShape,
       payload: <String, Object?>{
-        'selectedShapeId': _delegate.state.selectedShape?.id ?? '',
+        'selectedShapeId': current.selectedShape?.id ?? '',
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateCanvasState(_delegate.moveSelected());
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: _delegate.moveSelected,
+    );
   }
 
   @override
   CanvasEditingState resizeSelected() {
-    if (!_allowOperation(
+    final CanvasEditingState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.resizeShape,
       payload: <String, Object?>{
-        'selectedShapeId': _delegate.state.selectedShape?.id ?? '',
+        'selectedShapeId': current.selectedShape?.id ?? '',
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateCanvasState(_delegate.resizeSelected());
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: _delegate.resizeSelected,
+    );
   }
 
   @override
   CanvasEditingState toggleFillSelected() {
-    if (!_allowOperation(
+    final CanvasEditingState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.toggleFill,
       payload: <String, Object?>{
-        'selectedShapeId': _delegate.state.selectedShape?.id ?? '',
-        'currentFill': _delegate.state.selectedShape?.fillHex ?? '',
+        'selectedShapeId': current.selectedShape?.id ?? '',
+        'currentFill': current.selectedShape?.fillHex ?? '',
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateCanvasState(_delegate.toggleFillSelected());
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: _delegate.toggleFillSelected,
+    );
   }
 }
 
@@ -1194,13 +1922,22 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
   final AssetManagementContract _delegate;
   final RemoteStubFaultProfile faultProfile;
   final RemoteStubTransportClient transportClient;
+  AssetManagementState? _stateSnapshot;
   String? _statusOverride;
 
-  @override
-  AssetManagementState get state =>
-      _decorateAssetState(_delegate.state, status: _statusOverride);
+  AssetManagementState get _currentState =>
+      _stateSnapshot ?? _decorateAssetState(_delegate.state);
 
-  bool _allowOperation(
+  @override
+  AssetManagementState get state {
+    final AssetManagementState baseState = _currentState;
+    if (_statusOverride == null) {
+      return baseState;
+    }
+    return _decorateAssetState(baseState, status: _statusOverride);
+  }
+
+  RemoteStubTransportResult? _allowOperation(
     String operation, {
     Map<String, Object?> payload = const <String, Object?>{},
   }) {
@@ -1218,62 +1955,94 @@ class RemoteStubAssetManagementContract implements AssetManagementContract {
     _statusOverride = null;
   }
 
+  AssetManagementState _resolveNextState({
+    required RemoteStubTransportResult transportResult,
+    required AssetManagementState Function() delegateFallback,
+  }) {
+    final AssetManagementState previousState = _currentState;
+    final AssetManagementState? backendState = _assetStateFromBackendPayload(
+      transportResult.responsePayload,
+      previousState,
+    );
+    _stateSnapshot = _decorateAssetState(backendState ?? delegateFallback());
+    return _stateSnapshot!;
+  }
+
   @override
   AssetManagementState importAsset(String assetName, String assetType) {
-    if (!_allowOperation(
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.importAsset,
       payload: <String, Object?>{
         'assetName': assetName.trim(),
         'assetType': assetType,
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateAssetState(_delegate.importAsset(assetName, assetType));
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: () => _delegate.importAsset(assetName, assetType),
+    );
   }
 
   @override
   AssetManagementState selectAsset(int index) {
-    if (!_allowOperation(
+    final AssetManagementState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.selectAsset,
       payload: <String, Object?>{
         'index': index,
-        'assetCount': _delegate.state.assets.length,
+        'assetCount': current.assets.length,
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateAssetState(_delegate.selectAsset(index));
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: () => _delegate.selectAsset(index),
+    );
   }
 
   @override
   AssetManagementState useSelectedAsset() {
-    if (!_allowOperation(
+    final AssetManagementState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.useAsset,
       payload: <String, Object?>{
-        'selectedAssetId': _delegate.state.selectedAsset?.id ?? '',
+        'selectedAssetId': current.selectedAsset?.id ?? '',
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateAssetState(_delegate.useSelectedAsset());
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: _delegate.useSelectedAsset,
+    );
   }
 
   @override
   AssetManagementState removeSelectedAsset() {
-    if (!_allowOperation(
+    final AssetManagementState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.removeAsset,
       payload: <String, Object?>{
-        'selectedAssetId': _delegate.state.selectedAsset?.id ?? '',
+        'selectedAssetId': current.selectedAsset?.id ?? '',
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateAssetState(_delegate.removeSelectedAsset());
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: _delegate.removeSelectedAsset,
+    );
   }
 }
 
@@ -1288,13 +2057,22 @@ class RemoteStubCollaborationContextContract
   final CollaborationContextContract _delegate;
   final RemoteStubFaultProfile faultProfile;
   final RemoteStubTransportClient transportClient;
+  CollaborationContextState? _stateSnapshot;
   String? _statusOverride;
 
-  @override
-  CollaborationContextState get state =>
-      _decorateCollaborationState(_delegate.state, status: _statusOverride);
+  CollaborationContextState get _currentState =>
+      _stateSnapshot ?? _decorateCollaborationState(_delegate.state);
 
-  bool _allowOperation(
+  @override
+  CollaborationContextState get state {
+    final CollaborationContextState baseState = _currentState;
+    if (_statusOverride == null) {
+      return baseState;
+    }
+    return _decorateCollaborationState(baseState, status: _statusOverride);
+  }
+
+  RemoteStubTransportResult? _allowOperation(
     String operation, {
     Map<String, Object?> payload = const <String, Object?>{},
   }) {
@@ -1312,57 +2090,92 @@ class RemoteStubCollaborationContextContract
     _statusOverride = null;
   }
 
+  CollaborationContextState _resolveNextState({
+    required RemoteStubTransportResult transportResult,
+    required CollaborationContextState Function() delegateFallback,
+  }) {
+    final CollaborationContextState previousState = _currentState;
+    final CollaborationContextState? backendState =
+        _collaborationStateFromBackendPayload(
+          transportResult.responsePayload,
+          previousState,
+        );
+    _stateSnapshot = _decorateCollaborationState(
+      backendState ?? delegateFallback(),
+    );
+    return _stateSnapshot!;
+  }
+
   @override
   CollaborationContextState togglePeerPresence() {
-    if (!_allowOperation(
+    final CollaborationContextState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.togglePeerPresence,
-      payload: <String, Object?>{'peerActive': _delegate.state.peerActive},
-    )) {
+      payload: <String, Object?>{'peerActive': current.peerActive},
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateCollaborationState(_delegate.togglePeerPresence());
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: _delegate.togglePeerPresence,
+    );
   }
 
   @override
   CollaborationContextState createThread(String title) {
-    if (!_allowOperation(
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.createThread,
       payload: <String, Object?>{'title': title.trim()},
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateCollaborationState(_delegate.createThread(title));
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: () => _delegate.createThread(title),
+    );
   }
 
   @override
   CollaborationContextState selectThread(int index) {
-    if (!_allowOperation(
+    final CollaborationContextState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.selectThread,
       payload: <String, Object?>{
         'index': index,
-        'threadCount': _delegate.state.threads.length,
+        'threadCount': current.threads.length,
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateCollaborationState(_delegate.selectThread(index));
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: () => _delegate.selectThread(index),
+    );
   }
 
   @override
   CollaborationContextState resolveSelectedThread() {
-    if (!_allowOperation(
+    final CollaborationContextState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.resolveThread,
       payload: <String, Object?>{
-        'selectedThreadId': _delegate.state.selectedThread?.id ?? '',
+        'selectedThreadId': current.selectedThread?.id ?? '',
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateCollaborationState(_delegate.resolveSelectedThread());
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: _delegate.resolveSelectedThread,
+    );
   }
 }
 
@@ -1376,13 +2189,22 @@ class RemoteStubInspectHandoffContract implements InspectHandoffContract {
   final InspectHandoffContract _delegate;
   final RemoteStubFaultProfile faultProfile;
   final RemoteStubTransportClient transportClient;
+  InspectHandoffState? _stateSnapshot;
   String? _statusOverride;
 
-  @override
-  InspectHandoffState get state =>
-      _decorateInspectState(_delegate.state, status: _statusOverride);
+  InspectHandoffState get _currentState =>
+      _stateSnapshot ?? _decorateInspectState(_delegate.state);
 
-  bool _allowOperation(
+  @override
+  InspectHandoffState get state {
+    final InspectHandoffState baseState = _currentState;
+    if (_statusOverride == null) {
+      return baseState;
+    }
+    return _decorateInspectState(baseState, status: _statusOverride);
+  }
+
+  RemoteStubTransportResult? _allowOperation(
     String operation, {
     Map<String, Object?> payload = const <String, Object?>{},
   }) {
@@ -1400,43 +2222,69 @@ class RemoteStubInspectHandoffContract implements InspectHandoffContract {
     _statusOverride = null;
   }
 
+  InspectHandoffState _resolveNextState({
+    required RemoteStubTransportResult transportResult,
+    required InspectHandoffState Function() delegateFallback,
+  }) {
+    final InspectHandoffState previousState = _currentState;
+    final InspectHandoffState? backendState = _inspectStateFromBackendPayload(
+      transportResult.responsePayload,
+      previousState,
+    );
+    _stateSnapshot = _decorateInspectState(backendState ?? delegateFallback());
+    return _stateSnapshot!;
+  }
+
   @override
   InspectHandoffState setTarget(String target) {
-    if (!_allowOperation(
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.setInspectTarget,
       payload: <String, Object?>{'target': target},
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateInspectState(_delegate.setTarget(target));
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: () => _delegate.setTarget(target),
+    );
   }
 
   @override
   InspectHandoffState generateSnippet(String elementId) {
-    if (!_allowOperation(
+    final InspectHandoffState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.generateSnippet,
       payload: <String, Object?>{
         'elementId': elementId.trim(),
-        'target': _delegate.state.target,
+        'target': current.target,
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateInspectState(_delegate.generateSnippet(elementId));
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: () => _delegate.generateSnippet(elementId),
+    );
   }
 
   @override
   InspectHandoffState copyMetadata(String elementId) {
-    if (!_allowOperation(
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.copyMetadata,
       payload: <String, Object?>{'elementId': elementId.trim()},
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateInspectState(_delegate.copyMetadata(elementId));
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: () => _delegate.copyMetadata(elementId),
+    );
   }
 }
 
@@ -1450,13 +2298,22 @@ class RemoteStubExportWorkflowContract implements ExportWorkflowContract {
   final ExportWorkflowContract _delegate;
   final RemoteStubFaultProfile faultProfile;
   final RemoteStubTransportClient transportClient;
+  ExportWorkflowState? _stateSnapshot;
   String? _statusOverride;
 
-  @override
-  ExportWorkflowState get state =>
-      _decorateExportState(_delegate.state, status: _statusOverride);
+  ExportWorkflowState get _currentState =>
+      _stateSnapshot ?? _decorateExportState(_delegate.state);
 
-  bool _allowOperation(
+  @override
+  ExportWorkflowState get state {
+    final ExportWorkflowState baseState = _currentState;
+    if (_statusOverride == null) {
+      return baseState;
+    }
+    return _decorateExportState(baseState, status: _statusOverride);
+  }
+
+  RemoteStubTransportResult? _allowOperation(
     String operation, {
     Map<String, Object?> payload = const <String, Object?>{},
   }) {
@@ -1474,9 +2331,22 @@ class RemoteStubExportWorkflowContract implements ExportWorkflowContract {
     _statusOverride = null;
   }
 
+  ExportWorkflowState _resolveNextState({
+    required RemoteStubTransportResult transportResult,
+    required ExportWorkflowState Function() delegateFallback,
+  }) {
+    final ExportWorkflowState previousState = _currentState;
+    final ExportWorkflowState? backendState = _exportStateFromBackendPayload(
+      transportResult.responsePayload,
+      previousState,
+    );
+    _stateSnapshot = _decorateExportState(backendState ?? delegateFallback());
+    return _stateSnapshot!;
+  }
+
   @override
   ExportWorkflowState runExport(ExportRequest request) {
-    if (!_allowOperation(
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.runExport,
       payload: <String, Object?>{
         'fileName': request.fileName.trim(),
@@ -1484,39 +2354,49 @@ class RemoteStubExportWorkflowContract implements ExportWorkflowContract {
         'scale': request.scale,
         'includeBackground': request.includeBackground,
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateExportState(_delegate.runExport(request));
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: () => _delegate.runExport(request),
+    );
   }
 
   @override
   ExportWorkflowState saveLatest() {
-    if (!_allowOperation(
+    final ExportWorkflowState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.saveExport,
-      payload: <String, Object?>{
-        'hasArtifact': _delegate.state.latestArtifact != null,
-      },
-    )) {
+      payload: <String, Object?>{'hasArtifact': current.latestArtifact != null},
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateExportState(_delegate.saveLatest());
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: _delegate.saveLatest,
+    );
   }
 
   @override
   ExportWorkflowState clearArtifacts() {
-    if (!_allowOperation(
+    final ExportWorkflowState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.clearExportArtifacts,
-      payload: <String, Object?>{
-        'artifactCount': _delegate.state.artifacts.length,
-      },
-    )) {
+      payload: <String, Object?>{'artifactCount': current.artifacts.length},
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateExportState(_delegate.clearArtifacts());
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: _delegate.clearArtifacts,
+    );
   }
 }
 
@@ -1531,13 +2411,22 @@ class RemoteStubDiagnosticsRecoveryContract
   final DiagnosticsRecoveryContract _delegate;
   final RemoteStubFaultProfile faultProfile;
   final RemoteStubTransportClient transportClient;
+  DiagnosticsRecoveryState? _stateSnapshot;
   String? _statusOverride;
 
-  @override
-  DiagnosticsRecoveryState get state =>
-      _decorateDiagnosticsState(_delegate.state, status: _statusOverride);
+  DiagnosticsRecoveryState get _currentState =>
+      _stateSnapshot ?? _decorateDiagnosticsState(_delegate.state);
 
-  bool _allowOperation(
+  @override
+  DiagnosticsRecoveryState get state {
+    final DiagnosticsRecoveryState baseState = _currentState;
+    if (_statusOverride == null) {
+      return baseState;
+    }
+    return _decorateDiagnosticsState(baseState, status: _statusOverride);
+  }
+
+  RemoteStubTransportResult? _allowOperation(
     String operation, {
     Map<String, Object?> payload = const <String, Object?>{},
   }) {
@@ -1555,62 +2444,98 @@ class RemoteStubDiagnosticsRecoveryContract
     _statusOverride = null;
   }
 
+  DiagnosticsRecoveryState _resolveNextState({
+    required RemoteStubTransportResult transportResult,
+    required DiagnosticsRecoveryState Function() delegateFallback,
+  }) {
+    final DiagnosticsRecoveryState previousState = _currentState;
+    final DiagnosticsRecoveryState? backendState =
+        _diagnosticsStateFromBackendPayload(
+          transportResult.responsePayload,
+          previousState,
+        );
+    _stateSnapshot = _decorateDiagnosticsState(
+      backendState ?? delegateFallback(),
+    );
+    return _stateSnapshot!;
+  }
+
   @override
   DiagnosticsRecoveryState runHealthCheck() {
-    if (!_allowOperation(
+    final DiagnosticsRecoveryState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.runHealthCheck,
       payload: <String, Object?>{
-        'websocketHealthy': _delegate.state.websocketHealthy,
-        'mcpHealthy': _delegate.state.mcpHealthy,
+        'websocketHealthy': current.websocketHealthy,
+        'mcpHealthy': current.mcpHealthy,
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateDiagnosticsState(_delegate.runHealthCheck());
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: _delegate.runHealthCheck,
+    );
   }
 
   @override
   DiagnosticsRecoveryState simulateDisconnect() {
-    if (!_allowOperation(
+    final DiagnosticsRecoveryState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.simulateDisconnect,
       payload: <String, Object?>{
-        'websocketHealthy': _delegate.state.websocketHealthy,
-        'mcpHealthy': _delegate.state.mcpHealthy,
+        'websocketHealthy': current.websocketHealthy,
+        'mcpHealthy': current.mcpHealthy,
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateDiagnosticsState(_delegate.simulateDisconnect());
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: _delegate.simulateDisconnect,
+    );
   }
 
   @override
   DiagnosticsRecoveryState attemptReconnect() {
-    if (!_allowOperation(
+    final DiagnosticsRecoveryState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.attemptReconnect,
       payload: <String, Object?>{
-        'reconnectAttempts': _delegate.state.reconnectAttempts,
+        'reconnectAttempts': current.reconnectAttempts,
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateDiagnosticsState(_delegate.attemptReconnect());
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: _delegate.attemptReconnect,
+    );
   }
 
   @override
   DiagnosticsRecoveryState openRecoveryGuide() {
-    if (!_allowOperation(
+    final DiagnosticsRecoveryState current = _currentState;
+    final RemoteStubTransportResult? transportResult = _allowOperation(
       RemoteStubOperationIds.openRecoveryGuide,
       payload: <String, Object?>{
-        'reconnectAttempts': _delegate.state.reconnectAttempts,
-        'websocketHealthy': _delegate.state.websocketHealthy,
+        'reconnectAttempts': current.reconnectAttempts,
+        'websocketHealthy': current.websocketHealthy,
       },
-    )) {
+    );
+    if (transportResult == null) {
       return state;
     }
     _clearOverride();
-    return _decorateDiagnosticsState(_delegate.openRecoveryGuide());
+    return _resolveNextState(
+      transportResult: transportResult,
+      delegateFallback: _delegate.openRecoveryGuide,
+    );
   }
 }

@@ -13,6 +13,64 @@ class _CaptureTransportClient extends RemoteStubTransportClient {
   }
 }
 
+class _BackendResponseTransportClient extends RemoteStubTransportClient {
+  _BackendResponseTransportClient(this.responsesByOperation);
+
+  final Map<String, Map<String, Object?>> responsesByOperation;
+  final List<String> executedOperations = <String>[];
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    executedOperations.add(request.operation);
+    final Map<String, Object?>? response =
+        responsesByOperation[request.operation];
+    if (response == null || response.isEmpty) {
+      return RemoteStubTransportResult.allow;
+    }
+    return RemoteStubTransportResult.allowedWithPayload(response);
+  }
+}
+
+class _TrackingAuthSessionContract implements AuthSessionContract {
+  int signInCallCount = 0;
+  bool _rememberSession = false;
+  bool _signedIn = false;
+  String _status = 'Idle';
+
+  @override
+  AuthSessionState get state => AuthSessionState(
+    rememberSession: _rememberSession,
+    signedIn: _signedIn,
+    status: _status,
+  );
+
+  @override
+  AuthSessionState setRememberSession(bool enabled) {
+    _rememberSession = enabled;
+    return state;
+  }
+
+  @override
+  AuthSessionState signIn(AuthSignInRequest request) {
+    signInCallCount += 1;
+    _signedIn = true;
+    _status = 'Delegate sign-in called.';
+    return state;
+  }
+
+  @override
+  AuthSessionState restoreSession() {
+    _status = 'Delegate restore called.';
+    return state;
+  }
+
+  @override
+  AuthSessionState refreshToken() {
+    _status = 'Delegate refresh called.';
+    return state;
+  }
+}
+
 void main() {
   group('InMemoryAuthSessionContract', () {
     test('requires email and password to sign in', () {
@@ -882,7 +940,21 @@ void main() {
                   request.endpointUrl,
                   'https://api.penjar.app/v1/api/desktop/projects',
                 );
-                return const RemoteStubHttpBackendExecutionResult.allowed();
+                return RemoteStubHttpBackendExecutionResult.allowedWithPayload(
+                  <String, Object?>{
+                    'status': 'Backend project snapshot applied.',
+                    'state': <String, Object?>{
+                      'projects': <Map<String, Object?>>[
+                        <String, Object?>{
+                          'id': 'project-backend',
+                          'name': 'Backend Execution Workspace',
+                          'files': <String>['backend-file.penjar'],
+                        },
+                      ],
+                      'selectedProjectIndex': 0,
+                    },
+                  },
+                );
               },
             );
 
@@ -893,10 +965,264 @@ void main() {
         projectContract.createProject('Backend Execution Ready');
 
         expect(executedRequests, hasLength(1));
-        expect(projectContract.state.projects, hasLength(2));
+        expect(projectContract.state.projects, hasLength(1));
+        expect(
+          projectContract.state.selectedProject.name,
+          'Backend Execution Workspace',
+        );
+        expect(projectContract.state.selectedProject.files, <String>[
+          'backend-file.penjar',
+        ]);
         expect(
           projectContract.state.status,
-          '[remote-stub] Project created: Backend Execution Ready.',
+          '[remote-stub] Backend project snapshot applied.',
+        );
+      },
+    );
+
+    test(
+      'applies backend response payload snapshots across all workflow adapters',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.signIn: <String, Object?>{
+                'status': 'Backend auth snapshot applied.',
+                'state': <String, Object?>{
+                  'rememberSession': true,
+                  'signedIn': false,
+                },
+              },
+              RemoteStubOperationIds.createProject: <String, Object?>{
+                'status': 'Backend project snapshot applied.',
+                'state': <String, Object?>{
+                  'projects': <Map<String, Object?>>[
+                    <String, Object?>{
+                      'id': 'project-remote',
+                      'name': 'Remote Project',
+                      'files': <String>['remote.penjar'],
+                    },
+                  ],
+                  'selectedProjectIndex': 0,
+                },
+              },
+              RemoteStubOperationIds.createRectangle: <String, Object?>{
+                'status': 'Backend canvas snapshot applied.',
+                'state': <String, Object?>{
+                  'shapes': <Map<String, Object?>>[
+                    <String, Object?>{
+                      'id': 'rect-remote',
+                      'x': 41.0,
+                      'y': 22.0,
+                      'width': 180.0,
+                      'height': 90.0,
+                      'fillHex': '#112233',
+                    },
+                  ],
+                  'selectedIndex': 0,
+                },
+              },
+              RemoteStubOperationIds.importAsset: <String, Object?>{
+                'status': 'Backend asset snapshot applied.',
+                'state': <String, Object?>{
+                  'assets': <Map<String, Object?>>[
+                    <String, Object?>{
+                      'id': 'asset-remote',
+                      'name': 'hero-remote.png',
+                      'type': 'image',
+                      'usedCount': 9,
+                    },
+                  ],
+                  'selectedAssetIndex': 0,
+                },
+              },
+              RemoteStubOperationIds.createThread: <String, Object?>{
+                'status': 'Backend collaboration snapshot applied.',
+                'state': <String, Object?>{
+                  'peerActive': true,
+                  'threads': <Map<String, Object?>>[
+                    <String, Object?>{
+                      'id': 'thread-remote',
+                      'title': 'Backend Review',
+                    },
+                  ],
+                  'selectedThreadIndex': 0,
+                },
+              },
+              RemoteStubOperationIds.generateSnippet: <String, Object?>{
+                'status': 'Backend inspect snapshot applied.',
+                'state': <String, Object?>{
+                  'target': 'swiftui',
+                  'snippet': 'Text("Remote")',
+                },
+              },
+              RemoteStubOperationIds.runExport: <String, Object?>{
+                'status': 'Backend export snapshot applied.',
+                'state': <String, Object?>{
+                  'artifacts': <Map<String, Object?>>[
+                    <String, Object?>{
+                      'id': 'export-remote',
+                      'fileName': 'remote-landing',
+                      'format': 'svg',
+                      'scale': '3x',
+                      'includeBackground': false,
+                    },
+                  ],
+                },
+              },
+              RemoteStubOperationIds.runHealthCheck: <String, Object?>{
+                'status': 'Backend diagnostics snapshot applied.',
+                'state': <String, Object?>{
+                  'websocketHealthy': false,
+                  'mcpHealthy': true,
+                  'reconnectAttempts': 7,
+                },
+              },
+            });
+
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+        final RemoteStubProjectLifecycleContract projectContract =
+            RemoteStubProjectLifecycleContract(
+              transportClient: transportClient,
+            );
+        final RemoteStubCanvasEditingContract canvasContract =
+            RemoteStubCanvasEditingContract(transportClient: transportClient);
+        final RemoteStubAssetManagementContract assetContract =
+            RemoteStubAssetManagementContract(transportClient: transportClient);
+        final RemoteStubCollaborationContextContract collaborationContract =
+            RemoteStubCollaborationContextContract(
+              transportClient: transportClient,
+            );
+        final RemoteStubInspectHandoffContract inspectContract =
+            RemoteStubInspectHandoffContract(transportClient: transportClient);
+        final RemoteStubExportWorkflowContract exportContract =
+            RemoteStubExportWorkflowContract(transportClient: transportClient);
+        final RemoteStubDiagnosticsRecoveryContract diagnosticsContract =
+            RemoteStubDiagnosticsRecoveryContract(
+              transportClient: transportClient,
+            );
+
+        authContract.signIn(
+          const AuthSignInRequest(
+            email: 'designer@penjar.app',
+            password: 'desktop-pass',
+          ),
+        );
+        expect(authContract.state.rememberSession, isTrue);
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend auth snapshot applied.',
+        );
+
+        projectContract.createProject('Ignored Name');
+        expect(projectContract.state.projects, hasLength(1));
+        expect(projectContract.state.selectedProject.name, 'Remote Project');
+        expect(projectContract.state.selectedProject.files, <String>[
+          'remote.penjar',
+        ]);
+        expect(
+          projectContract.state.status,
+          '[remote-stub] Backend project snapshot applied.',
+        );
+
+        canvasContract.createRectangle();
+        expect(canvasContract.state.shapes, hasLength(1));
+        expect(canvasContract.state.selectedShape?.id, 'rect-remote');
+        expect(canvasContract.state.selectedShape?.fillHex, '#112233');
+        expect(
+          canvasContract.state.status,
+          '[remote-stub] Backend canvas snapshot applied.',
+        );
+
+        assetContract.importAsset('ignored.png', 'image');
+        expect(assetContract.state.assets, hasLength(1));
+        expect(assetContract.state.selectedAsset?.name, 'hero-remote.png');
+        expect(assetContract.state.selectedAsset?.usedCount, 9);
+        expect(
+          assetContract.state.status,
+          '[remote-stub] Backend asset snapshot applied.',
+        );
+
+        collaborationContract.createThread('Ignored Thread');
+        expect(collaborationContract.state.peerActive, isTrue);
+        expect(collaborationContract.state.threads, hasLength(1));
+        expect(
+          collaborationContract.state.selectedThread?.title,
+          'Backend Review',
+        );
+        expect(
+          collaborationContract.state.status,
+          '[remote-stub] Backend collaboration snapshot applied.',
+        );
+
+        inspectContract.generateSnippet('button/primary');
+        expect(inspectContract.state.target, 'swiftui');
+        expect(inspectContract.state.snippet, 'Text("Remote")');
+        expect(
+          inspectContract.state.status,
+          '[remote-stub] Backend inspect snapshot applied.',
+        );
+
+        exportContract.runExport(
+          const ExportRequest(
+            fileName: 'ignored',
+            format: 'png',
+            scale: '1x',
+            includeBackground: true,
+          ),
+        );
+        expect(exportContract.state.artifacts, hasLength(1));
+        expect(exportContract.state.latestArtifact?.fileName, 'remote-landing');
+        expect(exportContract.state.latestArtifact?.format, 'svg');
+        expect(exportContract.state.latestArtifact?.scale, '3x');
+        expect(exportContract.state.latestArtifact?.includeBackground, isFalse);
+        expect(
+          exportContract.state.status,
+          '[remote-stub] Backend export snapshot applied.',
+        );
+
+        diagnosticsContract.runHealthCheck();
+        expect(diagnosticsContract.state.websocketHealthy, isFalse);
+        expect(diagnosticsContract.state.mcpHealthy, isTrue);
+        expect(diagnosticsContract.state.reconnectAttempts, 7);
+        expect(
+          diagnosticsContract.state.status,
+          '[remote-stub] Backend diagnostics snapshot applied.',
+        );
+      },
+    );
+
+    test(
+      'skips auth delegate mutation when backend response snapshot is present',
+      () {
+        final _TrackingAuthSessionContract trackingDelegate =
+            _TrackingAuthSessionContract();
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.signIn: <String, Object?>{
+                'status': 'Backend auth snapshot applied.',
+                'state': <String, Object?>{'signedIn': false},
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(
+              delegate: trackingDelegate,
+              transportClient: transportClient,
+            );
+
+        authContract.signIn(
+          const AuthSignInRequest(
+            email: 'designer@penjar.app',
+            password: 'desktop-pass',
+          ),
+        );
+
+        expect(trackingDelegate.signInCallCount, 0);
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend auth snapshot applied.',
         );
       },
     );

@@ -4908,8 +4908,73 @@ Integrate real backend endpoint execution into the remote-stub transport path so
   - backend execution success path preserves existing remote-stub delegate behavior.
   - full verification gate (`desktop:verify:full`) remains green after backend execution integration.
 
+## Unit WS-D-113: Remote-stub backend response-driven state mutation integration
+
+### Planned objective
+
+Replace in-memory delegate-first mutation behavior in remote-stub adapters with backend response-driven state transitions when backend success payload is available, while preserving existing synchronous signatures, degraded-path behavior, and delegate fallback compatibility.
+
+### Implemented changes
+
+1. Extended transport success contract payload propagation in `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `RemoteStubTransportResult` now carries optional `responsePayload`,
+   - `RemoteStubHttpBackendExecutionResult` now carries optional `responsePayload`,
+   - added payload-aware factories:
+     - `RemoteStubTransportResult.allowedWithPayload(...)`,
+     - `RemoteStubHttpBackendExecutionResult.allowedWithPayload(...)`.
+2. Added backend success-body extraction + propagation in HTTP backend execution path:
+   - introduced `_extractBackendSuccessPayload(...)` JSON map extractor for 2xx responses,
+   - `_defaultHttpBackendExecutionProbe(...)` now forwards decoded success payload when available,
+   - `RemoteStubHttpTransportClient.execute(...)` now propagates backend response payload into transport result.
+3. Reworked remote-stub adapter mutation flow across all workflow domains:
+   - `_allowRemoteStubOperation(...)` now returns `RemoteStubTransportResult?` instead of boolean gate,
+   - all remote-stub adapters now keep per-domain state snapshots and apply blocked-status overrides on top of snapshot state,
+   - added backend response parsers + coercion helpers for all domain states:
+     - auth/project/canvas/assets/collaboration/inspect/export/diagnostics,
+   - mutation operations now:
+     - apply backend response payload state when present,
+     - skip delegate mutation in that branch,
+     - preserve delegate fallback when backend payload is absent.
+4. Expanded contract regression coverage in `desktop/test/contracts/workflow_contracts_test.dart`:
+   - updated `http transport client executes backend request and allows operation on success` to assert backend-driven project state snapshot application,
+   - added `applies backend response payload snapshots across all workflow adapters`,
+   - added `skips auth delegate mutation when backend response snapshot is present`.
+5. Synced continuity docs:
+   - `desktop-flutter-development-runbook.md`,
+   - `desktop-flutter-migration-inventory.md`,
+   - `desktop-flutter-parity-checklist.md`,
+   - `desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/contracts/desktop_contract_bundle_test.dart`,
+   - `cd desktop && flutter test test/parity/remote_stub_mode_parity_test.dart test/parity/remote_stub_unavailable_parity_test.dart`,
+   - `pnpm run desktop:verify:full`.
+
+### Unit review (detailed)
+
+- **Review scope**
+  - correctness of transport success payload propagation from backend execution to adapter layer,
+  - domain-state parser safety and fallback behavior under partial/malformed payloads,
+  - non-regression of degraded-path blocking/status override behavior and parity coverage.
+- **Issues found during review**
+  1. Successful backend execution path still returned allow-only signal, so adapter state mutations remained delegate-driven.
+  2. Initial full verification pass failed static analysis due two hygiene issues introduced during refactor:
+     - unnecessary cast in asset parser,
+     - unnecessary string escapes in test fixture payload.
+  3. Delegate-bypass behavior under backend payload success was not explicitly asserted in tests, creating regression risk.
+  4. Optional selected-index normalization initially coerced negative values to `0`, which could incorrectly auto-select an item when backend snapshot intended no selection (`-1`).
+- **Fix applied**
+  1. Added payload propagation contracts and wired HTTP backend success-body extraction through transport results.
+  2. Added domain-specific backend payload parsers and state-snapshot application flow across all remote-stub adapters.
+  3. Removed unnecessary cast/string escapes and re-ran full verification.
+  4. Added explicit test proving delegate sign-in mutation is skipped when backend auth snapshot payload is present.
+  5. Corrected optional index clamp behavior to preserve backend `-1` no-selection semantics for optional selected-index fields.
+- **Post-fix validation criteria**
+  - backend success payload can deterministically drive visible contract state transitions in all workflow domains.
+  - blocked/unavailable transport behavior and decorated status surfaces remain intact.
+  - full verification gate (`desktop:verify:full`) passes after response-driven integration.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
-- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata, shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, and runtime mode parity/matrix gates, but backend response-driven state mutation integration is still pending across auth/project/file/canvas/assets/collaboration/inspect/export/diagnostics.
+- All workflow domains now have Flutter parity scaffolds/harnesses, runtime-switchable in-memory/remote-stub contract boundaries, degraded-path remote-stub fault-profile gates (global unavailable + operation-scoped blocked-operation profiles), scripted transport-client injection seam, HTTP health-probe transport gating path, canonical operation-ID catalog + env list filtering, transport-profile interface abstraction, bundle/UI-visible remote profile metadata, shared contract-bundle injection, operation-level backend request metadata mapping, backend endpoint execution wiring with error propagation, backend response-driven state mutation integration, and runtime mode parity/matrix gates, but live backend schema alignment/session persistence integration and route/state runtime bridge integration are still pending.
 - Desktop parity CI baseline is now configured on Linux+macOS+Windows with consolidated verification scripts, release script syntax gate plus syntax-contract regression guard, verify test coverage guard plus coverage-contract regression guard (set-diff optimized uncovered/missing detection), desktop command inventory guard plus command-inventory contract regression guard, de-duplicated contract/parity/mode-matrix verification chain, verify stage timing instrumentation/reporting with update-manifest stage integration plus update-manifest contract regression guard and gate-policy contract-check integration, macOS build validation, verification log/app artifact upload automation, hardened release-evidence guard automation (schema + RC/platform uniqueness + required attachment-reference checks with in-memory duplicate-key tracking + base-check markdown report emission) plus evidence-index contract regression guard (including dedicated missing-base-check-report attachment, missing-index-file, invalid-decision, and promoted-placeholder cases, dedicated tests workflow release-evidence guard base+contract enforcement/upload, and parity matrix base-check artifact retention), update-manifest guard automation with validation + contract report artifacts (including dedicated tests workflow update-manifest guard job contract enforcement/upload), on-demand installer/update smoke build-report workflow with preflight syntax/coverage/command-inventory/update-manifest readiness checks plus gate-policy contract check, automated release-evidence row snippet generation, release-evidence bundle summary automation plus bundle status guard enforcement with gate-policy dependency wiring, evidence-index preview/apply automation, strict appcast platform coverage generation/validation workflow, appcast publish dry-run automation, appcast publication bundle automation, release smoke gate-policy preflight, signing readiness gating with expanded command-hook/placeholder hygiene coverage (including sign-verify/provenance hooks) plus gate-policy strict readiness dependency for execution/provenance, command-hooked signing execution baseline with strict sign/notarize placeholder-hygiene enforcement plus gate-policy placeholder dependency plus signing provenance gate with strict verify-command placeholder hygiene enforcement, optional external publication dry-run stage with production consent guard and readiness gate baseline plus production identity/invalidation validation hooks, strict placeholder-hygiene enforcement, resilient publication invalidation-status reporting, and provider/readiness preflight dependency hardening for non-dry-run publication with strict release-evidence bundle dependency, Windows installer packaging verification baseline with strict naming gate, command-hooked Windows installer pipeline baseline with strict placeholder-hygiene enforcement, Windows installer provenance gate baseline with strict placeholder-hygiene enforcement plus strict packaging+naming dependency, and platform-scoped Windows report upload normalization with shared placeholder-hygiene helper reuse, but real signing/notarization command secret provisioning, actual Windows signed installer generation (`.msi`/`exe`), and external production publication credential provisioning/invalidation execution validation are not yet configured.
