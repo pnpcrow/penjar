@@ -65,3 +65,4 @@ the [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-pha
 - Remote-stub degraded-path simulation now supports operation-scoped blocking via `PENJAR_DESKTOP_REMOTE_STUB_BLOCKED_OPERATIONS` (comma-separated operation IDs) in addition to global unavailable profile flag `PENJAR_DESKTOP_REMOTE_STUB_UNAVAILABLE`.
 - Remote-stub transport simulation now supports scripted transport-level operation blocking via `PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BLOCKED_OPERATIONS` and optional reason override `PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BLOCK_REASON`.
 - Environment-driven blocked-operation lists are filtered against `RemoteStubOperationIds` catalog in `desktop/lib/contracts/remote_stub_contracts.dart` to avoid unsupported operation keys.
+- Diagnostics parity surface now includes runtime remote profile summary text (`Remote profile: ...`) for remote-stub mode visibility during degraded-path validation.

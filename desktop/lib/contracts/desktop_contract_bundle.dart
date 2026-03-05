@@ -30,6 +30,39 @@ Set<String> _parseBlockedOperations(
   return normalizedOperations;
 }
 
+Set<String> _normalizeOperationSet(Set<String> operations) {
+  final Set<String> normalized = <String>{};
+  for (final String operation in operations) {
+    final String item = operation.trim().toLowerCase();
+    if (item.isNotEmpty) {
+      normalized.add(item);
+    }
+  }
+  return normalized;
+}
+
+DesktopRemoteStubProfile _buildRemoteStubProfile({
+  required RemoteStubFaultProfile faultProfile,
+  required RemoteStubTransportClient transportClient,
+}) {
+  Set<String> transportBlockedOperations = const <String>{};
+  String transportBlockedReason = 'Remote transport unavailable';
+
+  if (transportClient is RemoteStubScriptedTransportClient) {
+    transportBlockedOperations = _normalizeOperationSet(
+      transportClient.blockedOperations,
+    );
+    transportBlockedReason = transportClient.blockedReason;
+  }
+
+  return DesktopRemoteStubProfile(
+    unavailable: faultProfile.unavailable,
+    blockedOperations: _normalizeOperationSet(faultProfile.blockedOperations),
+    transportBlockedOperations: transportBlockedOperations,
+    transportBlockedReason: transportBlockedReason,
+  );
+}
+
 RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
   final Set<String> blockedOperations = _parseBlockedOperations(
     const String.fromEnvironment(
@@ -75,6 +108,45 @@ enum DesktopContractMode {
   };
 }
 
+class DesktopRemoteStubProfile {
+  const DesktopRemoteStubProfile({
+    required this.unavailable,
+    this.blockedOperations = const <String>{},
+    this.transportBlockedOperations = const <String>{},
+    this.transportBlockedReason = 'Remote transport unavailable',
+  });
+
+  final bool unavailable;
+  final Set<String> blockedOperations;
+  final Set<String> transportBlockedOperations;
+  final String transportBlockedReason;
+
+  bool get isEmpty =>
+      !unavailable &&
+      blockedOperations.isEmpty &&
+      transportBlockedOperations.isEmpty;
+
+  String get summaryLabel {
+    if (isEmpty) {
+      return 'none';
+    }
+
+    final List<String> parts = <String>[];
+    if (unavailable) {
+      parts.add('unavailable');
+    }
+    if (blockedOperations.isNotEmpty) {
+      final List<String> values = blockedOperations.toList()..sort();
+      parts.add('fault blocks: ${values.join(',')}');
+    }
+    if (transportBlockedOperations.isNotEmpty) {
+      final List<String> values = transportBlockedOperations.toList()..sort();
+      parts.add('transport blocks: ${values.join(',')}');
+    }
+    return parts.join(' · ');
+  }
+}
+
 class DesktopContractBundle {
   const DesktopContractBundle({
     required this.mode,
@@ -86,6 +158,7 @@ class DesktopContractBundle {
     required this.inspectHandoff,
     required this.exportWorkflow,
     required this.diagnosticsRecovery,
+    this.remoteStubProfile,
   });
 
   factory DesktopContractBundle.fromEnvironment() {
@@ -120,12 +193,19 @@ class DesktopContractBundle {
         const RemoteStubFaultProfile(),
     RemoteStubTransportClient remoteStubTransportClient =
         const RemoteStubNoopTransportClient(),
+    DesktopRemoteStubProfile? remoteStubProfile,
   }) {
     return switch (mode) {
       DesktopContractMode.inMemory => DesktopContractBundle.inMemory(),
       DesktopContractMode.remoteStub => DesktopContractBundle.remoteStub(
         faultProfile: remoteStubFaultProfile,
         transportClient: remoteStubTransportClient,
+        remoteStubProfile:
+            remoteStubProfile ??
+            _buildRemoteStubProfile(
+              faultProfile: remoteStubFaultProfile,
+              transportClient: remoteStubTransportClient,
+            ),
       ),
     };
   }
@@ -148,6 +228,7 @@ class DesktopContractBundle {
     RemoteStubFaultProfile faultProfile = const RemoteStubFaultProfile(),
     RemoteStubTransportClient transportClient =
         const RemoteStubNoopTransportClient(),
+    DesktopRemoteStubProfile? remoteStubProfile,
   }) {
     return DesktopContractBundle(
       mode: DesktopContractMode.remoteStub,
@@ -183,6 +264,12 @@ class DesktopContractBundle {
         faultProfile: faultProfile,
         transportClient: transportClient,
       ),
+      remoteStubProfile:
+          remoteStubProfile ??
+          _buildRemoteStubProfile(
+            faultProfile: faultProfile,
+            transportClient: transportClient,
+          ),
     );
   }
 
@@ -195,4 +282,5 @@ class DesktopContractBundle {
   final InspectHandoffContract inspectHandoff;
   final ExportWorkflowContract exportWorkflow;
   final DiagnosticsRecoveryContract diagnosticsRecovery;
+  final DesktopRemoteStubProfile? remoteStubProfile;
 }

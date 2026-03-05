@@ -212,6 +212,16 @@ class _DesktopShellPageState extends State<DesktopShellPage> {
                                       'Contract Mode: ${_contracts.mode.label}',
                                     ),
                                   ),
+                                  if (_contracts.mode ==
+                                          DesktopContractMode.remoteStub &&
+                                      (_contracts.remoteStubProfile?.isEmpty ??
+                                              true) ==
+                                          false)
+                                    Chip(
+                                      label: Text(
+                                        'Remote Profile: ${_contracts.remoteStubProfile?.summaryLabel}',
+                                      ),
+                                    ),
                                 ],
                               ),
                               const SizedBox(height: 20),
@@ -247,6 +257,14 @@ class _DesktopShellPageState extends State<DesktopShellPage> {
                                 DiagnosticsRecoveryPanel(
                                   contract: _contracts.diagnosticsRecovery,
                                   contractModeLabel: _contracts.mode.label,
+                                  remoteProfileLabel:
+                                      _contracts.mode ==
+                                          DesktopContractMode.remoteStub
+                                      ? (_contracts
+                                                .remoteStubProfile
+                                                ?.summaryLabel ??
+                                            'none')
+                                      : '',
                                 )
                               else
                                 Text(
@@ -1341,10 +1359,12 @@ class DiagnosticsRecoveryPanel extends StatefulWidget {
     super.key,
     this.contract,
     this.contractModeLabel = 'in-memory',
+    this.remoteProfileLabel = '',
   });
 
   final DiagnosticsRecoveryContract? contract;
   final String contractModeLabel;
+  final String remoteProfileLabel;
 
   @override
   State<DiagnosticsRecoveryPanel> createState() =>
@@ -1402,6 +1422,14 @@ class _DiagnosticsRecoveryPanelState extends State<DiagnosticsRecoveryPanel> {
           key: const ValueKey<String>('diagnostics-summary'),
           style: textTheme.bodyMedium,
         ),
+        if (widget.remoteProfileLabel.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 8),
+          Text(
+            'Remote profile: ${widget.remoteProfileLabel}',
+            key: const ValueKey<String>('diagnostics-remote-profile'),
+            style: textTheme.bodyMedium,
+          ),
+        ],
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,

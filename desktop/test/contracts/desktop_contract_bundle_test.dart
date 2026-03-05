@@ -24,6 +24,7 @@ void main() {
     expect(bundle.inspectHandoff.state.status, 'Idle');
     expect(bundle.exportWorkflow.state.status, 'Idle');
     expect(bundle.diagnosticsRecovery.state.status, 'Idle');
+    expect(bundle.remoteStubProfile, isNull);
   });
 
   test('contract mode parser supports remote-stub aliases', () {
@@ -64,6 +65,8 @@ void main() {
       bundle.diagnosticsRecovery,
       isA<RemoteStubDiagnosticsRecoveryContract>(),
     );
+    expect(bundle.remoteStubProfile, isNotNull);
+    expect(bundle.remoteStubProfile?.isEmpty, isTrue);
     expect(bundle.authSession.state.status, '[remote-stub] Idle');
 
     bundle.authSession.signIn(
@@ -93,7 +96,9 @@ void main() {
         );
 
     expect(inMemoryBundle.mode, DesktopContractMode.inMemory);
+    expect(inMemoryBundle.remoteStubProfile, isNull);
     expect(remoteStubBundle.mode, DesktopContractMode.remoteStub);
+    expect(remoteStubBundle.remoteStubProfile, isNotNull);
     expect(remoteStubBundle.authSession.state.status, '[remote-stub] Idle');
 
     blockedRemoteStubBundle.authSession.signIn(
@@ -106,6 +111,7 @@ void main() {
       blockedRemoteStubBundle.authSession.state.status,
       '[remote-stub] Remote bridge unavailable: sign-in.',
     );
+    expect(blockedRemoteStubBundle.remoteStubProfile?.unavailable, isTrue);
   });
 
   test('remote-stub unavailable profile blocks mutating operations', () {
@@ -166,6 +172,10 @@ void main() {
       bundle.authSession.state.status,
       '[remote-stub] Remote bridge unavailable: sign-in.',
     );
+    expect(
+      bundle.remoteStubProfile?.blockedOperations,
+      contains(RemoteStubOperationIds.signIn),
+    );
 
     bundle.projectLifecycle.createProject('Allowed Project');
     expect(bundle.projectLifecycle.state.projects, hasLength(2));
@@ -203,6 +213,10 @@ void main() {
       expect(
         bundle.projectLifecycle.state.status,
         '[remote-stub] Remote transport unavailable: create-project.',
+      );
+      expect(
+        bundle.remoteStubProfile?.transportBlockedOperations,
+        contains(RemoteStubOperationIds.createProject),
       );
     },
   );

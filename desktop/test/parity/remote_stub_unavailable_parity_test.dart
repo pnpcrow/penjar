@@ -50,6 +50,7 @@ void main() {
     );
 
     await openWorkflowSection(tester, 'diagnostics');
+    expect(find.textContaining('Remote profile: unavailable'), findsOneWidget);
     await tester.ensureVisible(
       find.byKey(const ValueKey<String>('diagnostics-health-check')),
     );
