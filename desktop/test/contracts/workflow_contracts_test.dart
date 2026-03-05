@@ -1411,12 +1411,62 @@ void main() {
     );
 
     test(
+      'auth backend numeric unauthorized code overrides token/session inference',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'code': 401,
+                'message': 'Backend unauthorized response.',
+                'state': <String, Object?>{
+                  'sessionToken': 'numeric-code-session-token',
+                  'user': <String, Object?>{'id': 'numeric-user'},
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend unauthorized response.',
+        );
+      },
+    );
+
+    test(
       'auth backend explicit signed-in state overrides signed-out error code',
       () {
         final _BackendResponseTransportClient transportClient =
             _BackendResponseTransportClient(<String, Map<String, Object?>>{
               RemoteStubOperationIds.restoreSession: <String, Object?>{
                 'code': 'AUTH_REQUIRED',
+                'state': <String, Object?>{
+                  'signedIn': true,
+                  'rememberSession': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
+
+    test(
+      'auth backend explicit signed-in state overrides numeric unauthorized code',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'code': 401,
                 'state': <String, Object?>{
                   'signedIn': true,
                   'rememberSession': true,

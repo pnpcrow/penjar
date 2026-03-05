@@ -654,6 +654,17 @@ String? _coerceNonEmptyString(Object? value) {
   return trimmed.isEmpty ? null : trimmed;
 }
 
+String? _coerceBackendCodeString(Object? value) {
+  final String? asString = _coerceNonEmptyString(value);
+  if (asString != null) {
+    return asString;
+  }
+  if (value is num) {
+    return value.toString();
+  }
+  return null;
+}
+
 bool? _coerceBool(Object? value) {
   if (value is bool) {
     return value;
@@ -884,9 +895,9 @@ String? _resolveBackendCodeValue({
 
 String? _resolveBackendCodeFromPayload(Map<String, Object?> payload) {
   final String? directCode =
-      _coerceNonEmptyString(payload['code']) ??
-      _coerceNonEmptyString(payload['errorCode']) ??
-      _coerceNonEmptyString(payload['reasonCode']);
+      _coerceBackendCodeString(payload['code']) ??
+      _coerceBackendCodeString(payload['errorCode']) ??
+      _coerceBackendCodeString(payload['reasonCode']);
   if (directCode != null) {
     return directCode;
   }
@@ -905,7 +916,7 @@ String? _resolveBackendCodeFromPayload(Map<String, Object?> payload) {
 }
 
 String? _resolveBackendCodeFromContainer(Object? value) {
-  final String? stringCode = _coerceNonEmptyString(value);
+  final String? stringCode = _coerceBackendCodeString(value);
   if (stringCode != null) {
     return stringCode;
   }
@@ -925,6 +936,13 @@ String? _resolveBackendCodeFromContainer(Object? value) {
 }
 
 bool _backendCodeIndicatesSignedOut(String rawCode) {
+  final String trimmed = rawCode.trim();
+  if (trimmed == '401' ||
+      trimmed == '403' ||
+      trimmed == '419' ||
+      trimmed == '440') {
+    return true;
+  }
   final String compact = rawCode.trim().toLowerCase().replaceAll(
     RegExp(r'[^a-z0-9]'),
     '',
