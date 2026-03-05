@@ -3000,6 +3000,63 @@ void main() {
       );
     });
 
+    test(
+      'secure auth state store persists backend signed-out refresh fallback snapshot',
+      () async {
+        final List<String> persistedSnapshots = <String>[];
+        final RemoteStubSecureSnapshotAuthStateStore authStateStore =
+            RemoteStubSecureSnapshotAuthStateStore(
+              initialSnapshot: const AuthSessionState(
+                rememberSession: true,
+                signedIn: true,
+                status: 'Loaded from secure snapshot.',
+              ),
+              snapshotWriter: (String snapshotJson) async {
+                persistedSnapshots.add(snapshotJson);
+              },
+            );
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'code': 401,
+                'state': <String, Object?>{
+                  'sessionToken': 'secure-store-expired-session',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(
+              authStateStore: authStateStore,
+              transportClient: transportClient,
+            );
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Loaded from secure snapshot.',
+        );
+
+        authContract.refreshToken();
+        await Future<void>.delayed(Duration.zero);
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(authContract.state.rememberSession, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Authentication required.',
+        );
+        final AuthSessionState? persistedState = authStateStore.load();
+        expect(persistedState, isNotNull);
+        expect(persistedState?.rememberSession, isTrue);
+        expect(persistedState?.signedIn, isFalse);
+        expect(persistedState?.status, 'Authentication required.');
+        expect(persistedSnapshots, hasLength(1));
+        expect(persistedSnapshots.single, contains('"rememberSession":true'));
+        expect(persistedSnapshots.single, contains('"signedIn":false'));
+      },
+    );
+
     test('file auth state store loads and saves snapshots', () {
       final Directory tempDir = Directory.systemTemp.createTempSync(
         'penjar-auth-store-',
