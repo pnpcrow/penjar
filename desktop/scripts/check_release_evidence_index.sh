@@ -14,8 +14,7 @@ fi
 
 errors=0
 line_no=0
-seen_keys_file="$(mktemp)"
-trap 'rm -f "$seen_keys_file"' EXIT
+seen_keys_blob=$'\n'
 
 while IFS= read -r line; do
   line_no=$((line_no + 1))
@@ -58,12 +57,12 @@ while IFS= read -r line; do
   fi
 
   key="$(printf '%s::%s' "$rc" "$(printf '%s' "$platform" | tr '[:upper:]' '[:lower:]')")"
-  if grep -Fxq "$key" "$seen_keys_file"; then
+  if [[ "$seen_keys_blob" == *$'\n'"$key"$'\n'* ]]; then
     echo "[release-evidence-check] line $line_no duplicate RC+platform key detected: $key" >&2
     errors=$((errors + 1))
     continue
   fi
-  printf '%s\n' "$key" >> "$seen_keys_file"
+  seen_keys_blob+="${key}"$'\n'
 
   normalized="$(printf '%s' "$line" | tr '[:upper:]' '[:lower:]')"
   decision_normalized="$(printf '%s' "$decision" | tr '[:upper:]' '[:lower:]')"

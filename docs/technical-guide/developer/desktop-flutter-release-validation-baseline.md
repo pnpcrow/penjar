@@ -236,7 +236,7 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview readiness step accepts production identity/invalidation validation command hooks (`APPCAST_EXTERNAL_IDENTITY_CHECK_COMMAND`, `APPCAST_EXTERNAL_INVALIDATION_CHECK_COMMAND`).
 - `.github/workflows/release-desktop-installer-smoke.yml` strict external readiness mode now enforces placeholder-hygiene checks for identity/invalidation/cache-invalidation command hooks.
 - `.github/workflows/release-desktop-installer-smoke.yml` appcast-preview job optionally runs external publication stage and uploads publication report artifact.
-- `desktop/scripts/check_release_evidence_index.sh` now enforces release evidence table schema (8 columns), RC+platform uniqueness, decision value validity, and required attachment references for core verification reports.
+- `desktop/scripts/check_release_evidence_index.sh` now enforces release evidence table schema (8 columns), RC+platform uniqueness, decision value validity, and required attachment references for core verification reports (with in-memory duplicate-key tracking to avoid per-row file I/O).
 - Update manifest baseline file: `desktop/release/update_manifest.example.json`.
 - Update manifest checker: `desktop/scripts/check_update_manifest.sh` (outputs `release/reports/update_manifest_validation_report.md`).
 - Update manifest contract checker: `desktop/scripts/check_update_manifest_contract.sh`.
