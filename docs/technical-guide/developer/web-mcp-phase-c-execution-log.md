@@ -13356,6 +13356,64 @@ paths that produce no compact output append (for example delimiter-only code mar
   - delimiter-only/no-append normalization paths avoid eager empty-buffer allocation.
   - delimiter-only `code: "::"` payloads keep signed-in/status stability without unintended
     auth-required/session-expired fallback mapping in contract/parity suites.
+- numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+- contract/parity/mode-parity suites and full desktop verification remain green.
+
+## Unit WS-D-271: compact normalization lazy-buffer inline initialization
+
+### Planned objective
+
+Reduce compact normalization hot-loop overhead by removing local lazy-buffer closure dispatch while
+preserving the existing lazy allocation behavior and normalization semantics.
+
+### Implemented changes
+
+1. Updated compact normalization path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_compactBackendCodeFromTrimmed(...)` now removes the local `ensureAsciiBuffer()` closure and
+     uses inline `asciiBuffer ??= StringBuffer()` initialization across prefix/unicode/delimiter
+     append paths.
+2. Preserved existing fallback semantics:
+   - delimiter/no-delimiter normalization, Unicode fallback, marker classification, and non-exact
+     fallback behavior remain unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only unicode-only marker keeps signed-in state without auth-required fallback status`
+     (`code: "\uC138\uC158\uB9CC\uB8CC"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client: `_AuthBackendUnicodeOnlyCodeParityTransportClient`,
+   - new parity test:
+     `auth/session parity keeps signed-in state for unicode-only backend code marker without auth-required fallback status`.
+5. Synced continuity docs for WS-D-271 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - compact normalization lazy-buffer dispatch behavior in `_compactBackendCodeFromTrimmed(...)`,
+  - unicode-only code marker (`code: "\uC138\uC158\uB9CC\uB8CC"`) signed-in/status behavior,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. WS-D-270 still routed lazy buffer allocation through a local closure on hot append paths.
+  2. Unicode-only backend code marker behavior was not explicitly parity-locked.
+- **Fix applied**
+  1. Replaced local closure dispatch with inline `asciiBuffer ??= StringBuffer()` initialization.
+  2. Added dedicated contract/parity regressions for unicode-only code marker stability.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - compact normalization preserves lazy buffer allocation semantics without closure-dispatch
+    overhead on append paths.
+  - unicode-only `code: "\uC138\uC158\uB9CC\uB8CC"` payloads keep signed-in/status stability
+    without unintended auth-required/session-expired fallback mapping in contract/parity suites.
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 

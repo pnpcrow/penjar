@@ -1558,12 +1558,8 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
           );
   }
   StringBuffer? asciiBuffer;
-  StringBuffer ensureAsciiBuffer() {
-    return asciiBuffer ??= StringBuffer();
-  }
-
   if (firstNonCompactIndex > 0) {
-    final StringBuffer prefixBuffer = ensureAsciiBuffer();
+    final StringBuffer prefixBuffer = asciiBuffer ??= StringBuffer();
     if (firstUppercaseCompactIndex == -1) {
       _appendCompactBackendAsciiRange(
         prefixBuffer,
@@ -1590,11 +1586,11 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
   }
   if (trimmedCode.codeUnitAt(firstNonCompactIndex) > 127) {
     _appendCompactBackendUnicodeLowercasedRange(
-      ensureAsciiBuffer(),
+      asciiBuffer ??= StringBuffer(),
       trimmedCode,
       startInclusive: firstNonCompactIndex,
     );
-    return asciiBuffer?.toString() ?? '';
+    return asciiBuffer.toString();
   }
   for (
     int index = firstNonCompactIndex + 1;
@@ -1604,18 +1600,20 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
     final int codeUnit = trimmedCode.codeUnitAt(index);
     if (codeUnit > 127) {
       _appendCompactBackendUnicodeLowercasedRange(
-        ensureAsciiBuffer(),
+        asciiBuffer ??= StringBuffer(),
         trimmedCode,
         startInclusive: index,
       );
-      return asciiBuffer?.toString() ?? '';
+      return asciiBuffer.toString();
     }
     if (_isBackendCodeCompactCodeUnit(codeUnit)) {
-      ensureAsciiBuffer().writeCharCode(codeUnit);
+      (asciiBuffer ??= StringBuffer()).writeCharCode(codeUnit);
       continue;
     }
     if (_isBackendCodeAsciiUpperAlphaCodeUnit(codeUnit)) {
-      ensureAsciiBuffer().writeCharCode(_toLowerAsciiCodeUnit(codeUnit));
+      (asciiBuffer ??= StringBuffer()).writeCharCode(
+        _toLowerAsciiCodeUnit(codeUnit),
+      );
     }
   }
   return asciiBuffer?.toString() ?? '';

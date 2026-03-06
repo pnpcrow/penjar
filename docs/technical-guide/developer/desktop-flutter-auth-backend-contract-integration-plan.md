@@ -424,6 +424,18 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      signed-in state and status stability without unintended auth-required/session-expired fallback
      mapping on empty compact normalization output paths; execution evidence is recorded in
      `web-mcp-phase-c-execution-log.md` (`Unit WS-D-270`).
+58. Backend code compact normalization lazy-buffer inline-initialization optimization:
+   - `_compactBackendCodeFromTrimmed(...)` now removes the local `ensureAsciiBuffer()` closure and
+     uses inline `asciiBuffer ??= StringBuffer()` initialization across prefix/unicode/delimiter
+     append paths, preserving lazy allocation while reducing closure-dispatch overhead on classifier
+     hot loops,
+   - existing delimiter/no-delimiter normalization and Unicode fallback semantics remain unchanged
+     while empty compact results still resolve deterministically to `''`,
+   - contract/parity suites now lock unicode-only code marker behavior
+     (`code: "\uC138\uC158\uB9CC\uB8CC"`) to ensure signed-in state and status stability without
+     unintended auth-required/session-expired fallback mapping on non-ASCII-only compact-empty
+     normalization paths; execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
+     (`Unit WS-D-271`).
 
 ## Remaining integration gaps (auth scope)
 
