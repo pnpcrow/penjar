@@ -375,6 +375,14 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      non-ASCII suffix (`Unauthorized::TOKEN토큰`) to preserve deterministic auth-required fallback
      mapping on the incremental Unicode-suffix normalization path; execution evidence is recorded
      in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-265`).
+53. Backend code lowercase delimiter-prefix append optimization for compact normalization:
+   - `_compactBackendCodeFromTrimmed(...)` now appends pre-scanned lowercase/digit compact prefix
+     ranges via `_appendCompactBackendAsciiRange(...)` instead of allocating intermediate
+     `substring` objects on delimiter-path normalization when no uppercase compact units exist,
+   - contract/parity suites now lock lowercase delimited unauthorized marker behavior
+     (`unauthorized::token`) to preserve deterministic auth-required fallback mapping on the
+     substring-free lowercase prefix path; execution evidence is recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-266`).
 
 ## Remaining integration gaps (auth scope)
 

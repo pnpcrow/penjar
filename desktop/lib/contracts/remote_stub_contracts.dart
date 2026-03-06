@@ -1561,7 +1561,12 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
         endExclusive: firstNonCompactIndex,
       );
     } else {
-      asciiBuffer.write(trimmedCode.substring(0, firstNonCompactIndex));
+      _appendCompactBackendAsciiRange(
+        asciiBuffer,
+        trimmedCode,
+        startInclusive: 0,
+        endExclusive: firstNonCompactIndex,
+      );
     }
   }
   if (trimmedCode.codeUnitAt(firstNonCompactIndex) > 127) {
@@ -1615,6 +1620,17 @@ void _appendCompactBackendAsciiLowercaseRange(
           ? _toLowerAsciiCodeUnit(codeUnit)
           : codeUnit,
     );
+  }
+}
+
+void _appendCompactBackendAsciiRange(
+  StringBuffer buffer,
+  String code, {
+  required int startInclusive,
+  required int endExclusive,
+}) {
+  for (int index = startInclusive; index < endExclusive; index++) {
+    buffer.writeCharCode(code.codeUnitAt(index));
   }
 }
 

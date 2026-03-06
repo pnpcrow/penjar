@@ -13037,6 +13037,67 @@ first encountered non-ASCII index without rescanning already-normalized ASCII se
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-266: lowercase delimiter-prefix substring-free append optimization
+
+### Planned objective
+
+Reduce delimiter-path transient allocation overhead by removing lowercase prefix `substring`
+allocation when compact prefix segments are already lowercase/digit-only.
+
+### Implemented changes
+
+1. Updated compact normalization path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_compactBackendCodeFromTrimmed(...)` now appends lowercase/digit compact prefix ranges via
+     `_appendCompactBackendAsciiRange(...)` when no uppercase compact units are present,
+   - removed lowercase prefix `substring(0, firstNonCompactIndex)` allocation in that path.
+2. Preserved existing fallback semantics:
+   - compact-only, uppercase-lowering, Unicode-suffix normalization, marker classification, and
+     non-exact fallback behavior remain unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only lowercase delimited unauthorized payload maps authentication-required fallback status`
+     (`code: "unauthorized::token"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendLowercaseDelimitedUnauthorizedParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps lowercase delimited unauthorized backend failure to deterministic auth-required status`.
+5. Synced continuity docs for WS-D-266 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - delimiter-path lowercase prefix allocation behavior in `_compactBackendCodeFromTrimmed(...)`,
+  - deterministic auth-required fallback behavior for lowercase delimited `unauthorized::token`,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. WS-D-265 still allocated intermediate lowercase prefix `substring` objects on delimiter-path
+     normalization when uppercase conversion was unnecessary.
+  2. Lowercase delimited unauthorized marker behavior (`unauthorized::token`) was not explicitly
+     parity-locked.
+- **Fix applied**
+  1. Replaced lowercase prefix `substring` append with range-based ASCII append helper.
+  2. Added dedicated contract/parity regressions for `unauthorized::token` deterministic
+     auth-required fallback behavior.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - delimiter-path lowercase prefix append path avoids intermediate `substring` allocation.
+  - lowercase delimited `unauthorized::token` payloads map to deterministic auth-required fallback
+    behavior in contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
