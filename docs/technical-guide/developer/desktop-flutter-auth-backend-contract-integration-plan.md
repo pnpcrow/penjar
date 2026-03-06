@@ -161,6 +161,13 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      gap against existing `data.authState` + snake_case/`is*` signed-out coverage,
    - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
      (`Unit WS-D-236`).
+24. Auth fixture matrix symmetry automation guard completion:
+   - `desktop/test/contracts/workflow_contracts_test.dart` now includes an automated matrix guard
+     that asserts direct `authState` alias symmetry for sign-in/refresh-token/restore-session
+     across `result/data` wrappers for signed-in (`true`), signed-in (`false`), and signed-out
+     alias sets,
+   - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
+     (`Unit WS-D-237`).
 
 ## Remaining integration gaps (auth scope)
 

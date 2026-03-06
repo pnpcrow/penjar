@@ -40,9 +40,10 @@ This checklist tracks user-facing workflow parity for the Flutter desktop full-p
 | Export workflows | PNG/SVG export and save | In progress | Export Pipeline | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) | Flutter export-workflow parity scaffold, parity harness, runtime-switchable in-memory/remote-stub contract boundary, backend response-driven state mutation wiring, and sibling `result`/`data` envelope fallback regression coverage (contract + parity) are added; backend export pipeline/native save integration is pending. |
 | Diagnostics/recovery | Runtime health, reconnect, remediation | In progress | Platform Reliability | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) | Flutter diagnostics/recovery parity scaffold, parity harness, runtime-switchable in-memory/remote-stub contract boundary, HTTP health-probe remote transport gating, operation-level backend request metadata mapping, backend execution-path status propagation, backend response-driven state mutation wiring, and sibling `result`/`data` envelope fallback regression coverage (contract + parity) are added; live telemetry/reconnect policy integration is pending. |
 
-Latest auth/session parity evidence update: `Unit WS-D-236` closes the residual
-restore-session direct `result.authState` signed-out alias fixture gap (`signedOut`,
-`loggedOut`) so signed-out fallback coverage remains symmetric with existing parity locks.
+Latest auth/session parity evidence update: `Unit WS-D-237` adds an automated auth fixture
+matrix symmetry guard for direct `authState` aliases (`sign-in` / `refresh-token` /
+`restore-session` across `result/data` wrappers and signed-in/signed-out alias sets), keeping
+contract fixture coverage drift-detectable against parity locks.
 
 ## Cross-cutting shell/release routing note
 

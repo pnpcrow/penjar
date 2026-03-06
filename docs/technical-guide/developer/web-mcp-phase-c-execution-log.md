@@ -11300,6 +11300,62 @@ signed-out aliases so contract matrix symmetry matches existing `data.authState`
     (`Authentication required.`) without ambiguity.
   - targeted auth tests and full desktop verification remain green after fixture closure.
 
+## Unit WS-D-237: auth backend fixture matrix symmetry automation guard (`authState` direct wrappers)
+
+### Planned objective
+
+Replace ad-hoc manual matrix scans with an in-suite automation guard so missing direct-wrapper
+auth alias fixtures are detected immediately in contract tests.
+
+### Implemented changes
+
+1. Added a fixture-matrix symmetry guard test in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend contract fixture matrix keeps authState alias symmetry`.
+2. Guard criteria now assert matrix completeness for direct `authState` wrappers across all three
+   auth operations:
+   - operations: `sign-in`, `refresh-token`, `restore-session`,
+   - wrappers: `result`, `data`,
+   - signed-out aliases (`true`): `signedOut`, `signed_out`, `isSignedOut`, `loggedOut`,
+     `logged_out`, `isLoggedOut`, `is_signed_out`, `is_logged_out`,
+   - signed-in aliases (`true` and `false`): `isAuthenticated`, `loggedIn`, `isLoggedIn`,
+     `is_authenticated`, `signedIn`, `authenticated`, `signed_in`, `is_signed_in`,
+     `logged_in`, `is_logged_in`.
+3. Synced continuity docs for WS-D-237 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && dart format test/contracts/workflow_contracts_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - fixture-level alias symmetry completeness for auth direct wrappers,
+  - regression-detection latency for future alias/wrapper fixture omissions,
+  - compatibility with existing contract/parity suites and full verification chain.
+- **Issues found during review**
+  1. Prior completeness checks depended on manual scan scripts and visual inspection, which left
+     omission detection vulnerable to human error between units.
+  2. A single missing wrapper/alias pair can remain hidden until targeted exploratory checks are
+     rerun, creating avoidable drift risk.
+- **Fix applied**
+  1. Added an automated matrix guard test that validates required alias/wrapper/operation entries
+     directly from `authBackendContractFixtures`.
+  2. Encoded missing entries into deterministic failure output (`Missing auth backend fixture
+     matrix entries`) so regressions are actionable without extra scripts.
+  3. Re-ran targeted auth suites and full desktop verification to confirm zero behavioral
+     regressions.
+- **Post-fix validation criteria**
+  - any future omission in direct `authState` alias fixture matrix now fails contract tests
+    immediately with explicit missing-entry details.
+  - existing auth contract fixture behavior remains unchanged beyond completeness enforcement.
+  - targeted auth tests and full desktop verification remain green after guard introduction.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

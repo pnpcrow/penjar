@@ -5294,6 +5294,114 @@ void main() {
       ),
     ];
 
+    test(
+      'auth backend contract fixture matrix keeps authState alias symmetry',
+      () {
+        final List<String> operationIds = <String>[
+          RemoteStubOperationIds.signIn,
+          RemoteStubOperationIds.refreshToken,
+          RemoteStubOperationIds.restoreSession,
+        ];
+        final List<String> wrapperKeys = <String>['result', 'data'];
+        final List<String> signedOutAliases = <String>[
+          'signedOut',
+          'signed_out',
+          'isSignedOut',
+          'loggedOut',
+          'logged_out',
+          'isLoggedOut',
+          'is_signed_out',
+          'is_logged_out',
+        ];
+        final List<String> signedInAliases = <String>[
+          'isAuthenticated',
+          'loggedIn',
+          'isLoggedIn',
+          'is_authenticated',
+          'signedIn',
+          'authenticated',
+          'signed_in',
+          'is_signed_in',
+          'logged_in',
+          'is_logged_in',
+        ];
+
+        bool hasAuthStateAliasFixture({
+          required String operationId,
+          required String wrapperKey,
+          required String alias,
+          required Object? expectedValue,
+        }) {
+          for (final _AuthBackendFixtureCase fixture
+              in authBackendContractFixtures) {
+            if (fixture.operationId != operationId) {
+              continue;
+            }
+            final Object? wrapper = fixture.responsePayload[wrapperKey];
+            if (wrapper is! Map) {
+              continue;
+            }
+            final Object? authState = wrapper['authState'];
+            if (authState is! Map) {
+              continue;
+            }
+            if (authState[alias] == expectedValue) {
+              return true;
+            }
+          }
+          return false;
+        }
+
+        final List<String> missingEntries = <String>[];
+
+        for (final String operationId in operationIds) {
+          for (final String wrapperKey in wrapperKeys) {
+            for (final String alias in signedOutAliases) {
+              if (!hasAuthStateAliasFixture(
+                operationId: operationId,
+                wrapperKey: wrapperKey,
+                alias: alias,
+                expectedValue: true,
+              )) {
+                missingEntries.add(
+                  '$operationId $wrapperKey authState.$alias=true',
+                );
+              }
+            }
+            for (final String alias in signedInAliases) {
+              if (!hasAuthStateAliasFixture(
+                operationId: operationId,
+                wrapperKey: wrapperKey,
+                alias: alias,
+                expectedValue: true,
+              )) {
+                missingEntries.add(
+                  '$operationId $wrapperKey authState.$alias=true',
+                );
+              }
+              if (!hasAuthStateAliasFixture(
+                operationId: operationId,
+                wrapperKey: wrapperKey,
+                alias: alias,
+                expectedValue: false,
+              )) {
+                missingEntries.add(
+                  '$operationId $wrapperKey authState.$alias=false',
+                );
+              }
+            }
+          }
+        }
+
+        expect(
+          missingEntries,
+          isEmpty,
+          reason:
+              'Missing auth backend fixture matrix entries:\n${missingEntries.join('\n')}',
+        );
+      },
+    );
+
     for (final _AuthBackendFixtureCase fixture in authBackendContractFixtures) {
       test('auth backend contract fixture: ${fixture.name}', () {
         final _BackendResponseTransportClient transportClient =
