@@ -311,6 +311,14 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      (`UNAUTHORIZED::TOKEN`) to keep auth-required mapping parity stable across non-compact ASCII
      normalization paths; execution evidence is recorded in
      `web-mcp-phase-c-execution-log.md` (`Unit WS-D-257`).
+45. Backend code non-compact normalization single-pass fallback optimization:
+   - `_compactBackendCodeFromTrimmed(...)` now removes separate non-ASCII pre-scan by applying
+     single-pass ASCII code-unit normalization with inline non-ASCII detection, delegating to
+     shared Unicode fallback helper only when needed,
+   - contract/parity suites now lock delimited uppercase signed-out marker behavior with
+     non-ASCII suffix (`UNAUTHORIZED::토큰`) to preserve deterministic auth-required mapping across
+     fallback-path changes; execution evidence is recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-258`).
 
 ## Remaining integration gaps (auth scope)
 

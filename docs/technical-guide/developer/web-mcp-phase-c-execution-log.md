@@ -12526,6 +12526,70 @@ existing non-ASCII fallback semantics.
   - non-ASCII normalization fallback semantics remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-258: backend code non-compact single-pass fallback normalization
+
+### Planned objective
+
+Reduce duplicate scan work in non-compact backend-code normalization by removing dedicated
+non-ASCII pre-scan and switching to single-pass ASCII normalization with inline fallback dispatch.
+
+### Implemented changes
+
+1. Updated `_compactBackendCodeFromTrimmed(...)` in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - removed separate non-ASCII pre-scan branch,
+   - added single-pass ASCII normalization loop with inline non-ASCII detection.
+2. Added shared Unicode fallback helper:
+   - `_compactBackendCodeFromTrimmedUnicodeFallback(...)` now owns prior
+     `toLowerCase + filter` non-ASCII-safe normalization path.
+3. Preserved compact fast paths:
+   - compact lowercase direct return and compact uppercase direct lowercase return behavior from
+     WS-D-253/WS-D-256 remain unchanged.
+4. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only delimited uppercase unauthorized with non-ascii suffix maps authentication-required fallback status`
+     (`code: "UNAUTHORIZED::토큰"`).
+5. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendDelimitedUppercaseUnauthorizedNonAsciiSuffixParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps delimited uppercase unauthorized backend failure with non-ascii suffix to deterministic auth-required status`.
+6. Synced continuity docs for WS-D-258 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+7. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - scan-count reduction in non-compact backend-code normalization hot path,
+  - non-ASCII fallback correctness under delimiter-heavy uppercase signed-out codes,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. WS-D-257 still performed dedicated non-ASCII pre-scan before normalization, adding an extra
+     pass to non-compact paths.
+  2. Non-ASCII-suffixed delimited uppercase signed-out marker behavior
+     (`UNAUTHORIZED::토큰`) was not explicitly parity-locked.
+- **Fix applied**
+  1. Replaced pre-scan branch with single-pass ASCII normalization + inline non-ASCII dispatch.
+  2. Added dedicated contract/parity regression coverage for
+     `UNAUTHORIZED::토큰` fallback behavior.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - non-compact normalization no longer performs dedicated non-ASCII pre-scan.
+  - delimited uppercase `UNAUTHORIZED::토큰` payloads map to deterministic auth-required fallback
+    behavior in contract/parity suites.
+  - compact fast paths and numeric/exact/marker-length/substring fallback semantics remain
+    unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

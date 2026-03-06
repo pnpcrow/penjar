@@ -141,6 +141,34 @@ class _AuthBackendDelimitedUppercaseUnauthorizedParityTransportClient
   }
 }
 
+class _AuthBackendDelimitedUppercaseUnauthorizedNonAsciiSuffixParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendDelimitedUppercaseUnauthorizedNonAsciiSuffixParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend sign-in snapshot applied.',
+          'state': <String, Object?>{'signedIn': true, 'rememberSession': true},
+        },
+      );
+    }
+    if (request.operation == RemoteStubOperationIds.refreshToken) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'code': 'UNAUTHORIZED::토큰',
+          'state': <String, Object?>{
+            'sessionToken': 'delimited-uppercase-unauthorized-nonascii',
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 class _AuthBackendMixedUnauthorizedRefreshTokenExpiredParityTransportClient
     extends RemoteStubTransportClient {
   const _AuthBackendMixedUnauthorizedRefreshTokenExpiredParityTransportClient();
@@ -2438,6 +2466,50 @@ void main() {
           DesktopContractMode.remoteStub,
           remoteStubTransportClient:
               const _AuthBackendDelimitedUppercaseUnauthorizedParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend sign-in snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Status: [remote-stub] Authentication required.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'auth/session parity maps delimited uppercase unauthorized backend failure with non-ascii suffix to deterministic auth-required status',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendDelimitedUppercaseUnauthorizedNonAsciiSuffixParityTransportClient(),
         ),
       );
       await openWorkflowSection(tester, 'auth');

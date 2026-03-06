@@ -1527,23 +1527,30 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
         ? trimmedCode.toLowerCase()
         : trimmedCode;
   }
-  if (!_containsNonAsciiCodeUnits(
-    trimmedCode,
-    startIndex: firstNonCompactIndex,
-  )) {
-    final StringBuffer asciiBuffer = StringBuffer();
-    for (int index = 0; index < trimmedCode.length; index++) {
-      final int codeUnit = trimmedCode.codeUnitAt(index);
-      if (_isBackendCodeCompactCodeUnit(codeUnit)) {
-        asciiBuffer.writeCharCode(codeUnit);
-        continue;
-      }
-      if (_isBackendCodeAsciiUpperAlphaCodeUnit(codeUnit)) {
-        asciiBuffer.writeCharCode(_toLowerAsciiCodeUnit(codeUnit));
-      }
+  final StringBuffer asciiBuffer = StringBuffer();
+  for (int index = 0; index < trimmedCode.length; index++) {
+    final int codeUnit = trimmedCode.codeUnitAt(index);
+    if (codeUnit > 127) {
+      return _compactBackendCodeFromTrimmedUnicodeFallback(
+        trimmedCode,
+        firstNonCompactIndex: firstNonCompactIndex,
+      );
     }
-    return asciiBuffer.toString();
+    if (_isBackendCodeCompactCodeUnit(codeUnit)) {
+      asciiBuffer.writeCharCode(codeUnit);
+      continue;
+    }
+    if (_isBackendCodeAsciiUpperAlphaCodeUnit(codeUnit)) {
+      asciiBuffer.writeCharCode(_toLowerAsciiCodeUnit(codeUnit));
+    }
   }
+  return asciiBuffer.toString();
+}
+
+String _compactBackendCodeFromTrimmedUnicodeFallback(
+  String trimmedCode, {
+  required int firstNonCompactIndex,
+}) {
   final String lowered = trimmedCode.toLowerCase();
   final StringBuffer buffer = StringBuffer();
   if (firstNonCompactIndex > 0) {
@@ -1569,15 +1576,6 @@ bool _isBackendCodeAsciiUpperAlphaCodeUnit(int codeUnit) {
 
 int _toLowerAsciiCodeUnit(int codeUnit) {
   return codeUnit + 32;
-}
-
-bool _containsNonAsciiCodeUnits(String value, {int startIndex = 0}) {
-  for (int index = startIndex; index < value.length; index++) {
-    if (value.codeUnitAt(index) > 127) {
-      return true;
-    }
-  }
-  return false;
 }
 
 int _clampIndex(int index, {required int itemCount}) {
