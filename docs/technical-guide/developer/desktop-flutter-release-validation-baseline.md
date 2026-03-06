@@ -404,6 +404,8 @@ CI baseline note:
     (`"1<<=1"`, `"1>>=1"`) so shift-assignment values cannot widen strict acceptance.
   - contract matrix now also locks unsigned-shift expression/assignment numeric near-match alias
     behavior (`"1>>>1"`, `"1>>>=1"`) so unsigned-shift values cannot widen strict acceptance.
+  - contract matrix now also locks exponentiation expression/assignment numeric near-match alias
+    behavior (`"1**1"`, `"1**=1"`) so exponentiation values cannot widen strict acceptance.
   - contract matrix now also locks logical-assignment numeric near-match alias behavior
     (`"1&&=1"`, `"1||=1"`) so logical-assignment values cannot widen strict acceptance.
   - contract matrix now also locks nullish-assignment numeric near-match alias behavior
