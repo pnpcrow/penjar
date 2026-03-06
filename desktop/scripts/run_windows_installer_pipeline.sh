@@ -31,6 +31,10 @@ case "$build_mode" in
 esac
 
 runner_dir="build/windows/x64/runner/${mode_dir}"
+runner_exists=0
+if [[ -d "$runner_dir" ]]; then
+  runner_exists=1
+fi
 installer_output_path_default="${runner_dir}/installer/PenjarInstaller.msi"
 installer_output_path="${PENJAR_WINDOWS_INSTALLER_PATH:-$installer_output_path_default}"
 installer_command="${PENJAR_WINDOWS_INSTALLER_COMMAND:-}"
@@ -49,7 +53,7 @@ protocol_execution_status="simulated"
 protocol_error_message=""
 protocol_placeholder_status="not-configured"
 
-if [[ ! -d "$runner_dir" ]]; then
+if [[ "$runner_exists" -eq 0 ]]; then
   if [[ "$strict_mode" -eq 1 ]]; then
     execution_status="failed"
     error_message="missing runner directory: ${runner_dir}"
@@ -89,7 +93,12 @@ elif [[ "$strict_mode" -eq 1 ]]; then
   error_message="installer command missing in strict mode"
 fi
 
-if [[ -d "$runner_dir" && -n "$protocol_register_command" ]]; then
+# Preserve legacy protocol-stage behavior when installer command mutates runner artifacts.
+if [[ "$runner_exists" -eq 1 && ! -d "$runner_dir" ]]; then
+  runner_exists=0
+fi
+
+if [[ "$runner_exists" -eq 1 && -n "$protocol_register_command" ]]; then
   export PENJAR_WINDOWS_PROTOCOL_SCHEME="$protocol_scheme"
   export PENJAR_WINDOWS_PROTOCOL_TARGET_PATH="$protocol_target_path"
   if is_placeholder_command "$protocol_register_command"; then
@@ -109,7 +118,7 @@ if [[ -d "$runner_dir" && -n "$protocol_register_command" ]]; then
     protocol_execution_status="failed"
     protocol_error_message="protocol register command failed"
   fi
-elif [[ -d "$runner_dir" && "$strict_protocol_mode" -eq 1 ]]; then
+elif [[ "$runner_exists" -eq 1 && "$strict_protocol_mode" -eq 1 ]]; then
   protocol_execution_status="failed"
   protocol_error_message="protocol register command missing in strict protocol mode"
 fi

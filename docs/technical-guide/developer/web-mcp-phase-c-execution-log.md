@@ -14846,6 +14846,58 @@ interaction combinations across strict installer and strict protocol release/deb
   - alias-triggered strict semantics remain deterministic across release/debug paths.
   - full desktop verify remains green after matrix expansion.
 
+## Unit WS-D-298: runner existence caching with stale-state safeguard
+
+### Planned objective
+
+Improve Windows installer pipeline runtime efficiency/readability by reusing a cached
+runner-directory existence state across branch decisions, while preserving protocol-stage behavior
+under installer side effects.
+
+### Implemented changes
+
+1. Added explicit runner-directory existence cache in
+   `desktop/scripts/run_windows_installer_pipeline.sh`:
+   - introduced `runner_exists` state derived once from `[[ -d "$runner_dir" ]]`,
+   - replaced repeated branch probes with `runner_exists` checks for initial missing-runner and
+     protocol branch gating.
+2. Completed protocol-stage stale-state safeguard during review:
+   - added pre-protocol revalidation guard:
+     `if [[ "$runner_exists" -eq 1 && ! -d "$runner_dir" ]]; then runner_exists=0; fi`,
+   - prevents stale cached state from incorrectly entering protocol registration path when installer
+     commands mutate/remove runner artifacts.
+3. Synced latest-unit continuity pointer in
+   `docs/technical-guide/developer/desktop-flutter-development-runbook.md`:
+   - latest release pipeline evidence lock now references WS-D-298 with
+     cache+revalidation behavior and intent.
+4. Synced release baseline inventory in
+   `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md`:
+   - Windows installer pipeline checker notes now include runner-state caching plus
+     protocol-stage revalidation safeguard.
+5. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - behavioral equivalence of runner-directory checks after introducing cached state,
+  - protocol registration branch gating correctness under installer-command side effects,
+  - documentation continuity for latest release-pipeline evidence lock + baseline inventory.
+- **Issues found during review**
+  1. initial cache-only refactor could allow stale state if installer command removes runner
+     artifacts between installer and protocol phases.
+  2. stale cached runner state could trigger unintended protocol command execution attempts that
+     were previously prevented by direct `-d` probe at protocol stage.
+- **Fix applied**
+  1. added protocol-stage runner revalidation guard before protocol branch evaluation.
+  2. updated runbook/baseline wording to reflect final behavior (cache reuse + stale-state
+     protection), avoiding documentation drift.
+- **Post-fix validation criteria**
+  - windows installer pipeline contract checker passes with no regressions.
+  - full desktop verification remains green with updated runtime branch logic.
+  - release continuity docs remain synchronized to WS-D-298 behavior.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

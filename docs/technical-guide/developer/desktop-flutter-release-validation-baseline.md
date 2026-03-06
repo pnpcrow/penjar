@@ -295,6 +295,9 @@ CI baseline note:
     for deterministic strict-mode behavior.
   - alias matrix coverage now explicitly includes remaining `yes/strict/true` interaction paths
     across strict installer and strict protocol release/debug scenarios.
+  - pipeline runtime path now caches runner-directory existence state (`runner_exists`) for branch
+    reuse and revalidates before protocol-stage execution to avoid stale-state regressions when
+    installer commands mutate runner artifacts.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
