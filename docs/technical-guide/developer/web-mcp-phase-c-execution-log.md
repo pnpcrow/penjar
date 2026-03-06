@@ -17024,6 +17024,54 @@ plus-equals and minus-equals numeric near matches as non-strict paths.
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-343.
 
+## Unit WS-D-344: multiplicative-assignment numeric near-match strict alias regression coverage
+
+### Planned objective
+
+Prevent strict numeric alias broadening through multiplicative-assignment style inputs by locking
+times-equals and divide-equals numeric near matches as non-strict paths.
+
+### Implemented changes
+
+1. Expanded strict installer multiplicative-assignment numeric near-match coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-nearmatch-expression-one-times-equals-one-alias-missing-command-pass`,
+   - added `strict-installer-nearmatch-expression-one-div-equals-one-alias-missing-command-pass`,
+   - fixtures `1*=1` and `1/=1` assert `- Strict mode: 0` with non-blocking completion.
+2. Expanded strict protocol multiplicative-assignment numeric near-match coverage in the same checker:
+   - added `strict-protocol-nearmatch-expression-one-times-equals-one-alias-missing-command-pass`,
+   - added `strict-protocol-nearmatch-expression-one-div-equals-one-alias-missing-command-pass`,
+   - fixtures `STRICT_WINDOWS_PROTOCOL_REGISTRATION=1*=1` and `=1/=1` assert
+     `- Strict protocol registration mode: 0` with non-blocking completion.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-344
+     multiplicative-assignment numeric near-match boundary lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     multiplicative-assignment numeric near-match strict boundary matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict numeric alias exact-match boundaries under multiplicative-assignment near matches,
+  - installer/protocol non-overmatch behavior for `1*=1` and `1/=1`,
+  - compatibility with existing assignment/arithmetic/logical near-match coverage.
+- **Issues found during review**
+  1. assignment-expression locks covered `+=`/`-=`, but multiplicative-assignment variants
+     (`*=`, `/=`) were not explicitly locked.
+  2. without multiplicative-assignment fixtures, parser normalization/coercion refactors could
+     accidentally widen strict numeric alias acceptance.
+- **Fix applied**
+  1. added installer/protocol multiplicative-assignment near-match pass fixtures with strict-mode-zero
+     assertions.
+  2. retained strict-positive exact alias behavior and existing warning/failure semantics.
+- **Post-fix validation criteria**
+  - contract checker passes with multiplicative-assignment near-match fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-344.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
