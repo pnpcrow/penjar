@@ -260,6 +260,12 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      short-circuits impossible short compact inputs before substring loop scans,
    - exact-marker fast path and composite substring fallback behavior remain intact, with execution
      evidence recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-250`).
+38. Backend code compact normalization trim-reuse optimization:
+   - `_classifyBackendCode(...)` now compacts backend codes from the already-trimmed input
+     (`_compactBackendCodeFromTrimmed(trimmed)`) to remove duplicate trim work inside classifier
+     hot paths,
+   - numeric/exact/marker-length/substring fallback behavior remains unchanged, with execution
+     evidence recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-251`).
 
 ## Remaining integration gaps (auth scope)
 

@@ -12089,8 +12089,57 @@ exact-marker and composite fallback behavior.
   2. Added short-input early returns in classifier before respective substring loops.
   3. Re-ran formatter, targeted auth suites, and full desktop verification.
 - **Post-fix validation criteria**
-  - impossible short compact inputs now bypass signed-out/session-expired substring loops.
-  - numeric/exact/composite classification semantics remain unchanged.
+- impossible short compact inputs now bypass signed-out/session-expired substring loops.
+- numeric/exact/composite classification semantics remain unchanged.
+- contract/parity/mode-parity suites and full desktop verification remain green.
+
+## Unit WS-D-251: backend code compact-normalization trim reuse
+
+### Planned objective
+
+Remove residual duplicate string preprocessing in classifier hot paths by reusing already-trimmed
+input when normalizing backend codes into compact marker-comparison form.
+
+### Implemented changes
+
+1. Updated `_classifyBackendCode(...)` in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - switched compact normalization input from raw code to classifier-local trimmed value:
+     - before: `_compactBackendCode(rawCode)`,
+     - after: `_compactBackendCodeFromTrimmed(trimmed)`.
+2. Renamed/refactored compact helper:
+   - replaced `_compactBackendCode(String rawCode)` with
+     `_compactBackendCodeFromTrimmed(String trimmedCode)` to make trim-reuse explicit.
+3. Preserved classifier behavior ordering:
+   - numeric fast paths, exact-marker set fast path, minimum-length short-circuits, and substring
+     fallback loops remain unchanged.
+4. Synced continuity docs for WS-D-251 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+5. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - residual duplicate trim work within backend-code classifier normalization,
+  - semantic equivalence across numeric/exact/min-length/substr fallback paths after refactor,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. `_classifyBackendCode(...)` trimmed `rawCode`, then compact helper trimmed again.
+  2. This duplicate trim introduces avoidable string preprocessing in a hot path.
+- **Fix applied**
+  1. Refactored compact helper to accept already-trimmed input.
+  2. Rewired classifier to pass local trimmed value directly.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - duplicate trim in backend-code normalization path is removed.
+  - classification semantics across all auth tests remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
 ## Remaining Phase C setup gaps

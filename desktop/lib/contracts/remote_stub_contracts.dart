@@ -1440,7 +1440,7 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
       sessionExpired: false,
     );
   }
-  final String compact = _compactBackendCode(rawCode);
+  final String compact = _compactBackendCodeFromTrimmed(trimmed);
   if (compact.isEmpty) {
     return const _BackendCodeClassification(
       signedOut: false,
@@ -1494,11 +1494,8 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
   );
 }
 
-String _compactBackendCode(String rawCode) {
-  return rawCode.trim().toLowerCase().replaceAll(
-    _backendCodeCompactPattern,
-    '',
-  );
+String _compactBackendCodeFromTrimmed(String trimmedCode) {
+  return trimmedCode.toLowerCase().replaceAll(_backendCodeCompactPattern, '');
 }
 
 int _clampIndex(int index, {required int itemCount}) {
