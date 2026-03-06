@@ -1577,7 +1577,11 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
     );
     return asciiBuffer.toString();
   }
-  for (int index = firstNonCompactIndex; index < trimmedCode.length; index++) {
+  for (
+    int index = firstNonCompactIndex + 1;
+    index < trimmedCode.length;
+    index++
+  ) {
     final int codeUnit = trimmedCode.codeUnitAt(index);
     if (codeUnit > 127) {
       _appendCompactBackendUnicodeLowercasedRange(

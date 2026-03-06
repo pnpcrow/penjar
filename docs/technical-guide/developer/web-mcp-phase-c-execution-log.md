@@ -13098,6 +13098,70 @@ allocation when compact prefix segments are already lowercase/digit-only.
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-267: delimiter-path first-marker recheck elimination
+
+### Planned objective
+
+Reduce delimiter-path branch overhead by skipping recheck of the already-identified first
+non-compact delimiter index during compact normalization scanning.
+
+### Implemented changes
+
+1. Updated compact normalization path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_compactBackendCodeFromTrimmed(...)` now starts delimiter-path scan loop at
+     `firstNonCompactIndex + 1`, avoiding redundant recheck of the first delimiter index that is
+     already known to be non-compact/non-uppercase,
+   - existing Unicode fallback and compact append semantics are preserved.
+2. Preserved existing fallback semantics:
+   - compact-only, lowercase/uppercase delimiter-path normalization, Unicode-suffix handling,
+     marker classification, and non-exact fallback behavior remain unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only lowercase unauthorized with trailing delimiter maps authentication-required fallback status`
+     (`code: "unauthorized::"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendLowercaseTrailingDelimiterUnauthorizedParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps lowercase trailing-delimiter unauthorized backend failure to deterministic auth-required status`.
+5. Synced continuity docs for WS-D-267 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - delimiter-path first-marker recheck behavior in `_compactBackendCodeFromTrimmed(...)`,
+  - deterministic auth-required fallback behavior for lowercase trailing-delimiter
+    `unauthorized::`,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. WS-D-266 still performed one redundant delimiter-branch check for
+     `firstNonCompactIndex` in delimiter-path loop progression.
+  2. Lowercase trailing-delimiter unauthorized marker behavior (`unauthorized::`) was not
+     explicitly parity-locked.
+- **Fix applied**
+  1. Started delimiter-path loop at `firstNonCompactIndex + 1` to remove redundant first-marker
+     recheck.
+  2. Added dedicated contract/parity regressions for `unauthorized::` deterministic auth-required
+     fallback behavior.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - delimiter-path loop progression skips redundant recheck for the known first delimiter index.
+  - lowercase trailing-delimiter `unauthorized::` payloads map to deterministic auth-required
+    fallback behavior in contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

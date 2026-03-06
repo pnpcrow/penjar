@@ -40,11 +40,11 @@ This checklist tracks user-facing workflow parity for the Flutter desktop full-p
 | Export workflows | PNG/SVG export and save | In progress | Export Pipeline | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) | Flutter export-workflow parity scaffold, parity harness, runtime-switchable in-memory/remote-stub contract boundary, backend response-driven state mutation wiring, and sibling `result`/`data` envelope fallback regression coverage (contract + parity) are added; backend export pipeline/native save integration is pending. |
 | Diagnostics/recovery | Runtime health, reconnect, remediation | In progress | Platform Reliability | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) | Flutter diagnostics/recovery parity scaffold, parity harness, runtime-switchable in-memory/remote-stub contract boundary, HTTP health-probe remote transport gating, operation-level backend request metadata mapping, backend execution-path status propagation, backend response-driven state mutation wiring, and sibling `result`/`data` envelope fallback regression coverage (contract + parity) are added; live telemetry/reconnect policy integration is pending. |
 
-Latest auth/session parity evidence update: `Unit WS-D-266` optimizes delimiter-path lowercase
-prefix append handling in `_compactBackendCodeFromTrimmed(...)` by replacing intermediate prefix
-`substring` allocation with `_appendCompactBackendAsciiRange(...)` when no uppercase compact units
-exist, preserving existing parity behavior while reducing transient allocation overhead and
-locking lowercase delimited `unauthorized::token` auth-required fallback behavior.
+Latest auth/session parity evidence update: `Unit WS-D-267` optimizes delimiter-path scan
+progression in `_compactBackendCodeFromTrimmed(...)` by skipping recheck of the already-identified
+first non-compact delimiter index and continuing from `firstNonCompactIndex + 1`, preserving
+existing parity behavior while reducing redundant delimiter-branch checks and locking lowercase
+trailing-delimiter `unauthorized::` auth-required fallback behavior.
 
 ## Cross-cutting shell/release routing note
 

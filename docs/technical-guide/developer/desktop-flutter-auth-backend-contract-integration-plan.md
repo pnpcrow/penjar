@@ -383,6 +383,15 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      (`unauthorized::token`) to preserve deterministic auth-required fallback mapping on the
      substring-free lowercase prefix path; execution evidence is recorded in
      `web-mcp-phase-c-execution-log.md` (`Unit WS-D-266`).
+54. Backend code delimiter-path first-marker recheck elimination optimization:
+   - `_compactBackendCodeFromTrimmed(...)` now skips rechecking the already-identified first
+     non-compact delimiter index by starting delimiter-path scan from
+     `firstNonCompactIndex + 1`, reducing one redundant branch/classifier check per delimiter-path
+     normalization call,
+   - contract/parity suites now lock lowercase trailing-delimiter unauthorized marker behavior
+     (`unauthorized::`) to preserve deterministic auth-required fallback mapping while exercising
+     the adjusted delimiter-loop start path; execution evidence is recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-267`).
 
 ## Remaining integration gaps (auth scope)
 
