@@ -1421,6 +1421,9 @@ final int _backendSignedOutCodeMarkerMaxLength = _markerMaxLength(
 );
 final int _backendSignedOutOnlyCodeMarkerCount =
     _backendSignedOutOnlyCodeMarkers.length;
+final Set<int> _backendSignedOutCodeMarkerLengths = _buildMarkerLengthSet(
+  _backendSignedOutCodeMarkers,
+);
 
 Map<String, _BackendCodeClassification>
 _buildBackendExactCodeClassifications() {
@@ -1486,6 +1489,14 @@ int _markerMaxLength(List<String> markers) {
   return maxLength;
 }
 
+Set<int> _buildMarkerLengthSet(List<String> markers) {
+  final Set<int> markerLengths = <int>{};
+  for (final String marker in markers) {
+    markerLengths.add(marker.length);
+  }
+  return Set<int>.unmodifiable(markerLengths);
+}
+
 _BackendCodeClassification _classifyBackendCode(String rawCode) {
   final String trimmed = rawCode.trim();
   final int trimmedLength = trimmed.length;
@@ -1508,7 +1519,8 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
     );
   }
   final int signedOutMarkerMaxLength = _backendSignedOutCodeMarkerMaxLength;
-  if (trimmedLength <= signedOutMarkerMaxLength) {
+  if (trimmedLength <= signedOutMarkerMaxLength &&
+      _backendSignedOutCodeMarkerLengths.contains(trimmedLength)) {
     final _BackendCodeClassification? rawExactClassification =
         _backendRawExactCodeClassifications[trimmed];
     if (rawExactClassification != null) {
@@ -1523,7 +1535,8 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
       sessionExpired: false,
     );
   }
-  if (compactLength <= signedOutMarkerMaxLength) {
+  if (compactLength <= signedOutMarkerMaxLength &&
+      _backendSignedOutCodeMarkerLengths.contains(compactLength)) {
     final _BackendCodeClassification? exactClassification =
         _backendExactCodeClassifications[compact];
     if (exactClassification != null) {

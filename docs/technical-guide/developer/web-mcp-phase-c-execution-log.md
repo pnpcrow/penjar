@@ -13963,6 +13963,69 @@ static marker-count constants for marker index scans.
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-281: classifier exact-length candidate gating
+
+### Planned objective
+
+Reduce backend code classifier exact-map overhead by probing exact catalogs only when code length
+matches known marker lengths.
+
+### Implemented changes
+
+1. Updated backend classifier exact-gating path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - introduced `_backendSignedOutCodeMarkerLengths` as an unmodifiable marker-length catalog.
+   - added `_buildMarkerLengthSet(...)` helper to build the catalog from signed-out marker lists.
+   - `_classifyBackendCode(...)` now gates raw exact-map lookups by
+     `contains(trimmedLength)` against the marker-length catalog.
+   - `_classifyBackendCode(...)` now gates compact exact-map lookups by
+     `contains(compactLength)` against the marker-length catalog.
+2. Preserved existing fallback semantics:
+   - numeric shortcuts, short-code/long-code guards, marker precedence, and substring fallback
+     behavior remain unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only capitalized compact signedout length-gap suffix payload maps authentication-required fallback status`
+     (`code: "SignedOutErr"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendCapitalizedCompactSignedOutLengthGapSuffixParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps capitalized compact signedout length-gap suffix backend failure to deterministic auth-required status`.
+5. Synced continuity docs for WS-D-281 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - exact-length candidate gating behavior for raw/compact exact-map probes,
+  - signed-out fallback continuity on non-catalog compact lengths,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. raw/compact exact-map probes still executed for many in-range non-catalog lengths where exact
+     hits were impossible.
+  2. capitalized compact signed-out length-gap suffix fallback behavior was not explicitly parity
+     locked for exact-length-gated paths.
+- **Fix applied**
+  1. introduced marker-length catalog + exact-length gating for raw/compact exact-map probes.
+  2. added contract/parity regressions for `code: "SignedOutErr"` fallback continuity.
+  3. re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - exact-length gating does not alter numeric shortcuts, long/short guards, or marker precedence.
+  - capitalized compact signed-out length-gap suffix code remains deterministic auth-required
+    fallback in contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

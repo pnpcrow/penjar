@@ -526,6 +526,17 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      (`code: "UnauthorizedSessionTimeoutContinuation"`) to preserve deterministic session-expired
      fallback precedence on long mixed-marker paths; execution evidence is recorded in
      `web-mcp-phase-c-execution-log.md` (`Unit WS-D-280`).
+68. Backend code classification exact-length candidate gating optimization:
+   - `_classifyBackendCode(...)` now reuses precomputed marker-length catalog
+     (`_backendSignedOutCodeMarkerLengths`) and only probes raw/compact exact maps when the input
+     length is a known marker length, reducing unnecessary exact-map lookups on non-catalog
+     lengths while preserving long/short code guards and substring marker fallback paths,
+   - existing numeric shortcuts, marker precedence, and signed-out/session-expired fallback
+     semantics remain unchanged,
+   - contract/parity suites now lock capitalized compact signed-out length-gap suffix behavior
+     (`code: "SignedOutErr"`) to preserve deterministic auth-required fallback mapping on
+     non-catalog exact-length-gated paths; execution evidence is recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-281`).
 
 ## Remaining integration gaps (auth scope)
 
