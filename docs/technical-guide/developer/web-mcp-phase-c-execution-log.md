@@ -16976,6 +16976,54 @@ full-file shell-string loading with fixed-string file scanning while preserving 
   - full desktop verify remains green after matcher-path optimization.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-342.
 
+## Unit WS-D-343: assignment-expression numeric near-match strict alias regression coverage
+
+### Planned objective
+
+Prevent strict numeric alias broadening through assignment-expression style inputs by locking
+plus-equals and minus-equals numeric near matches as non-strict paths.
+
+### Implemented changes
+
+1. Expanded strict installer assignment-expression numeric near-match coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-nearmatch-expression-one-plus-equals-zero-alias-missing-command-pass`,
+   - added `strict-installer-nearmatch-expression-one-minus-equals-zero-alias-missing-command-pass`,
+   - fixtures `1+=0` and `1-=0` assert `- Strict mode: 0` with non-blocking completion.
+2. Expanded strict protocol assignment-expression numeric near-match coverage in the same checker:
+   - added `strict-protocol-nearmatch-expression-one-plus-equals-zero-alias-missing-command-pass`,
+   - added `strict-protocol-nearmatch-expression-one-minus-equals-zero-alias-missing-command-pass`,
+   - fixtures `STRICT_WINDOWS_PROTOCOL_REGISTRATION=1+=0` and `=1-=0` assert
+     `- Strict protocol registration mode: 0` with non-blocking completion.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-343
+     assignment-expression numeric near-match boundary lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     assignment-expression numeric near-match strict boundary matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict numeric alias exact-match boundaries under assignment-expression near matches,
+  - installer/protocol non-overmatch behavior for `1+=0` and `1-=0`,
+  - compatibility with existing arithmetic/equality/logical/shift near-match coverage.
+- **Issues found during review**
+  1. numeric near-match coverage was broad for operator and logical variants but assignment-expression
+     variants (`+=`, `-=`) were not explicitly locked.
+  2. without assignment fixtures, parser normalization/coercion refactors could accidentally widen
+     strict numeric alias acceptance.
+- **Fix applied**
+  1. added installer/protocol assignment-expression near-match pass fixtures with strict-mode-zero
+     assertions.
+  2. retained strict-positive exact alias behavior and existing warning/failure semantics.
+- **Post-fix validation criteria**
+  - contract checker passes with assignment-expression near-match fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-343.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
