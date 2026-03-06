@@ -7352,56 +7352,67 @@ void main() {
         ),
       ];
 
+  final Iterable<Map<String, Object?>> restoreAuthStateEnvelopePayloads =
+      authStateSignedOutEnvelopeCases
+          .where(
+            (caseData) =>
+                caseData.actionKey.value == 'auth-restore-session' &&
+                caseData.restoreSessionPayload != null,
+          )
+          .map((caseData) => caseData.restoreSessionPayload!);
+  final Iterable<Map<String, Object?>> refreshAuthStateEnvelopePayloads =
+      authStateSignedOutEnvelopeCases
+          .where(
+            (caseData) =>
+                caseData.actionKey.value == 'auth-refresh-token' &&
+                caseData.refreshTokenPayload != null,
+          )
+          .map((caseData) => caseData.refreshTokenPayload!);
+
+  void expectRestoreRefreshAuthStateMatrixSymmetric({
+    required Iterable<String> aliases,
+    required bool expectedValue,
+  }) {
+    final List<String> missingEntries = <String>[];
+
+    for (final String wrapperKey in authStateWrapperKeys) {
+      for (final String alias in aliases) {
+        if (!hasAuthStateAliasPayload(
+          refreshAuthStateEnvelopePayloads,
+          wrapperKey: wrapperKey,
+          alias: alias,
+          expectedValue: expectedValue,
+        )) {
+          missingEntries.add(
+            'refresh-token $wrapperKey authState.$alias=$expectedValue',
+          );
+        }
+        if (!hasAuthStateAliasPayload(
+          restoreAuthStateEnvelopePayloads,
+          wrapperKey: wrapperKey,
+          alias: alias,
+          expectedValue: expectedValue,
+        )) {
+          missingEntries.add(
+            'restore-session $wrapperKey authState.$alias=$expectedValue',
+          );
+        }
+      }
+    }
+
+    expect(
+      missingEntries,
+      isEmpty,
+      reason: 'Missing parity matrix entries:\n${missingEntries.join('\n')}',
+    );
+  }
+
   test(
     'auth/session parity restore/refresh signed-out authState matrix is symmetric',
     () {
-      final Iterable<Map<String, Object?>> refreshPayloads =
-          authStateSignedOutEnvelopeCases
-              .where(
-                (caseData) =>
-                    caseData.actionKey.value == 'auth-refresh-token' &&
-                    caseData.refreshTokenPayload != null,
-              )
-              .map((caseData) => caseData.refreshTokenPayload!);
-      final Iterable<Map<String, Object?>> restorePayloads =
-          authStateSignedOutEnvelopeCases
-              .where(
-                (caseData) =>
-                    caseData.actionKey.value == 'auth-restore-session' &&
-                    caseData.restoreSessionPayload != null,
-              )
-              .map((caseData) => caseData.restoreSessionPayload!);
-      final List<String> missingEntries = <String>[];
-
-      for (final String wrapperKey in authStateWrapperKeys) {
-        for (final String alias in authStateSignedOutAliases) {
-          if (!hasAuthStateAliasPayload(
-            refreshPayloads,
-            wrapperKey: wrapperKey,
-            alias: alias,
-            expectedValue: true,
-          )) {
-            missingEntries.add(
-              'refresh-token $wrapperKey authState.$alias=true',
-            );
-          }
-          if (!hasAuthStateAliasPayload(
-            restorePayloads,
-            wrapperKey: wrapperKey,
-            alias: alias,
-            expectedValue: true,
-          )) {
-            missingEntries.add(
-              'restore-session $wrapperKey authState.$alias=true',
-            );
-          }
-        }
-      }
-
-      expect(
-        missingEntries,
-        isEmpty,
-        reason: 'Missing parity matrix entries:\n${missingEntries.join('\n')}',
+      expectRestoreRefreshAuthStateMatrixSymmetric(
+        aliases: authStateSignedOutAliases,
+        expectedValue: true,
       );
     },
   );
@@ -7409,53 +7420,9 @@ void main() {
   test(
     'auth/session parity restore/refresh signed-in-false authState matrix is symmetric',
     () {
-      final Iterable<Map<String, Object?>> refreshPayloads =
-          authStateSignedOutEnvelopeCases
-              .where(
-                (caseData) =>
-                    caseData.actionKey.value == 'auth-refresh-token' &&
-                    caseData.refreshTokenPayload != null,
-              )
-              .map((caseData) => caseData.refreshTokenPayload!);
-      final Iterable<Map<String, Object?>> restorePayloads =
-          authStateSignedOutEnvelopeCases
-              .where(
-                (caseData) =>
-                    caseData.actionKey.value == 'auth-restore-session' &&
-                    caseData.restoreSessionPayload != null,
-              )
-              .map((caseData) => caseData.restoreSessionPayload!);
-      final List<String> missingEntries = <String>[];
-
-      for (final String wrapperKey in authStateWrapperKeys) {
-        for (final String alias in authStateSignedInAliases) {
-          if (!hasAuthStateAliasPayload(
-            refreshPayloads,
-            wrapperKey: wrapperKey,
-            alias: alias,
-            expectedValue: false,
-          )) {
-            missingEntries.add(
-              'refresh-token $wrapperKey authState.$alias=false',
-            );
-          }
-          if (!hasAuthStateAliasPayload(
-            restorePayloads,
-            wrapperKey: wrapperKey,
-            alias: alias,
-            expectedValue: false,
-          )) {
-            missingEntries.add(
-              'restore-session $wrapperKey authState.$alias=false',
-            );
-          }
-        }
-      }
-
-      expect(
-        missingEntries,
-        isEmpty,
-        reason: 'Missing parity matrix entries:\n${missingEntries.join('\n')}',
+      expectRestoreRefreshAuthStateMatrixSymmetric(
+        aliases: authStateSignedInAliases,
+        expectedValue: false,
       );
     },
   );

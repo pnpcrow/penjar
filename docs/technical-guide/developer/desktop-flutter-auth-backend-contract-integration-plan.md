@@ -183,6 +183,13 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      `authenticated`, `signed_in`, `is_signed_in`, `logged_in`, `is_logged_in`),
    - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
      (`Unit WS-D-239`).
+27. Restore/refresh parity matrix guard deduplication and payload-filter reuse:
+   - `desktop/test/parity/auth_session_parity_test.dart` now centralizes restore/refresh direct
+     `authState` matrix assertions through a shared guard helper with prefiltered payload iterables,
+     removing duplicated signed-out and signed-in-false matrix loops while preserving deterministic
+     missing-entry reporting,
+   - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
+     (`Unit WS-D-240`).
 
 ## Remaining integration gaps (auth scope)
 

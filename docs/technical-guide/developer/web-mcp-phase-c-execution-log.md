@@ -11466,6 +11466,62 @@ existing signed-in/signed-out guard coverage and making alias-drift detection im
   - guard passes with zero missing entries on current fixture set.
   - targeted auth tests and full desktop verification remain green after guard addition.
 
+## Unit WS-D-240: restore/refresh parity matrix guard deduplication and payload-filter reuse
+
+### Planned objective
+
+Reduce duplicate parity matrix-assertion logic for restore-session/refresh-token authState checks
+without weakening drift detection, so future alias-set updates are applied once and validated
+consistently.
+
+### Implemented changes
+
+1. Refactored `desktop/test/parity/auth_session_parity_test.dart` to precompute shared payload
+   iterables used by restore/refresh direct-wrapper matrix guards:
+   - `restoreAuthStateEnvelopePayloads`,
+   - `refreshAuthStateEnvelopePayloads`.
+2. Added a shared assertion helper:
+   - `expectRestoreRefreshAuthStateMatrixSymmetric(...)`.
+3. Rewired both restore/refresh matrix tests to the shared helper:
+   - signed-out (`authState.<signedOutAlias>=true`) matrix symmetry test,
+   - signed-in-false (`authState.<signedInAlias>=false`) matrix symmetry test.
+4. Preserved deterministic missing-entry diagnostics with unchanged message shape
+   (`Missing parity matrix entries`) while removing duplicated loop/filter logic.
+5. Synced continuity docs for WS-D-240 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - duplication risk in restore/refresh parity matrix-guard loops and payload filtering,
+  - behavioral equivalence of guard outcomes after helper extraction,
+  - regression impact across auth contract/parity suites and full verification chain.
+- **Issues found during review**
+  1. Signed-out and signed-in-false restore/refresh matrix tests repeated identical
+     payload-filter/loop logic with only alias-set and expected-value differences.
+  2. This duplication increased maintenance risk (future alias-set evolution could be updated in
+     one loop but missed in the other), and did unnecessary repeated filtering work.
+- **Fix applied**
+  1. Centralized restore/refresh matrix assertions into one helper function parameterized by alias
+     set and expected value.
+  2. Reused prefiltered restore/refresh payload iterables to avoid repeated query pipelines inside
+     each test.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification to confirm behavior
+     parity.
+- **Post-fix validation criteria**
+  - restore/refresh signed-out and signed-in-false matrix guards still fail deterministically on
+    missing entries with unchanged error semantics.
+  - helperized implementation keeps wrapper/alias/value coverage identical to pre-refactor scope.
+  - targeted auth tests and full desktop verification remain green after deduplication.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
