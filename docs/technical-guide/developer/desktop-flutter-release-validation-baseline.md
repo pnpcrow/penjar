@@ -356,6 +356,8 @@ CI baseline note:
     `"1e0"`) so strict numeric alias inference remains exact (`"1"`) without numeric parser drift.
   - contract matrix now also locks base-notation numeric near-match alias behavior (`"0x1"`,
     `"0b1"`) so strict numeric alias inference cannot drift into radix-style coercion paths.
+  - contract matrix now also locks uppercase base-notation numeric near-match alias behavior
+    (`"0X1"`, `"0B1"`) so case normalization changes cannot broaden strict numeric acceptance.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
