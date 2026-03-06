@@ -1375,22 +1375,6 @@ class _BackendCodeClassification {
   final bool sessionExpired;
 }
 
-const List<String> _backendSignedOutCodeMarkers = <String>[
-  'authrequired',
-  'unauthorized',
-  'unauthenticated',
-  'tokenexpired',
-  'sessionexpired',
-  'sessiontimeout',
-  'sessiontimedout',
-  'expiredtoken',
-  'expiredsession',
-  'invalidtoken',
-  'jwtexpired',
-  'signedout',
-  'loggedout',
-];
-
 const List<String> _backendSessionExpiredCodeMarkers = <String>[
   'tokenexpired',
   'sessionexpired',
@@ -1402,6 +1386,19 @@ const List<String> _backendSessionExpiredCodeMarkers = <String>[
   'accesstokenexpired',
   'refreshtokenexpired',
   'jwtexpired',
+];
+
+const List<String> _backendSignedOutOnlyCodeMarkers = <String>[
+  'authrequired',
+  'unauthorized',
+  'unauthenticated',
+  'signedout',
+  'loggedout',
+];
+
+const List<String> _backendSignedOutCodeMarkers = <String>[
+  ..._backendSignedOutOnlyCodeMarkers,
+  ..._backendSessionExpiredCodeMarkers,
 ];
 
 _BackendCodeClassification _classifyBackendCode(String rawCode) {

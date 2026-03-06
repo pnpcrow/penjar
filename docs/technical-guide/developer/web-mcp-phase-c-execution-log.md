@@ -11917,7 +11917,77 @@ precedence in contract/parity suites.
      regressions.
 - **Post-fix validation criteria**
   - code-only `JWT_EXPIRED` payloads now map to deterministic session-expired fallback behavior.
-  - explicit signed-in state still overrides `JWT_EXPIRED` code-based signed-out inference.
+- explicit signed-in state still overrides `JWT_EXPIRED` code-based signed-out inference.
+- contract/parity/mode-parity suites and full desktop verification remain green.
+
+## Unit WS-D-248: session-expired marker cohesion and token-expiry variant coverage
+
+### Planned objective
+
+Close residual marker-catalog drift risk by ensuring `session-expired` code markers are included in
+`signed-out` classification by construction, then lock `ACCESS_TOKEN_EXPIRED` /
+`REFRESH_TOKEN_EXPIRED` fallback+override behavior in contract/parity suites.
+
+### Implemented changes
+
+1. Updated auth parser marker catalogs in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - introduced `_backendSignedOutOnlyCodeMarkers`,
+   - made `_backendSignedOutCodeMarkers` include `_backendSessionExpiredCodeMarkers` by
+     construction (`..._backendSessionExpiredCodeMarkers`),
+   - preserved existing signed-out-only markers (`authrequired`, `unauthorized`,
+     `unauthenticated`, `signedout`, `loggedout`) while structurally preventing omission of
+     session-expired variants.
+2. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only access-token-expired payload maps session-expired fallback status`,
+   - `auth backend code-only refresh-token-expired payload maps session-expired fallback status`,
+   - `auth backend explicit signed-in state overrides refresh-token-expired code variant`.
+3. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport clients:
+     - `_AuthBackendRefreshTokenExpiredParityTransportClient`,
+     - `_AuthBackendRefreshTokenExpiredSignedInOverrideParityTransportClient`,
+   - new parity tests:
+     - `auth/session parity maps refresh-token-expired backend failure to deterministic session-expired status`,
+     - `auth/session parity keeps signed-in state when refresh-token-expired backend failure has explicit signed-in override`.
+4. Synced continuity docs for WS-D-248 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+5. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - marker-catalog cohesion between signed-out and session-expired classification paths,
+  - deterministic fallback behavior for session-expiry token variants not previously parity-locked,
+  - explicit signed-in override precedence integrity under those variants,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. `session-expired` marker list contained variants (`accesstokenexpired`,
+     `refreshtokenexpired`) that were not guaranteed to exist in `signed-out` marker list.
+  2. Because session-expired marker checks run only after signed-out classification, such drift can
+     skip both signed-out and session-expired fallback behavior for affected code-only payloads.
+  3. Contract/parity suites did not explicitly lock `ACCESS_TOKEN_EXPIRED` /
+     `REFRESH_TOKEN_EXPIRED` variant behavior.
+- **Fix applied**
+  1. Rebuilt marker catalogs so signed-out classification structurally includes the full
+     session-expired marker list.
+  2. Added contract regressions for `ACCESS_TOKEN_EXPIRED` and `REFRESH_TOKEN_EXPIRED` fallback
+     handling plus refresh-token explicit signed-in override.
+  3. Added parity regressions for refresh-token variant fallback and explicit signed-in override.
+  4. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - code-only `ACCESS_TOKEN_EXPIRED` / `REFRESH_TOKEN_EXPIRED` payloads now map to deterministic
+    session-expired fallback behavior.
+  - explicit signed-in state still overrides refresh-token-expired code-based signed-out inference.
+  - signed-out/session-expired marker drift of this class is prevented by construction.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
 ## Remaining Phase C setup gaps

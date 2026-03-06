@@ -239,6 +239,15 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
    - contract/parity suites now include JWT-expired fallback and explicit signed-in override
      regression coverage, with execution evidence recorded in
      `web-mcp-phase-c-execution-log.md` (`Unit WS-D-247`).
+35. Session-expired marker cohesion and token-expiry variant parity completion:
+   - auth parser marker catalogs now enforce `session-expired` -> `signed-out` inclusion by
+     construction (`_backendSignedOutCodeMarkers` includes `_backendSessionExpiredCodeMarkers`),
+     closing prior drift risk for variants such as `ACCESS_TOKEN_EXPIRED` and
+     `REFRESH_TOKEN_EXPIRED`,
+   - contract/parity suites now include `ACCESS_TOKEN_EXPIRED` / `REFRESH_TOKEN_EXPIRED`
+     deterministic session-expired fallback coverage and explicit signed-in override regression
+     coverage, with execution evidence recorded in `web-mcp-phase-c-execution-log.md`
+     (`Unit WS-D-248`).
 
 ## Remaining integration gaps (auth scope)
 

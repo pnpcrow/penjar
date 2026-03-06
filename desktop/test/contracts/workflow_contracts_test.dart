@@ -5793,6 +5793,56 @@ void main() {
     );
 
     test(
+      'auth backend code-only access-token-expired payload maps session-expired fallback status',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'code': 'ACCESS_TOKEN_EXPIRED',
+                'state': <String, Object?>{
+                  'sessionToken': 'code-only-access-token-expired',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend session expired.',
+        );
+      },
+    );
+
+    test(
+      'auth backend code-only refresh-token-expired payload maps session-expired fallback status',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'code': 'REFRESH_TOKEN_EXPIRED',
+                'state': <String, Object?>{
+                  'sessionToken': 'code-only-refresh-token-expired',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend session expired.',
+        );
+      },
+    );
+
+    test(
       'auth backend explicit message keeps precedence over code-based fallback mapping',
       () {
         final _BackendResponseTransportClient transportClient =
@@ -6498,6 +6548,29 @@ void main() {
             _BackendResponseTransportClient(<String, Map<String, Object?>>{
               RemoteStubOperationIds.restoreSession: <String, Object?>{
                 'code': 'JWT_EXPIRED',
+                'state': <String, Object?>{
+                  'signedIn': true,
+                  'rememberSession': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
+
+    test(
+      'auth backend explicit signed-in state overrides refresh-token-expired code variant',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'code': 'REFRESH_TOKEN_EXPIRED',
                 'state': <String, Object?>{
                   'signedIn': true,
                   'rememberSession': true,
