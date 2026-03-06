@@ -14405,6 +14405,52 @@ behavior checks to the Windows installer pipeline contract matrix.
   - debug strict installer pass and debug strict protocol missing-command failure remain stable.
   - full desktop verify remains green after matrix expansion.
 
+## Unit WS-D-289: strict missing-runner failure matrix coverage
+
+### Planned objective
+
+Close strict-mode boundary coverage gaps by adding explicit release/debug missing-runner failure
+locks for installer strict mode and strict protocol registration mode.
+
+### Implemented changes
+
+1. Expanded contract checker matrix in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-missing-runner-fail`,
+   - added `strict-protocol-missing-runner-fail`,
+   - added `debug-mode-strict-installer-missing-runner-fail`,
+   - added `debug-mode-strict-protocol-missing-runner-fail`.
+2. Locked strict missing-runner diagnostics across build modes:
+   - installer strict mode now has explicit release/debug report-asserted missing-runner failures,
+   - strict protocol mode now has explicit release/debug report-asserted missing-runner failures.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-289
+     strict missing-runner release evidence lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     strict missing-runner matrix coverage in checker inventory notes.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict installer mode behavior when runner directory is absent in release/debug builds,
+  - strict protocol mode behavior when runner directory is absent in release/debug builds,
+  - deterministic report/log assertion coverage for missing-runner strict failures,
+  - continuity documentation alignment for expanded boundary matrix.
+- **Issues found during review**
+  1. matrix coverage previously locked non-strict missing-runner skip behavior only.
+  2. strict missing-runner failures (installer/protocol, release/debug) were behaviorally present
+     but not contract-locked.
+- **Fix applied**
+  1. added four strict missing-runner failure cases spanning installer/protocol and release/debug.
+  2. updated runbook/release baseline notes to expose the new strict boundary coverage.
+- **Post-fix validation criteria**
+  - contract checker passes with strict missing-runner cases in release/debug matrices.
+  - strict missing-runner diagnostics remain deterministic in report/log outputs.
+  - full desktop verify remains green after matrix expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

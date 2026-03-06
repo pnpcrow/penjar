@@ -111,6 +111,48 @@ run_case \
   "[windows-installer-pipeline] warning: pipeline skipped."
 
 run_case \
+  "strict-installer-missing-runner-fail" \
+  "fail" \
+  "Strict installer mode must fail when the runner directory is missing in release mode." \
+  setup_empty_case \
+  "1" \
+  "release" \
+  "- Error: missing runner directory: build/windows/x64/runner/Release" \
+  "[windows-installer-pipeline] strict mode failed."
+
+run_case \
+  "strict-protocol-missing-runner-fail" \
+  "fail" \
+  "Strict protocol mode must fail when the runner directory is missing in release mode." \
+  setup_empty_case \
+  "0" \
+  "release" \
+  "- Protocol error: missing runner directory for strict protocol registration: build/windows/x64/runner/Release" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=1"
+
+run_case \
+  "debug-mode-strict-installer-missing-runner-fail" \
+  "fail" \
+  "Strict installer mode must fail when the runner directory is missing in debug mode." \
+  setup_empty_case \
+  "1" \
+  "debug" \
+  "- Error: missing runner directory: build/windows/x64/runner/Debug" \
+  "[windows-installer-pipeline] strict mode failed."
+
+run_case \
+  "debug-mode-strict-protocol-missing-runner-fail" \
+  "fail" \
+  "Strict protocol mode must fail when the runner directory is missing in debug mode." \
+  setup_empty_case \
+  "0" \
+  "debug" \
+  "- Protocol error: missing runner directory for strict protocol registration: build/windows/x64/runner/Debug" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=1"
+
+run_case \
   "strict-installer-missing-command-fail" \
   "fail" \
   "Strict installer mode must fail when installer command is unset and runner exists." \
