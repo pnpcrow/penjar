@@ -12720,6 +12720,70 @@ exact backend codes before normalization.
     unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-261: backend code raw exact single-map fast path
+
+### Planned objective
+
+Reduce exact-path lookup overhead by consolidating raw lowercase/uppercase exact-marker checks into
+a single lookup map.
+
+### Implemented changes
+
+1. Updated exact lookup map wiring in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - replaced `_backendUppercaseExactCodeClassifications` runtime dual-lookup path with
+     `_backendRawExactCodeClassifications`,
+   - `_backendRawExactCodeClassifications` pre-materializes lowercase and uppercase exact marker
+     keys from `_backendExactCodeClassifications` during initialization.
+2. Updated `_classifyBackendCode(...)` raw exact fast path:
+   - classifier now performs one map lookup
+     (`_backendRawExactCodeClassifications[trimmed]`) before compact normalization.
+3. Preserved existing fallback semantics:
+   - non-exact inputs continue through compact normalization plus exact/marker classification logic
+     unchanged.
+4. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only uppercase compact sessionexpired payload maps session-expired fallback status`
+     (`code: "SESSIONEXPIRED"`).
+5. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendUppercaseCompactSessionExpiredParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps uppercase compact sessionexpired backend failure to deterministic session-expired status`.
+6. Synced continuity docs for WS-D-261 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+7. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - raw exact-marker map lookup efficiency in classifier fast paths,
+  - deterministic session-expired fallback behavior for uppercase compact `SESSIONEXPIRED`,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. WS-D-260 raw exact fast path still required dual map lookups (`exact` then `uppercase`) on
+     every classification call.
+  2. Uppercase compact `SESSIONEXPIRED` exact-marker behavior was not explicitly parity-locked.
+- **Fix applied**
+  1. Consolidated raw exact keys into single map and replaced dual lookup with one lookup.
+  2. Added dedicated contract/parity regressions for `SESSIONEXPIRED` deterministic
+     session-expired fallback behavior.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - raw exact marker classification performs a single map lookup.
+  - uppercase compact `SESSIONEXPIRED` payloads map to deterministic session-expired fallback
+    behavior in contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

@@ -336,6 +336,13 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      (`sessionexpired`) to preserve deterministic session-expired fallback mapping on the expanded
      raw exact fast-path; execution evidence is recorded in
      `web-mcp-phase-c-execution-log.md` (`Unit WS-D-260`).
+48. Backend code raw exact-classification single-map lookup optimization:
+   - `_classifyBackendCode(...)` now uses a single raw exact map
+     (`_backendRawExactCodeClassifications`) that materializes lowercase and uppercase exact keys
+     during initialization, reducing runtime dual-map lookup overhead on exact-code paths,
+   - contract/parity suites now lock uppercase compact exact session-expired marker behavior
+     (`SESSIONEXPIRED`) to preserve deterministic fallback mapping on the single-map fast-path;
+     execution evidence is recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-261`).
 
 ## Remaining integration gaps (auth scope)
 

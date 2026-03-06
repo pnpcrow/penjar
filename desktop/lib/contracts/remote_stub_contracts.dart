@@ -1402,10 +1402,9 @@ const List<String> _backendSignedOutCodeMarkers = <String>[
 final Map<String, _BackendCodeClassification> _backendExactCodeClassifications =
     _buildBackendExactCodeClassifications();
 final Map<String, _BackendCodeClassification>
-_backendUppercaseExactCodeClassifications =
-    _buildBackendUppercaseExactCodeClassifications(
-      _backendExactCodeClassifications,
-    );
+_backendRawExactCodeClassifications = _buildBackendRawExactCodeClassifications(
+  _backendExactCodeClassifications,
+);
 final int _backendSignedOutOnlyCodeMarkerMinLength = _markerMinLength(
   _backendSignedOutOnlyCodeMarkers,
 );
@@ -1434,17 +1433,18 @@ _buildBackendExactCodeClassifications() {
 }
 
 Map<String, _BackendCodeClassification>
-_buildBackendUppercaseExactCodeClassifications(
+_buildBackendRawExactCodeClassifications(
   Map<String, _BackendCodeClassification> exactClassifications,
 ) {
-  final Map<String, _BackendCodeClassification> uppercaseClassifications =
+  final Map<String, _BackendCodeClassification> rawExactClassifications =
       <String, _BackendCodeClassification>{};
   for (final MapEntry<String, _BackendCodeClassification> entry
       in exactClassifications.entries) {
-    uppercaseClassifications[entry.key.toUpperCase()] = entry.value;
+    rawExactClassifications[entry.key] = entry.value;
+    rawExactClassifications[entry.key.toUpperCase()] = entry.value;
   }
   return Map<String, _BackendCodeClassification>.unmodifiable(
-    uppercaseClassifications,
+    rawExactClassifications,
   );
 }
 
@@ -1477,8 +1477,7 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
     );
   }
   final _BackendCodeClassification? rawExactClassification =
-      _backendExactCodeClassifications[trimmed] ??
-      _backendUppercaseExactCodeClassifications[trimmed];
+      _backendRawExactCodeClassifications[trimmed];
   if (rawExactClassification != null) {
     return rawExactClassification;
   }

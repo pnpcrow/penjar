@@ -5818,6 +5818,39 @@ void main() {
     );
 
     test(
+      'auth backend code-only uppercase compact sessionexpired payload maps session-expired fallback status',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'code': 'SESSIONEXPIRED',
+                'state': <String, Object?>{
+                  'sessionToken': 'code-only-uppercase-compact-session-expired',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(
+              transportClient: transportClient,
+              initialState: const AuthSessionState(
+                rememberSession: true,
+                signedIn: true,
+                status: 'Previously signed in.',
+              ),
+            );
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(authContract.state.rememberSession, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend session expired.',
+        );
+      },
+    );
+
+    test(
       'auth backend statusCode unauthorized payload maps authentication-required fallback status',
       () {
         final _BackendResponseTransportClient transportClient =
