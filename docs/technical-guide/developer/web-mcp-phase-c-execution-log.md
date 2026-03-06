@@ -16163,6 +16163,54 @@ formatted numeric near matches as non-strict paths.
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-325.
 
+## Unit WS-D-326: quoted numeric near-match strict alias regression coverage
+
+### Planned objective
+
+Prevent strict numeric alias broadening through accidental quote-wrapped env values by locking
+quoted numeric near matches as non-strict paths.
+
+### Implemented changes
+
+1. Expanded strict installer quoted near-match coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-nearmatch-double-quoted-one-alias-missing-command-pass`,
+   - added `strict-installer-nearmatch-single-quoted-one-alias-missing-command-pass`,
+   - fixtures `"1"` and `'1'` assert `- Strict mode: 0` with non-blocking completion.
+2. Expanded strict protocol quoted near-match coverage in the same checker:
+   - added `strict-protocol-nearmatch-double-quoted-one-alias-missing-command-pass`,
+   - added `strict-protocol-nearmatch-single-quoted-one-alias-missing-command-pass`,
+   - fixtures `STRICT_WINDOWS_PROTOCOL_REGISTRATION="1"` and `='1'` assert
+     `- Strict protocol registration mode: 0` with non-blocking completion.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-326
+     quoted numeric near-match boundary lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     quoted numeric near-match strict boundary matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict numeric alias exact-match boundaries under quote-wrapped values,
+  - installer/protocol non-overmatch behavior for `"1"` and `'1'`,
+  - compatibility with existing numeric near-match coverage.
+- **Issues found during review**
+  1. numeric near-match boundaries were locked for format and notation variants, but quoted numeric
+     env-value variants were not explicitly covered.
+  2. without quote-wrapped fixtures, accidental quoting during CI/env wiring could be mistaken as
+     strict intent after parser refactors.
+- **Fix applied**
+  1. added installer/protocol quote-wrapped near-match pass fixtures with strict-mode-zero
+     assertions.
+  2. preserved strict-positive exact alias behavior and all existing warning/failure semantics.
+- **Post-fix validation criteria**
+  - contract checker passes with quote-wrapped near-match fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-326.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

@@ -520,6 +520,26 @@ run_case \
   "[windows-installer-pipeline] completed."
 
 run_case \
+  "strict-installer-nearmatch-double-quoted-one-alias-missing-command-pass" \
+  "pass" \
+  "Strict installer mode parser should keep quoted near-match alias '\"1\"' non-strict when installer command is missing." \
+  setup_release_runner_case \
+  "\"1\"" \
+  "release" \
+  "- Strict mode: 0" \
+  "[windows-installer-pipeline] completed."
+
+run_case \
+  "strict-installer-nearmatch-single-quoted-one-alias-missing-command-pass" \
+  "pass" \
+  "Strict installer mode parser should keep quoted near-match alias \"'1'\" non-strict when installer command is missing." \
+  setup_release_runner_case \
+  "'1'" \
+  "release" \
+  "- Strict mode: 0" \
+  "[windows-installer-pipeline] completed."
+
+run_case \
   "strict-installer-nearmatch-truee-placeholder-warning-pass" \
   "pass" \
   "Strict installer mode parser should keep near-match alias 'truee' non-strict and preserve placeholder warning behavior." \
@@ -994,6 +1014,28 @@ run_case \
   "- Strict protocol registration mode: 0" \
   "[windows-installer-pipeline] completed." \
   "STRICT_WINDOWS_PROTOCOL_REGISTRATION=1,0"
+
+run_case \
+  "strict-protocol-nearmatch-double-quoted-one-alias-missing-command-pass" \
+  "pass" \
+  "Strict protocol mode parser should keep quoted near-match alias '\"1\"' non-strict when protocol command is missing." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Strict protocol registration mode: 0" \
+  "[windows-installer-pipeline] completed." \
+  'STRICT_WINDOWS_PROTOCOL_REGISTRATION="1"'
+
+run_case \
+  "strict-protocol-nearmatch-single-quoted-one-alias-missing-command-pass" \
+  "pass" \
+  "Strict protocol mode parser should keep quoted near-match alias \"'1'\" non-strict when protocol command is missing." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Strict protocol registration mode: 0" \
+  "[windows-installer-pipeline] completed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION='1'"
 
 run_case \
   "strict-protocol-nearmatch-truee-placeholder-warning-pass" \

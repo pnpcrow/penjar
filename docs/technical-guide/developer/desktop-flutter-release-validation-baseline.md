@@ -360,6 +360,8 @@ CI baseline note:
     (`"0X1"`, `"0B1"`) so case normalization changes cannot broaden strict numeric acceptance.
   - contract matrix now also locks separator/locale numeric near-match alias behavior (`"1_0"`,
     `"1,0"`) so numeric formatting/coercion paths cannot widen strict numeric alias acceptance.
+  - contract matrix now also locks quoted numeric near-match alias behavior (`"\"1\""`, `"'1'"`)
+    so accidental quoting in env wiring cannot widen strict numeric alias acceptance.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
