@@ -5017,6 +5017,226 @@ void main() {
     );
   }
 
+  final List<({String description, Map<String, Object?> signInPayload})>
+  authStateSignedOutSignInEnvelopeCases =
+      <({String description, Map<String, Object?> signInPayload})>[
+        (
+          description: 'result envelope authState signedOut alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'signedOut': true,
+                'sessionToken': 'sign-in-result-signed-out-camel-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState signedOut alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'signedOut': true,
+                'sessionToken': 'sign-in-data-signed-out-camel-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'result envelope authState signed_out alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'signed_out': true,
+                'sessionToken': 'sign-in-result-signed-out-snake-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState signed_out alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'signed_out': true,
+                'sessionToken': 'sign-in-data-signed-out-snake-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'result envelope authState isSignedOut alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'isSignedOut': true,
+                'sessionToken': 'sign-in-result-is-signed-out-camel-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState isSignedOut alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'isSignedOut': true,
+                'sessionToken': 'sign-in-data-is-signed-out-camel-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'result envelope authState loggedOut alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'loggedOut': true,
+                'sessionToken': 'sign-in-result-logged-out-camel-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState loggedOut alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'loggedOut': true,
+                'sessionToken': 'sign-in-data-logged-out-camel-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'result envelope authState logged_out alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'logged_out': true,
+                'sessionToken': 'sign-in-result-logged-out-snake-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState logged_out alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'logged_out': true,
+                'sessionToken': 'sign-in-data-logged-out-snake-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'result envelope authState isLoggedOut alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'isLoggedOut': true,
+                'sessionToken': 'sign-in-result-is-logged-out-camel-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState isLoggedOut alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'isLoggedOut': true,
+                'sessionToken': 'sign-in-data-is-logged-out-camel-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'result envelope authState is_signed_out alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_signed_out': true,
+                'sessionToken': 'sign-in-result-is-signed-out-snake-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState is_signed_out alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_signed_out': true,
+                'sessionToken': 'sign-in-data-is-signed-out-snake-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'result envelope authState is_logged_out alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_logged_out': true,
+                'sessionToken': 'sign-in-result-is-logged-out-snake-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState is_logged_out alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_logged_out': true,
+                'sessionToken': 'sign-in-data-is-logged-out-snake-token',
+              },
+            },
+          },
+        ),
+      ];
+
+  for (final ({String description, Map<String, Object?> signInPayload}) caseData
+      in authStateSignedOutSignInEnvelopeCases) {
+    testWidgets(
+      'auth/session parity maps sign-in ${caseData.description} to deterministic signed-out fallback',
+      (WidgetTester tester) async {
+        await pumpDesktopApp(
+          tester,
+          contracts: DesktopContractBundle.fromMode(
+            DesktopContractMode.remoteStub,
+            remoteStubTransportClient:
+                _AuthBackendAuthStateEnvelopeFixtureParityTransportClient(
+                  signInPayload: caseData.signInPayload,
+                ),
+          ),
+        );
+        await openWorkflowSection(tester, 'auth');
+
+        await tester.enterText(
+          find.byKey(const ValueKey<String>('auth-password')),
+          'desktop-pass',
+        );
+        await tester.ensureVisible(
+          find.byKey(const ValueKey<String>('auth-sign-in')),
+        );
+        await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining('Status: [remote-stub] Authentication required.'),
+          findsOneWidget,
+        );
+        final CheckboxListTile rememberSessionTile = tester.widget(
+          find.byKey(const ValueKey<String>('auth-remember')),
+        );
+        expect(rememberSessionTile.value, isFalse);
+        expect(find.textContaining('Signed in (simulated).'), findsNothing);
+      },
+    );
+  }
+
   final List<
     ({
       String description,

@@ -11185,6 +11185,69 @@ signed-in-false aliases map deterministically on both `result.authState` and `da
     at default false for explicit-false sign-in fixtures.
   - targeted auth tests and full desktop verification remain green after expansion.
 
+## Unit WS-D-235: sign-in direct-wrapper signed-out alias symmetry (`signedOut`/`signed_out`/`isSignedOut`/`loggedOut`/`logged_out`/`isLoggedOut`/`is_signed_out`/`is_logged_out`)
+
+### Planned objective
+
+Close sign-in direct-wrapper signed-out alias gaps by extending contract and parity fixtures so
+all explicit signed-out aliases map deterministically on both `result.authState` and
+`data.authState`.
+
+### Implemented changes
+
+1. Expanded sign-in contract fallback fixture matrix in
+   `desktop/test/contracts/workflow_contracts_test.dart` with direct `result/data.authState`
+   signed-out alias coverage for eight aliases:
+   - `signedOut=true`,
+   - `signed_out=true`,
+   - `isSignedOut=true`,
+   - `loggedOut=true`,
+   - `logged_out=true`,
+   - `isLoggedOut=true`,
+   - `is_signed_out=true`,
+   - `is_logged_out=true`.
+2. Added sign-in signed-out parity loop in
+   `desktop/test/parity/auth_session_parity_test.dart` with matching direct
+   `result/data.authState` alias fixtures and deterministic signed-out fallback assertions.
+3. Synced continuity docs for latest sign-in signed-out direct-wrapper evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && dart format test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - sign-in direct-wrapper signed-out alias completeness against existing refresh/restore alias
+    fallback matrix,
+  - contract/parity consistency for wrapper (`result`/`data`) and signed-out alias permutations,
+  - deterministic fallback/status behavior and remember-toggle state under sign-in signed-out
+    payloads.
+- **Issues found during review**
+  1. Sign-in direct-wrapper signed-out aliases were not yet covered while restore-session and
+     refresh-token had full signed-out alias wrapper locks.
+  2. This left operation-scoped drift risk if backend sign-in responses provided signed-out state
+     only under direct `authState` wrappers.
+- **Fix applied**
+  1. Added sixteen sign-in contract fixtures (eight aliases × result/data wrappers) with
+     deterministic fallback-status assertions.
+  2. Added sixteen sign-in parity cases using the same alias/wrapper matrix with signed-out
+     fallback assertions.
+  3. Re-ran formatter + targeted tests + full verification chain after fixture/parity expansion.
+  4. Updated continuity docs so current auth baseline points to WS-D-235 evidence.
+- **Post-fix validation criteria**
+  - sign-in direct wrappers now lock signed-out alias fallback behavior for all eight variants on
+    both `result` and `data` envelopes.
+  - parity sign-in flow maps each added alias/wrapper combination to deterministic fallback status
+    (`Authentication required.`), suppresses `Signed in (simulated).`, and keeps remember toggle
+    at default false for signed-out sign-in fixtures.
+  - targeted auth tests and full desktop verification remain green after expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

@@ -149,6 +149,12 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      `is_logged_in`,
    - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
      (`Unit WS-D-234`).
+22. Sign-in direct-wrapper signed-out alias parity completion:
+   - auth fixture + parity suites now include direct `result/data.authState` sign-in signed-out
+     alias fallback coverage for `signedOut`, `signed_out`, `isSignedOut`, `loggedOut`,
+     `logged_out`, `isLoggedOut`, `is_signed_out`, and `is_logged_out`,
+   - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
+     (`Unit WS-D-235`).
 
 ## Remaining integration gaps (auth scope)
 
