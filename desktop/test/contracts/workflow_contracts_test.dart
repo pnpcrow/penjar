@@ -2459,6 +2459,28 @@ void main() {
       ),
       const _AuthBackendFixtureCase(
         name:
+            'sign-in result envelope with authState is_signed_in alias success',
+        operationId: RemoteStubOperationIds.signIn,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'detail':
+                'Fixture sign-in result envelope is_signed_in alias applied.',
+            'authState': <String, Object?>{
+              'is_signed_in': true,
+              'remember_session': true,
+              'tokens': <String, Object?>{
+                'accessToken': 'fixture-result-envelope-is-signed-in-token',
+              },
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture sign-in result envelope is_signed_in alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
             'refresh-token result payload envelope authState signed_out alias maps fallback status',
         operationId: RemoteStubOperationIds.refreshToken,
         responsePayload: <String, Object?>{
@@ -2648,6 +2670,21 @@ void main() {
             'authState': <String, Object?>{
               'signed_in': false,
               'sessionToken': 'fixture-signed-in-false-result-token',
+            },
+          },
+        },
+        expectedSignedIn: false,
+        expectedStatus: '[remote-stub] Authentication required.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session result envelope authState is_signed_in false alias maps fallback status',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'authState': <String, Object?>{
+              'is_signed_in': false,
+              'sessionToken': 'fixture-is-signed-in-false-result-token',
             },
           },
         },

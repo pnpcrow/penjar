@@ -4478,6 +4478,21 @@ void main() {
           expectedStatus:
               'Backend authState data envelope is_signed_in applied.',
         ),
+        (
+          description: 'result envelope authState is_signed_in alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail':
+                  'Backend authState result envelope is_signed_in applied.',
+              'authState': <String, Object?>{
+                'is_signed_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend authState result envelope is_signed_in applied.',
+        ),
       ];
 
   for (final ({
@@ -4720,6 +4735,21 @@ void main() {
               'authState': <String, Object?>{
                 'signed_in': false,
                 'sessionToken': 'auth-state-signed-in-false-result-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
+          description: 'result envelope authState is_signed_in false alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_signed_in': false,
+                'sessionToken': 'auth-state-is-signed-in-false-result-token',
               },
             },
           },
