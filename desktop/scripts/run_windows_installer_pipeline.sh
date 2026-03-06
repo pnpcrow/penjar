@@ -139,7 +139,12 @@ fi
   fi
 } > "$report_file"
 
-if [[ ( "$strict_mode" -eq 1 || "$strict_protocol_mode" -eq 1 ) && ( "$execution_status" == "failed" || "$protocol_execution_status" == "failed" ) ]]; then
+if [[ "$strict_mode" -eq 1 ]]; then
+  if [[ "$execution_status" == "failed" || "$protocol_execution_status" == "failed" ]]; then
+    echo "[windows-installer-pipeline] strict mode failed. report: $report_file" >&2
+    exit 1
+  fi
+elif [[ "$strict_protocol_mode" -eq 1 && "$protocol_execution_status" == "failed" ]]; then
   echo "[windows-installer-pipeline] strict mode failed. report: $report_file" >&2
   exit 1
 fi

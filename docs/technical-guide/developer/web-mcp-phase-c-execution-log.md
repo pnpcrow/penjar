@@ -14648,6 +14648,58 @@ installer/protocol command failure and placeholder command scenarios.
   - release/debug non-strict warning-path behavior remains symmetric and deterministic.
   - full desktop verify remains green after matrix expansion.
 
+## Unit WS-D-294: strict-protocol installer-failure gating fix
+
+### Planned objective
+
+Correct strict-protocol gating semantics so strict protocol mode fails only on protocol-registration
+failures, while installer command non-zero failures remain warning-based when strict installer mode
+is not enabled.
+
+### Implemented changes
+
+1. Fixed strict-failure gating logic in
+   `desktop/scripts/run_windows_installer_pipeline.sh`:
+   - strict installer mode (`strict_mode=1`) continues to fail on installer/protocol failures,
+   - strict protocol-only mode now fails only when `protocol_execution_status=failed`,
+   - installer execution failures no longer hard-fail strict protocol mode by themselves.
+2. Added regression cases in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - `strict-protocol-installer-command-failure-warning-pass`,
+   - `debug-mode-strict-protocol-installer-command-failure-warning-pass`.
+3. Locked deterministic warning behavior for fixed path:
+   - report assertion: `- Error: installer command failed`,
+   - log assertion: `[windows-installer-pipeline] warning: pipeline failed.`,
+   - strict protocol mode remains pass/non-blocking when protocol command succeeds.
+4. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-294
+     strict-protocol gating fix evidence lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     dedicated regression coverage for this strict-protocol behavior.
+5. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict-mode fail gating behavior in `run_windows_installer_pipeline.sh`,
+  - strict protocol mode interactions with installer command execution failures,
+  - regression coverage for release/debug strict protocol behavior.
+- **Issues found during review**
+  1. previous gating treated strict protocol mode as hard-fail when installer execution failed,
+     even if protocol registration succeeded.
+  2. this mixed strict installer semantics into strict protocol-only execution path and was not
+     aligned with strict-protocol intent.
+- **Fix applied**
+  1. split strict fail condition by mode: installer strict handles installer/protocol failures,
+     protocol strict handles protocol failures only.
+  2. added release/debug contract cases to prevent strict-protocol installer-failure regression.
+- **Post-fix validation criteria**
+  - strict protocol mode no longer fails when only installer command fails and protocol succeeds.
+  - strict protocol mode still fails deterministically on protocol command failures.
+  - full desktop verify remains green after gating fix.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

@@ -392,6 +392,32 @@ run_case \
   "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=true"
 
 run_case \
+  "strict-protocol-installer-command-failure-warning-pass" \
+  "pass" \
+  "Strict protocol mode should keep installer command non-zero failures non-blocking when protocol command succeeds in release mode." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Error: installer command failed" \
+  "[windows-installer-pipeline] warning: pipeline failed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=1" \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=false" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=true"
+
+run_case \
+  "debug-mode-strict-protocol-installer-command-failure-warning-pass" \
+  "pass" \
+  "Strict protocol mode should keep installer command non-zero failures non-blocking when protocol command succeeds in debug mode." \
+  setup_debug_runner_case \
+  "0" \
+  "debug" \
+  "- Error: installer command failed" \
+  "[windows-installer-pipeline] warning: pipeline failed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=1" \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=false" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=true"
+
+run_case \
   "strict-protocol-command-failure-fail" \
   "fail" \
   "Strict protocol mode must fail when protocol registration command returns non-zero in release mode." \

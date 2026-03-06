@@ -287,6 +287,8 @@ CI baseline note:
     failures and placeholder command paths in release mode.
   - contract matrix now also locks non-strict warning behavior for installer/protocol command
     failures and placeholder command paths in debug mode.
+  - strict protocol mode now has dedicated regression coverage proving installer command non-zero
+    failures remain non-blocking when protocol registration succeeds (release/debug).
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
