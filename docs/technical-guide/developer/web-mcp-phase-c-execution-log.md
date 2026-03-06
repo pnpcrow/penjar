@@ -15096,6 +15096,51 @@ tab-wrapped alias inputs, ensuring `[:space:]` handling remains stable beyond pl
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-302.
 
+## Unit WS-D-303: newline-whitespace strict alias regression coverage
+
+### Planned objective
+
+Complete whitespace-class strict toggle regression guards by locking newline-wrapped alias handling
+for strict installer/protocol toggles.
+
+### Implemented changes
+
+1. Expanded strict installer whitespace matrix in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-newline-whitespace-yes-alias-placeholder-fail`,
+   - uses strict argument fixture `\nYES\n`,
+   - locks strict placeholder failure semantics after newline trim normalization.
+2. Expanded strict protocol whitespace matrix in the same checker:
+   - added `strict-protocol-newline-whitespace-true-alias-missing-command-fail`,
+   - uses env fixture `STRICT_WINDOWS_PROTOCOL_REGISTRATION=\nTRUE\n`,
+   - locks strict protocol missing-command failure semantics after newline trim normalization.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-303
+     newline-whitespace alias regression lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     newline-wrapped strict alias matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict toggle behavior for newline-wrapped installer/protocol alias inputs,
+  - whitespace-class coverage completeness after space/tab coverage locks,
+  - deterministic strict fail semantics under newline-normalized aliases.
+- **Issues found during review**
+  1. prior matrix covered space/tab variants but did not explicitly lock newline-wrapped aliases.
+  2. command-substitution/env-template flows can introduce trailing newlines; without explicit cases
+     this could regress strict behavior undetected.
+- **Fix applied**
+  1. added dedicated newline-wrapped strict installer/protocol alias contract cases.
+  2. kept strict mode label and failure diagnostic assertions to lock parser outcomes end-to-end.
+- **Post-fix validation criteria**
+  - contract checker passes with newline-whitespace alias fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-303.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
