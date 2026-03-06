@@ -15924,6 +15924,53 @@ remain non-strict in installer/protocol parser paths.
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-320.
 
+## Unit WS-D-321: numeric near-match strict alias boundary regression coverage
+
+### Planned objective
+
+Prevent numeric strict alias overmatching by locking non-canonical numeric near matches as
+non-strict paths.
+
+### Implemented changes
+
+1. Expanded strict installer numeric near-match coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-nearmatch-leading-zero-one-alias-missing-command-pass`,
+   - added `strict-installer-nearmatch-decimal-one-zero-alias-missing-command-pass`,
+   - fixtures `01` and `1.0` assert `- Strict mode: 0` with non-blocking completion.
+2. Expanded strict protocol numeric near-match coverage in the same checker:
+   - added `strict-protocol-nearmatch-leading-zero-one-alias-missing-command-pass`,
+   - added `strict-protocol-nearmatch-decimal-one-zero-alias-missing-command-pass`,
+   - fixtures `STRICT_WINDOWS_PROTOCOL_REGISTRATION=01` and `=1.0` assert
+     `- Strict protocol registration mode: 0` with non-blocking completion.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-321
+     numeric near-match boundary lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     numeric near-match strict boundary matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict numeric alias boundary around canonical `1` toggle,
+  - installer/protocol non-overmatch behavior for non-canonical numeric variants,
+  - compatibility with existing strict-positive numeric alias fixture (`" 1 "`).
+- **Issues found during review**
+  1. canonical strict numeric alias coverage (`1`) existed, but non-canonical near matches (`01`,
+     `1.0`) were not explicitly locked as non-strict.
+  2. without explicit numeric near-match fixtures, parser refactors could inadvertently broaden
+     numeric strict inference.
+- **Fix applied**
+  1. added installer/protocol numeric near-match pass fixtures with strict-mode-zero assertions.
+  2. retained all existing strict-positive and warning-path coverage semantics.
+- **Post-fix validation criteria**
+  - contract checker passes with numeric near-match fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-321.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
