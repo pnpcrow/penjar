@@ -392,6 +392,9 @@ CI baseline note:
     (`"1===1"`, `"1!==1"`) so strict-equality values cannot widen strict acceptance.
   - contract matrix now also locks nullish-optional numeric near-match alias behavior
     (`"1??1"`, `"1?.1"`) so nullish/optional values cannot widen strict acceptance.
+  - assertion scanning in `desktop/scripts/check_windows_installer_pipeline_contract.sh` now uses
+    fixed-string file checks (`grep -Fq`) for report/log pattern verification instead of loading
+    full file contents into shell variables per case.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.

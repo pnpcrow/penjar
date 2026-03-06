@@ -113,7 +113,6 @@ run_case() {
   ensure_unique_case_name "$case_name"
 
   local case_index case_root tmp_report tmp_log rc actual result report_assertion log_assertion
-  local report_content log_content
   case_index=$((total_cases + 1))
   case_root="$scratch_root/case_${case_index}"
   mkdir -p "$case_root"
@@ -144,8 +143,7 @@ run_case() {
     if [[ ! -f "$tmp_report" ]]; then
       report_assertion="missing: ${required_report_pattern}"
     else
-      report_content="$(<"$tmp_report")"
-      if [[ "$report_content" != *"$required_report_pattern"* ]]; then
+      if ! grep -Fq -- "$required_report_pattern" "$tmp_report"; then
         report_assertion="missing: ${required_report_pattern}"
       fi
     fi
@@ -156,8 +154,7 @@ run_case() {
     if [[ ! -f "$tmp_log" ]]; then
       log_assertion="missing: ${required_log_pattern}"
     else
-      log_content="$(<"$tmp_log")"
-      if [[ "$log_content" != *"$required_log_pattern"* ]]; then
+      if ! grep -Fq -- "$required_log_pattern" "$tmp_log"; then
         log_assertion="missing: ${required_log_pattern}"
       fi
     fi

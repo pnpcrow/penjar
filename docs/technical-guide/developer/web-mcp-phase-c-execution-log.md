@@ -16931,6 +16931,51 @@ nullish-coalescing and optional-dot numeric near matches as non-strict paths.
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-341.
 
+## Unit WS-D-342: installer contract assertion scan performance optimization
+
+### Planned objective
+
+Reduce per-case assertion overhead in the Windows installer pipeline contract checker by replacing
+full-file shell-string loading with fixed-string file scanning while preserving behavior.
+
+### Implemented changes
+
+1. Optimized report assertion scanning in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - replaced `report_content="$(<file)"` + shell wildcard matching with
+     `grep -Fq -- "$required_report_pattern" "$tmp_report"`.
+2. Optimized log assertion scanning in the same checker:
+   - replaced `log_content="$(<file)"` + shell wildcard matching with
+     `grep -Fq -- "$required_log_pattern" "$tmp_log"`.
+3. Removed now-unneeded temporary full-file variables for report/log content in `run_case`.
+4. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-342
+     assertion-scan optimization lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     fixed-string assertion scanning baseline.
+5. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - equivalence of report/log required-pattern assertion semantics,
+  - contract checker reliability after matcher-path refactor,
+  - runtime overhead characteristics for large report/log artifacts.
+- **Issues found during review**
+  1. previous implementation loaded full report/log files into shell variables per case, increasing
+     allocation overhead as case count/report sizes grow.
+  2. shell wildcard matching on full strings was functionally correct but less memory-efficient than
+     direct fixed-string file scanning.
+- **Fix applied**
+  1. switched both report/log required-pattern checks to `grep -Fq` fixed-string scans.
+  2. retained existing missing-file and missing-pattern failure semantics and case-row reporting.
+- **Post-fix validation criteria**
+  - contract checker passes with unchanged case expectations.
+  - full desktop verify remains green after matcher-path optimization.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-342.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
