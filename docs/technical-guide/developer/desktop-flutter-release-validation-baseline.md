@@ -332,6 +332,8 @@ CI baseline note:
   - strict toggle runtime parser now resolves trim normalization through a shared normalized buffer
     instead of command-substitution return path to reduce subshell overhead while preserving alias
     inference behavior.
+  - contract matrix now also locks whitespace-wrapped numeric zero alias behavior (`" 0 "`) so
+    installer/protocol strict parser inference keeps zero-valued toggles explicitly non-strict.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.

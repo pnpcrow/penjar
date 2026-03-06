@@ -337,6 +337,16 @@ run_case \
   "[windows-installer-pipeline] completed."
 
 run_case \
+  "strict-installer-whitespace-zero-alias-missing-command-pass" \
+  "pass" \
+  "Strict installer mode parser should trim alias ' 0 ' and keep it non-strict when installer command is missing." \
+  setup_release_runner_case \
+  " 0 " \
+  "release" \
+  "- Strict mode: 0" \
+  "[windows-installer-pipeline] completed."
+
+run_case \
   "strict-installer-strict-alias-clear-command-pass" \
   "pass" \
   "Strict installer mode parser should treat strict input alias 'strict' as strict and pass when installer command succeeds." \
@@ -635,6 +645,17 @@ run_case \
   "- Strict protocol registration mode: 0" \
   "[windows-installer-pipeline] completed." \
   "STRICT_WINDOWS_PROTOCOL_REGISTRATION=off"
+
+run_case \
+  "strict-protocol-whitespace-zero-alias-missing-command-pass" \
+  "pass" \
+  "Strict protocol mode parser should trim alias ' 0 ' and keep it non-strict when protocol command is missing." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Strict protocol registration mode: 0" \
+  "[windows-installer-pipeline] completed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION= 0 "
 
 run_case \
   "strict-protocol-uppercase-true-alias-missing-command-fail" \

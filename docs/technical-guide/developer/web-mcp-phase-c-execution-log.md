@@ -15606,6 +15606,51 @@ from toggle trim normalization while keeping strict alias semantics identical.
   - full desktop verify remains green after parser-path optimization.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-313.
 
+## Unit WS-D-314: whitespace zero alias non-strict regression coverage
+
+### Planned objective
+
+Ensure trim normalization does not accidentally elevate zero-valued toggles to strict mode by
+locking whitespace-wrapped numeric zero aliases in installer/protocol parser paths.
+
+### Implemented changes
+
+1. Expanded strict installer non-overmatch coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-whitespace-zero-alias-missing-command-pass`,
+   - strict argument fixture `" 0 "` now asserts `- Strict mode: 0` and non-blocking completion.
+2. Expanded strict protocol non-overmatch coverage in the same checker:
+   - added `strict-protocol-whitespace-zero-alias-missing-command-pass`,
+   - env fixture `STRICT_WINDOWS_PROTOCOL_REGISTRATION= 0 ` now asserts
+     `- Strict protocol registration mode: 0` and non-blocking completion.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-314
+     whitespace-zero alias lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     numeric-zero non-strict alias matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict parser handling of zero-valued toggle aliases under trim normalization,
+  - installer/protocol non-strict behavior when command hooks are missing,
+  - interaction between numeric alias coverage (`" 1 "`) and zero-path non-overmatch safety.
+- **Issues found during review**
+  1. numeric strict alias coverage existed for `" 1 "`, but complementary zero non-strict behavior
+     (`" 0 "`) was not explicitly locked.
+  2. without explicit zero-path fixtures, future parser refactors could accidentally broaden strict
+     interpretation around numeric aliases.
+- **Fix applied**
+  1. added installer/protocol whitespace-zero fixtures with strict-mode-zero assertions.
+  2. retained full verification gate to ensure matrix expansion introduces no side effects.
+- **Post-fix validation criteria**
+  - contract checker passes with whitespace-zero alias fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-314.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
