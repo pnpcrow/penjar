@@ -175,6 +175,14 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      `loggedOut`),
    - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
      (`Unit WS-D-238`).
+26. Parity restore/refresh signed-in-false matrix symmetry automation guard completion:
+   - `desktop/test/parity/auth_session_parity_test.dart` now includes an additional matrix guard
+     that enforces direct `result/data.authState` explicit `false` alias symmetry for
+     restore-session and refresh-token operations across the signed-in alias set
+     (`isAuthenticated`, `loggedIn`, `isLoggedIn`, `is_authenticated`, `signedIn`,
+     `authenticated`, `signed_in`, `is_signed_in`, `logged_in`, `is_logged_in`),
+   - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
+     (`Unit WS-D-239`).
 
 ## Remaining integration gaps (auth scope)
 

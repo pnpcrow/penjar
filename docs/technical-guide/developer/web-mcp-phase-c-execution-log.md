@@ -11408,6 +11408,64 @@ drift is detected directly in parity suites, then close any newly exposed residu
     `signedOut` and `loggedOut` alongside existing alias variants.
   - targeted auth tests and full desktop verification remain green after closure.
 
+## Unit WS-D-239: parity restore/refresh signed-in-false matrix symmetry guard completion
+
+### Planned objective
+
+Close the remaining parity automation blind spot by adding an explicit restore-session /
+refresh-token direct-wrapper signed-in-false (`authState.*=false`) matrix guard, matching the
+existing signed-in/signed-out guard coverage and making alias-drift detection immediate.
+
+### Implemented changes
+
+1. Added a new parity matrix-guard test in `desktop/test/parity/auth_session_parity_test.dart`:
+   - `auth/session parity restore/refresh signed-in-false authState matrix is symmetric`.
+2. The new guard enforces matrix completeness for:
+   - operations: `auth-refresh-token`, `auth-restore-session`,
+   - wrappers: `result`, `data`,
+   - aliases: `isAuthenticated`, `loggedIn`, `isLoggedIn`, `is_authenticated`, `signedIn`,
+     `authenticated`, `signed_in`, `is_signed_in`, `logged_in`, `is_logged_in`,
+   - value: explicit `false`.
+3. Guard implementation reuses existing parity fixtures by filtering
+   `authStateSignedOutEnvelopeCases` per `actionKey` and evaluating alias presence through
+   `hasAuthStateAliasPayload(...)` to avoid duplicate fixture tables.
+4. Synced continuity docs for WS-D-239 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+5. Re-ran validation commands:
+   - `cd desktop && dart format test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - parity matrix automation completeness for restore-session/refresh-token signed-in-false
+    alias paths,
+  - wrapper symmetry (`result`/`data`) and alias symmetry against the canonical signed-in alias
+    set,
+  - regression impact on existing auth/session parity and full verification chain.
+- **Issues found during review**
+  1. Existing parity guards covered restore/refresh signed-out aliases and sign-in signed-in-false
+     aliases, but did not explicitly enforce restore/refresh signed-in-false alias symmetry.
+  2. This left a targeted drift risk where a restore/refresh `authState.<signedInAlias>=false`
+     case could be removed without immediate parity-guard failure.
+- **Fix applied**
+  1. Added restore/refresh signed-in-false matrix guard with deterministic missing-entry output
+     (`Missing parity matrix entries`).
+  2. Kept fixture source-of-truth centralized by reusing existing envelope-case tables and helper
+     predicates.
+  3. Re-ran targeted auth contract/parity tests and full desktop verification after guard
+     integration.
+- **Post-fix validation criteria**
+  - parity suite now fails immediately if any restore/refresh direct `result/data.authState`
+    signed-in alias `false` matrix entry is missing.
+  - guard passes with zero missing entries on current fixture set.
+  - targeted auth tests and full desktop verification remain green after guard addition.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
