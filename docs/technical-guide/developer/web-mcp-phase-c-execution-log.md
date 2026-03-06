@@ -14797,6 +14797,55 @@ in Windows installer pipeline contract coverage.
   - strict alias inputs resolve deterministically to strict semantics.
   - full desktop verify remains green after alias matrix expansion.
 
+## Unit WS-D-297: alias matrix completeness expansion
+
+### Planned objective
+
+Close remaining strict alias-path gaps by extending contract coverage to additional `yes/strict/true`
+interaction combinations across strict installer and strict protocol release/debug scenarios.
+
+### Implemented changes
+
+1. Expanded strict installer alias coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-yes-alias-placeholder-fail`,
+   - added `debug-mode-strict-installer-true-alias-clear-command-pass`.
+2. Expanded strict protocol alias coverage in the same checker:
+   - added `strict-protocol-strict-alias-missing-command-fail`,
+   - added `strict-protocol-yes-alias-installer-command-failure-warning-pass`.
+3. Locked additional alias interaction expectations:
+   - strict installer alias `yes` now explicitly asserts strict placeholder failure behavior,
+   - debug strict installer alias `true` now explicitly asserts strict pass behavior,
+   - strict protocol alias `strict` now explicitly asserts strict missing-command failure behavior,
+   - strict protocol alias `yes` now explicitly asserts installer-failure warning non-blocking
+     behavior when protocol command succeeds.
+4. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-297
+     alias matrix completeness lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     expanded alias interaction matrix scope.
+5. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - remaining strict installer alias permutations (`yes/true`) in release/debug strict paths,
+  - remaining strict protocol alias permutations (`strict/yes`) across fail/warning interactions,
+  - deterministic report/log outcomes for alias-triggered strict semantics.
+- **Issues found during review**
+  1. prior alias coverage established baseline parsing guarantees but left several interaction
+     combinations implicitly covered rather than explicitly locked.
+  2. release/debug alias interaction parity could still drift on uncovered combinations.
+- **Fix applied**
+  1. added four targeted alias interaction cases to complete the high-risk matrix gaps.
+  2. added explicit report/log assertions for strict fail/pass and warning non-blocking outcomes.
+- **Post-fix validation criteria**
+  - contract checker passes with expanded alias interaction matrix.
+  - alias-triggered strict semantics remain deterministic across release/debug paths.
+  - full desktop verify remains green after matrix expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

@@ -276,6 +276,17 @@ run_case \
   "PENJAR_WINDOWS_INSTALLER_COMMAND=true"
 
 run_case \
+  "strict-installer-yes-alias-placeholder-fail" \
+  "fail" \
+  "Strict installer mode parser should treat strict input alias 'yes' as strict and fail on placeholder installer command." \
+  setup_release_runner_case \
+  "yes" \
+  "release" \
+  "- Strict mode: 1" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=placeholder"
+
+run_case \
   "strict-installer-placeholder-command-fail" \
   "fail" \
   "Strict installer mode must fail when installer command is a placeholder value." \
@@ -367,6 +378,17 @@ run_case \
   "PENJAR_WINDOWS_INSTALLER_COMMAND=true"
 
 run_case \
+  "debug-mode-strict-installer-true-alias-clear-command-pass" \
+  "pass" \
+  "Strict installer alias 'true' should pass in debug mode when installer command succeeds." \
+  setup_debug_runner_case \
+  "true" \
+  "debug" \
+  "- Strict mode: 1" \
+  "[windows-installer-pipeline] completed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=true"
+
+run_case \
   "debug-mode-strict-protocol-missing-command-fail" \
   "fail" \
   "Strict protocol mode should fail in debug build mode when protocol command is missing." \
@@ -398,6 +420,17 @@ run_case \
   "- Strict protocol registration mode: 1" \
   "[windows-installer-pipeline] strict mode failed." \
   "STRICT_WINDOWS_PROTOCOL_REGISTRATION=true"
+
+run_case \
+  "strict-protocol-strict-alias-missing-command-fail" \
+  "fail" \
+  "Strict protocol mode parser should treat protocol alias 'strict' as strict and fail on missing protocol command." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Strict protocol registration mode: 1" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=strict"
 
 run_case \
   "strict-protocol-placeholder-command-fail" \
@@ -434,6 +467,19 @@ run_case \
   "[windows-installer-pipeline] warning: placeholder installer command detected." \
   "STRICT_WINDOWS_PROTOCOL_REGISTRATION=strict" \
   "PENJAR_WINDOWS_INSTALLER_COMMAND=placeholder" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=true"
+
+run_case \
+  "strict-protocol-yes-alias-installer-command-failure-warning-pass" \
+  "pass" \
+  "Strict protocol alias 'yes' should keep installer command non-zero failures non-blocking when protocol command succeeds." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Error: installer command failed" \
+  "[windows-installer-pipeline] warning: pipeline failed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=yes" \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=false" \
   "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=true"
 
 run_case \
