@@ -41,11 +41,11 @@ This inventory tracks remaining non-Flutter desktop paths and their decommission
 | Export UX | `frontend/src/app/main/ui/exports/files.cljs`, `frontend/src/app/main/data/exports/files.cljs`, `frontend/src/app/main/ui/workspace/sidebar/options/menus/exports.cljs` | Export dialogs and export orchestration are implemented in web UI + data flows | Flutter export flow with parity in format/options/status and save UX | Baseline Flutter export workflow surface and runtime-switchable in-memory/remote-stub contract boundary are implemented; sibling `result`/`data` envelope fallback regression coverage is now added in contract/parity suites (`desktop/test/contracts/workflow_contracts_test.dart`, `desktop/test/parity/export_workflow_parity_test.dart`), and backend export pipeline and native save bridge integration remain pending | Export Pipeline | 2026-09-15 | In progress | [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/) |
 | Diagnostics/recovery UX | `frontend/src/app/main/data/websocket.cljs`, `frontend/src/app/main/data/workspace/mcp.cljs`, `mcp/scripts/verify-live-evidence` | Web runtime handles ws/MCP events; diagnostics are script/tooling-centric and not surfaced via desktop-native UX | Flutter-native diagnostics/recovery surface with embedded MCP health and reconnect guidance | Baseline Flutter diagnostics/recovery surface and runtime-switchable in-memory/remote-stub contract boundary are implemented; sibling `result`/`data` envelope fallback regression coverage is now added in contract/parity suites (`desktop/test/contracts/workflow_contracts_test.dart`, `desktop/test/parity/diagnostics_recovery_parity_test.dart`), and live telemetry ingestion and reconnect policy orchestration remain pending | Platform Reliability | 2026-09-30 | In progress | [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/) |
 
-Latest auth/session continuity evidence update: `Unit WS-D-230` closes refresh-token direct
-wrapper signed-out parity for full `result/data.authState` alias coverage (`signedOut`,
-`signed_out`, `isSignedOut`, `loggedOut`, `logged_out`, `isLoggedOut`, `is_signed_out`,
-`is_logged_out`) and is logged in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-229`,
-`Unit WS-D-230`).
+Latest auth/session continuity evidence update: `Unit WS-D-231` extends refresh-token direct
+wrapper parity to explicit signed-in-false aliases for full `result/data.authState` coverage
+(`isAuthenticated`, `loggedIn`, `isLoggedIn`, `is_authenticated`, `signedIn`, `authenticated`,
+`signed_in`, `is_signed_in`, `logged_in`, `is_logged_in`) and is logged in
+`web-mcp-phase-c-execution-log.md` (`Unit WS-D-231`).
 
 ## Review cadence
 

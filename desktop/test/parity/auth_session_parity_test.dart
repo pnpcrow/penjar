@@ -5247,6 +5247,344 @@ void main() {
           absentSuccessText: 'Session restored (simulated).',
         ),
         (
+          description:
+              'refresh-token result envelope authState isAuthenticated false alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'isAuthenticated': false,
+                'sessionToken':
+                    'auth-state-is-authenticated-false-refresh-result-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token data envelope authState isAuthenticated false alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'isAuthenticated': false,
+                'sessionToken':
+                    'auth-state-is-authenticated-false-refresh-data-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token data envelope authState loggedIn false alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'loggedIn': false,
+                'sessionToken': 'auth-state-logged-in-false-refresh-data-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token result envelope authState loggedIn false alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'loggedIn': false,
+                'sessionToken':
+                    'auth-state-logged-in-false-refresh-result-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token result envelope authState isLoggedIn false alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'isLoggedIn': false,
+                'sessionToken':
+                    'auth-state-is-logged-in-false-refresh-result-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token data envelope authState isLoggedIn false alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'isLoggedIn': false,
+                'sessionToken':
+                    'auth-state-is-logged-in-false-refresh-data-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token data envelope authState is_authenticated false alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_authenticated': false,
+                'sessionToken':
+                    'auth-state-is-authenticated-false-refresh-data-snake-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token result envelope authState is_authenticated false alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_authenticated': false,
+                'sessionToken':
+                    'auth-state-is-authenticated-false-refresh-result-snake-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token result envelope authState signedIn false alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'signedIn': false,
+                'sessionToken':
+                    'auth-state-signed-in-camel-false-refresh-result-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token data envelope authState signedIn false alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'signedIn': false,
+                'sessionToken':
+                    'auth-state-signed-in-camel-false-refresh-data-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token data envelope authState authenticated false alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'authenticated': false,
+                'sessionToken':
+                    'auth-state-authenticated-false-refresh-data-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token result envelope authState authenticated false alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'authenticated': false,
+                'sessionToken':
+                    'auth-state-authenticated-false-refresh-result-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token result envelope authState signed_in false alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'signed_in': false,
+                'sessionToken':
+                    'auth-state-signed-in-false-refresh-result-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token data envelope authState signed_in false alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'signed_in': false,
+                'sessionToken': 'auth-state-signed-in-false-refresh-data-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token result envelope authState is_signed_in false alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_signed_in': false,
+                'sessionToken':
+                    'auth-state-is-signed-in-false-refresh-result-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token data envelope authState is_signed_in false alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_signed_in': false,
+                'sessionToken':
+                    'auth-state-is-signed-in-false-refresh-data-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token result envelope authState logged_in false alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'logged_in': false,
+                'sessionToken':
+                    'auth-state-logged-in-snake-false-refresh-result-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token data envelope authState logged_in false alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'logged_in': false,
+                'sessionToken':
+                    'auth-state-logged-in-snake-false-refresh-data-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token data envelope authState is_logged_in false alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_logged_in': false,
+                'sessionToken':
+                    'auth-state-is-logged-in-snake-false-refresh-data-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token result envelope authState is_logged_in false alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_logged_in': false,
+                'sessionToken':
+                    'auth-state-is-logged-in-snake-false-refresh-result-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
           description: 'result envelope authState isAuthenticated false alias',
           restoreSessionPayload: <String, Object?>{
             'result': <String, Object?>{
