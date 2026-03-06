@@ -1533,9 +1533,10 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
 }
 
 String _compactBackendCodeFromTrimmed(String trimmedCode) {
+  final int codeLength = trimmedCode.length;
   int firstUppercaseCompactIndex = -1;
   int firstNonCompactIndex = -1;
-  for (int index = 0; index < trimmedCode.length; index++) {
+  for (int index = 0; index < codeLength; index++) {
     final int codeUnit = trimmedCode.codeUnitAt(index);
     if (_isBackendCodeCompactCodeUnit(codeUnit)) {
       continue;
@@ -1555,6 +1556,7 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
         : _compactBackendAsciiLowercase(
             trimmedCode,
             startInclusive: firstUppercaseCompactIndex,
+            endExclusive: codeLength,
           );
   }
   StringBuffer? outputBuffer;
@@ -1593,11 +1595,7 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
     );
     return unicodeBuffer.toString();
   }
-  for (
-    int index = firstNonCompactIndex + 1;
-    index < trimmedCode.length;
-    index++
-  ) {
+  for (int index = firstNonCompactIndex + 1; index < codeLength; index++) {
     final int codeUnit = trimmedCode.codeUnitAt(index);
     if (codeUnit > 127) {
       final StringBuffer unicodeBuffer = outputBuffer ??= StringBuffer();
@@ -1624,6 +1622,7 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
 String _compactBackendAsciiLowercase(
   String code, {
   required int startInclusive,
+  required int endExclusive,
 }) {
   final StringBuffer buffer = StringBuffer();
   if (startInclusive > 0) {
@@ -1638,7 +1637,7 @@ String _compactBackendAsciiLowercase(
     buffer,
     code,
     startInclusive: startInclusive,
-    endExclusive: code.length,
+    endExclusive: endExclusive,
   );
   return buffer.toString();
 }

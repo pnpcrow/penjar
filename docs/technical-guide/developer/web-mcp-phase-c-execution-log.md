@@ -13479,6 +13479,66 @@ reference across suffix scans while preserving existing fallback semantics.
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-273: compact normalization boundary length caching
+
+### Planned objective
+
+Reduce compact normalization hot-path boundary overhead by caching string length and reusing explicit
+scan boundaries across no-delimiter and delimiter-suffix normalization paths.
+
+### Implemented changes
+
+1. Updated compact normalization path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_compactBackendCodeFromTrimmed(...)` now caches `trimmedCode.length` as `codeLength` and
+     reuses it across initial scan/suffix loops.
+   - no-delimiter compact-uppercase normalization now passes explicit `endExclusive` into
+     `_compactBackendAsciiLowercase(...)` so caller-cached boundaries are reused directly.
+2. Preserved existing fallback semantics:
+   - delimiter/no-delimiter normalization, Unicode fallback, marker classification, and non-exact
+     fallback behavior remain unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only capitalized compact unauthorized payload maps authentication-required fallback status`
+     (`code: "Unauthorized"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendCapitalizedCompactUnauthorizedParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps capitalized compact unauthorized backend failure to deterministic auth-required status`.
+5. Synced continuity docs for WS-D-273 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - compact normalization boundary handling in `_compactBackendCodeFromTrimmed(...)`,
+  - no-delimiter capitalized compact unauthorized marker (`code: "Unauthorized"`) fallback mapping,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. WS-D-272 still repeated `trimmedCode.length` getter lookups across scan/suffix loops.
+  2. Capitalized compact unauthorized marker behavior was not explicitly parity-locked.
+- **Fix applied**
+  1. Cached `codeLength` and reused it in scan/suffix loops plus explicit compact-uppercase boundary
+     propagation.
+  2. Added dedicated contract/parity regressions for capitalized compact unauthorized mapping.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - compact normalization reuses cached scan boundaries without altering normalization behavior.
+  - capitalized compact `code: "Unauthorized"` payloads map deterministically to auth-required
+    fallback in contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

@@ -446,6 +446,16 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      (`code: "::UNAUTHORIZED"`) to preserve deterministic auth-required fallback mapping on
      prefix-empty delimiter-path normalization and loop-local append-buffer reuse paths; execution
      evidence is recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-272`).
+60. Backend code compact normalization length-caching optimization:
+   - `_compactBackendCodeFromTrimmed(...)` now caches `trimmedCode.length` as `codeLength` and
+     reuses it across scan/suffix loops and compact-uppercase normalization boundaries to reduce
+     repeated length getter lookups on classifier hot paths,
+   - `_compactBackendAsciiLowercase(...)` now accepts explicit `endExclusive` so no-delimiter
+     compact-uppercase normalization can reuse caller-cached boundaries directly,
+   - contract/parity suites now lock capitalized compact unauthorized marker behavior
+     (`code: "Unauthorized"`) to preserve deterministic auth-required fallback mapping on the
+     no-delimiter start-indexed lowercase path with cached boundary reuse; execution evidence is
+     recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-273`).
 
 ## Remaining integration gaps (auth scope)
 
