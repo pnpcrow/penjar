@@ -4864,12 +4864,42 @@ void main() {
           absentSuccessText: 'Session restored (simulated).',
         ),
         (
+          description: 'data envelope authState isAuthenticated false alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'isAuthenticated': false,
+                'sessionToken': 'auth-state-is-authenticated-false-data-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
           description: 'data envelope authState loggedIn false alias',
           restoreSessionPayload: <String, Object?>{
             'data': <String, Object?>{
               'authState': <String, Object?>{
                 'loggedIn': false,
                 'sessionToken': 'auth-state-logged-in-false-data-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
+          description: 'result envelope authState loggedIn false alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'loggedIn': false,
+                'sessionToken': 'auth-state-logged-in-false-result-token',
               },
             },
           },
@@ -4894,12 +4924,43 @@ void main() {
           absentSuccessText: 'Session restored (simulated).',
         ),
         (
+          description: 'data envelope authState isLoggedIn false alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'isLoggedIn': false,
+                'sessionToken': 'auth-state-is-logged-in-false-data-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
           description: 'data envelope authState is_authenticated false alias',
           restoreSessionPayload: <String, Object?>{
             'data': <String, Object?>{
               'authState': <String, Object?>{
                 'is_authenticated': false,
                 'sessionToken': 'auth-state-is-authenticated-false-data-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
+          description: 'result envelope authState is_authenticated false alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_authenticated': false,
+                'sessionToken':
+                    'auth-state-is-authenticated-false-result-token',
               },
             },
           },
@@ -4924,12 +4985,42 @@ void main() {
           absentSuccessText: 'Session restored (simulated).',
         ),
         (
+          description: 'data envelope authState signedIn false alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'signedIn': false,
+                'sessionToken': 'auth-state-signed-in-camel-false-data-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
           description: 'data envelope authState authenticated false alias',
           restoreSessionPayload: <String, Object?>{
             'data': <String, Object?>{
               'authState': <String, Object?>{
                 'authenticated': false,
                 'sessionToken': 'auth-state-authenticated-false-data-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
+          description: 'result envelope authState authenticated false alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'authenticated': false,
+                'sessionToken': 'auth-state-authenticated-false-result-token',
               },
             },
           },
