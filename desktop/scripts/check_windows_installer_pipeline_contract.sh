@@ -185,6 +185,28 @@ run_case \
   "PENJAR_WINDOWS_INSTALLER_COMMAND=true"
 
 run_case \
+  "strict-installer-command-failure-fail" \
+  "fail" \
+  "Strict installer mode must fail when installer command execution returns non-zero in release mode." \
+  setup_release_runner_case \
+  "1" \
+  "release" \
+  "- Error: installer command failed" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=false"
+
+run_case \
+  "debug-mode-strict-installer-command-failure-fail" \
+  "fail" \
+  "Strict installer mode must fail when installer command execution returns non-zero in debug mode." \
+  setup_debug_runner_case \
+  "1" \
+  "debug" \
+  "- Error: installer command failed" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=false"
+
+run_case \
   "strict-installer-protocol-placeholder-fail" \
   "fail" \
   "Strict installer mode must fail when protocol command is placeholder, even without strict protocol mode." \
@@ -252,6 +274,30 @@ run_case \
   "[windows-installer-pipeline] completed." \
   "STRICT_WINDOWS_PROTOCOL_REGISTRATION=1" \
   "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=true"
+
+run_case \
+  "strict-protocol-command-failure-fail" \
+  "fail" \
+  "Strict protocol mode must fail when protocol registration command returns non-zero in release mode." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Protocol error: protocol register command failed" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=1" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=false"
+
+run_case \
+  "debug-mode-strict-protocol-command-failure-fail" \
+  "fail" \
+  "Strict protocol mode must fail when protocol registration command returns non-zero in debug mode." \
+  setup_debug_runner_case \
+  "0" \
+  "debug" \
+  "- Protocol error: protocol register command failed" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=1" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=false"
 
 run_case \
   "invalid-build-mode-fail" \

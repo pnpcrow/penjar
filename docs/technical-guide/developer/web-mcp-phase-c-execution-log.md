@@ -14451,6 +14451,55 @@ locks for installer strict mode and strict protocol registration mode.
   - strict missing-runner diagnostics remain deterministic in report/log outputs.
   - full desktop verify remains green after matrix expansion.
 
+## Unit WS-D-290: strict command-failure matrix coverage
+
+### Planned objective
+
+Close strict execution-path gaps by adding deterministic contract coverage for non-zero installer
+and protocol command exits across release/debug build modes.
+
+### Implemented changes
+
+1. Expanded strict installer execution matrix in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-command-failure-fail`,
+   - added `debug-mode-strict-installer-command-failure-fail`.
+2. Expanded strict protocol execution matrix in the same checker:
+   - added `strict-protocol-command-failure-fail`,
+   - added `debug-mode-strict-protocol-command-failure-fail`.
+3. Locked deterministic strict failure diagnostics for non-zero command exits:
+   - installer strict mode now explicitly asserts `- Error: installer command failed`,
+   - strict protocol mode now explicitly asserts
+     `- Protocol error: protocol register command failed`,
+   - release + debug log assertions now explicitly lock
+     `[windows-installer-pipeline] strict mode failed.` for these paths.
+4. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-290
+     strict command-failure release evidence lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     strict non-zero command failure matrix coverage in checker inventory notes.
+5. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict installer mode non-zero command exit handling in release/debug builds,
+  - strict protocol mode non-zero command exit handling in release/debug builds,
+  - report/log determinism for strict failure diagnostics.
+- **Issues found during review**
+  1. strict missing/placeholder paths were covered, but explicit command execution failure paths
+     were not contract-locked.
+  2. release/debug parity for strict command-failure diagnostics was not explicitly asserted.
+- **Fix applied**
+  1. introduced four strict command-failure cases spanning installer/protocol and release/debug.
+  2. added explicit report/log assertions for strict failure diagnostics on command non-zero exits.
+- **Post-fix validation criteria**
+  - contract checker passes with strict command-failure paths in release/debug matrices.
+  - strict command-failure diagnostics remain deterministic in report/log outputs.
+  - full desktop verify remains green after matrix expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

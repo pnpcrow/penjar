@@ -279,6 +279,8 @@ CI baseline note:
     command behavior in debug mode.
   - contract matrix now also locks strict missing-runner failure behavior for installer strict mode
     and strict protocol mode across release/debug build modes.
+  - contract matrix now also locks strict non-zero command failure behavior for installer/protocol
+    command execution paths across release/debug build modes.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
