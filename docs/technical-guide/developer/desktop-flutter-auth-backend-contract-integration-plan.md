@@ -197,6 +197,13 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      logic,
    - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
      (`Unit WS-D-241`).
+29. Cross-operation authState matrix assertion helper consolidation:
+   - `desktop/test/parity/auth_session_parity_test.dart` now centralizes authState matrix entry
+     detection through shared operation-level append/expect helpers reused by sign-in,
+     refresh-token, restore-session, and combined restore/refresh matrix guards, reducing repeated
+     wrapper/alias iteration logic while preserving deterministic failure diagnostics,
+   - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
+     (`Unit WS-D-242`).
 
 ## Remaining integration gaps (auth scope)
 

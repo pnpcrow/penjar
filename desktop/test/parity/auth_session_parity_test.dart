@@ -4455,6 +4455,52 @@ void main() {
     return false;
   }
 
+  void appendMissingAuthStateMatrixEntries({
+    required List<String> missingEntries,
+    required String operationLabel,
+    required Iterable<Map<String, Object?>> payloads,
+    required Iterable<String> aliases,
+    required bool expectedValue,
+  }) {
+    for (final String wrapperKey in authStateWrapperKeys) {
+      for (final String alias in aliases) {
+        if (!hasAuthStateAliasPayload(
+          payloads,
+          wrapperKey: wrapperKey,
+          alias: alias,
+          expectedValue: expectedValue,
+        )) {
+          missingEntries.add(
+            '$operationLabel $wrapperKey authState.$alias=$expectedValue',
+          );
+        }
+      }
+    }
+  }
+
+  void expectOperationAuthStateMatrixSymmetric({
+    required String operationLabel,
+    required Iterable<Map<String, Object?>> payloads,
+    required Iterable<String> aliases,
+    required bool expectedValue,
+  }) {
+    final List<String> missingEntries = <String>[];
+
+    appendMissingAuthStateMatrixEntries(
+      missingEntries: missingEntries,
+      operationLabel: operationLabel,
+      payloads: payloads,
+      aliases: aliases,
+      expectedValue: expectedValue,
+    );
+
+    expect(
+      missingEntries,
+      isEmpty,
+      reason: 'Missing parity matrix entries:\n${missingEntries.join('\n')}',
+    );
+  }
+
   final List<
     ({
       String description,
@@ -4756,27 +4802,11 @@ void main() {
     required Iterable<String> aliases,
     required bool expectedValue,
   }) {
-    final List<String> missingEntries = <String>[];
-
-    for (final String wrapperKey in authStateWrapperKeys) {
-      for (final String alias in aliases) {
-        if (!hasAuthStateAliasPayload(
-          payloads,
-          wrapperKey: wrapperKey,
-          alias: alias,
-          expectedValue: expectedValue,
-        )) {
-          missingEntries.add(
-            'sign-in $wrapperKey authState.$alias=$expectedValue',
-          );
-        }
-      }
-    }
-
-    expect(
-      missingEntries,
-      isEmpty,
-      reason: 'Missing parity matrix entries:\n${missingEntries.join('\n')}',
+    expectOperationAuthStateMatrixSymmetric(
+      operationLabel: 'sign-in',
+      payloads: payloads,
+      aliases: aliases,
+      expectedValue: expectedValue,
     );
   }
 
@@ -5654,27 +5684,11 @@ void main() {
           authStateSignedInRefreshEnvelopeCases.map(
             (caseData) => caseData.refreshTokenPayload,
           );
-      final List<String> missingEntries = <String>[];
-
-      for (final String wrapperKey in authStateWrapperKeys) {
-        for (final String alias in authStateSignedInAliases) {
-          if (!hasAuthStateAliasPayload(
-            payloads,
-            wrapperKey: wrapperKey,
-            alias: alias,
-            expectedValue: true,
-          )) {
-            missingEntries.add(
-              'refresh-token $wrapperKey authState.$alias=true',
-            );
-          }
-        }
-      }
-
-      expect(
-        missingEntries,
-        isEmpty,
-        reason: 'Missing parity matrix entries:\n${missingEntries.join('\n')}',
+      expectOperationAuthStateMatrixSymmetric(
+        operationLabel: 'refresh-token',
+        payloads: payloads,
+        aliases: authStateSignedInAliases,
+        expectedValue: true,
       );
     },
   );
@@ -6050,27 +6064,11 @@ void main() {
           authStateSignedInRestoreEnvelopeCases.map(
             (caseData) => caseData.restoreSessionPayload,
           );
-      final List<String> missingEntries = <String>[];
-
-      for (final String wrapperKey in authStateWrapperKeys) {
-        for (final String alias in authStateSignedInAliases) {
-          if (!hasAuthStateAliasPayload(
-            payloads,
-            wrapperKey: wrapperKey,
-            alias: alias,
-            expectedValue: true,
-          )) {
-            missingEntries.add(
-              'restore-session $wrapperKey authState.$alias=true',
-            );
-          }
-        }
-      }
-
-      expect(
-        missingEntries,
-        isEmpty,
-        reason: 'Missing parity matrix entries:\n${missingEntries.join('\n')}',
+      expectOperationAuthStateMatrixSymmetric(
+        operationLabel: 'restore-session',
+        payloads: payloads,
+        aliases: authStateSignedInAliases,
+        expectedValue: true,
       );
     },
   );
@@ -7359,30 +7357,20 @@ void main() {
   }) {
     final List<String> missingEntries = <String>[];
 
-    for (final String wrapperKey in authStateWrapperKeys) {
-      for (final String alias in aliases) {
-        if (!hasAuthStateAliasPayload(
-          refreshAuthStateEnvelopePayloads,
-          wrapperKey: wrapperKey,
-          alias: alias,
-          expectedValue: expectedValue,
-        )) {
-          missingEntries.add(
-            'refresh-token $wrapperKey authState.$alias=$expectedValue',
-          );
-        }
-        if (!hasAuthStateAliasPayload(
-          restoreAuthStateEnvelopePayloads,
-          wrapperKey: wrapperKey,
-          alias: alias,
-          expectedValue: expectedValue,
-        )) {
-          missingEntries.add(
-            'restore-session $wrapperKey authState.$alias=$expectedValue',
-          );
-        }
-      }
-    }
+    appendMissingAuthStateMatrixEntries(
+      missingEntries: missingEntries,
+      operationLabel: 'refresh-token',
+      payloads: refreshAuthStateEnvelopePayloads,
+      aliases: aliases,
+      expectedValue: expectedValue,
+    );
+    appendMissingAuthStateMatrixEntries(
+      missingEntries: missingEntries,
+      operationLabel: 'restore-session',
+      payloads: restoreAuthStateEnvelopePayloads,
+      aliases: aliases,
+      expectedValue: expectedValue,
+    );
 
     expect(
       missingEntries,

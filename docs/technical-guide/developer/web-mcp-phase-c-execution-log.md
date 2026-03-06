@@ -11577,6 +11577,61 @@ signed-in-false, and signed-out sign-in symmetry tests share one assertion path.
   - missing-entry output format remains deterministic for debugging matrix drift.
   - targeted auth tests and full desktop verification remain green after deduplication.
 
+## Unit WS-D-242: cross-operation authState matrix assertion helper consolidation
+
+### Planned objective
+
+Consolidate duplicated authState matrix assertion plumbing across sign-in, refresh-token,
+restore-session, and combined restore/refresh parity guards so operation-level matrix checks share
+one reusable append/expect path.
+
+### Implemented changes
+
+1. Added shared operation-level matrix helper pair in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - `appendMissingAuthStateMatrixEntries(...)`,
+   - `expectOperationAuthStateMatrixSymmetric(...)`.
+2. Updated existing sign-in matrix helper to delegate to the new operation-level helper rather than
+   re-implementing wrapper/alias loops.
+3. Replaced duplicate loops in operation-specific signed-in matrix tests with helper calls:
+   - refresh-token signed-in authState matrix symmetry test,
+   - restore-session signed-in authState matrix symmetry test.
+4. Updated combined restore/refresh matrix helper to reuse shared append helper for both operation
+   payloads, preserving single combined failure report behavior.
+5. Synced continuity docs for WS-D-242 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - residual duplicated wrapper/alias loops outside WS-D-240/241 helpers,
+  - consistency of missing-entry diagnostics across per-operation and combined-operation guards,
+  - regression impact across targeted auth suites and full desktop verification chain.
+- **Issues found during review**
+  1. Even after WS-D-240/241, refresh-token signed-in and restore-session signed-in matrix tests
+     still had local duplicate loops, and restore/refresh combined guard still duplicated loop
+     structure internally.
+  2. This left multiple assertion paths to keep in sync whenever alias/wrapper policy changes.
+- **Fix applied**
+  1. Introduced shared append + expect helpers for operation-level authState matrix assertions.
+  2. Rewired sign-in, refresh-token, restore-session, and restore/refresh combined matrix guards to
+     use shared helper plumbing.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification to ensure zero behavior
+     regressions.
+- **Post-fix validation criteria**
+  - all authState matrix guards now rely on shared operation-level assertion plumbing with
+    deterministic missing-entry diagnostics.
+  - operation labels, alias sets, wrappers, and expected-value semantics remain unchanged.
+  - targeted auth tests and full desktop verification remain green after consolidation.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
