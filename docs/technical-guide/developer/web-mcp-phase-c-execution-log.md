@@ -15333,6 +15333,50 @@ alias handling in installer/protocol strict paths.
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-307.
 
+## Unit WS-D-308: contract report markdown cell escaping hardening
+
+### Planned objective
+
+Prevent contract report table corruption when mismatch diagnostics include control characters or
+pipe/backslash content from strict alias fixtures.
+
+### Implemented changes
+
+1. Hardened report cell rendering in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `escape_markdown_cell()` utility,
+   - escapes `\n`, `\r`, `\t`, `\f`, `\v`, `|`, and `\` in Markdown table cells.
+2. Updated `append_case_row()` to route all row fields through the new escape helper before
+   appending markdown output.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-308
+     contract report cell escaping hardening,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     markdown-safe mismatch diagnostic rendering behavior.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - markdown report row stability for mismatch diagnostics containing non-printable whitespace,
+  - log/report assertion cell rendering safety under strict alias regression failures,
+  - backward compatibility of pass-path output.
+- **Issues found during review**
+  1. report rows were assembled with raw cell values; mismatch diagnostics containing newline/CR/tab
+     or pipe characters could break markdown table structure.
+  2. strict alias coverage now includes multiple control-character fixtures, raising the likelihood
+     of unreadable failure reports if any assertion regresses.
+- **Fix applied**
+  1. added centralized markdown-cell escaping for control characters and markdown-sensitive
+     separators.
+  2. applied escaping uniformly to all row columns to keep report structure deterministic.
+- **Post-fix validation criteria**
+  - contract checker passes after report escaping hardening.
+  - full desktop verify remains green with unchanged pass-path behavior.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-308.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
