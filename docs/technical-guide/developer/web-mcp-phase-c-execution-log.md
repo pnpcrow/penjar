@@ -10876,6 +10876,67 @@ deterministic regardless of wrapper location.
     added alias/wrapper combination.
   - targeted auth tests and full desktop verification remain green after refresh-wrapper expansion.
 
+## Unit WS-D-230: close refresh-token direct-wrapper signed-out alias coverage (`isLoggedOut`/`is_signed_out`/`is_logged_out`)
+
+### Planned objective
+
+Close the remaining refresh-token direct-wrapper signed-out gaps by adding
+`isLoggedOut`, `is_signed_out`, and `is_logged_out` coverage on both `result.authState`
+and `data.authState`, then resync continuity docs so alias inventories stay aligned.
+
+### Implemented changes
+
+1. Expanded refresh-token contract fixture matrix in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - added `refresh-token data envelope authState is_signed_out alias maps fallback status`,
+   - added `refresh-token result envelope authState is_signed_out alias maps fallback status`,
+   - added `refresh-token data envelope authState is_logged_out alias maps fallback status`,
+   - added `refresh-token result envelope authState is_logged_out alias maps fallback status`,
+   - added `refresh-token result envelope authState isLoggedOut alias maps fallback status`,
+   - added `refresh-token data envelope authState isLoggedOut alias maps fallback status`.
+2. Expanded refresh-token parity signed-out envelope loop in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - added `refresh-token data envelope authState is_signed_out alias`,
+   - added `refresh-token result envelope authState is_signed_out alias`,
+   - added `refresh-token data envelope authState is_logged_out alias`,
+   - added `refresh-token result envelope authState is_logged_out alias`,
+   - added `refresh-token result envelope authState isLoggedOut alias`,
+   - added `refresh-token data envelope authState isLoggedOut alias`.
+3. Synced continuity docs for completed refresh-token direct-wrapper alias set:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && dart format test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - refresh-token direct-wrapper alias completeness against full signed-out alias inventory,
+  - contract/parity symmetry for `result` and `data` wrapper permutations,
+  - cross-document alias inventory drift after latest fixture expansion.
+- **Issues found during review**
+  1. `isLoggedOut`, `is_signed_out`, and `is_logged_out` were already covered on restore-session
+     direct wrappers, but refresh-token direct wrappers were missing counterparts.
+  2. This created an operation-scoped asymmetry risk where backend wrapper moves during refresh
+     flow could bypass parity-locked deterministic signed-out fallback.
+- **Fix applied**
+  1. Added six refresh-token contract fixtures for the three remaining aliases across both wrapper
+     positions.
+  2. Added six refresh-token parity cases mirroring the same alias/wrapper combinations.
+  3. Updated continuity docs so all auth evidence pointers reference the completed alias set.
+- **Post-fix validation criteria**
+  - refresh-token direct wrappers now cover the full signed-out alias set:
+    `signedOut`, `signed_out`, `isSignedOut`, `loggedOut`, `logged_out`, `isLoggedOut`,
+    `is_signed_out`, `is_logged_out`.
+  - each added combination maps to deterministic fallback status `Authentication required.` and
+    suppresses simulated token-refresh success text.
+  - targeted auth tests and full desktop verification remain green after expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
