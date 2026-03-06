@@ -15191,6 +15191,53 @@ strict semantics.
   - full desktop verify remains green after parser optimization.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-304.
 
+## Unit WS-D-305: whitespace numeric strict alias regression coverage
+
+### Planned objective
+
+Close remaining strict-toggle normalization gaps by locking whitespace-wrapped numeric strict alias
+handling (`" 1 "`) for strict installer/protocol paths.
+
+### Implemented changes
+
+1. Expanded strict installer numeric-path coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-whitespace-numeric-one-placeholder-fail`,
+   - strict argument fixture `" 1 "` now explicitly asserts strict-mode failure semantics on
+     placeholder installer command.
+2. Expanded strict protocol numeric-path coverage in the same checker:
+   - added `strict-protocol-whitespace-numeric-one-missing-command-fail`,
+   - env fixture `STRICT_WINDOWS_PROTOCOL_REGISTRATION= 1 ` now explicitly asserts strict protocol
+     missing-command failure semantics.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-305
+     whitespace numeric strict alias coverage lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     whitespace-wrapped numeric strict alias matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict installer/protocol behavior for whitespace-wrapped numeric strict aliases,
+  - completeness of strict toggle normalization matrix after alpha alias coverage,
+  - deterministic strict fail semantics for numeric path.
+- **Issues found during review**
+  1. alpha alias whitespace coverage was locked, but numeric strict alias (`1`) whitespace variants
+     were not explicitly tested.
+  2. without numeric whitespace fixtures, strict semantics for common CI/template numeric toggles
+     could regress without direct detection.
+- **Fix applied**
+  1. added strict installer/protocol whitespace numeric alias fixtures with explicit strict outcome
+     assertions.
+  2. preserved full verification gate to confirm no collateral behavior changes.
+- **Post-fix validation criteria**
+  - contract checker passes with numeric whitespace alias fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-305.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

@@ -331,6 +331,17 @@ run_case \
   "PENJAR_WINDOWS_INSTALLER_COMMAND=placeholder"
 
 run_case \
+  "strict-installer-whitespace-numeric-one-placeholder-fail" \
+  "fail" \
+  "Strict installer mode parser should trim numeric strict input alias and fail on placeholder installer command for ' 1 '." \
+  setup_release_runner_case \
+  " 1 " \
+  "release" \
+  "- Strict mode: 1" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=placeholder"
+
+run_case \
   "strict-installer-placeholder-command-fail" \
   "fail" \
   "Strict installer mode must fail when installer command is a placeholder value." \
@@ -519,6 +530,17 @@ run_case \
   "- Strict protocol registration mode: 1" \
   "[windows-installer-pipeline] strict mode failed." \
   $'STRICT_WINDOWS_PROTOCOL_REGISTRATION=\nTRUE\n'
+
+run_case \
+  "strict-protocol-whitespace-numeric-one-missing-command-fail" \
+  "fail" \
+  "Strict protocol mode parser should trim numeric strict alias and fail on missing protocol command for ' 1 '." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Strict protocol registration mode: 1" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION= 1 "
 
 run_case \
   "strict-protocol-strict-alias-missing-command-fail" \
