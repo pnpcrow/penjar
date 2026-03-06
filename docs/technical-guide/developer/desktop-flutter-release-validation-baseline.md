@@ -273,6 +273,8 @@ CI baseline note:
 - Desktop command inventory checker: `desktop/scripts/check_desktop_command_inventory.sh`.
 - Desktop command inventory contract checker: `desktop/scripts/check_desktop_command_inventory_contract.sh`.
 - Windows installer pipeline contract checker: `desktop/scripts/check_windows_installer_pipeline_contract.sh`.
+  - contract matrix now includes strict installer execution cases (missing/placeholder/clear
+    command) and strict installer + protocol placeholder interaction coverage.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.

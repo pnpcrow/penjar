@@ -14311,6 +14311,55 @@ execution and artifact visibility in release and test CI paths.
     artifacts.
   - local contract check and full desktop verify remain green.
 
+## Unit WS-D-287: strict installer execution matrix expansion
+
+### Planned objective
+
+Expand Windows installer pipeline contract coverage to include strict installer execution paths so
+missing/placeholder installer command regressions are detected with deterministic report and log
+assertions.
+
+### Implemented changes
+
+1. Expanded contract checker case matrix in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-missing-command-fail`,
+   - added `strict-installer-placeholder-command-fail`,
+   - added `strict-installer-clear-command-pass`,
+   - added `strict-installer-protocol-placeholder-fail`.
+2. Locked strict installer + protocol interaction behavior:
+   - in strict installer mode, protocol placeholder command now remains explicitly covered as
+     strict failure behavior even when strict protocol mode is not separately enabled.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records latest
+     release evidence lock for WS-D-287 strict installer matrix coverage,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     strict installer execution + interaction coverage in checker inventory notes.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict installer execution behavior when runner exists and installer command is missing,
+    placeholder, or clear command,
+  - strict installer + protocol placeholder interaction behavior,
+  - release verify-chain impact and documentation consistency.
+- **Issues found during review**
+  1. contract coverage focused on strict protocol paths and did not explicitly lock strict installer
+     command scenarios.
+  2. strict installer mode interaction with protocol placeholder input was not explicitly
+     regression-locked.
+- **Fix applied**
+  1. added strict installer failure/success matrix cases to contract checker.
+  2. added strict installer + protocol placeholder interaction failure lock.
+  3. updated runbook/release-baseline continuity notes for the expanded matrix.
+- **Post-fix validation criteria**
+  - contract checker passes with zero mismatches including new strict installer matrix cases.
+  - full desktop verify pipeline remains green with expanded contract matrix.
+  - continuity docs explicitly describe strict installer matrix coverage.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

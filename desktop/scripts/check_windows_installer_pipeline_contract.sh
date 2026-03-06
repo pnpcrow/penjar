@@ -106,6 +106,50 @@ run_case \
   "[windows-installer-pipeline] warning: pipeline skipped."
 
 run_case \
+  "strict-installer-missing-command-fail" \
+  "fail" \
+  "Strict installer mode must fail when installer command is unset and runner exists." \
+  setup_release_runner_case \
+  "1" \
+  "release" \
+  "- Error: installer command missing in strict mode" \
+  "[windows-installer-pipeline] strict mode failed."
+
+run_case \
+  "strict-installer-placeholder-command-fail" \
+  "fail" \
+  "Strict installer mode must fail when installer command is a placeholder value." \
+  setup_release_runner_case \
+  "1" \
+  "release" \
+  "- Error: installer command appears to be a placeholder in strict mode" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=placeholder"
+
+run_case \
+  "strict-installer-clear-command-pass" \
+  "pass" \
+  "Strict installer mode should pass when installer command is configured and succeeds." \
+  setup_release_runner_case \
+  "1" \
+  "release" \
+  "- Execution status: executed" \
+  "[windows-installer-pipeline] completed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=true"
+
+run_case \
+  "strict-installer-protocol-placeholder-fail" \
+  "fail" \
+  "Strict installer mode must fail when protocol command is placeholder, even without strict protocol mode." \
+  setup_release_runner_case \
+  "1" \
+  "release" \
+  "- Protocol error: protocol register command appears to be a placeholder in strict mode" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=true" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=placeholder"
+
+run_case \
   "strict-protocol-missing-command-fail" \
   "fail" \
   "Strict protocol mode must fail when protocol command is unset and runner exists." \
