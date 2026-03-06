@@ -303,6 +303,14 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
    - contract/parity suites now lock uppercase compact signed-out marker fallback behavior
      (`UNAUTHORIZED`) to keep auth-required mapping parity stable on uppercase compact code paths;
      execution evidence is recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-256`).
+44. Backend code non-compact ASCII lowercase-allocation reduction:
+   - `_compactBackendCodeFromTrimmed(...)` now uses code-unit lowercase/filter normalization for
+     non-compact ASCII inputs, avoiding full-string `toLowerCase` allocation on delimiter-heavy
+     ASCII paths while preserving non-ASCII normalization fallback behavior,
+   - contract/parity suites now lock delimited uppercase signed-out marker fallback behavior
+     (`UNAUTHORIZED::TOKEN`) to keep auth-required mapping parity stable across non-compact ASCII
+     normalization paths; execution evidence is recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-257`).
 
 ## Remaining integration gaps (auth scope)
 

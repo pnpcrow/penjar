@@ -12462,6 +12462,70 @@ work when the trimmed input is already ASCII alphanumeric and only case normaliz
   - numeric/exact/marker-length/substring fallback semantics remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-257: backend code non-compact ASCII allocation reduction
+
+### Planned objective
+
+Reduce normalization allocations for delimiter-heavy ASCII backend code values by removing
+full-string lowercase allocation from non-compact ASCII normalization paths while preserving
+existing non-ASCII fallback semantics.
+
+### Implemented changes
+
+1. Updated non-compact normalization path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_compactBackendCodeFromTrimmed(...)` now adds an ASCII-only code-unit normalization path
+     when non-compact input contains only ASCII code units.
+2. Added allocation-light ASCII helpers:
+   - `_toLowerAsciiCodeUnit(int)` for uppercase ASCII normalization,
+   - `_containsNonAsciiCodeUnits(String, {startIndex})` guard to preserve Unicode fallback path.
+3. Preserved non-ASCII behavior:
+   - non-ASCII non-compact inputs still use existing `toLowerCase()` fallback + filter path to
+     maintain prior normalization semantics.
+4. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only delimited uppercase unauthorized payload maps authentication-required fallback status`
+     (`code: "UNAUTHORIZED::TOKEN"`).
+5. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendDelimitedUppercaseUnauthorizedParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps delimited uppercase unauthorized backend failure to deterministic auth-required status`.
+6. Synced continuity docs for WS-D-257 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+7. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - non-compact backend-code normalization allocation behavior in classifier hot paths,
+  - signed-out fallback behavior for delimiter-heavy uppercase code payloads,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. After WS-D-256, non-compact ASCII inputs still incurred full-string lowercase allocation
+     before delimiter filtering.
+  2. Delimited uppercase signed-out marker behavior (`UNAUTHORIZED::TOKEN`) was not explicitly
+     parity-locked in contract/parity suites.
+- **Fix applied**
+  1. Added ASCII-only code-unit normalization path guarded by non-ASCII detection.
+  2. Added contract/parity regressions for delimited uppercase `UNAUTHORIZED::TOKEN` fallback
+     behavior.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - non-compact ASCII inputs normalize without full-string lowercase allocation.
+  - delimited uppercase `UNAUTHORIZED::TOKEN` payloads map to deterministic auth-required fallback
+    behavior in contract/parity suites.
+  - non-ASCII normalization fallback semantics remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

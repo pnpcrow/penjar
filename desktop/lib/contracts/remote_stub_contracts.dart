@@ -1527,6 +1527,23 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
         ? trimmedCode.toLowerCase()
         : trimmedCode;
   }
+  if (!_containsNonAsciiCodeUnits(
+    trimmedCode,
+    startIndex: firstNonCompactIndex,
+  )) {
+    final StringBuffer asciiBuffer = StringBuffer();
+    for (int index = 0; index < trimmedCode.length; index++) {
+      final int codeUnit = trimmedCode.codeUnitAt(index);
+      if (_isBackendCodeCompactCodeUnit(codeUnit)) {
+        asciiBuffer.writeCharCode(codeUnit);
+        continue;
+      }
+      if (_isBackendCodeAsciiUpperAlphaCodeUnit(codeUnit)) {
+        asciiBuffer.writeCharCode(_toLowerAsciiCodeUnit(codeUnit));
+      }
+    }
+    return asciiBuffer.toString();
+  }
   final String lowered = trimmedCode.toLowerCase();
   final StringBuffer buffer = StringBuffer();
   if (firstNonCompactIndex > 0) {
@@ -1548,6 +1565,19 @@ bool _isBackendCodeCompactCodeUnit(int codeUnit) {
 
 bool _isBackendCodeAsciiUpperAlphaCodeUnit(int codeUnit) {
   return codeUnit >= 65 && codeUnit <= 90;
+}
+
+int _toLowerAsciiCodeUnit(int codeUnit) {
+  return codeUnit + 32;
+}
+
+bool _containsNonAsciiCodeUnits(String value, {int startIndex = 0}) {
+  for (int index = startIndex; index < value.length; index++) {
+    if (value.codeUnitAt(index) > 127) {
+      return true;
+    }
+  }
+  return false;
 }
 
 int _clampIndex(int index, {required int itemCount}) {
