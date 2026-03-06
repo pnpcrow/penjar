@@ -15834,6 +15834,50 @@ placeholder-warning paths for installer/protocol command execution branches.
   - full desktop verify remains green after warning-path matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-318.
 
+## Unit WS-D-319: duplicate case-name preflight guard hardening
+
+### Planned objective
+
+Prevent matrix drift and ambiguous report rows by failing fast when duplicate contract case names are
+registered.
+
+### Implemented changes
+
+1. Added case-name uniqueness guard in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - introduced `case_name_registry` array,
+   - added `ensure_unique_case_name()` helper,
+   - `run_case()` now validates uniqueness before case execution and exits with explicit diagnostic
+     on duplicates.
+2. Preserved existing case execution, result assertion, and report generation behavior for
+   non-duplicate matrices.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-319
+     duplicate-case preflight lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     duplicate case-ID fail-fast baseline behavior.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - matrix maintainability and accidental duplicate case-name risk,
+  - report row uniqueness and long-term regression traceability,
+  - compatibility with existing large-case matrix execution flow.
+- **Issues found during review**
+  1. prior matrix path did not guard duplicate case IDs; duplicates could silently hide coverage
+     drift and produce ambiguous report interpretation.
+  2. expanding matrix size increased the risk of copy/paste collisions without immediate detection.
+- **Fix applied**
+  1. added explicit duplicate-case-name preflight validation before case execution.
+  2. retained unchanged behavior for valid unique-case matrices.
+- **Post-fix validation criteria**
+  - contract checker passes with uniqueness guard enabled.
+  - full desktop verify remains green after preflight hardening.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-319.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

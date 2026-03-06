@@ -23,6 +23,7 @@ failure_count=0
 total_cases=0
 escaped_markdown_cell=""
 scratch_root="$(mktemp -d)"
+case_name_registry=()
 
 cleanup_contract_scratch() {
   rm -rf "$scratch_root"
@@ -70,6 +71,18 @@ append_case_row() {
   case_rows+="| ${case_name_escaped} | ${expected_escaped} | ${actual_escaped} | ${report_assertion_escaped} | ${log_assertion_escaped} | ${result_escaped} | ${summary_escaped} |"$'\n'
 }
 
+ensure_unique_case_name() {
+  local candidate="$1"
+  local existing
+  for existing in "${case_name_registry[@]}"; do
+    if [[ "$existing" == "$candidate" ]]; then
+      echo "[windows-installer-pipeline-contract] duplicate case name: $candidate" >&2
+      return 1
+    fi
+  done
+  case_name_registry+=("$candidate")
+}
+
 setup_empty_case() {
   local root_dir="$1"
   mkdir -p "$root_dir"
@@ -96,6 +109,8 @@ run_case() {
   local required_log_pattern="$8"
   shift 8
   local env_overrides=("$@")
+
+  ensure_unique_case_name "$case_name"
 
   local case_index case_root tmp_report tmp_log rc actual result report_assertion log_assertion
   local report_content log_content
