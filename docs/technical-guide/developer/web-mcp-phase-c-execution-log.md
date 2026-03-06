@@ -17120,6 +17120,54 @@ mod-equals and xor-equals numeric near matches as non-strict paths.
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-345.
 
+## Unit WS-D-346: bitwise-and-or-assignment numeric near-match strict alias regression coverage
+
+### Planned objective
+
+Prevent strict numeric alias broadening through bitwise-and/or-assignment style inputs by locking
+and-equals and pipe-equals numeric near matches as non-strict paths.
+
+### Implemented changes
+
+1. Expanded strict installer bitwise-and/or-assignment numeric near-match coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-nearmatch-expression-one-and-equals-one-alias-missing-command-pass`,
+   - added `strict-installer-nearmatch-expression-one-pipe-equals-one-alias-missing-command-pass`,
+   - fixtures `1&=1` and `1|=1` assert `- Strict mode: 0` with non-blocking completion.
+2. Expanded strict protocol bitwise-and/or-assignment numeric near-match coverage in the same checker:
+   - added `strict-protocol-nearmatch-expression-one-and-equals-one-alias-missing-command-pass`,
+   - added `strict-protocol-nearmatch-expression-one-pipe-equals-one-alias-missing-command-pass`,
+   - fixtures `STRICT_WINDOWS_PROTOCOL_REGISTRATION=1&=1` and `=1|=1` assert
+     `- Strict protocol registration mode: 0` with non-blocking completion.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-346
+     bitwise-and/or-assignment numeric near-match boundary lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     bitwise-and/or-assignment numeric near-match strict boundary matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict numeric alias exact-match boundaries under bitwise-and/or-assignment near matches,
+  - installer/protocol non-overmatch behavior for `1&=1` and `1|=1`,
+  - compatibility with existing assignment-expression near-match coverage.
+- **Issues found during review**
+  1. assignment locks covered additive/multiplicative/modulo/xor variants, but bitwise and/or
+     assignment variants (`&=`, `|=`) were not explicitly locked.
+  2. without bitwise and/or-assignment fixtures, parser normalization/coercion refactors could
+     accidentally widen strict numeric alias acceptance.
+- **Fix applied**
+  1. added installer/protocol bitwise and/or-assignment near-match pass fixtures with strict-mode-zero
+     assertions.
+  2. retained strict-positive exact alias behavior and existing warning/failure semantics.
+- **Post-fix validation criteria**
+  - contract checker passes with bitwise and/or-assignment near-match fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-346.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
