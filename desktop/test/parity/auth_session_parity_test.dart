@@ -4409,6 +4409,52 @@ void main() {
     },
   );
 
+  final List<String> authStateWrapperKeys = <String>['result', 'data'];
+  final List<String> authStateSignedOutAliases = <String>[
+    'signedOut',
+    'signed_out',
+    'isSignedOut',
+    'loggedOut',
+    'logged_out',
+    'isLoggedOut',
+    'is_signed_out',
+    'is_logged_out',
+  ];
+  final List<String> authStateSignedInAliases = <String>[
+    'isAuthenticated',
+    'loggedIn',
+    'isLoggedIn',
+    'is_authenticated',
+    'signedIn',
+    'authenticated',
+    'signed_in',
+    'is_signed_in',
+    'logged_in',
+    'is_logged_in',
+  ];
+
+  bool hasAuthStateAliasPayload(
+    Iterable<Map<String, Object?>> payloads, {
+    required String wrapperKey,
+    required String alias,
+    required Object? expectedValue,
+  }) {
+    for (final Map<String, Object?> payload in payloads) {
+      final Object? wrapperPayload = payload[wrapperKey];
+      if (wrapperPayload is! Map) {
+        continue;
+      }
+      final Object? authStatePayload = wrapperPayload['authState'];
+      if (authStatePayload is! Map) {
+        continue;
+      }
+      if (authStatePayload[alias] == expectedValue) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   final List<
     ({
       String description,
@@ -4705,6 +4751,36 @@ void main() {
         ),
       ];
 
+  test(
+    'auth/session parity sign-in signed-in authState matrix is symmetric',
+    () {
+      final Iterable<Map<String, Object?>> payloads =
+          authStateSignedInEnvelopeCases.map(
+            (caseData) => caseData.signInPayload,
+          );
+      final List<String> missingEntries = <String>[];
+
+      for (final String wrapperKey in authStateWrapperKeys) {
+        for (final String alias in authStateSignedInAliases) {
+          if (!hasAuthStateAliasPayload(
+            payloads,
+            wrapperKey: wrapperKey,
+            alias: alias,
+            expectedValue: true,
+          )) {
+            missingEntries.add('sign-in $wrapperKey authState.$alias=true');
+          }
+        }
+      }
+
+      expect(
+        missingEntries,
+        isEmpty,
+        reason: 'Missing parity matrix entries:\n${missingEntries.join('\n')}',
+      );
+    },
+  );
+
   for (final ({
         String description,
         Map<String, Object?> signInPayload,
@@ -4978,6 +5054,36 @@ void main() {
         ),
       ];
 
+  test(
+    'auth/session parity sign-in signed-in-false authState matrix is symmetric',
+    () {
+      final Iterable<Map<String, Object?>> payloads =
+          authStateSignedInFalseEnvelopeCases.map(
+            (caseData) => caseData.signInPayload,
+          );
+      final List<String> missingEntries = <String>[];
+
+      for (final String wrapperKey in authStateWrapperKeys) {
+        for (final String alias in authStateSignedInAliases) {
+          if (!hasAuthStateAliasPayload(
+            payloads,
+            wrapperKey: wrapperKey,
+            alias: alias,
+            expectedValue: false,
+          )) {
+            missingEntries.add('sign-in $wrapperKey authState.$alias=false');
+          }
+        }
+      }
+
+      expect(
+        missingEntries,
+        isEmpty,
+        reason: 'Missing parity matrix entries:\n${missingEntries.join('\n')}',
+      );
+    },
+  );
+
   for (final ({String description, Map<String, Object?> signInPayload}) caseData
       in authStateSignedInFalseEnvelopeCases) {
     testWidgets(
@@ -5197,6 +5303,36 @@ void main() {
           },
         ),
       ];
+
+  test(
+    'auth/session parity sign-in signed-out authState matrix is symmetric',
+    () {
+      final Iterable<Map<String, Object?>> payloads =
+          authStateSignedOutSignInEnvelopeCases.map(
+            (caseData) => caseData.signInPayload,
+          );
+      final List<String> missingEntries = <String>[];
+
+      for (final String wrapperKey in authStateWrapperKeys) {
+        for (final String alias in authStateSignedOutAliases) {
+          if (!hasAuthStateAliasPayload(
+            payloads,
+            wrapperKey: wrapperKey,
+            alias: alias,
+            expectedValue: true,
+          )) {
+            missingEntries.add('sign-in $wrapperKey authState.$alias=true');
+          }
+        }
+      }
+
+      expect(
+        missingEntries,
+        isEmpty,
+        reason: 'Missing parity matrix entries:\n${missingEntries.join('\n')}',
+      );
+    },
+  );
 
   for (final ({String description, Map<String, Object?> signInPayload}) caseData
       in authStateSignedOutSignInEnvelopeCases) {
@@ -5526,6 +5662,38 @@ void main() {
               'Backend refresh result envelope is_logged_in applied.',
         ),
       ];
+
+  test(
+    'auth/session parity refresh-token signed-in authState matrix is symmetric',
+    () {
+      final Iterable<Map<String, Object?>> payloads =
+          authStateSignedInRefreshEnvelopeCases.map(
+            (caseData) => caseData.refreshTokenPayload,
+          );
+      final List<String> missingEntries = <String>[];
+
+      for (final String wrapperKey in authStateWrapperKeys) {
+        for (final String alias in authStateSignedInAliases) {
+          if (!hasAuthStateAliasPayload(
+            payloads,
+            wrapperKey: wrapperKey,
+            alias: alias,
+            expectedValue: true,
+          )) {
+            missingEntries.add(
+              'refresh-token $wrapperKey authState.$alias=true',
+            );
+          }
+        }
+      }
+
+      expect(
+        missingEntries,
+        isEmpty,
+        reason: 'Missing parity matrix entries:\n${missingEntries.join('\n')}',
+      );
+    },
+  );
 
   for (final ({
         String description,
@@ -5891,6 +6059,38 @@ void main() {
         ),
       ];
 
+  test(
+    'auth/session parity restore-session signed-in authState matrix is symmetric',
+    () {
+      final Iterable<Map<String, Object?>> payloads =
+          authStateSignedInRestoreEnvelopeCases.map(
+            (caseData) => caseData.restoreSessionPayload,
+          );
+      final List<String> missingEntries = <String>[];
+
+      for (final String wrapperKey in authStateWrapperKeys) {
+        for (final String alias in authStateSignedInAliases) {
+          if (!hasAuthStateAliasPayload(
+            payloads,
+            wrapperKey: wrapperKey,
+            alias: alias,
+            expectedValue: true,
+          )) {
+            missingEntries.add(
+              'restore-session $wrapperKey authState.$alias=true',
+            );
+          }
+        }
+      }
+
+      expect(
+        missingEntries,
+        isEmpty,
+        reason: 'Missing parity matrix entries:\n${missingEntries.join('\n')}',
+      );
+    },
+  );
+
   for (final ({
         String description,
         Map<String, Object?> restoreSessionPayload,
@@ -6082,6 +6282,21 @@ void main() {
           absentSuccessText: 'Session restored (simulated).',
         ),
         (
+          description: 'result envelope authState signedOut alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'signedOut': true,
+                'sessionToken': 'auth-state-signed-out-result-camel-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
           description: 'data envelope authState signedOut alias',
           restoreSessionPayload: <String, Object?>{
             'data': <String, Object?>{
@@ -6247,6 +6462,21 @@ void main() {
               'authState': <String, Object?>{
                 'logged_out': true,
                 'sessionToken': 'auth-state-logged-out-data-snake-direct-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
+          description: 'result envelope authState loggedOut alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'loggedOut': true,
+                'sessionToken': 'auth-state-logged-out-result-camel-token',
               },
             },
           },
@@ -7121,6 +7351,60 @@ void main() {
           absentSuccessText: 'Session restored (simulated).',
         ),
       ];
+
+  test(
+    'auth/session parity restore/refresh signed-out authState matrix is symmetric',
+    () {
+      final Iterable<Map<String, Object?>> refreshPayloads =
+          authStateSignedOutEnvelopeCases
+              .where(
+                (caseData) =>
+                    caseData.actionKey.value == 'auth-refresh-token' &&
+                    caseData.refreshTokenPayload != null,
+              )
+              .map((caseData) => caseData.refreshTokenPayload!);
+      final Iterable<Map<String, Object?>> restorePayloads =
+          authStateSignedOutEnvelopeCases
+              .where(
+                (caseData) =>
+                    caseData.actionKey.value == 'auth-restore-session' &&
+                    caseData.restoreSessionPayload != null,
+              )
+              .map((caseData) => caseData.restoreSessionPayload!);
+      final List<String> missingEntries = <String>[];
+
+      for (final String wrapperKey in authStateWrapperKeys) {
+        for (final String alias in authStateSignedOutAliases) {
+          if (!hasAuthStateAliasPayload(
+            refreshPayloads,
+            wrapperKey: wrapperKey,
+            alias: alias,
+            expectedValue: true,
+          )) {
+            missingEntries.add(
+              'refresh-token $wrapperKey authState.$alias=true',
+            );
+          }
+          if (!hasAuthStateAliasPayload(
+            restorePayloads,
+            wrapperKey: wrapperKey,
+            alias: alias,
+            expectedValue: true,
+          )) {
+            missingEntries.add(
+              'restore-session $wrapperKey authState.$alias=true',
+            );
+          }
+        }
+      }
+
+      expect(
+        missingEntries,
+        isEmpty,
+        reason: 'Missing parity matrix entries:\n${missingEntries.join('\n')}',
+      );
+    },
+  );
 
   for (final ({
         String description,

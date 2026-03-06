@@ -168,6 +168,13 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      alias sets,
    - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
      (`Unit WS-D-237`).
+25. Parity authState matrix symmetry automation and residual gap closure:
+   - `desktop/test/parity/auth_session_parity_test.dart` now includes parity-side matrix guards
+     for sign-in/refresh-token/restore-session direct `authState` alias coverage, and the guard
+     closed residual restore-session result-wrapper signed-out parity gaps (`signedOut`,
+     `loggedOut`),
+   - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
+     (`Unit WS-D-238`).
 
 ## Remaining integration gaps (auth scope)
 
