@@ -14360,6 +14360,51 @@ assertions.
   - full desktop verify pipeline remains green with expanded contract matrix.
   - continuity docs explicitly describe strict installer matrix coverage.
 
+## Unit WS-D-288: debug-mode installer contract coverage
+
+### Planned objective
+
+Close build-mode coverage gaps by adding explicit debug runner resolution and strict protocol
+behavior checks to the Windows installer pipeline contract matrix.
+
+### Implemented changes
+
+1. Expanded contract checker setup/coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `setup_debug_runner_case` (`build/windows/x64/runner/Debug`),
+   - added `debug-mode-strict-installer-clear-command-pass`,
+   - added `debug-mode-strict-protocol-missing-command-fail`.
+2. Locked debug build-mode behavior:
+   - strict installer execution in debug mode now explicitly requires successful command execution
+     against Debug runner directory resolution,
+   - strict protocol mode in debug builds now explicitly locks missing-command failure behavior.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-288
+     debug-mode release evidence lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     debug-mode matrix coverage in checker inventory notes.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - debug runner directory selection in installer pipeline contract checks,
+  - strict installer command success path in debug mode,
+  - strict protocol missing-command failure behavior in debug mode,
+  - continuity doc alignment for build-mode matrix coverage.
+- **Issues found during review**
+  1. existing matrix coverage emphasized release-mode runner paths.
+  2. debug-mode strict protocol regression behavior was not explicitly locked by contract cases.
+- **Fix applied**
+  1. introduced debug runner setup and debug-specific strict pass/fail cases.
+  2. updated runbook and release baseline notes for debug matrix coverage visibility.
+- **Post-fix validation criteria**
+  - contract checker passes with release + debug strict matrix cases.
+  - debug strict installer pass and debug strict protocol missing-command failure remain stable.
+  - full desktop verify remains green after matrix expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

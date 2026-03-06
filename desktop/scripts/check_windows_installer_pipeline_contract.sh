@@ -33,6 +33,11 @@ setup_release_runner_case() {
   mkdir -p "$root_dir/build/windows/x64/runner/Release"
 }
 
+setup_debug_runner_case() {
+  local root_dir="$1"
+  mkdir -p "$root_dir/build/windows/x64/runner/Debug"
+}
+
 run_case() {
   local case_name="$1"
   local expected="$2"
@@ -148,6 +153,28 @@ run_case \
   "[windows-installer-pipeline] strict mode failed." \
   "PENJAR_WINDOWS_INSTALLER_COMMAND=true" \
   "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=placeholder"
+
+run_case \
+  "debug-mode-strict-installer-clear-command-pass" \
+  "pass" \
+  "Debug build mode should resolve debug runner directory and pass strict installer execution with a clear command." \
+  setup_debug_runner_case \
+  "1" \
+  "debug" \
+  "- Runner directory: build/windows/x64/runner/Debug" \
+  "[windows-installer-pipeline] completed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=true"
+
+run_case \
+  "debug-mode-strict-protocol-missing-command-fail" \
+  "fail" \
+  "Strict protocol mode should fail in debug build mode when protocol command is missing." \
+  setup_debug_runner_case \
+  "0" \
+  "debug" \
+  "- Protocol error: protocol register command missing in strict protocol mode" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=1"
 
 run_case \
   "strict-protocol-missing-command-fail" \
