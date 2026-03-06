@@ -366,6 +366,8 @@ CI baseline note:
     `"[1]"`) so accidental wrapper formatting cannot widen strict numeric alias acceptance.
   - contract matrix now also locks trim-wrapped numeric near-match alias behavior (`" 1.0 "`,
     `"\\t+1\\t"`) so trim normalization cannot widen strict numeric alias acceptance.
+  - contract matrix now also locks internal-separator numeric near-match alias behavior (`"1 0"`,
+    `"1\\n0"`) so token-boundary parsing cannot widen strict numeric alias acceptance.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
