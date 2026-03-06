@@ -466,6 +466,16 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      (`code: "Unauthenticated"`) to preserve deterministic auth-required fallback mapping on the
      signed-out-only marker scan path after loop-shape changes; execution evidence is recorded in
      `web-mcp-phase-c-execution-log.md` (`Unit WS-D-274`).
+62. Backend code classification compact-length caching optimization:
+   - `_classifyBackendCode(...)` now caches `compact.length` as `compactLength` and reuses it for
+     compact-empty and marker-min-length guards to reduce repeated length getter lookups on
+     classifier hot paths,
+   - session-expired and signed-out-only marker precedence semantics remain unchanged while exact
+     raw/compact classification behavior is preserved,
+   - contract/parity suites now lock capitalized compact logged-out marker behavior
+     (`code: "LoggedOut"`) to preserve deterministic auth-required fallback mapping on signed-out
+     marker paths with compact-length guard reuse; execution evidence is recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-275`).
 
 ## Remaining integration gaps (auth scope)
 

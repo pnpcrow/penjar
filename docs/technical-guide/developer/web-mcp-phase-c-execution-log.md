@@ -13602,6 +13602,66 @@ inference precedence.
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-275: classifier compact-length guard caching
+
+### Planned objective
+
+Reduce backend code classifier guard overhead by caching compact-code length once and reusing it
+across empty/min-length checks while preserving signed-out/session-expired inference behavior.
+
+### Implemented changes
+
+1. Updated backend classifier guard path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_classifyBackendCode(...)` now caches `compact.length` as `compactLength`.
+   - compact-empty guard and session-expired/signed-out marker min-length guards now reuse
+     `compactLength`.
+2. Preserved existing fallback semantics:
+   - raw/compact exact classification and marker precedence behavior remain unchanged.
+   - session-expired fallback status and signed-out fallback status mapping behavior remain
+     unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only capitalized compact loggedout payload maps authentication-required fallback status`
+     (`code: "LoggedOut"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendCapitalizedCompactLoggedOutParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps capitalized compact loggedout backend failure to deterministic auth-required status`.
+5. Synced continuity docs for WS-D-275 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - compact-length guard reuse in `_classifyBackendCode(...)`,
+  - capitalized compact logged-out marker fallback mapping on signed-out-only marker path,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. classifier guard logic still repeated `compact.length` lookups across compact-empty and marker
+     min-length checks.
+  2. capitalized compact `LoggedOut` marker behavior was not explicitly parity-locked.
+- **Fix applied**
+  1. cached `compactLength` and reused it across compact-empty/min-length checks.
+  2. added dedicated contract/parity regressions for capitalized compact logged-out mapping.
+  3. re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - compact-length guard reuse does not alter classification precedence or fallback mapping.
+  - capitalized compact `code: "LoggedOut"` payloads map to auth-required fallback status in
+    contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

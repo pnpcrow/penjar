@@ -1482,7 +1482,8 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
     return rawExactClassification;
   }
   final String compact = _compactBackendCodeFromTrimmed(trimmed);
-  if (compact.isEmpty) {
+  final int compactLength = compact.length;
+  if (compactLength == 0) {
     return const _BackendCodeClassification(
       signedOut: false,
       sessionExpired: false,
@@ -1494,7 +1495,7 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
     return exactClassification;
   }
 
-  if (compact.length >= _backendSessionExpiredCodeMarkerMinLength) {
+  if (compactLength >= _backendSessionExpiredCodeMarkerMinLength) {
     final int markerCount = _backendSessionExpiredCodeMarkers.length;
     for (int markerIndex = 0; markerIndex < markerCount; markerIndex++) {
       if (compact.contains(_backendSessionExpiredCodeMarkers[markerIndex])) {
@@ -1506,7 +1507,7 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
     }
   }
 
-  if (compact.length < _backendSignedOutOnlyCodeMarkerMinLength) {
+  if (compactLength < _backendSignedOutOnlyCodeMarkerMinLength) {
     return const _BackendCodeClassification(
       signedOut: false,
       sessionExpired: false,
