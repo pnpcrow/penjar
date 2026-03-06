@@ -14598,6 +14598,56 @@ installer/protocol command failures and placeholder commands in release-mode run
     warning diagnostics.
   - full desktop verify remains green after matrix expansion.
 
+## Unit WS-D-293: debug non-strict warning-path symmetry coverage
+
+### Planned objective
+
+Close build-mode symmetry gaps by extending non-strict warning-path contract coverage to debug-mode
+installer/protocol command failure and placeholder command scenarios.
+
+### Implemented changes
+
+1. Expanded debug non-strict installer warning matrix in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `debug-mode-non-strict-installer-command-failure-warning-pass`,
+   - added `debug-mode-non-strict-installer-placeholder-warning-pass`.
+2. Expanded debug non-strict protocol warning matrix in the same checker:
+   - added `debug-mode-non-strict-protocol-command-failure-warning-pass`,
+   - added `debug-mode-non-strict-protocol-placeholder-warning-pass`.
+3. Locked release/debug non-strict warning symmetry:
+   - debug installer command failure/placeholder paths now explicitly assert non-blocking warning
+     diagnostics,
+   - debug protocol command failure/placeholder paths now explicitly assert non-blocking warning
+     diagnostics.
+4. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-293
+     debug non-strict warning-path release evidence lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     debug non-strict warning-path matrix coverage in checker inventory notes.
+5. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - debug-mode non-strict installer command failure/placeholder behavior,
+  - debug-mode non-strict protocol command failure/placeholder behavior,
+  - release/debug warning-path behavior symmetry and non-blocking semantics.
+- **Issues found during review**
+  1. non-strict release-mode warnings were contract-locked, but debug-mode warning paths were not
+     explicitly covered.
+  2. build-mode symmetry for non-strict warning diagnostics could regress without direct contract
+     assertions.
+- **Fix applied**
+  1. introduced four debug non-strict warning-path cases for installer/protocol failure+placeholder
+     permutations.
+  2. added explicit warning log/report assertions to lock non-blocking debug behavior.
+- **Post-fix validation criteria**
+  - contract checker passes with debug non-strict warning-path cases.
+  - release/debug non-strict warning-path behavior remains symmetric and deterministic.
+  - full desktop verify remains green after matrix expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

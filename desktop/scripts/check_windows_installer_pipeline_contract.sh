@@ -157,6 +157,52 @@ run_case \
   "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=placeholder"
 
 run_case \
+  "debug-mode-non-strict-installer-command-failure-warning-pass" \
+  "pass" \
+  "Non-strict debug mode should keep installer command non-zero failures non-blocking with warning diagnostics." \
+  setup_debug_runner_case \
+  "0" \
+  "debug" \
+  "- Error: installer command failed" \
+  "[windows-installer-pipeline] warning: pipeline failed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=false"
+
+run_case \
+  "debug-mode-non-strict-installer-placeholder-warning-pass" \
+  "pass" \
+  "Non-strict debug mode should keep installer placeholder commands non-blocking with warning diagnostics." \
+  setup_debug_runner_case \
+  "0" \
+  "debug" \
+  "- Installer command placeholder status: detected" \
+  "[windows-installer-pipeline] warning: placeholder installer command detected." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=placeholder"
+
+run_case \
+  "debug-mode-non-strict-protocol-command-failure-warning-pass" \
+  "pass" \
+  "Non-strict debug mode should keep protocol command non-zero failures non-blocking with warning diagnostics." \
+  setup_debug_runner_case \
+  "0" \
+  "debug" \
+  "- Protocol error: protocol register command failed" \
+  "[windows-installer-pipeline] warning: protocol registration failed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=true" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=false"
+
+run_case \
+  "debug-mode-non-strict-protocol-placeholder-warning-pass" \
+  "pass" \
+  "Non-strict debug mode should keep protocol placeholder commands non-blocking with warning diagnostics." \
+  setup_debug_runner_case \
+  "0" \
+  "debug" \
+  "- Protocol command placeholder status: detected" \
+  "[windows-installer-pipeline] warning: placeholder protocol command detected." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=true" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=placeholder"
+
+run_case \
   "strict-installer-missing-runner-fail" \
   "fail" \
   "Strict installer mode must fail when the runner directory is missing in release mode." \
