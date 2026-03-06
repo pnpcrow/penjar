@@ -353,6 +353,28 @@ run_case \
   "PENJAR_WINDOWS_INSTALLER_COMMAND=placeholder"
 
 run_case \
+  "strict-installer-formfeed-whitespace-yes-alias-placeholder-fail" \
+  "fail" \
+  "Strict installer mode parser should trim form-feed-wrapped strict input alias and fail on placeholder installer command for '\\fYES\\f'." \
+  setup_release_runner_case \
+  $'\fYES\f' \
+  "release" \
+  "- Strict mode: 1" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=placeholder"
+
+run_case \
+  "strict-installer-vtab-whitespace-yes-alias-placeholder-fail" \
+  "fail" \
+  "Strict installer mode parser should trim vertical-tab-wrapped strict input alias and fail on placeholder installer command for '\\vYES\\v'." \
+  setup_release_runner_case \
+  $'\vYES\v' \
+  "release" \
+  "- Strict mode: 1" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=placeholder"
+
+run_case \
   "strict-installer-placeholder-command-fail" \
   "fail" \
   "Strict installer mode must fail when installer command is a placeholder value." \
@@ -563,6 +585,28 @@ run_case \
   "- Strict protocol registration mode: 1" \
   "[windows-installer-pipeline] strict mode failed." \
   $'STRICT_WINDOWS_PROTOCOL_REGISTRATION=\rTRUE\r'
+
+run_case \
+  "strict-protocol-formfeed-whitespace-true-alias-missing-command-fail" \
+  "fail" \
+  "Strict protocol mode parser should trim form-feed-wrapped protocol alias and fail on missing protocol command for '\\fTRUE\\f'." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Strict protocol registration mode: 1" \
+  "[windows-installer-pipeline] strict mode failed." \
+  $'STRICT_WINDOWS_PROTOCOL_REGISTRATION=\fTRUE\f'
+
+run_case \
+  "strict-protocol-vtab-whitespace-true-alias-missing-command-fail" \
+  "fail" \
+  "Strict protocol mode parser should trim vertical-tab-wrapped protocol alias and fail on missing protocol command for '\\vTRUE\\v'." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Strict protocol registration mode: 1" \
+  "[windows-installer-pipeline] strict mode failed." \
+  $'STRICT_WINDOWS_PROTOCOL_REGISTRATION=\vTRUE\v'
 
 run_case \
   "strict-protocol-strict-alias-missing-command-fail" \

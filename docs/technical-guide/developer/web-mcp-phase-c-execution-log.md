@@ -15283,6 +15283,56 @@ locking carriage-return-wrapped alias handling.
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-306.
 
+## Unit WS-D-307: form-feed and vertical-tab strict alias regression coverage
+
+### Planned objective
+
+Close remaining whitespace-class strict toggle gaps by locking form-feed and vertical-tab wrapped
+alias handling in installer/protocol strict paths.
+
+### Implemented changes
+
+1. Expanded strict installer coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-formfeed-whitespace-yes-alias-placeholder-fail`,
+   - added `strict-installer-vtab-whitespace-yes-alias-placeholder-fail`,
+   - strict argument fixtures `\fYES\f` and `\vYES\v` now assert strict placeholder failure
+     behavior.
+2. Expanded strict protocol coverage in the same checker:
+   - added `strict-protocol-formfeed-whitespace-true-alias-missing-command-fail`,
+   - added `strict-protocol-vtab-whitespace-true-alias-missing-command-fail`,
+   - env fixtures `STRICT_WINDOWS_PROTOCOL_REGISTRATION=\fTRUE\f` and
+     `STRICT_WINDOWS_PROTOCOL_REGISTRATION=\vTRUE\v` now assert strict protocol missing-command
+     failure behavior.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-307
+     form-feed/vertical-tab strict alias regression lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     form-feed/vertical-tab strict alias matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict installer/protocol behavior for form-feed and vertical-tab wrapped alias inputs,
+  - residual whitespace-class coverage completeness after space/tab/newline/CR/numeric locks,
+  - deterministic strict fail semantics under non-printable boundary normalization.
+- **Issues found during review**
+  1. strict whitespace coverage already locked space/tab/newline/CR and numeric aliases, but
+     form-feed (`\f`) and vertical-tab (`\v`) wrapped aliases were not explicitly asserted.
+  2. without dedicated fixtures, future trim/parser refactors could regress non-printable
+     whitespace handling while still passing existing matrix cases.
+- **Fix applied**
+  1. added installer/protocol form-feed and vertical-tab strict fixtures with explicit strict-fail
+     assertions.
+  2. retained full verification gate to ensure matrix expansion introduces no collateral changes.
+- **Post-fix validation criteria**
+  - contract checker passes with form-feed/vertical-tab alias fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-307.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

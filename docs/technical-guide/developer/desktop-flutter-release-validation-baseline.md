@@ -316,6 +316,8 @@ CI baseline note:
     strict installer/protocol deterministic fail semantics.
   - contract matrix now also locks carriage-return-wrapped strict alias handling (`"\rYES\r"`,
     `"\rTRUE\r"`) to prevent Windows-style line-ending normalization regressions.
+  - contract matrix now also locks form-feed/vertical-tab wrapped strict alias handling
+    (`"\fYES\f"`, `"\vTRUE\v"`) to prevent remaining whitespace-class trim regressions.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
