@@ -4438,6 +4438,21 @@ void main() {
           expectedStatus: 'Backend authState result envelope applied.',
         ),
         (
+          description: 'data envelope authState isAuthenticated alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail':
+                  'Backend authState data envelope isAuthenticated applied.',
+              'authState': <String, Object?>{
+                'isAuthenticated': true,
+                'remember': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend authState data envelope isAuthenticated applied.',
+        ),
+        (
           description: 'data envelope authState loggedIn alias',
           signInPayload: <String, Object?>{
             'data': <String, Object?>{
@@ -4449,6 +4464,19 @@ void main() {
             },
           },
           expectedStatus: 'Backend authState data envelope loggedIn applied.',
+        ),
+        (
+          description: 'result envelope authState loggedIn alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail': 'Backend authState result envelope loggedIn applied.',
+              'authState': <String, Object?>{
+                'loggedIn': true,
+                'persistSession': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend authState result envelope loggedIn applied.',
         ),
         (
           description: 'result envelope authState isLoggedIn alias',
@@ -4463,6 +4491,19 @@ void main() {
           },
           expectedStatus:
               'Backend authState result envelope isLoggedIn applied.',
+        ),
+        (
+          description: 'data envelope authState isLoggedIn alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend authState data envelope isLoggedIn applied.',
+              'authState': <String, Object?>{
+                'isLoggedIn': true,
+                'persistSession': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend authState data envelope isLoggedIn applied.',
         ),
         (
           description: 'data envelope authState is_authenticated alias',
@@ -4480,6 +4521,21 @@ void main() {
               'Backend authState data envelope is_authenticated applied.',
         ),
         (
+          description: 'result envelope authState is_authenticated alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail':
+                  'Backend authState result envelope is_authenticated applied.',
+              'authState': <String, Object?>{
+                'is_authenticated': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend authState result envelope is_authenticated applied.',
+        ),
+        (
           description: 'result envelope authState signedIn alias',
           signInPayload: <String, Object?>{
             'result': <String, Object?>{
@@ -4491,6 +4547,19 @@ void main() {
             },
           },
           expectedStatus: 'Backend authState result envelope signedIn applied.',
+        ),
+        (
+          description: 'data envelope authState signedIn alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend authState data envelope signedIn applied.',
+              'authState': <String, Object?>{
+                'signedIn': true,
+                'persistSession': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend authState data envelope signedIn applied.',
         ),
         (
           description: 'data envelope authState authenticated alias',
@@ -4506,6 +4575,21 @@ void main() {
           },
           expectedStatus:
               'Backend authState data envelope authenticated applied.',
+        ),
+        (
+          description: 'result envelope authState authenticated alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail':
+                  'Backend authState result envelope authenticated applied.',
+              'authState': <String, Object?>{
+                'authenticated': true,
+                'remember': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend authState result envelope authenticated applied.',
         ),
         (
           description: 'data envelope authState logged_in alias',
