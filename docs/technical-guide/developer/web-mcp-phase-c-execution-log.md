@@ -15651,6 +15651,55 @@ locking whitespace-wrapped numeric zero aliases in installer/protocol parser pat
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-314.
 
+## Unit WS-D-315: strict alias exact-match boundary regression coverage
+
+### Planned objective
+
+Lock strict parser exact-match behavior by asserting near-match alias inputs do not accidentally
+trigger strict mode.
+
+### Implemented changes
+
+1. Expanded strict installer non-overmatch matrix in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-nearmatch-truee-alias-missing-command-pass`,
+   - added `strict-installer-nearmatch-yesplease-alias-missing-command-pass`,
+   - added `strict-installer-nearmatch-strict-mode-alias-missing-command-pass`,
+   - each case asserts `- Strict mode: 0` with missing installer command.
+2. Expanded strict protocol non-overmatch matrix in the same checker:
+   - added `strict-protocol-nearmatch-truee-alias-missing-command-pass`,
+   - added `strict-protocol-nearmatch-yesplease-alias-missing-command-pass`,
+   - added `strict-protocol-nearmatch-strict-mode-alias-missing-command-pass`,
+   - each case asserts `- Strict protocol registration mode: 0` with missing protocol command.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-315
+     strict exact-match boundary lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     near-match alias non-overmatch coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict parser exact-match boundaries around positive aliases,
+  - installer/protocol non-strict behavior for prefixed/suffixed alias variants,
+  - compatibility with existing strict-positive and strict-negative matrices.
+- **Issues found during review**
+  1. strict-positive aliases were heavily covered, but near-match variants were not directly
+     asserted as non-strict.
+  2. without near-match fixtures, parser changes could unintentionally shift from exact match to
+     prefix/substring match semantics.
+- **Fix applied**
+  1. added installer/protocol near-match fixtures across representative positive-alias families.
+  2. locked strict-mode-zero assertions so missing-command paths remain non-blocking for those
+     variants.
+- **Post-fix validation criteria**
+  - contract checker passes with near-match alias fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-315.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

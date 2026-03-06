@@ -347,6 +347,36 @@ run_case \
   "[windows-installer-pipeline] completed."
 
 run_case \
+  "strict-installer-nearmatch-truee-alias-missing-command-pass" \
+  "pass" \
+  "Strict installer mode parser should keep near-match alias 'truee' non-strict when installer command is missing." \
+  setup_release_runner_case \
+  "truee" \
+  "release" \
+  "- Strict mode: 0" \
+  "[windows-installer-pipeline] completed."
+
+run_case \
+  "strict-installer-nearmatch-yesplease-alias-missing-command-pass" \
+  "pass" \
+  "Strict installer mode parser should keep near-match alias 'yesplease' non-strict when installer command is missing." \
+  setup_release_runner_case \
+  "yesplease" \
+  "release" \
+  "- Strict mode: 0" \
+  "[windows-installer-pipeline] completed."
+
+run_case \
+  "strict-installer-nearmatch-strict-mode-alias-missing-command-pass" \
+  "pass" \
+  "Strict installer mode parser should keep near-match alias 'strict-mode' non-strict when installer command is missing." \
+  setup_release_runner_case \
+  "strict-mode" \
+  "release" \
+  "- Strict mode: 0" \
+  "[windows-installer-pipeline] completed."
+
+run_case \
   "strict-installer-strict-alias-clear-command-pass" \
   "pass" \
   "Strict installer mode parser should treat strict input alias 'strict' as strict and pass when installer command succeeds." \
@@ -656,6 +686,39 @@ run_case \
   "- Strict protocol registration mode: 0" \
   "[windows-installer-pipeline] completed." \
   "STRICT_WINDOWS_PROTOCOL_REGISTRATION= 0 "
+
+run_case \
+  "strict-protocol-nearmatch-truee-alias-missing-command-pass" \
+  "pass" \
+  "Strict protocol mode parser should keep near-match alias 'truee' non-strict when protocol command is missing." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Strict protocol registration mode: 0" \
+  "[windows-installer-pipeline] completed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=truee"
+
+run_case \
+  "strict-protocol-nearmatch-yesplease-alias-missing-command-pass" \
+  "pass" \
+  "Strict protocol mode parser should keep near-match alias 'yesplease' non-strict when protocol command is missing." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Strict protocol registration mode: 0" \
+  "[windows-installer-pipeline] completed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=yesplease"
+
+run_case \
+  "strict-protocol-nearmatch-strict-mode-alias-missing-command-pass" \
+  "pass" \
+  "Strict protocol mode parser should keep near-match alias 'strict-mode' non-strict when protocol command is missing." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Strict protocol registration mode: 0" \
+  "[windows-installer-pipeline] completed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=strict-mode"
 
 run_case \
   "strict-protocol-uppercase-true-alias-missing-command-fail" \
