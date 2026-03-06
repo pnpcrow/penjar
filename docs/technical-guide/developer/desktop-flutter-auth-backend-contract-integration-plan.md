@@ -414,6 +414,16 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      marker behavior (`unauthoriZed::token`) to preserve deterministic auth-required fallback
      mapping on the delimiter-prefix start-indexed lowercase path; execution evidence is recorded
      in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-269`).
+57. Backend code compact normalization lazy-buffer allocation optimization:
+   - `_compactBackendCodeFromTrimmed(...)` now lazily allocates `StringBuffer` only when compact
+     characters are actually appended, avoiding unnecessary empty-buffer allocation on
+     delimiter-only/no-append normalization paths,
+   - existing delimiter/no-delimiter normalization semantics remain unchanged while empty compact
+     results still resolve deterministically to `''`,
+   - contract/parity suites now lock delimiter-only code marker behavior (`code: "::"`) to ensure
+     signed-in state and status stability without unintended auth-required/session-expired fallback
+     mapping on empty compact normalization output paths; execution evidence is recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-270`).
 
 ## Remaining integration gaps (auth scope)
 

@@ -13301,6 +13301,64 @@ prefix units already known to be lowercase/digit before the first uppercase comp
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-270: compact normalization lazy-buffer allocation
+
+### Planned objective
+
+Reduce compact normalization allocation overhead by avoiding eager `StringBuffer` allocation on
+paths that produce no compact output append (for example delimiter-only code markers).
+
+### Implemented changes
+
+1. Updated compact normalization path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_compactBackendCodeFromTrimmed(...)` now uses lazy `StringBuffer` allocation via
+     `ensureAsciiBuffer()` so buffer creation occurs only when append output is needed,
+   - delimiter-only/no-append paths now return empty compact output without allocating an unused
+     buffer instance.
+2. Preserved existing fallback semantics:
+   - compact-only/no-delimiter normalization, delimiter-path normalization, Unicode fallback,
+     marker classification, and non-exact fallback behavior remain unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only delimiter-only marker keeps signed-in state without auth-required fallback status`
+     (`code: "::"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client: `_AuthBackendDelimiterOnlyCodeParityTransportClient`,
+   - new parity test:
+     `auth/session parity keeps signed-in state for delimiter-only backend code marker without auth-required fallback status`.
+5. Synced continuity docs for WS-D-270 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - compact normalization buffer allocation behavior in `_compactBackendCodeFromTrimmed(...)`,
+  - delimiter-only code marker (`code: "::"`) signed-in/status behavior,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. WS-D-269 still allocated `StringBuffer` eagerly even when no compact output append occurred.
+  2. Delimiter-only backend code marker behavior (`code: "::"`) was not explicitly parity-locked.
+- **Fix applied**
+  1. Converted compact normalization buffer creation to lazy allocation with `ensureAsciiBuffer()`.
+  2. Added dedicated contract/parity regressions for delimiter-only code marker stability.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - delimiter-only/no-append normalization paths avoid eager empty-buffer allocation.
+  - delimiter-only `code: "::"` payloads keep signed-in/status stability without unintended
+    auth-required/session-expired fallback mapping in contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
