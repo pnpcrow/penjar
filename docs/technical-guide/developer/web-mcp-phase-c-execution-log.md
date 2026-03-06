@@ -15878,6 +15878,52 @@ registered.
   - full desktop verify remains green after preflight hardening.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-319.
 
+## Unit WS-D-320: newline-wrapped uppercase near-match alias regression coverage
+
+### Planned objective
+
+Close trim+case combined boundary gaps by asserting newline-wrapped uppercase near-match aliases
+remain non-strict in installer/protocol parser paths.
+
+### Implemented changes
+
+1. Expanded strict installer near-match coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-nearmatch-newline-uppercase-truee-alias-missing-command-pass`,
+   - fixture uses `\nTRUEE\n` and asserts `- Strict mode: 0` with non-blocking completion.
+2. Expanded strict protocol near-match coverage in the same checker:
+   - added `strict-protocol-nearmatch-newline-uppercase-truee-alias-missing-command-pass`,
+   - fixture uses `STRICT_WINDOWS_PROTOCOL_REGISTRATION=\nTRUEE\n` and asserts
+     `- Strict protocol registration mode: 0` with non-blocking completion.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-320
+     newline-uppercase near-match lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     newline-uppercase near-match matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - trim normalization + case normalization interaction on near-match aliases,
+  - installer/protocol non-overmatch semantics for newline-wrapped uppercase variants,
+  - consistency with existing near-match and whitespace-class coverage.
+- **Issues found during review**
+  1. near-match aliases were covered for plain inputs, but newline-wrapped uppercase near-match
+     variants were not explicitly locked.
+  2. without combined trim+case near-match fixtures, future parser changes could inadvertently
+     broaden strict detection around uppercase near matches.
+- **Fix applied**
+  1. added installer/protocol newline-uppercase near-match pass fixtures with strict-mode-zero
+     assertions.
+  2. preserved existing strict-positive and warning-path regression coverage unchanged.
+- **Post-fix validation criteria**
+  - contract checker passes with newline-uppercase near-match fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-320.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

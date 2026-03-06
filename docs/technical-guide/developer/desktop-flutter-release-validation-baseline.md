@@ -348,6 +348,8 @@ CI baseline note:
     failures.
   - contract checker now validates case-name uniqueness before executing matrix cases, failing fast
     on duplicate case IDs to prevent ambiguous report rows and hidden regression coverage drift.
+  - contract matrix now also locks newline-wrapped uppercase near-match alias behavior
+    (`"\nTRUEE\n"`) so trim + case normalization still preserves exact-match strict boundaries.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.

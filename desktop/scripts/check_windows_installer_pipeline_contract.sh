@@ -410,6 +410,16 @@ run_case \
   "[windows-installer-pipeline] completed."
 
 run_case \
+  "strict-installer-nearmatch-newline-uppercase-truee-alias-missing-command-pass" \
+  "pass" \
+  "Strict installer mode parser should trim newline-wrapped near-match alias '\\nTRUEE\\n' and keep it non-strict when installer command is missing." \
+  setup_release_runner_case \
+  $'\nTRUEE\n' \
+  "release" \
+  "- Strict mode: 0" \
+  "[windows-installer-pipeline] completed."
+
+run_case \
   "strict-installer-nearmatch-truee-placeholder-warning-pass" \
   "pass" \
   "Strict installer mode parser should keep near-match alias 'truee' non-strict and preserve placeholder warning behavior." \
@@ -763,6 +773,17 @@ run_case \
   "- Strict protocol registration mode: 0" \
   "[windows-installer-pipeline] completed." \
   "STRICT_WINDOWS_PROTOCOL_REGISTRATION=strict-mode"
+
+run_case \
+  "strict-protocol-nearmatch-newline-uppercase-truee-alias-missing-command-pass" \
+  "pass" \
+  "Strict protocol mode parser should trim newline-wrapped near-match alias '\\nTRUEE\\n' and keep it non-strict when protocol command is missing." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Strict protocol registration mode: 0" \
+  "[windows-installer-pipeline] completed." \
+  $'STRICT_WINDOWS_PROTOCOL_REGISTRATION=\nTRUEE\n'
 
 run_case \
   "strict-protocol-nearmatch-truee-placeholder-warning-pass" \
