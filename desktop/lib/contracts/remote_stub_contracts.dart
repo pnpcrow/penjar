@@ -1401,8 +1401,8 @@ const List<String> _backendSignedOutCodeMarkers = <String>[
 
 final Map<String, _BackendCodeClassification> _backendExactCodeClassifications =
     _buildBackendExactCodeClassifications();
-final int _backendSignedOutCodeMarkerMinLength = _markerMinLength(
-  _backendSignedOutCodeMarkers,
+final int _backendSignedOutOnlyCodeMarkerMinLength = _markerMinLength(
+  _backendSignedOutOnlyCodeMarkers,
 );
 final int _backendSessionExpiredCodeMarkerMinLength = _markerMinLength(
   _backendSessionExpiredCodeMarkers,
@@ -1412,17 +1412,18 @@ Map<String, _BackendCodeClassification>
 _buildBackendExactCodeClassifications() {
   final Map<String, _BackendCodeClassification> classifications =
       <String, _BackendCodeClassification>{};
-  for (final String marker in _backendSignedOutOnlyCodeMarkers) {
-    classifications[marker] = const _BackendCodeClassification(
-      signedOut: true,
-      sessionExpired: false,
-    );
-  }
-  for (final String marker in _backendSessionExpiredCodeMarkers) {
-    classifications[marker] = const _BackendCodeClassification(
-      signedOut: true,
-      sessionExpired: true,
-    );
+  final Set<String> sessionExpiredMarkers = _backendSessionExpiredCodeMarkers
+      .toSet();
+  for (final String marker in _backendSignedOutCodeMarkers) {
+    classifications[marker] = sessionExpiredMarkers.contains(marker)
+        ? const _BackendCodeClassification(
+            signedOut: true,
+            sessionExpired: true,
+          )
+        : const _BackendCodeClassification(
+            signedOut: true,
+            sessionExpired: false,
+          );
   }
   return Map<String, _BackendCodeClassification>.unmodifiable(classifications);
 }
@@ -1467,44 +1468,42 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
   if (exactClassification != null) {
     return exactClassification;
   }
-  if (compact.length < _backendSignedOutCodeMarkerMinLength) {
-    return const _BackendCodeClassification(
-      signedOut: false,
-      sessionExpired: false,
-    );
-  }
-
-  bool signedOut = false;
-  for (final String marker in _backendSignedOutCodeMarkers) {
-    if (compact.contains(marker)) {
-      signedOut = true;
-      break;
-    }
-  }
-  if (!signedOut) {
-    return const _BackendCodeClassification(
-      signedOut: false,
-      sessionExpired: false,
-    );
-  }
-  if (compact.length < _backendSessionExpiredCodeMarkerMinLength) {
-    return const _BackendCodeClassification(
-      signedOut: true,
-      sessionExpired: false,
-    );
-  }
 
   bool sessionExpired = false;
-  for (final String marker in _backendSessionExpiredCodeMarkers) {
+  if (compact.length >= _backendSessionExpiredCodeMarkerMinLength) {
+    for (final String marker in _backendSessionExpiredCodeMarkers) {
+      if (compact.contains(marker)) {
+        sessionExpired = true;
+        break;
+      }
+    }
+  }
+  if (sessionExpired) {
+    return const _BackendCodeClassification(
+      signedOut: true,
+      sessionExpired: true,
+    );
+  }
+
+  if (compact.length < _backendSignedOutOnlyCodeMarkerMinLength) {
+    return const _BackendCodeClassification(
+      signedOut: false,
+      sessionExpired: false,
+    );
+  }
+
+  for (final String marker in _backendSignedOutOnlyCodeMarkers) {
     if (compact.contains(marker)) {
-      sessionExpired = true;
-      break;
+      return const _BackendCodeClassification(
+        signedOut: true,
+        sessionExpired: false,
+      );
     }
   }
 
-  return _BackendCodeClassification(
-    signedOut: true,
-    sessionExpired: sessionExpired,
+  return const _BackendCodeClassification(
+    signedOut: false,
+    sessionExpired: false,
   );
 }
 

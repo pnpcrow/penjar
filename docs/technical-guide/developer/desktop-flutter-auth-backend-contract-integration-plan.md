@@ -288,6 +288,14 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
    - contract/parity suites now lock compact lowercase signed-out marker fallback behavior
      (`unauthorized`) to keep auth-required mapping parity stable on exact compact code paths;
      execution evidence is recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-254`).
+42. Backend code substring loop reordering optimization:
+   - `_classifyBackendCode(...)` now scans session-expired markers first and signed-out-only
+     markers second, avoiding duplicate session-marker scans while preserving signed-out/session
+     fallback semantics,
+   - contract/parity suites now lock mixed-code precedence behavior
+     (`UNAUTHORIZED_REFRESH_TOKEN_EXPIRED` -> session-expired fallback) to keep deterministic
+     fallback parity stable on composite marker paths; execution evidence is recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-255`).
 
 ## Remaining integration gaps (auth scope)
 

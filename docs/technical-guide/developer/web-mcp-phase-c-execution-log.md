@@ -12334,6 +12334,70 @@ into one map access path, while preserving existing marker catalogs and fallback
   - numeric/marker-length/substring fallback classifier semantics remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-255: backend code substring scan reordering
+
+### Planned objective
+
+Reduce duplicate substring-scan work in backend code classification by scanning session-expired
+markers first and signed-out-only markers second, while preserving composite marker semantics.
+
+### Implemented changes
+
+1. Updated classifier substring path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - replaced prior combined signed-out scan + second session-expired scan sequence with:
+     - session-expired marker scan first,
+     - signed-out-only marker scan second.
+2. Updated marker-length short-circuit constants:
+   - replaced combined signed-out marker minimum-length usage with
+     `_backendSignedOutOnlyCodeMarkerMinLength` for signed-out-only scan gating.
+3. Preserved exact and numeric classification behavior:
+   - exact-marker map lookup (`_backendExactCodeClassifications`) and numeric code fast paths are
+     unchanged.
+4. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only mixed unauthorized-refresh-token-expired payload maps session-expired fallback status`
+     (`code: "UNAUTHORIZED_REFRESH_TOKEN_EXPIRED"`).
+5. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendMixedUnauthorizedRefreshTokenExpiredParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps mixed unauthorized-refresh-token-expired backend failure to deterministic session-expired status`.
+6. Synced continuity docs for WS-D-255 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+7. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - duplicate substring-scan paths in signed-out/session-expired composite classification,
+  - precedence behavior for mixed signed-out/session-expired composite backend codes,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. Substring path scanned session-expired markers twice in mixed/composite flows (once inside
+     combined signed-out scan, once in dedicated session-expired scan).
+  2. Mixed marker payload precedence (`unauthorized` + `refresh-token-expired`) was not explicitly
+     parity-locked for deterministic session-expired fallback behavior.
+- **Fix applied**
+  1. Reordered substring scans to session-expired-first, signed-out-only-second.
+  2. Added contract/parity regressions for mixed
+     `UNAUTHORIZED_REFRESH_TOKEN_EXPIRED` fallback behavior.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - substring classification no longer duplicates session-expired marker scan work.
+  - mixed `UNAUTHORIZED_REFRESH_TOKEN_EXPIRED` payloads map to deterministic session-expired
+    fallback behavior in contract/parity suites.
+  - numeric/exact/marker-length fallback semantics remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
