@@ -404,6 +404,8 @@ CI baseline note:
     (`"1<<=1"`, `"1>>=1"`) so shift-assignment values cannot widen strict acceptance.
   - contract matrix now also locks logical-assignment numeric near-match alias behavior
     (`"1&&=1"`, `"1||=1"`) so logical-assignment values cannot widen strict acceptance.
+  - contract matrix now also locks nullish-assignment numeric near-match alias behavior
+    (`"1??=1"`) so nullish-assignment values cannot widen strict acceptance.
   - assertion scanning in `desktop/scripts/check_windows_installer_pipeline_contract.sh` now uses
     fixed-string file checks (`grep -Fq`) for report/log pattern verification instead of loading
     full file contents into shell variables per case.
