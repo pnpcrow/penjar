@@ -77,6 +77,7 @@ This baseline defines minimum release validation requirements for desktop distri
    - run auth-store runtime decommission contract check: `pnpm run desktop:auth-store:runtime-decommission:contract:check`.
    - run desktop command inventory check: `pnpm run desktop:docs:command-inventory:check`.
    - run desktop command inventory contract check: `pnpm run desktop:docs:command-inventory:contract:check`.
+   - run Windows installer pipeline contract check: `pnpm run desktop:release:windows-installer:contract:check`.
 2. Run signing readiness preflight:
    - `pnpm run desktop:release:signing:readiness`
    - use strict mode when release secrets are expected: `pnpm run desktop:release:signing:readiness:strict`.
@@ -211,7 +212,7 @@ CI baseline note:
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs update manifest contract checks and uploads `desktop-update-manifest-contract-report-smoke` artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job also runs release smoke gate policy contract checks and uploads `desktop-release-smoke-gate-policy-contract-report` artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job now runs release evidence index base + contract checks and uploads `desktop-release-evidence-index-check-report-smoke` and `desktop-release-evidence-index-contract-report-smoke` artifacts.
-- `desktop/scripts/verify_desktop.sh` now runs release script syntax checks, release script syntax contract checks, verify test coverage checks, verify test coverage contract checks, strict auth-store legacy decommission checks (`STRICT_AUTH_STORE_LEGACY_DECOMMISSION=1`), auth-store legacy decommission contract checks, auth-store runtime decommission checks, auth-store runtime decommission contract checks, desktop command inventory checks, desktop command inventory contract checks, update manifest checks, update manifest contract checks, release smoke gate policy contract checks, release evidence index base checks, and release evidence index contract checks before test/analyze/build phases, and executes contract/parity/mode-matrix tests through dedicated scripts to avoid duplicate suite execution.
+- `desktop/scripts/verify_desktop.sh` now runs release script syntax checks, release script syntax contract checks, verify test coverage checks, verify test coverage contract checks, strict auth-store legacy decommission checks (`STRICT_AUTH_STORE_LEGACY_DECOMMISSION=1`), auth-store legacy decommission contract checks, auth-store runtime decommission checks, auth-store runtime decommission contract checks, desktop command inventory checks, desktop command inventory contract checks, update manifest checks, update manifest contract checks, release smoke gate policy contract checks, Windows installer pipeline contract checks, release evidence index base checks, and release evidence index contract checks before test/analyze/build phases, and executes contract/parity/mode-matrix tests through dedicated scripts to avoid duplicate suite execution.
 - `desktop/scripts/verify_desktop.sh` emits verify stage timing reports (`release/reports/verify_stage_timing_report.md`) including stage-level durations and status.
 - `.github/workflows/release-desktop-installer-smoke.yml` signing-readiness job runs release smoke gate policy preflight and uploads gate policy report artifact.
 - `.github/workflows/release-desktop-installer-smoke.yml` supports strict signing command-hook enforcement via `enforce_signing_command_hooks` input.
@@ -269,6 +270,7 @@ CI baseline note:
 - Verify test coverage contract checker: `desktop/scripts/check_verify_test_coverage_contract.sh`.
 - Desktop command inventory checker: `desktop/scripts/check_desktop_command_inventory.sh`.
 - Desktop command inventory contract checker: `desktop/scripts/check_desktop_command_inventory_contract.sh`.
+- Windows installer pipeline contract checker: `desktop/scripts/check_windows_installer_pipeline_contract.sh`.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.

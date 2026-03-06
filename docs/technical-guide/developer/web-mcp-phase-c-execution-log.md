@@ -14209,6 +14209,59 @@ compact normalization reuses the trimmed input value unchanged.
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-285: windows installer pipeline contract coverage
+
+### Planned objective
+
+Close release-path regression gaps by adding deterministic contract coverage for
+`run_windows_installer_pipeline.sh`, including strict protocol-registration behavior and invalid
+mode diagnostics.
+
+### Implemented changes
+
+1. Added a dedicated contract checker:
+   - new script `desktop/scripts/check_windows_installer_pipeline_contract.sh`,
+   - validates pass/fail/report/log outcomes for:
+     - baseline missing-runner non-strict skip,
+     - strict protocol mode missing command failure,
+     - strict protocol mode placeholder command failure,
+     - strict protocol mode clear command success,
+     - invalid build-mode failure diagnostics.
+2. Wired contract execution into baseline verify chain:
+   - `desktop/scripts/verify_desktop.sh` now runs
+     `check_windows_installer_pipeline_contract.sh` before release-evidence checks.
+3. Added package script entry:
+   - `package.json` now exposes
+     `desktop:release:windows-installer:contract:check`.
+4. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md`
+     now lists the new contract command/checker and verify-chain inclusion,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`
+     now records the latest release pipeline evidence lock (`Unit WS-D-285`).
+5. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - Windows installer pipeline strict/non-strict protocol-registration command behavior,
+  - placeholder hygiene handling for protocol commands in strict mode,
+  - invalid build-mode fail-fast diagnostics,
+  - verify-chain regression coverage inclusion.
+- **Issues found during review**
+  1. No dedicated contract checker existed for `run_windows_installer_pipeline.sh`.
+  2. Strict protocol command edge-cases were only indirectly validated via workflow wiring.
+  3. Verify baseline did not block regressions in installer-pipeline strict protocol logic.
+- **Fix applied**
+  1. introduced a standalone contract checker with explicit case matrix + report/log assertions.
+  2. added verify-chain stage integration to fail fast on installer-pipeline behavior regressions.
+  3. documented new command/checker in release validation baseline and runbook continuity links.
+- **Post-fix validation criteria**
+  - contract checker passes with zero mismatches across strict/non-strict coverage matrix.
+  - verify pipeline includes installer-pipeline contract stage and remains green end-to-end.
+  - release documentation references command/checker/verify inclusion consistently.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
