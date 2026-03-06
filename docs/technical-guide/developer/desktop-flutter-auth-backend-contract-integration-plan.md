@@ -114,6 +114,11 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      signed-in success, and `result/data.authState` signed-out fallback variants
      (`signedOut`, `signed_out`, `isSignedOut`, `loggedOut`, `logged_out`, `isLoggedOut`,
      `is_signed_out`, `is_logged_out`).
+17. Refresh-token direct-wrapper signed-out parity expansion:
+   - auth fixture + parity suites now include direct `result/data.authState` refresh-token
+     signed-out alias fallback coverage for `signedOut`, `signed_out`, `isSignedOut`,
+     `loggedOut`, and `logged_out`,
+   - execution evidence is recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-229`).
 
 ## Remaining integration gaps (auth scope)
 

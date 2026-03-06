@@ -4788,6 +4788,55 @@ void main() {
           absentSuccessText: 'Token refreshed (simulated).',
         ),
         (
+          description: 'refresh-token data envelope authState signedOut alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'signedOut': true,
+                'sessionToken':
+                    'auth-state-signed-out-refresh-data-camel-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token result envelope authState signed_out alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'signed_out': true,
+                'sessionToken':
+                    'auth-state-signed-out-refresh-result-snake-direct-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description: 'refresh-token data envelope authState signed_out alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'signed_out': true,
+                'sessionToken':
+                    'auth-state-signed-out-refresh-data-snake-direct-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
           description: 'result envelope authState signed_out alias',
           restoreSessionPayload: <String, Object?>{
             'result': <String, Object?>{
@@ -4834,6 +4883,40 @@ void main() {
           absentSuccessText: 'Session restored (simulated).',
         ),
         (
+          description:
+              'refresh-token result envelope authState isSignedOut alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'isSignedOut': true,
+                'sessionToken':
+                    'auth-state-is-signed-out-refresh-result-camel-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token data envelope authState isSignedOut alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'isSignedOut': true,
+                'sessionToken':
+                    'auth-state-is-signed-out-refresh-data-camel-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
           description: 'result envelope authState isSignedOut alias',
           restoreSessionPayload: <String, Object?>{
             'result': <String, Object?>{
@@ -4870,6 +4953,55 @@ void main() {
               'authState': <String, Object?>{
                 'loggedOut': true,
                 'sessionToken': 'auth-state-logged-out-result-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description: 'refresh-token data envelope authState loggedOut alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'loggedOut': true,
+                'sessionToken':
+                    'auth-state-logged-out-refresh-data-camel-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description:
+              'refresh-token result envelope authState logged_out alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'logged_out': true,
+                'sessionToken':
+                    'auth-state-logged-out-refresh-result-snake-direct-token',
+              },
+            },
+          },
+          restoreSessionPayload: null,
+          actionKey: const ValueKey<String>('auth-refresh-token'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description: 'refresh-token data envelope authState logged_out alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'logged_out': true,
+                'sessionToken':
+                    'auth-state-logged-out-refresh-data-snake-direct-token',
               },
             },
           },

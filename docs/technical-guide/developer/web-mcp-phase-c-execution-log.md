@@ -10811,6 +10811,71 @@ Close remaining direct-wrapper asymmetry in signed-out authState fixtures by pai
   - parity UI keeps fallback precedence and suppresses simulated restore success text for each case.
   - targeted auth tests and full desktop verification remain green after direct-wrapper expansion.
 
+## Unit WS-D-229: refresh-token signed-out authState direct-wrapper symmetry (`signedOut`/`signed_out`/`isSignedOut`/`loggedOut`/`logged_out`)
+
+### Planned objective
+
+Close remaining refresh-token signed-out wrapper asymmetry by expanding direct
+`result/data.authState` alias fixtures and parity cases so refresh fallback behavior remains
+deterministic regardless of wrapper location.
+
+### Implemented changes
+
+1. Expanded refresh-token contract fallback fixture matrix in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - added `refresh-token result envelope authState signed_out alias maps fallback status`,
+   - added `refresh-token data envelope authState signed_out alias maps fallback status`,
+   - added `refresh-token data envelope authState signedOut alias maps fallback status`,
+   - added `refresh-token result envelope authState isSignedOut alias maps fallback status`,
+   - added `refresh-token data envelope authState isSignedOut alias maps fallback status`,
+   - added `refresh-token data envelope authState loggedOut alias maps fallback status`,
+   - added `refresh-token result envelope authState logged_out alias maps fallback status`,
+   - added `refresh-token data envelope authState logged_out alias maps fallback status`.
+2. Expanded refresh-token parity signed-out envelope loop in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - added `refresh-token data envelope authState signedOut alias`,
+   - added `refresh-token result envelope authState signed_out alias`,
+   - added `refresh-token data envelope authState signed_out alias`,
+   - added `refresh-token result envelope authState isSignedOut alias`,
+   - added `refresh-token data envelope authState isSignedOut alias`,
+   - added `refresh-token data envelope authState loggedOut alias`,
+   - added `refresh-token result envelope authState logged_out alias`,
+   - added `refresh-token data envelope authState logged_out alias`.
+3. Synced continuity docs for latest refresh-token direct-wrapper parity evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && dart format test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - refresh-token signed-out alias wrapper completeness in contract fixture matrix,
+  - refresh-token parity case symmetry between `result` and `data` wrappers,
+  - continuity-doc drift risk after refresh-specific coverage expansion.
+- **Issues found during review**
+  1. Signed-out alias coverage was broad overall, but refresh-token direct wrappers still had
+     asymmetric allocation (`signedOut`/`loggedOut` were result-biased; `signed_out` relied mainly
+     on payload wrapper).
+  2. The missing refresh `data.authState` counterparts left wrapper-order drift risk when backend
+     response envelopes move between `result` and `data`.
+- **Fix applied**
+  1. Added eight refresh-token contract fixtures to lock direct result/data signed-out alias parity.
+  2. Added eight refresh-token parity loop entries to mirror fallback expectations in UI flow.
+  3. Updated continuity docs so latest refresh-token direct-wrapper coverage is explicitly linked.
+- **Post-fix validation criteria**
+  - refresh-token signed-out aliases (`signedOut`, `signed_out`, `isSignedOut`, `loggedOut`,
+    `logged_out`) map deterministic signed-out fallback status (`Authentication required.`) on both
+    `result.authState` and `data.authState`.
+  - parity UI keeps fallback precedence and suppresses simulated token-refresh success text for each
+    added alias/wrapper combination.
+  - targeted auth tests and full desktop verification remain green after refresh-wrapper expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
