@@ -350,6 +350,14 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
    - contract/parity suites now lock mixed-case compact session-expired marker behavior
      (`SessionExpired`) to preserve deterministic fallback mapping under the new ASCII fast-path;
      execution evidence is recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-262`).
+50. Backend code Unicode-fallback early-branch optimization for compact classification:
+   - `_compactBackendCodeFromTrimmed(...)` now short-circuits directly to
+     `_compactBackendCodeFromTrimmedUnicodeFallback(...)` when the first non-compact character is
+     non-ASCII, avoiding redundant ASCII normalization scans before Unicode fallback,
+   - contract/parity suites now lock compact uppercase unauthorized code behavior with non-ASCII
+     suffix (`UNAUTHORIZED토큰`) to preserve deterministic auth-required fallback mapping on the
+     early Unicode-fallback path; execution evidence is recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-263`).
 
 ## Remaining integration gaps (auth scope)
 

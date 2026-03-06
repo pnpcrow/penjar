@@ -1552,6 +1552,12 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
         ? _compactBackendAsciiLowercase(trimmedCode)
         : trimmedCode;
   }
+  if (trimmedCode.codeUnitAt(firstNonCompactIndex) > 127) {
+    return _compactBackendCodeFromTrimmedUnicodeFallback(
+      trimmedCode,
+      firstNonCompactIndex: firstNonCompactIndex,
+    );
+  }
   final StringBuffer asciiBuffer = StringBuffer();
   for (int index = 0; index < trimmedCode.length; index++) {
     final int codeUnit = trimmedCode.codeUnitAt(index);

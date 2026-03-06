@@ -12846,6 +12846,68 @@ Reduce compact mixed-case normalization overhead by replacing all-compact upperc
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-263: compact Unicode-fallback early-branch optimization
+
+### Planned objective
+
+Reduce redundant normalization work by short-circuiting directly to Unicode fallback when compact
+normalization detects a first non-compact non-ASCII character.
+
+### Implemented changes
+
+1. Updated compact normalization branching in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_compactBackendCodeFromTrimmed(...)` now checks the first non-compact index and branches
+     directly into `_compactBackendCodeFromTrimmedUnicodeFallback(...)` when that character is
+     non-ASCII.
+2. Preserved existing fallback semantics:
+   - ASCII compact/delimited paths continue through existing normalization and marker
+     classification unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only compact uppercase unauthorized with non-ascii suffix maps authentication-required fallback status`
+     (`code: "UNAUTHORIZED토큰"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendCompactUppercaseUnauthorizedNonAsciiSuffixParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps compact uppercase unauthorized backend failure with non-ascii suffix to deterministic auth-required status`.
+5. Synced continuity docs for WS-D-263 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - compact normalization hot path behavior when first non-compact character is non-ASCII,
+  - deterministic auth-required fallback behavior for compact uppercase `UNAUTHORIZED토큰`,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. WS-D-262 still entered the ASCII normalization scan loop before switching to Unicode fallback
+     when the first non-compact character was non-ASCII.
+  2. Compact uppercase unauthorized code behavior with non-ASCII suffix (`UNAUTHORIZED토큰`) was
+     not explicitly parity-locked.
+- **Fix applied**
+  1. Added first-non-compact non-ASCII early branch to Unicode fallback.
+  2. Added dedicated contract/parity regressions for `UNAUTHORIZED토큰` deterministic
+     auth-required fallback behavior.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - first-non-compact non-ASCII inputs branch to Unicode fallback without redundant ASCII loop
+    scanning.
+  - compact uppercase `UNAUTHORIZED토큰` payloads map to deterministic auth-required fallback
+    behavior in contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
