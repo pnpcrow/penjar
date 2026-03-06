@@ -210,6 +210,14 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      payload scans, reducing guard evaluation overhead while keeping failure semantics unchanged,
    - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
      (`Unit WS-D-243`).
+31. Auth backend contract fixture matrix guard lookup indexing and helper reuse:
+   - `desktop/test/contracts/workflow_contracts_test.dart` now precomputes auth backend fixture
+     matrix entries (operation/wrapper/alias/value) and reuses a shared missing-entry appender for
+     signed-out (`true`), signed-in (`true`), and signed-in-false (`false`) symmetry requirements
+     across `result/data` wrappers, replacing repeated fixture scans while preserving deterministic
+     failure diagnostics,
+   - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
+     (`Unit WS-D-244`).
 
 ## Remaining integration gaps (auth scope)
 

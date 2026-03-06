@@ -114,6 +114,73 @@ void _invokeAuthBackendFixtureOperation(
   fail('Unsupported auth fixture operation: $operationId');
 }
 
+String _authBackendFixtureMatrixEntryKey({
+  required String operationId,
+  required String wrapperKey,
+  required String alias,
+  required Object? expectedValue,
+}) => '$operationId|$wrapperKey|$alias|$expectedValue';
+
+Set<String> _buildAuthBackendFixtureMatrixEntrySet({
+  required Iterable<_AuthBackendFixtureCase> fixtures,
+  required Iterable<String> wrapperKeys,
+}) {
+  final Set<String> entries = <String>{};
+  for (final _AuthBackendFixtureCase fixture in fixtures) {
+    for (final String wrapperKey in wrapperKeys) {
+      final Object? wrapper = fixture.responsePayload[wrapperKey];
+      if (wrapper is! Map<Object?, Object?>) {
+        continue;
+      }
+      final Object? authState = wrapper['authState'];
+      if (authState is! Map<Object?, Object?>) {
+        continue;
+      }
+      for (final MapEntry<Object?, Object?> authStateEntry
+          in authState.entries) {
+        final Object? alias = authStateEntry.key;
+        if (alias is! String) {
+          continue;
+        }
+        entries.add(
+          _authBackendFixtureMatrixEntryKey(
+            operationId: fixture.operationId,
+            wrapperKey: wrapperKey,
+            alias: alias,
+            expectedValue: authStateEntry.value,
+          ),
+        );
+      }
+    }
+  }
+  return entries;
+}
+
+void _appendMissingAuthBackendFixtureMatrixEntries({
+  required List<String> missingEntries,
+  required Set<String> matrixEntries,
+  required String operationId,
+  required String wrapperKey,
+  required Iterable<String> aliases,
+  required Object? expectedValue,
+}) {
+  for (final String alias in aliases) {
+    if (matrixEntries.contains(
+      _authBackendFixtureMatrixEntryKey(
+        operationId: operationId,
+        wrapperKey: wrapperKey,
+        alias: alias,
+        expectedValue: expectedValue,
+      ),
+    )) {
+      continue;
+    }
+    missingEntries.add(
+      '$operationId $wrapperKey authState.$alias=$expectedValue',
+    );
+  }
+}
+
 void main() {
   group('InMemoryAuthSessionContract', () {
     test('requires email and password to sign in', () {
@@ -5326,70 +5393,39 @@ void main() {
           'is_logged_in',
         ];
 
-        bool hasAuthStateAliasFixture({
-          required String operationId,
-          required String wrapperKey,
-          required String alias,
-          required Object? expectedValue,
-        }) {
-          for (final _AuthBackendFixtureCase fixture
-              in authBackendContractFixtures) {
-            if (fixture.operationId != operationId) {
-              continue;
-            }
-            final Object? wrapper = fixture.responsePayload[wrapperKey];
-            if (wrapper is! Map) {
-              continue;
-            }
-            final Object? authState = wrapper['authState'];
-            if (authState is! Map) {
-              continue;
-            }
-            if (authState[alias] == expectedValue) {
-              return true;
-            }
-          }
-          return false;
-        }
-
         final List<String> missingEntries = <String>[];
+        final Set<String> matrixEntries =
+            _buildAuthBackendFixtureMatrixEntrySet(
+              fixtures: authBackendContractFixtures,
+              wrapperKeys: wrapperKeys,
+            );
 
         for (final String operationId in operationIds) {
           for (final String wrapperKey in wrapperKeys) {
-            for (final String alias in signedOutAliases) {
-              if (!hasAuthStateAliasFixture(
-                operationId: operationId,
-                wrapperKey: wrapperKey,
-                alias: alias,
-                expectedValue: true,
-              )) {
-                missingEntries.add(
-                  '$operationId $wrapperKey authState.$alias=true',
-                );
-              }
-            }
-            for (final String alias in signedInAliases) {
-              if (!hasAuthStateAliasFixture(
-                operationId: operationId,
-                wrapperKey: wrapperKey,
-                alias: alias,
-                expectedValue: true,
-              )) {
-                missingEntries.add(
-                  '$operationId $wrapperKey authState.$alias=true',
-                );
-              }
-              if (!hasAuthStateAliasFixture(
-                operationId: operationId,
-                wrapperKey: wrapperKey,
-                alias: alias,
-                expectedValue: false,
-              )) {
-                missingEntries.add(
-                  '$operationId $wrapperKey authState.$alias=false',
-                );
-              }
-            }
+            _appendMissingAuthBackendFixtureMatrixEntries(
+              missingEntries: missingEntries,
+              matrixEntries: matrixEntries,
+              operationId: operationId,
+              wrapperKey: wrapperKey,
+              aliases: signedOutAliases,
+              expectedValue: true,
+            );
+            _appendMissingAuthBackendFixtureMatrixEntries(
+              missingEntries: missingEntries,
+              matrixEntries: matrixEntries,
+              operationId: operationId,
+              wrapperKey: wrapperKey,
+              aliases: signedInAliases,
+              expectedValue: true,
+            );
+            _appendMissingAuthBackendFixtureMatrixEntries(
+              missingEntries: missingEntries,
+              matrixEntries: matrixEntries,
+              operationId: operationId,
+              wrapperKey: wrapperKey,
+              aliases: signedInAliases,
+              expectedValue: false,
+            );
           }
         }
 

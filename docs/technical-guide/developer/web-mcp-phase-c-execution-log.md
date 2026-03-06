@@ -11687,6 +11687,66 @@ matrix membership checks, while preserving existing assertion semantics and diag
   - helper-level assertion path now avoids repeated full payload scans per alias check.
   - targeted auth tests and full desktop verification remain green after indexing rollout.
 
+## Unit WS-D-244: contract fixture authState matrix guard indexing and helper reuse
+
+### Planned objective
+
+Bring auth backend contract fixture matrix symmetry checks to the same indexed lookup pattern used
+by parity guards, reducing repeated fixture scans while preserving deterministic missing-entry
+diagnostics and matrix coverage semantics.
+
+### Implemented changes
+
+1. Added contract fixture matrix helpers in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `_authBackendFixtureMatrixEntryKey(...)`,
+   - `_buildAuthBackendFixtureMatrixEntrySet(...)`,
+   - `_appendMissingAuthBackendFixtureMatrixEntries(...)`.
+2. Replaced local scan helper `hasAuthStateAliasFixture(...)` in
+   `auth backend contract fixture matrix keeps authState alias symmetry` with indexed membership
+   checks built once per fixture set.
+3. Rewired signed-out (`true`), signed-in (`true`), and signed-in-false (`false`) matrix
+   requirements to reuse the shared missing-entry appender across all
+   `sign-in`/`refresh-token`/`restore-session` and `result/data` wrapper combinations.
+4. Preserved matrix guard behavior contracts:
+   - unchanged test name,
+   - unchanged failure reason prefix (`Missing auth backend fixture matrix entries:`),
+   - unchanged required alias sets and wrapper scope.
+5. Synced continuity docs for WS-D-244 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format test/contracts/workflow_contracts_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - contract-side auth fixture matrix guard computational overhead and duplication,
+  - behavioral parity of matrix failure diagnostics after refactor,
+  - regression impact on contract/parity suites and full desktop verification chain.
+- **Issues found during review**
+  1. Contract fixture matrix guard performed repeated full fixture scans per
+     operation/wrapper/alias/value requirement through `hasAuthStateAliasFixture(...)`, causing
+     avoidable repeated traversal overhead.
+  2. Signed-out/signed-in/signed-in-false matrix loops each invoked the same scan path, increasing
+     maintenance drift risk if matrix shape rules evolve.
+- **Fix applied**
+  1. Introduced keyed matrix-entry indexing for operation/wrapper/alias/value tuples and built the
+     entry set once for the fixture matrix.
+  2. Added a shared missing-entry appender and rewired all required matrix checks to that path.
+  3. Re-ran formatter, targeted contract/parity suites, and full desktop verification to confirm no
+     regressions.
+- **Post-fix validation criteria**
+  - matrix guard still enforces the same alias/wrapper symmetry requirements.
+  - failure output remains deterministic and keeps the existing reason prefix.
+  - targeted auth suites and full desktop verification remain green after contract-side indexing
+    rollout.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
