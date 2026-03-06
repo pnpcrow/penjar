@@ -16259,6 +16259,54 @@ and bracketed numeric near matches as non-strict paths.
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-327.
 
+## Unit WS-D-328: trim-wrapped numeric near-match strict alias regression coverage
+
+### Planned objective
+
+Prevent strict numeric alias broadening through trim-normalized numeric near matches by locking
+whitespace/tab-wrapped numeric variants as non-strict paths.
+
+### Implemented changes
+
+1. Expanded strict installer trim-wrapped numeric near-match coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-nearmatch-whitespace-decimal-one-zero-alias-missing-command-pass`,
+   - added `strict-installer-nearmatch-tab-plus-one-alias-missing-command-pass`,
+   - fixtures ` 1.0 ` and `\t+1\t` assert `- Strict mode: 0` with non-blocking completion.
+2. Expanded strict protocol trim-wrapped numeric near-match coverage in the same checker:
+   - added `strict-protocol-nearmatch-whitespace-decimal-one-zero-alias-missing-command-pass`,
+   - added `strict-protocol-nearmatch-tab-plus-one-alias-missing-command-pass`,
+   - fixtures `STRICT_WINDOWS_PROTOCOL_REGISTRATION= 1.0 ` and `=\t+1\t` assert
+     `- Strict protocol registration mode: 0` with non-blocking completion.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-328
+     trim-wrapped numeric near-match boundary lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     trim-wrapped numeric near-match strict boundary matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict numeric alias exact-match boundaries under trim-normalized near-match values,
+  - installer/protocol non-overmatch behavior for ` 1.0 ` and `\t+1\t`,
+  - compatibility with existing whitespace-class and numeric near-match coverage.
+- **Issues found during review**
+  1. numeric near-match boundaries were covered for notation/quote/wrapper forms, but trim-wrapped
+     numeric near-match variants were not explicitly locked.
+  2. without trim-wrapped numeric fixtures, parser trim refactors could accidentally widen strict
+     numeric acceptance.
+- **Fix applied**
+  1. added installer/protocol trim-wrapped numeric near-match pass fixtures with strict-mode-zero
+     assertions.
+  2. retained strict-positive exact alias behavior and existing warning/failure semantics.
+- **Post-fix validation criteria**
+  - contract checker passes with trim-wrapped numeric near-match fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-328.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
