@@ -10,13 +10,20 @@ build_mode="${2:-release}"
 report_file="${3:-release/reports/windows_installer_pipeline_report.md}"
 strict_protocol_input="${STRICT_WINDOWS_PROTOCOL_REGISTRATION:-0}"
 
+normalize_toggle_input() {
+  local value="$1"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  printf '%s' "$value" | tr '[:upper:]' '[:lower:]'
+}
+
 strict_mode=0
-case "$(printf '%s' "$strict_input" | tr '[:upper:]' '[:lower:]')" in
+case "$(normalize_toggle_input "$strict_input")" in
   1|true|yes|strict) strict_mode=1 ;;
 esac
 
 strict_protocol_mode=0
-case "$(printf '%s' "$strict_protocol_input" | tr '[:upper:]' '[:lower:]')" in
+case "$(normalize_toggle_input "$strict_protocol_input")" in
   1|true|yes|strict) strict_protocol_mode=1 ;;
 esac
 

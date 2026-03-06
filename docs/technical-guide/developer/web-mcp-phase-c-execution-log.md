@@ -15000,6 +15000,57 @@ strict installer and strict protocol toggles.
   - full desktop verify remains green after alias matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-300.
 
+## Unit WS-D-301: whitespace-trim strict toggle parsing hardening
+
+### Planned objective
+
+Harden strict installer/protocol toggle parsing by normalizing leading/trailing whitespace before
+case-insensitive alias evaluation, and lock the behavior with explicit contract fixtures.
+
+### Implemented changes
+
+1. Updated toggle parser normalization in
+   `desktop/scripts/run_windows_installer_pipeline.sh`:
+   - introduced shared `normalize_toggle_input()` helper,
+   - helper trims leading/trailing whitespace and lowercases values,
+   - both `strict_input` and `STRICT_WINDOWS_PROTOCOL_REGISTRATION` now use the shared helper.
+2. Expanded strict installer contract coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-whitespace-yes-alias-placeholder-fail`,
+   - locks strict parsing for spaced alias input (`" yes "`) with strict failure semantics.
+3. Expanded strict protocol contract coverage in the same checker:
+   - added `strict-protocol-whitespace-true-alias-missing-command-fail`,
+   - locks strict protocol parsing for spaced alias input (`" true "`) with strict missing-command
+     failure semantics.
+4. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-301
+     whitespace-trim parser hardening lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     runtime trim normalization and whitespace alias regression coverage.
+5. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict toggle parser behavior for env/argument values containing leading/trailing whitespace,
+  - regression coverage depth for whitespace alias normalization in strict installer/protocol paths,
+  - behavior stability after parser normalization refactor.
+- **Issues found during review**
+  1. previous parser logic only lowercased values; whitespace-wrapped strict aliases were not
+     interpreted as strict.
+  2. missing whitespace fixtures in contract matrix left a gap where real-world env formatting
+     (export scripts/templates with padded values) could silently bypass strict gates.
+- **Fix applied**
+  1. centralized trim+lowercase normalization into `normalize_toggle_input()` and reused it for
+     both strict toggles.
+  2. added strict installer/protocol whitespace alias cases and explicit strict outcome assertions.
+- **Post-fix validation criteria**
+  - contract checker passes with whitespace alias fixtures.
+  - full desktop verify remains green after parser normalization update.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-301.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

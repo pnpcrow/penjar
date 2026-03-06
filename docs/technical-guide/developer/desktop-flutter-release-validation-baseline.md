@@ -304,6 +304,8 @@ CI baseline note:
   - contract matrix now also locks case-insensitive strict/strict-protocol alias parsing
     (`YES`/`TRUE`/`StRiCt`/`YeS`) for deterministic strict-mode semantics across release/debug
     scenarios.
+  - strict toggle parser now trims leading/trailing whitespace before lowercase normalization, and
+    contract coverage explicitly locks whitespace alias handling (`" yes "`, `" true "`).
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
