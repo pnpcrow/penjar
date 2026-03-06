@@ -4788,12 +4788,73 @@ void main() {
           absentSuccessText: 'Token refreshed (simulated).',
         ),
         (
+          description: 'result envelope authState signed_out alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'signed_out': true,
+                'sessionToken':
+                    'auth-state-signed-out-result-snake-direct-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
+          description: 'data envelope authState signed_out alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'signed_out': true,
+                'sessionToken': 'auth-state-signed-out-data-snake-direct-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
           description: 'data envelope authState signedOut alias',
           restoreSessionPayload: <String, Object?>{
             'data': <String, Object?>{
               'authState': <String, Object?>{
                 'signedOut': true,
                 'sessionToken': 'auth-state-signed-out-data-camel-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
+          description: 'result envelope authState isSignedOut alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'isSignedOut': true,
+                'sessionToken': 'auth-state-is-signed-out-result-camel-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
+          description: 'data envelope authState isSignedOut alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'isSignedOut': true,
+                'sessionToken': 'auth-state-is-signed-out-data-camel-token',
               },
             },
           },
@@ -4816,6 +4877,37 @@ void main() {
           actionKey: const ValueKey<String>('auth-refresh-token'),
           expectedStatus: 'Authentication required.',
           absentSuccessText: 'Token refreshed (simulated).',
+        ),
+        (
+          description: 'result envelope authState logged_out alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'logged_out': true,
+                'sessionToken':
+                    'auth-state-logged-out-result-snake-direct-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
+          description: 'data envelope authState logged_out alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'logged_out': true,
+                'sessionToken': 'auth-state-logged-out-data-snake-direct-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
         ),
         (
           description: 'data envelope authState loggedOut alias',
