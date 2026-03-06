@@ -456,6 +456,16 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      (`code: "Unauthorized"`) to preserve deterministic auth-required fallback mapping on the
      no-delimiter start-indexed lowercase path with cached boundary reuse; execution evidence is
      recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-273`).
+61. Backend code classification marker-loop index optimization:
+   - `_classifyBackendCode(...)` now replaces `for-in` marker scans with index-based loops and
+     cached marker counts for both session-expired and signed-out-only marker sets to avoid
+     iterator allocations on classifier hot paths,
+   - session-expired marker matches now return immediately without intermediate boolean state while
+     preserving session-expired precedence semantics,
+   - contract/parity suites now lock capitalized compact unauthenticated marker behavior
+     (`code: "Unauthenticated"`) to preserve deterministic auth-required fallback mapping on the
+     signed-out-only marker scan path after loop-shape changes; execution evidence is recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-274`).
 
 ## Remaining integration gaps (auth scope)
 

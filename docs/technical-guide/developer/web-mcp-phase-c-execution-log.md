@@ -13539,6 +13539,69 @@ scan boundaries across no-delimiter and delimiter-suffix normalization paths.
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-274: backend marker-loop index traversal optimization
+
+### Planned objective
+
+Reduce backend code classifier marker-scan overhead by replacing iterator-driven marker traversal
+with index-based loops and cached marker counts while preserving signed-out/session-expired
+inference precedence.
+
+### Implemented changes
+
+1. Updated backend marker classification path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_classifyBackendCode(...)` now scans `_backendSessionExpiredCodeMarkers` and
+     `_backendSignedOutOnlyCodeMarkers` with index-based loops and cached marker counts instead of
+     `for-in` traversal.
+   - session-expired marker matches now return immediately without intermediate boolean state.
+2. Preserved existing fallback semantics:
+   - session-expired marker precedence over signed-out-only marker matching remains unchanged.
+   - compact/raw exact classification, numeric status shortcuts, and fallback status mapping
+     behavior remain unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only capitalized compact unauthenticated payload maps authentication-required fallback status`
+     (`code: "Unauthenticated"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendCapitalizedCompactUnauthenticatedParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps capitalized compact unauthenticated backend failure to deterministic auth-required status`.
+5. Synced continuity docs for WS-D-274 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - marker-loop shape and precedence in `_classifyBackendCode(...)`,
+  - capitalized compact unauthenticated marker fallback mapping on signed-out-only marker path,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. session-expired/signed-out marker scans still used iterator-backed `for-in` traversal on a hot
+     classification path.
+  2. capitalized compact `Unauthenticated` marker behavior was not explicitly parity-locked.
+- **Fix applied**
+  1. replaced marker scans with index-based loops and cached marker counts; preserved
+     session-expired precedence with immediate return.
+  2. added dedicated contract/parity regressions for capitalized compact unauthenticated mapping.
+  3. re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - marker classification behavior remains deterministic and precedence-safe.
+  - capitalized compact `code: "Unauthenticated"` payloads map to auth-required fallback status in
+    contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
