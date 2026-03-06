@@ -14089,6 +14089,65 @@ with bitmask membership guards on raw/compact exact-map probe paths.
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-283: classifier compact-length candidate reuse
+
+### Planned objective
+
+Reduce backend code classifier duplicate exact-length candidate checks by reusing trimmed candidate
+state when compact normalization does not change code length.
+
+### Implemented changes
+
+1. Updated backend classifier exact-gating path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - added local `trimmedExactLengthCandidate` reuse in `_classifyBackendCode(...)`.
+   - added local `compactExactLengthCandidate` that reuses trimmed candidate when
+     `compactLength == trimmedLength`, otherwise falls back to
+     `_isBackendSignedOutCodeMarkerLength(compactLength)`.
+2. Preserved existing fallback semantics:
+   - numeric shortcuts, short/long guards, exact-map behavior, marker precedence, and substring
+     fallback behavior remain unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only capitalized compact marker-length candidate near-miss keeps signed-in state without fallback status`
+     (`code: "GrantToken"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendCapitalizedCompactMarkerLengthCandidateNearMissParityTransportClient`,
+   - new parity test:
+     `auth/session parity keeps signed-in state for capitalized compact marker-length candidate near-miss without fallback status`.
+5. Synced continuity docs for WS-D-283 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - compact/trimmed exact-length candidate reuse behavior in `_classifyBackendCode(...)`,
+  - marker-length-candidate near-miss signed-in/status stability,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. compact no-mutation paths still repeated exact-length candidate checks after trimmed checks.
+  2. marker-length-candidate near-miss (`GrantToken`) stability was not explicitly parity-locked.
+- **Fix applied**
+  1. introduced trimmed/compact candidate reuse path in `_classifyBackendCode(...)`.
+  2. added contract/parity regressions for `code: "GrantToken"` no-fallback stability.
+  3. re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - candidate reuse does not alter numeric shortcuts, length guards, or marker precedence.
+  - marker-length-candidate near-miss code remains signed-in/status-stable (no unintended
+    auth-required/session-expired fallback) in contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

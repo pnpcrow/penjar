@@ -1526,7 +1526,10 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
       sessionExpired: false,
     );
   }
-  if (_isBackendSignedOutCodeMarkerLength(trimmedLength)) {
+  final bool trimmedExactLengthCandidate = _isBackendSignedOutCodeMarkerLength(
+    trimmedLength,
+  );
+  if (trimmedExactLengthCandidate) {
     final _BackendCodeClassification? rawExactClassification =
         _backendRawExactCodeClassifications[trimmed];
     if (rawExactClassification != null) {
@@ -1541,7 +1544,10 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
       sessionExpired: false,
     );
   }
-  if (_isBackendSignedOutCodeMarkerLength(compactLength)) {
+  final bool compactExactLengthCandidate = compactLength == trimmedLength
+      ? trimmedExactLengthCandidate
+      : _isBackendSignedOutCodeMarkerLength(compactLength);
+  if (compactExactLengthCandidate) {
     final _BackendCodeClassification? exactClassification =
         _backendExactCodeClassifications[compact];
     if (exactClassification != null) {

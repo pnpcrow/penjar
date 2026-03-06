@@ -547,6 +547,16 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      (`code: "JwtExpiredErr"`) to preserve deterministic session-expired fallback mapping on
      exact-length bitmask-gated paths; execution evidence is recorded in
      `web-mcp-phase-c-execution-log.md` (`Unit WS-D-282`).
+70. Backend code classification compact-length candidate reuse optimization:
+   - `_classifyBackendCode(...)` now reuses `trimmedExactLengthCandidate` when
+     `compactLength == trimmedLength`, avoiding duplicate exact-length-candidate checks on compact
+     no-mutation paths while preserving existing exact-map fallback behavior,
+   - existing numeric shortcuts, short/long guards, and marker precedence semantics remain
+     unchanged,
+   - contract/parity suites now lock capitalized compact marker-length-candidate near-miss behavior
+     (`code: "GrantToken"`) to preserve signed-in/status stability (no unintended
+     auth-required/session-expired fallback) on candidate-reuse paths; execution evidence is
+     recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-283`).
 
 ## Remaining integration gaps (auth scope)
 
