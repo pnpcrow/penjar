@@ -13836,6 +13836,71 @@ raw-exact lookup and compact normalization when marker matching is impossible.
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-279: classifier long-code exact-lookup guard
+
+### Planned objective
+
+Reduce backend code classifier overhead for long inputs by avoiding exact-map lookups when exact
+marker matches are impossible due to input length.
+
+### Implemented changes
+
+1. Updated backend classifier long-code path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - introduced `_backendSignedOutCodeMarkerMaxLength` from the combined signed-out marker set.
+   - added `_markerMaxLength(...)` helper for marker max-length derivation.
+   - `_classifyBackendCode(...)` now reuses `trimmedLength` and skips raw exact-map lookup when
+     `trimmedLength > _backendSignedOutCodeMarkerMaxLength`.
+   - `_classifyBackendCode(...)` now skips compact exact-map lookup when
+     `compactLength > _backendSignedOutCodeMarkerMaxLength`.
+2. Preserved existing fallback semantics:
+   - numeric shortcuts (`401`, `403`, `440`), short-code early-return guards, marker precedence,
+     and substring fallback behavior remain unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only capitalized compact signedout suffix payload maps authentication-required fallback status`
+     (`code: "SignedOutSessionStateMismatch"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendCapitalizedCompactSignedOutSuffixParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps capitalized compact signedout suffix backend failure to deterministic auth-required status`.
+5. Synced continuity docs for WS-D-279 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - long-code exact-map guard behavior in `_classifyBackendCode(...)`,
+  - signed-out suffix marker detection continuity (`SignedOutSessionStateMismatch`) under guarded
+    exact lookups,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. long non-exact codes still executed raw/compact exact-map probes even though marker max-length
+     constraints made exact hits impossible.
+  2. capitalized compact signed-out suffix behavior was not explicitly parity-locked for guarded
+     long-code paths.
+- **Fix applied**
+  1. added marker max-length constants/helpers and exact-lookup guards for trimmed/compact inputs.
+  2. added dedicated contract/parity regressions for signed-out suffix fallback mapping.
+  3. re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - long-code exact-map guard does not alter numeric shortcuts, short-code guards, or marker
+    precedence behavior.
+  - capitalized compact `code: "SignedOutSessionStateMismatch"` remains deterministic
+    auth-required fallback in contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

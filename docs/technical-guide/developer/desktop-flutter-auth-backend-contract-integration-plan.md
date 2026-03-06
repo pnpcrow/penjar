@@ -504,6 +504,17 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      (`code: "SignOut"`) to preserve signed-in/status stability (no unintended auth-required
      fallback mapping) on short-code early-return paths; execution evidence is recorded in
      `web-mcp-phase-c-execution-log.md` (`Unit WS-D-278`).
+66. Backend code classification long-code exact-lookup guard optimization:
+   - `_classifyBackendCode(...)` now caches and reuses combined signed-out marker max length
+     (`_backendSignedOutCodeMarkerMaxLength`) and skips raw/compact exact-map lookups when code
+     length exceeds marker max length, reducing unnecessary exact-map probes on long classifier
+     inputs while preserving substring marker evaluation paths,
+   - existing numeric shortcuts (`401`, `403`, `440`), short-code early-return semantics, and
+     signed-out/session-expired marker precedence remain unchanged,
+   - contract/parity suites now lock capitalized compact signed-out suffix behavior
+     (`code: "SignedOutSessionStateMismatch"`) to preserve deterministic auth-required fallback
+     mapping on long-code exact-lookup guard paths; execution evidence is recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-279`).
 
 ## Remaining integration gaps (auth scope)
 

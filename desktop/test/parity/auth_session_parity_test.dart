@@ -197,6 +197,34 @@ class _AuthBackendCapitalizedCompactSignedOutParityTransportClient
   }
 }
 
+class _AuthBackendCapitalizedCompactSignedOutSuffixParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendCapitalizedCompactSignedOutSuffixParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend sign-in snapshot applied.',
+          'state': <String, Object?>{'signedIn': true, 'rememberSession': true},
+        },
+      );
+    }
+    if (request.operation == RemoteStubOperationIds.refreshToken) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'code': 'SignedOutSessionStateMismatch',
+          'state': <String, Object?>{
+            'sessionToken': 'capitalized-compact-signedout-suffix-session',
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 class _AuthBackendCapitalizedCompactSignOutNearMissParityTransportClient
     extends RemoteStubTransportClient {
   const _AuthBackendCapitalizedCompactSignOutNearMissParityTransportClient();
@@ -3113,6 +3141,50 @@ void main() {
           DesktopContractMode.remoteStub,
           remoteStubTransportClient:
               const _AuthBackendCapitalizedCompactSignedOutParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend sign-in snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Status: [remote-stub] Authentication required.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'auth/session parity maps capitalized compact signedout suffix backend failure to deterministic auth-required status',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendCapitalizedCompactSignedOutSuffixParityTransportClient(),
         ),
       );
       await openWorkflowSection(tester, 'auth');

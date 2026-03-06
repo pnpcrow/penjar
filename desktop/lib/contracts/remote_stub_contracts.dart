@@ -1414,6 +1414,9 @@ final int _backendSessionExpiredCodeMarkerMinLength = _markerMinLength(
 final int _backendSignedOutCodeMarkerMinLength = _markerMinLength(
   _backendSignedOutCodeMarkers,
 );
+final int _backendSignedOutCodeMarkerMaxLength = _markerMaxLength(
+  _backendSignedOutCodeMarkers,
+);
 
 Map<String, _BackendCodeClassification>
 _buildBackendExactCodeClassifications() {
@@ -1465,8 +1468,23 @@ int _markerMinLength(List<String> markers) {
   return minLength;
 }
 
+int _markerMaxLength(List<String> markers) {
+  if (markers.isEmpty) {
+    return 0;
+  }
+  int maxLength = markers.first.length;
+  for (int index = 1; index < markers.length; index++) {
+    final int markerLength = markers[index].length;
+    if (markerLength > maxLength) {
+      maxLength = markerLength;
+    }
+  }
+  return maxLength;
+}
+
 _BackendCodeClassification _classifyBackendCode(String rawCode) {
   final String trimmed = rawCode.trim();
+  final int trimmedLength = trimmed.length;
   if (trimmed == '419' || trimmed == '440') {
     return const _BackendCodeClassification(
       signedOut: true,
@@ -1479,16 +1497,19 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
       sessionExpired: false,
     );
   }
-  if (trimmed.length < _backendSignedOutCodeMarkerMinLength) {
+  if (trimmedLength < _backendSignedOutCodeMarkerMinLength) {
     return const _BackendCodeClassification(
       signedOut: false,
       sessionExpired: false,
     );
   }
-  final _BackendCodeClassification? rawExactClassification =
-      _backendRawExactCodeClassifications[trimmed];
-  if (rawExactClassification != null) {
-    return rawExactClassification;
+  final int signedOutMarkerMaxLength = _backendSignedOutCodeMarkerMaxLength;
+  if (trimmedLength <= signedOutMarkerMaxLength) {
+    final _BackendCodeClassification? rawExactClassification =
+        _backendRawExactCodeClassifications[trimmed];
+    if (rawExactClassification != null) {
+      return rawExactClassification;
+    }
   }
   final String compact = _compactBackendCodeFromTrimmed(trimmed);
   final int compactLength = compact.length;
@@ -1498,10 +1519,12 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
       sessionExpired: false,
     );
   }
-  final _BackendCodeClassification? exactClassification =
-      _backendExactCodeClassifications[compact];
-  if (exactClassification != null) {
-    return exactClassification;
+  if (compactLength <= signedOutMarkerMaxLength) {
+    final _BackendCodeClassification? exactClassification =
+        _backendExactCodeClassifications[compact];
+    if (exactClassification != null) {
+      return exactClassification;
+    }
   }
 
   final int sessionExpiredMarkerMinLength =
