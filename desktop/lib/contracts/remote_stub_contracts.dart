@@ -1401,6 +1401,11 @@ const List<String> _backendSignedOutCodeMarkers = <String>[
 
 final Map<String, _BackendCodeClassification> _backendExactCodeClassifications =
     _buildBackendExactCodeClassifications();
+final Map<String, _BackendCodeClassification>
+_backendUppercaseExactCodeClassifications =
+    _buildBackendUppercaseExactCodeClassifications(
+      _backendExactCodeClassifications,
+    );
 final int _backendSignedOutOnlyCodeMarkerMinLength = _markerMinLength(
   _backendSignedOutOnlyCodeMarkers,
 );
@@ -1426,6 +1431,21 @@ _buildBackendExactCodeClassifications() {
           );
   }
   return Map<String, _BackendCodeClassification>.unmodifiable(classifications);
+}
+
+Map<String, _BackendCodeClassification>
+_buildBackendUppercaseExactCodeClassifications(
+  Map<String, _BackendCodeClassification> exactClassifications,
+) {
+  final Map<String, _BackendCodeClassification> uppercaseClassifications =
+      <String, _BackendCodeClassification>{};
+  for (final MapEntry<String, _BackendCodeClassification> entry
+      in exactClassifications.entries) {
+    uppercaseClassifications[entry.key.toUpperCase()] = entry.value;
+  }
+  return Map<String, _BackendCodeClassification>.unmodifiable(
+    uppercaseClassifications,
+  );
 }
 
 int _markerMinLength(List<String> markers) {
@@ -1455,6 +1475,11 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
       signedOut: true,
       sessionExpired: false,
     );
+  }
+  final _BackendCodeClassification? uppercaseExactClassification =
+      _backendUppercaseExactCodeClassifications[trimmed];
+  if (uppercaseExactClassification != null) {
+    return uppercaseExactClassification;
   }
   final String compact = _compactBackendCodeFromTrimmed(trimmed);
   if (compact.isEmpty) {

@@ -319,6 +319,14 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      non-ASCII suffix (`UNAUTHORIZED::토큰`) to preserve deterministic auth-required mapping across
      fallback-path changes; execution evidence is recorded in
      `web-mcp-phase-c-execution-log.md` (`Unit WS-D-258`).
+46. Backend code uppercase exact-classification fast-path optimization:
+   - `_classifyBackendCode(...)` now checks `_backendUppercaseExactCodeClassifications` before
+     compact normalization, short-circuiting uppercase compact exact markers without extra
+     normalization/substring scans,
+   - contract/parity suites now lock uppercase compact session-expired exact-marker behavior
+     (`TOKENEXPIRED`) to preserve deterministic session-expired fallback mapping on the new
+     fast-path; execution evidence is recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-259`).
 
 ## Remaining integration gaps (auth scope)
 

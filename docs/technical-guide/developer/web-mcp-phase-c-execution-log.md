@@ -12590,6 +12590,73 @@ non-ASCII pre-scan and switching to single-pass ASCII normalization with inline 
     unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-259: backend code uppercase exact-classification fast path
+
+### Planned objective
+
+Reduce normalization overhead for uppercase compact exact backend codes by short-circuiting
+classification before compact-normalization and substring marker scanning.
+
+### Implemented changes
+
+1. Added uppercase exact-classification lookup in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - introduced `_backendUppercaseExactCodeClassifications`,
+   - added `_buildBackendUppercaseExactCodeClassifications(...)` map builder.
+2. Updated `_classifyBackendCode(...)` fast-path ordering:
+   - after numeric code checks (`419`/`440`, `401`/`403`), classifier now checks
+     `_backendUppercaseExactCodeClassifications[trimmed]` before calling
+     `_compactBackendCodeFromTrimmed(...)`.
+3. Preserved existing fallback semantics:
+   - non-uppercase or non-exact codes still follow existing compact normalization + exact map +
+     marker-contains classification flow without behavior change.
+4. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only uppercase compact token-expired payload maps session-expired fallback status`
+     (`code: "TOKENEXPIRED"`).
+5. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendUppercaseCompactTokenExpiredParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps uppercase compact token-expired backend failure to deterministic session-expired status`.
+6. Synced continuity docs for WS-D-259 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+7. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - uppercase compact exact-marker classification path in auth backend code parser,
+  - deterministic session-expired fallback behavior for compact uppercase exact codes,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. WS-D-258 still routed uppercase compact exact markers (for example `TOKENEXPIRED`) through
+     compact-normalization + exact/substring classification even when direct exact classification
+     was possible.
+  2. Uppercase compact exact session-expired marker behavior (`TOKENEXPIRED`) was not explicitly
+     locked in contract/parity suites.
+- **Fix applied**
+  1. Added uppercase exact-classification map and pre-normalization fast-path lookup.
+  2. Added dedicated contract/parity regressions for `TOKENEXPIRED` deterministic
+     session-expired fallback behavior.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - uppercase compact exact markers classify without compact-normalization or substring marker
+    scans.
+  - `TOKENEXPIRED` payloads map to deterministic session-expired fallback behavior in
+    contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for all other inputs remain
+    unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
