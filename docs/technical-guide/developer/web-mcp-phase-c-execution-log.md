@@ -16019,6 +16019,54 @@ numeric near matches as non-strict paths.
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-322.
 
+## Unit WS-D-323: base-notation numeric near-match strict alias regression coverage
+
+### Planned objective
+
+Prevent strict numeric alias broadening toward radix-style parsing by locking base-notation numeric
+near matches as non-strict paths.
+
+### Implemented changes
+
+1. Expanded strict installer base-notation near-match coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-nearmatch-hex-one-alias-missing-command-pass`,
+   - added `strict-installer-nearmatch-binary-one-alias-missing-command-pass`,
+   - fixtures `0x1` and `0b1` assert `- Strict mode: 0` with non-blocking completion.
+2. Expanded strict protocol base-notation near-match coverage in the same checker:
+   - added `strict-protocol-nearmatch-hex-one-alias-missing-command-pass`,
+   - added `strict-protocol-nearmatch-binary-one-alias-missing-command-pass`,
+   - fixtures `STRICT_WINDOWS_PROTOCOL_REGISTRATION=0x1` and `=0b1` assert
+     `- Strict protocol registration mode: 0` with non-blocking completion.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-323
+     base-notation numeric near-match boundary lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     base-notation numeric near-match strict boundary matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict numeric alias exact-match boundaries under radix-looking values,
+  - installer/protocol non-overmatch behavior for `0x1` and `0b1`,
+  - compatibility with existing numeric strict-positive and near-match coverage.
+- **Issues found during review**
+  1. signed/exponent and decimal near-match boundaries were locked, but base-notation numeric
+     variants (`0x1`, `0b1`) were not explicitly covered.
+  2. missing radix-style fixtures left risk of accidental broad strict acceptance if numeric
+     coercion/refactor logic is introduced.
+- **Fix applied**
+  1. added installer/protocol base-notation near-match pass fixtures with strict-mode-zero
+     assertions.
+  2. preserved all strict-positive and placeholder-warning semantics.
+- **Post-fix validation criteria**
+  - contract checker passes with base-notation near-match fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-323.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
