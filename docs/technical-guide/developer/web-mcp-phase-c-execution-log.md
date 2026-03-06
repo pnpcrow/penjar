@@ -16355,6 +16355,54 @@ space/newline-separated numeric near matches as non-strict paths.
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-329.
 
+## Unit WS-D-330: control-separator numeric near-match strict alias regression coverage
+
+### Planned objective
+
+Prevent strict numeric alias broadening through control-character token boundaries by locking
+carriage-return/tab separated numeric near matches as non-strict paths.
+
+### Implemented changes
+
+1. Expanded strict installer control-separator numeric near-match coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-nearmatch-carriage-return-separated-one-zero-alias-missing-command-pass`,
+   - added `strict-installer-nearmatch-tab-separated-one-zero-alias-missing-command-pass`,
+   - fixtures `1\r0` and `1\t0` assert `- Strict mode: 0` with non-blocking completion.
+2. Expanded strict protocol control-separator numeric near-match coverage in the same checker:
+   - added `strict-protocol-nearmatch-carriage-return-separated-one-zero-alias-missing-command-pass`,
+   - added `strict-protocol-nearmatch-tab-separated-one-zero-alias-missing-command-pass`,
+   - fixtures `STRICT_WINDOWS_PROTOCOL_REGISTRATION=1\r0` and `=1\t0` assert
+     `- Strict protocol registration mode: 0` with non-blocking completion.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-330
+     control-separator numeric near-match boundary lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     control-separator numeric near-match strict boundary matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict numeric alias exact-match boundaries under control-separator near matches,
+  - installer/protocol non-overmatch behavior for `1\r0` and `1\t0`,
+  - compatibility with existing internal-separator and trim near-match coverage.
+- **Issues found during review**
+  1. internal-separator boundaries (`1 0`, `1\n0`) were covered, but control-separator boundaries
+     (`1\r0`, `1\t0`) were not explicitly locked.
+  2. without control-separator fixtures, control-character normalization changes could accidentally
+     widen strict numeric alias acceptance.
+- **Fix applied**
+  1. added installer/protocol control-separator near-match pass fixtures with strict-mode-zero
+     assertions.
+  2. retained strict-positive exact alias behavior and existing warning/failure semantics.
+- **Post-fix validation criteria**
+  - contract checker passes with control-separator near-match fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-330.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
