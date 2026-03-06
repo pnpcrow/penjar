@@ -329,6 +329,9 @@ CI baseline note:
     toggle values for installer/protocol paths.
   - contract matrix now also locks CRLF-wrapped strict alias handling (`"\r\nYES\r\n"`,
     `"\r\nTRUE\r\n"`) to prevent mixed Windows line-ending boundary regressions.
+  - strict toggle runtime parser now resolves trim normalization through a shared normalized buffer
+    instead of command-substitution return path to reduce subshell overhead while preserving alias
+    inference behavior.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.

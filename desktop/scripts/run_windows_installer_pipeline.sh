@@ -9,17 +9,19 @@ strict_input="${1:-0}"
 build_mode="${2:-release}"
 report_file="${3:-release/reports/windows_installer_pipeline_report.md}"
 strict_protocol_input="${STRICT_WINDOWS_PROTOCOL_REGISTRATION:-0}"
+normalized_toggle_input=""
 
 normalize_toggle_input() {
   local value="$1"
   value="${value#"${value%%[![:space:]]*}"}"
   value="${value%"${value##*[![:space:]]}"}"
-  printf '%s' "$value"
+  normalized_toggle_input="$value"
 }
 
 is_strict_toggle() {
   local value
-  value="$(normalize_toggle_input "$1")"
+  normalize_toggle_input "$1"
+  value="$normalized_toggle_input"
   case "$value" in
     1|[Tt][Rr][Uu][Ee]|[Yy][Ee][Ss]|[Ss][Tt][Rr][Ii][Cc][Tt]) return 0 ;;
   esac

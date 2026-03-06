@@ -15562,6 +15562,50 @@ installer/protocol strict parser paths.
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-312.
 
+## Unit WS-D-313: strict toggle normalization path subshell optimization
+
+### Planned objective
+
+Reduce strict parser hot-path overhead in runtime pipeline script by removing command-substitution
+from toggle trim normalization while keeping strict alias semantics identical.
+
+### Implemented changes
+
+1. Optimized runtime parser plumbing in
+   `desktop/scripts/run_windows_installer_pipeline.sh`:
+   - introduced shared normalization buffer `normalized_toggle_input`,
+   - `normalize_toggle_input()` now writes to the shared buffer,
+   - `is_strict_toggle()` now consumes shared-buffer value instead of
+     `value="$(normalize_toggle_input ...)"` command substitution.
+2. Preserved strict alias matcher logic and all strict/non-strict branches unchanged.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-313
+     strict normalization subshell optimization lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     shared-buffer strict trim normalization behavior.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict toggle normalization/runtime parser hot path,
+  - behavioral parity of strict alias inference after subshell removal,
+  - compatibility with expanded strict alias matrix (whitespace/CRLF/non-strict guard cases).
+- **Issues found during review**
+  1. strict runtime parsing still used command substitution for trim normalization, creating an
+     avoidable subshell per strict-check invocation.
+  2. while low-frequency, the path is executed for both installer/protocol strict toggles and
+     benefits from consistent subshell-elimination strategy used in companion checker optimizations.
+- **Fix applied**
+  1. replaced command-substitution return path with shared-buffer handoff.
+  2. kept strict alias matcher patterns unchanged to preserve parser semantics.
+- **Post-fix validation criteria**
+  - contract checker passes with unchanged strict/non-strict outcomes.
+  - full desktop verify remains green after parser-path optimization.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-313.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
