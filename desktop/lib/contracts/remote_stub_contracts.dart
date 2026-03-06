@@ -1363,8 +1363,6 @@ String? _resolveBackendCodeFromContainer(
   return null;
 }
 
-final RegExp _backendCodeCompactPattern = RegExp(r'[^a-z0-9]');
-
 class _BackendCodeClassification {
   const _BackendCodeClassification({
     required this.signedOut,
@@ -1495,7 +1493,33 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
 }
 
 String _compactBackendCodeFromTrimmed(String trimmedCode) {
-  return trimmedCode.toLowerCase().replaceAll(_backendCodeCompactPattern, '');
+  final String lowered = trimmedCode.toLowerCase();
+  int firstNonCompactIndex = -1;
+  for (int index = 0; index < lowered.length; index++) {
+    if (!_isBackendCodeCompactCodeUnit(lowered.codeUnitAt(index))) {
+      firstNonCompactIndex = index;
+      break;
+    }
+  }
+  if (firstNonCompactIndex == -1) {
+    return lowered;
+  }
+  final StringBuffer buffer = StringBuffer();
+  if (firstNonCompactIndex > 0) {
+    buffer.write(lowered.substring(0, firstNonCompactIndex));
+  }
+  for (int index = firstNonCompactIndex; index < lowered.length; index++) {
+    final int codeUnit = lowered.codeUnitAt(index);
+    if (_isBackendCodeCompactCodeUnit(codeUnit)) {
+      buffer.writeCharCode(codeUnit);
+    }
+  }
+  return buffer.toString();
+}
+
+bool _isBackendCodeCompactCodeUnit(int codeUnit) {
+  return (codeUnit >= 48 && codeUnit <= 57) ||
+      (codeUnit >= 97 && codeUnit <= 122);
 }
 
 int _clampIndex(int index, {required int itemCount}) {
