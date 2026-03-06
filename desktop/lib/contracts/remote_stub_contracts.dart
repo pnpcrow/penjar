@@ -1493,17 +1493,17 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
 }
 
 String _compactBackendCodeFromTrimmed(String trimmedCode) {
-  final String lowered = trimmedCode.toLowerCase();
   int firstNonCompactIndex = -1;
-  for (int index = 0; index < lowered.length; index++) {
-    if (!_isBackendCodeCompactCodeUnit(lowered.codeUnitAt(index))) {
+  for (int index = 0; index < trimmedCode.length; index++) {
+    if (!_isBackendCodeCompactCodeUnit(trimmedCode.codeUnitAt(index))) {
       firstNonCompactIndex = index;
       break;
     }
   }
   if (firstNonCompactIndex == -1) {
-    return lowered;
+    return trimmedCode;
   }
+  final String lowered = trimmedCode.toLowerCase();
   final StringBuffer buffer = StringBuffer();
   if (firstNonCompactIndex > 0) {
     buffer.write(lowered.substring(0, firstNonCompactIndex));

@@ -274,6 +274,13 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      (`REFRESH-TOKEN::EXPIRED`) to keep session-expired mapping parity stable after normalization
      path changes; execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
      (`Unit WS-D-252`).
+40. Backend code compact-input lowercase fast-path optimization:
+   - `_compactBackendCodeFromTrimmed(...)` now returns early when the trimmed backend code is
+     already lowercase ASCII alphanumeric, skipping `toLowerCase` preprocessing for compact inputs
+     while preserving existing compact semantics for non-compact variants,
+   - contract/parity suites now lock compact lowercase session-expiry code fallback behavior
+     (`refreshtokenexpired`) to ensure parity stability across compact-input fast paths; execution
+     evidence is recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-253`).
 
 ## Remaining integration gaps (auth scope)
 

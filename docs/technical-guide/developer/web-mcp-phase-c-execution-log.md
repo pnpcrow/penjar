@@ -12207,6 +12207,69 @@ numeric/exact/marker-length/substring fallback semantics.
   - numeric/exact/marker-length/substring fallback classifier semantics remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-253: backend code compact-input lowercase fast path
+
+### Planned objective
+
+Reduce compact-input preprocessing overhead further by skipping lowercase normalization when backend
+codes are already lowercase ASCII alphanumeric, while preserving existing compact semantics for
+non-compact inputs.
+
+### Implemented changes
+
+1. Updated compact normalization helper in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_compactBackendCodeFromTrimmed(...)` now scans the trimmed input first and returns early when
+     input is already compact lowercase ASCII alphanumeric,
+   - lowercase normalization (`toLowerCase`) now runs only for non-compact inputs that require
+     normalization.
+2. Preserved non-compact normalization semantics:
+   - allocation-light character-scanning compaction remains the fallback path after lowercase
+     normalization for delimiter/uppercase variants.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only compact refresh-token-expired payload maps session-expired fallback status`
+     (`code: "refreshtokenexpired"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendCompactRefreshTokenExpiredParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps compact refresh-token-expired backend failure to deterministic session-expired status`.
+5. Synced continuity docs for WS-D-253 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - compact-input preprocessing behavior after character-scan normalization migration,
+  - semantic stability for compact lowercase and delimiter/uppercase backend code variants,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. Even after WS-D-252, compact lowercase inputs still paid unconditional `toLowerCase` cost.
+  2. Compact lowercase session-expiry marker payload behavior was not explicitly locked in
+     contract/parity suites.
+- **Fix applied**
+  1. Added compact-input early return path in `_compactBackendCodeFromTrimmed(...)` before
+     lowercase normalization.
+  2. Added contract/parity regressions for compact lowercase `refreshtokenexpired` fallback
+     behavior.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - already-compact lowercase backend codes now bypass lowercase normalization.
+  - compact lowercase `refreshtokenexpired` payloads map to deterministic session-expired fallback
+    behavior in contract/parity suites.
+  - delimiter/uppercase normalization behavior remains intact through existing fallback path.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
