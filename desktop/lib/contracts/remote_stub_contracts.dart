@@ -1411,6 +1411,9 @@ final int _backendSignedOutOnlyCodeMarkerMinLength = _markerMinLength(
 final int _backendSessionExpiredCodeMarkerMinLength = _markerMinLength(
   _backendSessionExpiredCodeMarkers,
 );
+final int _backendSignedOutCodeMarkerMinLength = _markerMinLength(
+  _backendSignedOutCodeMarkers,
+);
 
 Map<String, _BackendCodeClassification>
 _buildBackendExactCodeClassifications() {
@@ -1473,6 +1476,12 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
   if (trimmed == '401' || trimmed == '403') {
     return const _BackendCodeClassification(
       signedOut: true,
+      sessionExpired: false,
+    );
+  }
+  if (trimmed.length < _backendSignedOutCodeMarkerMinLength) {
+    return const _BackendCodeClassification(
+      signedOut: false,
       sessionExpired: false,
     );
   }

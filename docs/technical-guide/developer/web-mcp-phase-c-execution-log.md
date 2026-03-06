@@ -13778,6 +13778,64 @@ as local values before guard checks while preserving signed-out/session-expired 
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-278: classifier short-code early-return guard
+
+### Planned objective
+
+Reduce backend code classifier overhead for non-marker-length codes by short-circuiting before
+raw-exact lookup and compact normalization when marker matching is impossible.
+
+### Implemented changes
+
+1. Updated backend classifier short-code path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - introduced `_backendSignedOutCodeMarkerMinLength` from the combined signed-out marker set.
+   - `_classifyBackendCode(...)` now returns early when
+     `trimmed.length < _backendSignedOutCodeMarkerMinLength` after numeric status shortcuts.
+2. Preserved existing fallback semantics:
+   - numeric shortcuts (`401`, `403`, `440`), marker precedence, and fallback status mapping behavior
+     remain unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only capitalized compact signout near-miss keeps signed-in state without auth-required fallback status`
+     (`code: "SignOut"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendCapitalizedCompactSignOutNearMissParityTransportClient`,
+   - new parity test:
+     `auth/session parity keeps signed-in state for capitalized compact signout near-miss without auth-required fallback status`.
+5. Synced continuity docs for WS-D-278 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - short-code early-return guard behavior in `_classifyBackendCode(...)`,
+  - capitalized compact near-miss signed-out marker behavior (`SignOut`) stability,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. short non-marker-length code paths still performed raw-exact lookup and compact normalization.
+  2. capitalized compact `SignOut` near-miss behavior was not explicitly parity-locked.
+- **Fix applied**
+  1. added signed-out marker minimum-length early-return guard before raw-exact/compact paths.
+  2. added dedicated contract/parity regressions for near-miss signed-out marker stability.
+  3. re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - short-code early-return does not alter numeric shortcuts or marker precedence behavior.
+  - capitalized compact `code: "SignOut"` remains signed-in/status-stable without auth-required
+    fallback in contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

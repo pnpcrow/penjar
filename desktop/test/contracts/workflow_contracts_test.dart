@@ -5751,6 +5751,39 @@ void main() {
     );
 
     test(
+      'auth backend code-only capitalized compact signout near-miss keeps signed-in state without auth-required fallback status',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'code': 'SignOut',
+                'state': <String, Object?>{
+                  'sessionToken': 'code-only-capitalized-compact-signout',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(
+              transportClient: transportClient,
+              initialState: const AuthSessionState(
+                rememberSession: true,
+                signedIn: true,
+                status: 'Previously signed in.',
+              ),
+            );
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Previously signed in.',
+        );
+      },
+    );
+
+    test(
       'auth backend code-only capitalized compact authrequired payload maps authentication-required fallback status',
       () {
         final _BackendResponseTransportClient transportClient =
