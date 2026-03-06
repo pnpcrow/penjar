@@ -4493,6 +4493,33 @@ void main() {
           expectedStatus:
               'Backend authState result envelope is_signed_in applied.',
         ),
+        (
+          description: 'data envelope authState signed_in alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend authState data envelope signed_in applied.',
+              'authState': <String, Object?>{
+                'signed_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend authState data envelope signed_in applied.',
+        ),
+        (
+          description: 'result envelope authState signed_in alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail': 'Backend authState result envelope signed_in applied.',
+              'authState': <String, Object?>{
+                'signed_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend authState result envelope signed_in applied.',
+        ),
       ];
 
   for (final ({
