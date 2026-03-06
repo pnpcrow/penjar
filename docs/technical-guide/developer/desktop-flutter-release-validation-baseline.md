@@ -374,6 +374,8 @@ CI baseline note:
     `"1-0"`) so expression-like numeric values cannot widen strict numeric alias acceptance.
   - contract matrix now also locks arithmetic-operator numeric near-match alias behavior
     (`"1*1"`, `"1/1"`) so operator-style numeric values cannot widen strict numeric alias acceptance.
+  - contract matrix now also locks extended arithmetic numeric near-match alias behavior
+    (`"1%1"`, `"1^1"`) so extended operator-style numeric values cannot widen strict acceptance.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
