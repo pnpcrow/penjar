@@ -1365,65 +1365,73 @@ String? _resolveBackendCodeFromContainer(
 
 final RegExp _backendCodeCompactPattern = RegExp(r'[^a-z0-9]');
 
-bool _backendCodeIndicatesSignedOut(String rawCode) {
-  final String trimmed = rawCode.trim();
-  if (trimmed == '401' ||
-      trimmed == '403' ||
-      trimmed == '419' ||
-      trimmed == '440') {
-    return true;
-  }
-  final String compact = _compactBackendCode(rawCode);
-  if (compact.isEmpty) {
-    return false;
-  }
-  for (final String marker in const <String>[
-    'authrequired',
-    'unauthorized',
-    'unauthenticated',
-    'tokenexpired',
-    'sessionexpired',
-    'sessiontimeout',
-    'sessiontimedout',
-    'expiredtoken',
-    'expiredsession',
-    'invalidtoken',
-    'signedout',
-    'loggedout',
-  ]) {
-    if (compact.contains(marker)) {
-      return true;
-    }
-  }
-  return false;
+class _BackendCodeClassification {
+  const _BackendCodeClassification({
+    required this.signedOut,
+    required this.sessionExpired,
+  });
+
+  final bool signedOut;
+  final bool sessionExpired;
 }
 
-bool _backendCodeIndicatesSessionExpired(String rawCode) {
+const List<String> _backendSignedOutCodeMarkers = <String>[
+  'authrequired',
+  'unauthorized',
+  'unauthenticated',
+  'tokenexpired',
+  'sessionexpired',
+  'sessiontimeout',
+  'sessiontimedout',
+  'expiredtoken',
+  'expiredsession',
+  'invalidtoken',
+  'signedout',
+  'loggedout',
+];
+
+const List<String> _backendSessionExpiredCodeMarkers = <String>[
+  'tokenexpired',
+  'sessionexpired',
+  'sessiontimeout',
+  'sessiontimedout',
+  'expiredtoken',
+  'expiredsession',
+  'invalidtoken',
+  'accesstokenexpired',
+  'refreshtokenexpired',
+  'jwtexpired',
+];
+
+_BackendCodeClassification _classifyBackendCode(String rawCode) {
   final String trimmed = rawCode.trim();
-  if (trimmed == '419' || trimmed == '440') {
-    return true;
-  }
+  bool signedOut =
+      trimmed == '401' ||
+      trimmed == '403' ||
+      trimmed == '419' ||
+      trimmed == '440';
+  bool sessionExpired = signedOut && (trimmed == '419' || trimmed == '440');
   final String compact = _compactBackendCode(rawCode);
-  if (compact.isEmpty) {
-    return false;
-  }
-  for (final String marker in const <String>[
-    'tokenexpired',
-    'sessionexpired',
-    'sessiontimeout',
-    'sessiontimedout',
-    'expiredtoken',
-    'expiredsession',
-    'invalidtoken',
-    'accesstokenexpired',
-    'refreshtokenexpired',
-    'jwtexpired',
-  ]) {
-    if (compact.contains(marker)) {
-      return true;
+  if (compact.isNotEmpty && !signedOut) {
+    for (final String marker in _backendSignedOutCodeMarkers) {
+      if (compact.contains(marker)) {
+        signedOut = true;
+        break;
+      }
     }
   }
-  return false;
+  if (signedOut && compact.isNotEmpty && !sessionExpired) {
+    for (final String marker in _backendSessionExpiredCodeMarkers) {
+      if (compact.contains(marker)) {
+        sessionExpired = true;
+        break;
+      }
+    }
+  }
+  return _BackendCodeClassification(
+    signedOut: signedOut,
+    sessionExpired: sessionExpired,
+  );
 }
 
 String _compactBackendCode(String rawCode) {
@@ -1580,12 +1588,15 @@ AuthSessionState? _authStateFromBackendPayload(
     statePayload: statePayload,
     additionalPayloads: statusDetectionSources,
   );
-  final bool signedOutByCode =
-      backendCode != null && _backendCodeIndicatesSignedOut(backendCode);
-  final bool sessionExpiredByCode =
-      backendCode != null &&
-      signedOutByCode &&
-      _backendCodeIndicatesSessionExpired(backendCode);
+  final _BackendCodeClassification backendCodeClassification =
+      backendCode == null
+      ? const _BackendCodeClassification(
+          signedOut: false,
+          sessionExpired: false,
+        )
+      : _classifyBackendCode(backendCode);
+  final bool signedOutByCode = backendCodeClassification.signedOut;
+  final bool sessionExpiredByCode = backendCodeClassification.sessionExpired;
   final bool nextSignedIn;
   if (resolvedSignedIn != null) {
     nextSignedIn = resolvedSignedIn;

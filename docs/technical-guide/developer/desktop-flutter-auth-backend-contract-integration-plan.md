@@ -218,6 +218,13 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      failure diagnostics,
    - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
      (`Unit WS-D-244`).
+32. Backend code classification single-path reuse for auth-state inference:
+   - `desktop/lib/contracts/remote_stub_contracts.dart` now consolidates signed-out/session-expired
+     backend-code checks into a single classification path (`_classifyBackendCode`) with shared
+     marker catalogs, preserving existing signed-out precedence semantics while removing duplicated
+     backend-code compact/marker scans in auth-state inference,
+   - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
+     (`Unit WS-D-245`).
 
 ## Remaining integration gaps (auth scope)
 

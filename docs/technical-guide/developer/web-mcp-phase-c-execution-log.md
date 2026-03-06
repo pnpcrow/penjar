@@ -11747,6 +11747,65 @@ diagnostics and matrix coverage semantics.
   - targeted auth suites and full desktop verification remain green after contract-side indexing
     rollout.
 
+## Unit WS-D-245: backend code classification single-path reuse in auth parser
+
+### Planned objective
+
+Reduce duplicated backend-code classification work in auth-state inference by consolidating
+signed-out/session-expired checks into one reusable classification path while preserving existing
+state/status semantics.
+
+### Implemented changes
+
+1. Updated `desktop/lib/contracts/remote_stub_contracts.dart` auth parser helpers:
+   - added `_BackendCodeClassification`,
+   - added shared marker catalogs (`_backendSignedOutCodeMarkers`,
+     `_backendSessionExpiredCodeMarkers`),
+   - added `_classifyBackendCode(...)` to classify signed-out/session-expired in one path.
+2. Replaced dual backend-code checks in `_authStateFromBackendPayload(...)`:
+   - removed separate `_backendCodeIndicatesSignedOut(...)` and
+     `_backendCodeIndicatesSessionExpired(...)` calls,
+   - now uses one classification result to drive `signedOutByCode` and
+     `sessionExpiredByCode`.
+3. Preserved behavioral semantics:
+   - signed-out remains required for session-expired code effect,
+   - existing status fallback precedence and explicit signed-in override behavior remain unchanged.
+4. Synced continuity docs for WS-D-245 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+5. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - duplicated backend-code compact/marker scans in auth-state inference hot path,
+  - semantic parity of signed-out/session-expired classification behavior after consolidation,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. `_authStateFromBackendPayload(...)` previously computed `signedOutByCode` and
+     `sessionExpiredByCode` through separate helper functions, repeating backend-code compact/marker
+     scans on the same raw code value.
+  2. Signed-out/session-expired marker management lived in separate helpers, increasing drift risk
+     when code marker catalogs evolve.
+- **Fix applied**
+  1. Consolidated marker catalogs and classification into `_classifyBackendCode(...)` with one
+     compacted-code path.
+  2. Rewired auth-state inference to consume one classification object while preserving prior
+     signed-out/session-expired gating semantics.
+  3. Re-ran formatter, targeted auth contract/parity/mode-parity tests, and full desktop
+     verification to confirm no regressions.
+- **Post-fix validation criteria**
+  - signed-out/session-expired decision behavior remains unchanged for existing fixtures/parity
+    cases.
+  - backend-code classification no longer performs duplicate compact/marker scans per payload.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

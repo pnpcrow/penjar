@@ -40,10 +40,10 @@ This checklist tracks user-facing workflow parity for the Flutter desktop full-p
 | Export workflows | PNG/SVG export and save | In progress | Export Pipeline | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) | Flutter export-workflow parity scaffold, parity harness, runtime-switchable in-memory/remote-stub contract boundary, backend response-driven state mutation wiring, and sibling `result`/`data` envelope fallback regression coverage (contract + parity) are added; backend export pipeline/native save integration is pending. |
 | Diagnostics/recovery | Runtime health, reconnect, remediation | In progress | Platform Reliability | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) | Flutter diagnostics/recovery parity scaffold, parity harness, runtime-switchable in-memory/remote-stub contract boundary, HTTP health-probe remote transport gating, operation-level backend request metadata mapping, backend execution-path status propagation, backend response-driven state mutation wiring, and sibling `result`/`data` envelope fallback regression coverage (contract + parity) are added; live telemetry/reconnect policy integration is pending. |
 
-Latest auth/session parity evidence update: `Unit WS-D-244` extends matrix guard performance
-indexing to the auth backend contract fixture symmetry gate via keyed entry lookup + shared
-missing-entry helper reuse, keeping contract/parity authState matrix drift-detectable with lower
-assertion overhead.
+Latest auth/session parity evidence update: `Unit WS-D-245` consolidates backend code
+signed-out/session-expired classification into a single auth parser path, reducing duplicate
+backend-code compact/marker scans while preserving existing signed-out/session-expired parity
+expectations in contract/parity suites.
 
 ## Cross-cutting shell/release routing note
 
