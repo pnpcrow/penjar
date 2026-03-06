@@ -159,6 +159,14 @@ jobs:
           path: desktop/release/reports/release_smoke_gate_policy_contract_report.md
           if-no-files-found: warn
 
+      - name: Upload windows installer pipeline contract report (verify matrix)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-windows-installer-pipeline-contract-report-${{ matrix.label }}
+          path: desktop/release/reports/windows_installer_pipeline_contract_report.md
+          if-no-files-found: warn
+
       - name: Upload release evidence index check report (verify matrix)
         if: always()
         uses: actions/upload-artifact@v4

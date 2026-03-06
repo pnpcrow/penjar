@@ -14262,6 +14262,55 @@ mode diagnostics.
   - verify pipeline includes installer-pipeline contract stage and remains green end-to-end.
   - release documentation references command/checker/verify inclusion consistently.
 
+## Unit WS-D-286: workflow-level windows installer contract visibility
+
+### Planned objective
+
+Extend Windows installer pipeline contract coverage from local verify-only execution to workflow
+execution and artifact visibility in release and test CI paths.
+
+### Implemented changes
+
+1. Updated release smoke workflow execution path:
+   - `.github/workflows/release-desktop-installer-smoke.yml` now runs
+     `./scripts/check_windows_installer_pipeline_contract.sh` in `signing-readiness`,
+   - added artifact upload for
+     `desktop/release/reports/windows_installer_pipeline_contract_report.md` as
+     `desktop-windows-installer-pipeline-contract-report-smoke`.
+2. Updated desktop tests workflow artifact visibility:
+   - `.github/workflows/tests-desktop-flutter.yml` now uploads
+     `desktop/release/reports/windows_installer_pipeline_contract_report.md` from verify matrix as
+     `desktop-windows-installer-pipeline-contract-report-*`.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     workflow execution/upload coverage for the new contract report,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` updates latest
+     release evidence lock to WS-D-286 workflow-level coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - workflow-level execution visibility for Windows installer pipeline contract checks,
+  - parity of report artifact collection between release-smoke and verify-matrix workflows,
+  - continuity doc synchronization with workflow behavior.
+- **Issues found during review**
+  1. WS-D-285 introduced contract checker + local verify wiring, but CI workflows did not execute
+     or publish the new contract report directly.
+  2. Release validation baseline did not enumerate workflow artifact coverage for the new report.
+- **Fix applied**
+  1. added explicit contract-check step + artifact upload in
+     `release-desktop-installer-smoke.yml`.
+  2. added verify-matrix artifact upload in `tests-desktop-flutter.yml`.
+  3. synchronized release baseline and runbook references to workflow-level evidence.
+- **Post-fix validation criteria**
+  - release smoke signing-readiness path runs Windows installer pipeline contract check.
+  - both release-smoke and verify-matrix workflows expose Windows installer pipeline contract report
+    artifacts.
+  - local contract check and full desktop verify remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
