@@ -645,6 +645,27 @@ class _AuthBackendSnakeCaseStateAliasParityTransportClient
   }
 }
 
+class _AuthBackendIsSignedInStateAliasParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendIsSignedInStateAliasParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend is_signed_in sign-in snapshot applied.',
+          'state': <String, Object?>{
+            'is_signed_in': true,
+            'remember_session': true,
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 class _AuthBackendLoggedInStateAliasParityTransportClient
     extends RemoteStubTransportClient {
   const _AuthBackendLoggedInStateAliasParityTransportClient();
@@ -2143,6 +2164,10 @@ void main() {
           <String, Object?>{'signed_in': true, 'remember_session': true},
         ),
         const MapEntry<String, Map<String, Object?>>(
+          'is_signed_in',
+          <String, Object?>{'is_signed_in': true, 'remember_session': true},
+        ),
+        const MapEntry<String, Map<String, Object?>>(
           'is_logged_in',
           <String, Object?>{'is_logged_in': true, 'persist_session': true},
         ),
@@ -3151,6 +3176,43 @@ void main() {
       expect(find.textContaining('Signed in (simulated).'), findsNothing);
     },
   );
+
+  testWidgets('auth/session parity normalizes is_signed_in state aliases', (
+    WidgetTester tester,
+  ) async {
+    await pumpDesktopApp(
+      tester,
+      contracts: DesktopContractBundle.fromMode(
+        DesktopContractMode.remoteStub,
+        remoteStubTransportClient:
+            const _AuthBackendIsSignedInStateAliasParityTransportClient(),
+      ),
+    );
+    await openWorkflowSection(tester, 'auth');
+
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('auth-password')),
+      'desktop-pass',
+    );
+    await tester.ensureVisible(
+      find.byKey(const ValueKey<String>('auth-sign-in')),
+    );
+    await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining(
+        'Status: [remote-stub] Backend is_signed_in sign-in snapshot applied.',
+      ),
+      findsOneWidget,
+    );
+    final CheckboxListTile rememberSessionTile = tester.widget(
+      find.byKey(const ValueKey<String>('auth-remember')),
+    );
+    expect(rememberSessionTile.value, isTrue);
+
+    expect(find.textContaining('Signed in (simulated).'), findsNothing);
+  });
 
   testWidgets('auth/session parity normalizes logged_in state aliases', (
     WidgetTester tester,
@@ -4402,6 +4464,20 @@ void main() {
           expectedStatus:
               'Backend authState result envelope isLoggedIn applied.',
         ),
+        (
+          description: 'data envelope authState is_signed_in alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend authState data envelope is_signed_in applied.',
+              'authState': <String, Object?>{
+                'is_signed_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend authState data envelope is_signed_in applied.',
+        ),
       ];
 
   for (final ({
@@ -4644,6 +4720,21 @@ void main() {
               'authState': <String, Object?>{
                 'signed_in': false,
                 'sessionToken': 'auth-state-signed-in-false-result-token',
+              },
+            },
+          },
+          refreshTokenPayload: null,
+          actionKey: const ValueKey<String>('auth-restore-session'),
+          expectedStatus: 'Authentication required.',
+          absentSuccessText: 'Session restored (simulated).',
+        ),
+        (
+          description: 'data envelope authState is_signed_in false alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_signed_in': false,
+                'sessionToken': 'auth-state-is-signed-in-false-data-token',
               },
             },
           },

@@ -2044,6 +2044,34 @@ void main() {
     );
 
     test(
+      'auth backend snake_case is_signed_in and remember_session aliases are normalized',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'detail':
+                    'Backend snake-case is_signed_in auth payload applied.',
+                'state': <String, Object?>{
+                  'is_signed_in': true,
+                  'remember_session': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.rememberSession, isTrue);
+        expect(authContract.state.signedIn, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend snake-case is_signed_in auth payload applied.',
+        );
+      },
+    );
+
+    test(
       'auth backend logged_in and persist_session aliases are normalized',
       () {
         final _BackendResponseTransportClient transportClient =
@@ -2103,6 +2131,29 @@ void main() {
                 'code': 'AUTH_REQUIRED',
                 'state': <String, Object?>{
                   'signed_in': true,
+                  'remember_session': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
+
+    test(
+      'auth backend is_signed_in alias overrides unauthorized code inference',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'code': 'AUTH_REQUIRED',
+                'state': <String, Object?>{
+                  'is_signed_in': true,
                   'remember_session': true,
                 },
               },
@@ -2386,6 +2437,27 @@ void main() {
             '[remote-stub] Fixture sign-in result envelope isLoggedIn applied.',
       ),
       const _AuthBackendFixtureCase(
+        name: 'sign-in data envelope with authState is_signed_in alias success',
+        operationId: RemoteStubOperationIds.signIn,
+        responsePayload: <String, Object?>{
+          'data': <String, Object?>{
+            'detail':
+                'Fixture sign-in data envelope is_signed_in alias applied.',
+            'authState': <String, Object?>{
+              'is_signed_in': true,
+              'remember_session': true,
+              'tokens': <String, Object?>{
+                'accessToken': 'fixture-data-envelope-is-signed-in-token',
+              },
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture sign-in data envelope is_signed_in alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
         name:
             'refresh-token result payload envelope authState signed_out alias maps fallback status',
         operationId: RemoteStubOperationIds.refreshToken,
@@ -2576,6 +2648,21 @@ void main() {
             'authState': <String, Object?>{
               'signed_in': false,
               'sessionToken': 'fixture-signed-in-false-result-token',
+            },
+          },
+        },
+        expectedSignedIn: false,
+        expectedStatus: '[remote-stub] Authentication required.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session data envelope authState is_signed_in false alias maps fallback status',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'data': <String, Object?>{
+            'authState': <String, Object?>{
+              'is_signed_in': false,
+              'sessionToken': 'fixture-is-signed-in-false-data-token',
             },
           },
         },
