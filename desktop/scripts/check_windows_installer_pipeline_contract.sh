@@ -8,6 +8,16 @@ pipeline_script="${script_dir}/run_windows_installer_pipeline.sh"
 
 mkdir -p "$(dirname "$report_file")"
 
+if [[ ! -f "$pipeline_script" ]]; then
+  echo "[windows-installer-pipeline-contract] missing pipeline script: $pipeline_script" >&2
+  exit 1
+fi
+
+if [[ ! -x "$pipeline_script" ]]; then
+  echo "[windows-installer-pipeline-contract] pipeline script is not executable: $pipeline_script" >&2
+  exit 1
+fi
+
 case_rows=""
 failure_count=0
 total_cases=0

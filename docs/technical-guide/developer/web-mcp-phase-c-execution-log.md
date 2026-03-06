@@ -15700,6 +15700,49 @@ trigger strict mode.
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-315.
 
+## Unit WS-D-316: contract checker pipeline-script preflight hardening
+
+### Planned objective
+
+Fail fast on local script state issues by validating pipeline script availability/executability
+before running the installer/protocol contract matrix.
+
+### Implemented changes
+
+1. Added preflight guards in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - verify `run_windows_installer_pipeline.sh` exists,
+   - verify the pipeline script is executable,
+   - emit explicit contract-prefixed diagnostics and exit before matrix execution when invalid.
+2. Preserved existing matrix behavior for valid script state (no case logic changes).
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-316
+     preflight hardening lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     pipeline-script preflight guard behavior in checker baseline.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - contract checker startup reliability under local filesystem permission/state drift,
+  - diagnostic clarity for missing/non-executable pipeline script conditions,
+  - regression safety for existing matrix pass-path behavior.
+- **Issues found during review**
+  1. matrix execution assumed pipeline script path/executable state; failures surfaced later as
+     per-case mismatches with less direct root-cause clarity.
+  2. local permission drift (lost executable bit) could consume full matrix runtime before obvious
+     diagnosis.
+- **Fix applied**
+  1. added explicit preflight guards for script existence and executable bit.
+  2. retained unchanged matrix execution path when preflight passes.
+- **Post-fix validation criteria**
+  - contract checker passes in valid local script state with unchanged matrix behavior.
+  - full desktop verify remains green after checker preflight hardening.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-316.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

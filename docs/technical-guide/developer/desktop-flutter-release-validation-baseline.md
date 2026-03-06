@@ -337,6 +337,9 @@ CI baseline note:
   - contract matrix now also locks near-match alias behavior (`truee`, `yesplease`, `strict-mode`)
     so strict parser inference remains exact-match based and does not overmatch prefixed/suffixed
     variants.
+  - contract checker now performs pipeline-script preflight (file existence + executable bit)
+    before running matrix cases, failing fast with explicit diagnostics on invalid local script
+    state.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
