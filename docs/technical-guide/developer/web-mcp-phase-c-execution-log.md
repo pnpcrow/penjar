@@ -15238,6 +15238,51 @@ handling (`" 1 "`) for strict installer/protocol paths.
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-305.
 
+## Unit WS-D-306: carriage-return strict alias regression coverage
+
+### Planned objective
+
+Extend whitespace-class strict toggle guards for Windows-style line-ending boundary values by
+locking carriage-return-wrapped alias handling.
+
+### Implemented changes
+
+1. Expanded strict installer CR-path coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-cr-whitespace-yes-alias-placeholder-fail`,
+   - strict argument fixture `\rYES\r` now explicitly asserts strict placeholder failure behavior.
+2. Expanded strict protocol CR-path coverage in the same checker:
+   - added `strict-protocol-cr-whitespace-true-alias-missing-command-fail`,
+   - env fixture `STRICT_WINDOWS_PROTOCOL_REGISTRATION=\rTRUE\r` now explicitly asserts strict
+     protocol missing-command failure behavior.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-306
+     CR-wrapped alias regression lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     carriage-return strict alias matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict installer/protocol behavior for CR-wrapped alias inputs,
+  - Windows line-ending boundary robustness in strict toggle normalization,
+  - deterministic strict fail semantics after CR trim normalization.
+- **Issues found during review**
+  1. whitespace coverage included space/tab/newline and numeric variants, but CR-wrapped aliases
+     were not explicitly locked.
+  2. CR boundary values can emerge in Windows-derived env/template paths; without dedicated cases
+     strict behavior regressions could escape detection.
+- **Fix applied**
+  1. added strict installer/protocol carriage-return alias fixtures with strict fail assertions.
+  2. preserved full verification gate to ensure no side-effect regressions.
+- **Post-fix validation criteria**
+  - contract checker passes with CR alias fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-306.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
