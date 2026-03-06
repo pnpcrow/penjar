@@ -15051,6 +15051,51 @@ case-insensitive alias evaluation, and lock the behavior with explicit contract 
   - full desktop verify remains green after parser normalization update.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-301.
 
+## Unit WS-D-302: tab-whitespace strict alias regression coverage
+
+### Planned objective
+
+Extend whitespace-normalization regression guards by locking strict installer/protocol behavior for
+tab-wrapped alias inputs, ensuring `[:space:]` handling remains stable beyond plain spaces.
+
+### Implemented changes
+
+1. Expanded strict installer whitespace matrix in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-tab-whitespace-yes-alias-placeholder-fail`,
+   - uses strict argument fixture `\tYES\t`,
+   - locks strict failure behavior for placeholder installer command after tab trim normalization.
+2. Expanded strict protocol whitespace matrix in the same checker:
+   - added `strict-protocol-tab-whitespace-true-alias-missing-command-fail`,
+   - uses env fixture `STRICT_WINDOWS_PROTOCOL_REGISTRATION=\tTRUE\t`,
+   - locks strict protocol missing-command failure behavior after tab trim normalization.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-302
+     tab-whitespace alias regression lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     tab-wrapped strict alias matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict toggle behavior for tab-wrapped installer/protocol alias inputs,
+  - whitespace-class coverage completeness for WS-D-301 trim hardening,
+  - deterministic strict fail semantics under tab-normalized aliases.
+- **Issues found during review**
+  1. WS-D-301 locked plain-space aliases but did not explicitly cover tab-wrapped variants.
+  2. without tab fixtures, whitespace-class regressions could bypass strict-mode expectations while
+     still passing existing space-only tests.
+- **Fix applied**
+  1. added dedicated tab-wrapped strict installer/protocol alias contract cases.
+  2. asserted strict mode labels and failure diagnostics to lock parser outcomes.
+- **Post-fix validation criteria**
+  - contract checker passes with tab-whitespace alias fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-302.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

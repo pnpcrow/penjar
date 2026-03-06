@@ -306,6 +306,8 @@ CI baseline note:
     scenarios.
   - strict toggle parser now trims leading/trailing whitespace before lowercase normalization, and
     contract coverage explicitly locks whitespace alias handling (`" yes "`, `" true "`).
+  - contract matrix now also locks tab-wrapped strict alias handling (`"\tYES\t"`, `"\tTRUE\t"`)
+    to prevent whitespace-class normalization regressions.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
