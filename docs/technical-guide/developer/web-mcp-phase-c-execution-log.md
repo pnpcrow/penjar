@@ -12784,6 +12784,68 @@ a single lookup map.
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-262: compact uppercase normalization ASCII fast path
+
+### Planned objective
+
+Reduce compact mixed-case normalization overhead by replacing all-compact uppercase
+`toLowerCase()` usage with ASCII code-unit lowering.
+
+### Implemented changes
+
+1. Updated compact normalization in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_compactBackendCodeFromTrimmed(...)` now uses `_compactBackendAsciiLowercase(...)` when the
+     input is already compact and only requires uppercase-to-lowercase conversion,
+   - new helper `_compactBackendAsciiLowercase(...)` performs ASCII code-unit lowering without
+     full Unicode lowercase preprocessing.
+2. Preserved existing fallback semantics:
+   - non-compact and non-ASCII paths still flow through existing ASCII normalization / Unicode
+     fallback logic unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only mixed-case compact sessionexpired payload maps session-expired fallback status`
+     (`code: "SessionExpired"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendMixedCaseCompactSessionExpiredParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps mixed-case compact sessionexpired backend failure to deterministic session-expired status`.
+5. Synced continuity docs for WS-D-262 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - compact all-ASCII mixed-case backend code normalization hot path,
+  - deterministic session-expired fallback behavior for mixed-case compact `SessionExpired`,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. WS-D-261 still used `toLowerCase()` on all-compact uppercase/mixed-case inputs, adding
+     avoidable normalization overhead for ASCII-only compact markers.
+  2. Mixed-case compact session-expired marker behavior (`SessionExpired`) was not explicitly
+     parity-locked.
+- **Fix applied**
+  1. Replaced all-compact uppercase normalization with ASCII code-unit lowering helper.
+  2. Added dedicated contract/parity regressions for `SessionExpired` deterministic
+     session-expired fallback behavior.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - compact all-ASCII mixed-case backend codes normalize without `toLowerCase()` preprocessing.
+  - mixed-case compact `SessionExpired` payloads map to deterministic session-expired fallback
+    behavior in contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

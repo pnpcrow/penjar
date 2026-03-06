@@ -343,6 +343,13 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
    - contract/parity suites now lock uppercase compact exact session-expired marker behavior
      (`SESSIONEXPIRED`) to preserve deterministic fallback mapping on the single-map fast-path;
      execution evidence is recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-261`).
+49. Backend code compact uppercase-normalization ASCII fast-path optimization:
+   - `_compactBackendCodeFromTrimmed(...)` now uses `_compactBackendAsciiLowercase(...)` for
+     all-compact uppercase ASCII inputs, replacing `toLowerCase()` with ASCII code-unit lowering
+     to reduce normalization overhead in mixed-case compact marker paths,
+   - contract/parity suites now lock mixed-case compact session-expired marker behavior
+     (`SessionExpired`) to preserve deterministic fallback mapping under the new ASCII fast-path;
+     execution evidence is recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-262`).
 
 ## Remaining integration gaps (auth scope)
 

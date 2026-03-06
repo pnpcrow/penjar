@@ -1549,7 +1549,7 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
   }
   if (firstNonCompactIndex == -1) {
     return hasUppercaseCompactCodeUnit
-        ? trimmedCode.toLowerCase()
+        ? _compactBackendAsciiLowercase(trimmedCode)
         : trimmedCode;
   }
   final StringBuffer asciiBuffer = StringBuffer();
@@ -1570,6 +1570,19 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
     }
   }
   return asciiBuffer.toString();
+}
+
+String _compactBackendAsciiLowercase(String code) {
+  final StringBuffer buffer = StringBuffer();
+  for (int index = 0; index < code.length; index++) {
+    final int codeUnit = code.codeUnitAt(index);
+    buffer.writeCharCode(
+      _isBackendCodeAsciiUpperAlphaCodeUnit(codeUnit)
+          ? _toLowerAsciiCodeUnit(codeUnit)
+          : codeUnit,
+    );
+  }
+  return buffer.toString();
 }
 
 String _compactBackendCodeFromTrimmedUnicodeFallback(
