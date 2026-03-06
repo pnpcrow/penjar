@@ -11120,6 +11120,71 @@ so all signed-in aliases map deterministically on both `result.authState` and `d
     regression (`Authentication required.`) for each alias/wrapper combination.
   - targeted auth tests and full desktop verification remain green after expansion.
 
+## Unit WS-D-234: sign-in direct-wrapper explicit signed-in-false alias symmetry (`isAuthenticated`/`loggedIn`/`isLoggedIn`/`is_authenticated`/`signedIn`/`authenticated`/`signed_in`/`is_signed_in`/`logged_in`/`is_logged_in`)
+
+### Planned objective
+
+Close sign-in direct-wrapper fallback gaps by extending contract and parity fixtures so explicit
+signed-in-false aliases map deterministically on both `result.authState` and `data.authState`.
+
+### Implemented changes
+
+1. Expanded sign-in contract fallback fixture matrix in
+   `desktop/test/contracts/workflow_contracts_test.dart` with direct `result/data.authState`
+   explicit false alias coverage for ten aliases:
+   - `isAuthenticated=false`,
+   - `loggedIn=false`,
+   - `isLoggedIn=false`,
+   - `is_authenticated=false`,
+   - `signedIn=false`,
+   - `authenticated=false`,
+   - `signed_in=false`,
+   - `is_signed_in=false`,
+   - `logged_in=false`,
+   - `is_logged_in=false`.
+2. Added sign-in signed-in-false parity loop in
+   `desktop/test/parity/auth_session_parity_test.dart` with matching direct
+   `result/data.authState` alias fixtures and deterministic signed-out fallback assertions.
+3. Synced continuity docs for latest sign-in explicit-false direct-wrapper evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && dart format test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - sign-in direct-wrapper explicit false alias completeness against refresh/restore fallback
+    matrix,
+  - contract/parity consistency for wrapper (`result`/`data`) and alias permutations,
+  - assertion correctness and regression impact on existing positive sign-in parity loop.
+- **Issues found during review**
+  1. Sign-in direct-wrapper explicit signed-in-false alias coverage was missing while the same
+     alias set was already locked for refresh-token and restore-session.
+  2. During parity-loop authoring, remember-state expectation was initially set incorrectly and a
+     follow-up edit temporarily flipped the existing sign-in-positive loop expectation, causing
+     transient parity failures.
+- **Fix applied**
+  1. Added twenty sign-in contract fixtures (ten aliases × result/data wrappers) with deterministic
+     fallback-status assertions.
+  2. Added twenty sign-in parity cases using the same alias/wrapper matrix with signed-out fallback
+     assertions.
+  3. Corrected remember-state expectations (`isTrue` for existing sign-in positive loop,
+     `isFalse` for new sign-in explicit-false loop) and re-ran targeted suites.
+  4. Updated continuity docs so current auth baseline points to WS-D-234 evidence.
+- **Post-fix validation criteria**
+  - sign-in direct wrappers now lock explicit signed-in-false aliases across `result` and `data`
+    envelopes for all ten variants.
+  - parity sign-in flow maps each added alias/wrapper combination to deterministic fallback status
+    (`Authentication required.`), suppresses `Signed in (simulated).`, and keeps remember toggle
+    at default false for explicit-false sign-in fixtures.
+  - targeted auth tests and full desktop verification remain green after expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

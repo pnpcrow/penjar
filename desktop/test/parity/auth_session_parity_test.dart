@@ -4751,6 +4751,272 @@ void main() {
     );
   }
 
+  final List<({String description, Map<String, Object?> signInPayload})>
+  authStateSignedInFalseEnvelopeCases =
+      <({String description, Map<String, Object?> signInPayload})>[
+        (
+          description: 'result envelope authState isAuthenticated false alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'isAuthenticated': false,
+                'sessionToken': 'sign-in-result-is-authenticated-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState isAuthenticated false alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'isAuthenticated': false,
+                'sessionToken': 'sign-in-data-is-authenticated-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState loggedIn false alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'loggedIn': false,
+                'sessionToken': 'sign-in-data-logged-in-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'result envelope authState loggedIn false alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'loggedIn': false,
+                'sessionToken': 'sign-in-result-logged-in-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'result envelope authState isLoggedIn false alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'isLoggedIn': false,
+                'sessionToken': 'sign-in-result-is-logged-in-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState isLoggedIn false alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'isLoggedIn': false,
+                'sessionToken': 'sign-in-data-is-logged-in-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState is_authenticated false alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_authenticated': false,
+                'sessionToken':
+                    'sign-in-data-is-authenticated-snake-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'result envelope authState is_authenticated false alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_authenticated': false,
+                'sessionToken':
+                    'sign-in-result-is-authenticated-snake-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'result envelope authState signedIn false alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'signedIn': false,
+                'sessionToken': 'sign-in-result-signed-in-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState signedIn false alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'signedIn': false,
+                'sessionToken': 'sign-in-data-signed-in-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState authenticated false alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'authenticated': false,
+                'sessionToken': 'sign-in-data-authenticated-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'result envelope authState authenticated false alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'authenticated': false,
+                'sessionToken': 'sign-in-result-authenticated-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'result envelope authState signed_in false alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'signed_in': false,
+                'sessionToken': 'sign-in-result-signed-in-snake-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState signed_in false alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'signed_in': false,
+                'sessionToken': 'sign-in-data-signed-in-snake-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'result envelope authState is_signed_in false alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_signed_in': false,
+                'sessionToken': 'sign-in-result-is-signed-in-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState is_signed_in false alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_signed_in': false,
+                'sessionToken': 'sign-in-data-is-signed-in-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'result envelope authState logged_in false alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'logged_in': false,
+                'sessionToken': 'sign-in-result-logged-in-snake-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState logged_in false alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'logged_in': false,
+                'sessionToken': 'sign-in-data-logged-in-snake-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'data envelope authState is_logged_in false alias',
+          signInPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_logged_in': false,
+                'sessionToken': 'sign-in-data-is-logged-in-snake-false-token',
+              },
+            },
+          },
+        ),
+        (
+          description: 'result envelope authState is_logged_in false alias',
+          signInPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'authState': <String, Object?>{
+                'is_logged_in': false,
+                'sessionToken': 'sign-in-result-is-logged-in-snake-false-token',
+              },
+            },
+          },
+        ),
+      ];
+
+  for (final ({String description, Map<String, Object?> signInPayload}) caseData
+      in authStateSignedInFalseEnvelopeCases) {
+    testWidgets(
+      'auth/session parity maps sign-in ${caseData.description} to deterministic signed-out fallback',
+      (WidgetTester tester) async {
+        await pumpDesktopApp(
+          tester,
+          contracts: DesktopContractBundle.fromMode(
+            DesktopContractMode.remoteStub,
+            remoteStubTransportClient:
+                _AuthBackendAuthStateEnvelopeFixtureParityTransportClient(
+                  signInPayload: caseData.signInPayload,
+                ),
+          ),
+        );
+        await openWorkflowSection(tester, 'auth');
+
+        await tester.enterText(
+          find.byKey(const ValueKey<String>('auth-password')),
+          'desktop-pass',
+        );
+        await tester.ensureVisible(
+          find.byKey(const ValueKey<String>('auth-sign-in')),
+        );
+        await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining('Status: [remote-stub] Authentication required.'),
+          findsOneWidget,
+        );
+        final CheckboxListTile rememberSessionTile = tester.widget(
+          find.byKey(const ValueKey<String>('auth-remember')),
+        );
+        expect(rememberSessionTile.value, isFalse);
+        expect(find.textContaining('Signed in (simulated).'), findsNothing);
+      },
+    );
+  }
+
   final List<
     ({
       String description,
