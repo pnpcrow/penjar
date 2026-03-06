@@ -740,6 +740,26 @@ run_case \
   "[windows-installer-pipeline] completed."
 
 run_case \
+  "strict-installer-nearmatch-expression-one-andand-one-alias-missing-command-pass" \
+  "pass" \
+  "Strict installer mode parser should keep expression near-match alias '1&&1' non-strict when installer command is missing." \
+  setup_release_runner_case \
+  "1&&1" \
+  "release" \
+  "- Strict mode: 0" \
+  "[windows-installer-pipeline] completed."
+
+run_case \
+  "strict-installer-nearmatch-expression-one-pipepipe-one-alias-missing-command-pass" \
+  "pass" \
+  "Strict installer mode parser should keep expression near-match alias '1||1' non-strict when installer command is missing." \
+  setup_release_runner_case \
+  "1||1" \
+  "release" \
+  "- Strict mode: 0" \
+  "[windows-installer-pipeline] completed."
+
+run_case \
   "strict-installer-nearmatch-truee-placeholder-warning-pass" \
   "pass" \
   "Strict installer mode parser should keep near-match alias 'truee' non-strict and preserve placeholder warning behavior." \
@@ -1456,6 +1476,28 @@ run_case \
   "- Strict protocol registration mode: 0" \
   "[windows-installer-pipeline] completed." \
   "STRICT_WINDOWS_PROTOCOL_REGISTRATION=1!=1"
+
+run_case \
+  "strict-protocol-nearmatch-expression-one-andand-one-alias-missing-command-pass" \
+  "pass" \
+  "Strict protocol mode parser should keep expression near-match alias '1&&1' non-strict when protocol command is missing." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Strict protocol registration mode: 0" \
+  "[windows-installer-pipeline] completed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=1&&1"
+
+run_case \
+  "strict-protocol-nearmatch-expression-one-pipepipe-one-alias-missing-command-pass" \
+  "pass" \
+  "Strict protocol mode parser should keep expression near-match alias '1||1' non-strict when protocol command is missing." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Strict protocol registration mode: 0" \
+  "[windows-installer-pipeline] completed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=1||1"
 
 run_case \
   "strict-protocol-nearmatch-truee-placeholder-warning-pass" \

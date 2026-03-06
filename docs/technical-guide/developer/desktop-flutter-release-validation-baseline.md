@@ -382,6 +382,8 @@ CI baseline note:
     (`"1<1"`, `"1>1"`) so comparison-style numeric values cannot widen strict acceptance.
   - contract matrix now also locks equality-expression numeric near-match alias behavior
     (`"1==1"`, `"1!=1"`) so equality-style numeric values cannot widen strict acceptance.
+  - contract matrix now also locks logical-expression numeric near-match alias behavior
+    (`"1&&1"`, `"1||1"`) so logical-style numeric values cannot widen strict acceptance.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
