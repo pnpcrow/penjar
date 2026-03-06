@@ -301,6 +301,9 @@ CI baseline note:
   - contract matrix now also locks release/debug strict-protocol behavior when installer commands
     remove runner artifacts before protocol-stage evaluation, preserving simulated/non-blocking
     protocol status semantics.
+  - contract matrix now also locks case-insensitive strict/strict-protocol alias parsing
+    (`YES`/`TRUE`/`StRiCt`/`YeS`) for deterministic strict-mode semantics across release/debug
+    scenarios.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.

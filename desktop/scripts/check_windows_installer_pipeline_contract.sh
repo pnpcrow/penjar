@@ -287,6 +287,17 @@ run_case \
   "PENJAR_WINDOWS_INSTALLER_COMMAND=placeholder"
 
 run_case \
+  "strict-installer-uppercase-yes-alias-placeholder-fail" \
+  "fail" \
+  "Strict installer mode parser should treat uppercase strict input alias 'YES' as strict and fail on placeholder installer command." \
+  setup_release_runner_case \
+  "YES" \
+  "release" \
+  "- Strict mode: 1" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=placeholder"
+
+run_case \
   "strict-installer-placeholder-command-fail" \
   "fail" \
   "Strict installer mode must fail when installer command is a placeholder value." \
@@ -389,6 +400,17 @@ run_case \
   "PENJAR_WINDOWS_INSTALLER_COMMAND=true"
 
 run_case \
+  "debug-mode-strict-installer-mixedcase-strict-alias-clear-command-pass" \
+  "pass" \
+  "Strict installer alias 'StRiCt' should pass in debug mode when installer command succeeds." \
+  setup_debug_runner_case \
+  "StRiCt" \
+  "debug" \
+  "- Strict mode: 1" \
+  "[windows-installer-pipeline] completed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=true"
+
+run_case \
   "debug-mode-strict-protocol-missing-command-fail" \
   "fail" \
   "Strict protocol mode should fail in debug build mode when protocol command is missing." \
@@ -420,6 +442,17 @@ run_case \
   "- Strict protocol registration mode: 1" \
   "[windows-installer-pipeline] strict mode failed." \
   "STRICT_WINDOWS_PROTOCOL_REGISTRATION=true"
+
+run_case \
+  "strict-protocol-uppercase-true-alias-missing-command-fail" \
+  "fail" \
+  "Strict protocol mode parser should treat uppercase protocol alias 'TRUE' as strict and fail on missing protocol command." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Strict protocol registration mode: 1" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=TRUE"
 
 run_case \
   "strict-protocol-strict-alias-missing-command-fail" \
@@ -454,6 +487,18 @@ run_case \
   "- Strict protocol registration mode: 1" \
   "[windows-installer-pipeline] completed." \
   "STRICT_WINDOWS_PROTOCOL_REGISTRATION=yes" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=true"
+
+run_case \
+  "strict-protocol-mixedcase-yes-alias-clear-command-pass" \
+  "pass" \
+  "Strict protocol mode parser should treat mixed-case protocol alias 'YeS' as strict and pass when protocol command succeeds." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Strict protocol registration mode: 1" \
+  "[windows-installer-pipeline] completed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=YeS" \
   "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=true"
 
 run_case \

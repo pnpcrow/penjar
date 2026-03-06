@@ -14949,6 +14949,57 @@ behavior when installer commands mutate/remove runner artifacts before protocol-
   - full desktop verify remains green after contract matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-299.
 
+## Unit WS-D-300: case-insensitive strict alias regression coverage
+
+### Planned objective
+
+Close strict-mode parser regression gaps by contract-locking case-insensitive alias handling for
+strict installer and strict protocol toggles.
+
+### Implemented changes
+
+1. Expanded strict installer alias matrix in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-uppercase-yes-alias-placeholder-fail` (`YES`),
+   - added `debug-mode-strict-installer-mixedcase-strict-alias-clear-command-pass` (`StRiCt`).
+2. Expanded strict protocol alias matrix in the same checker:
+   - added `strict-protocol-uppercase-true-alias-missing-command-fail` (`TRUE`),
+   - added `strict-protocol-mixedcase-yes-alias-clear-command-pass` (`YeS`).
+3. Locked deterministic alias-normalized outcomes:
+   - uppercase/mixed-case strict installer aliases now explicitly assert strict-mode semantics
+     (`- Strict mode: 1`) for fail/pass paths,
+   - uppercase/mixed-case strict protocol aliases now explicitly assert strict protocol semantics
+     (`- Strict protocol registration mode: 1`) for fail/pass paths.
+4. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-300
+     case-insensitive alias regression lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     case-insensitive strict alias matrix coverage.
+5. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict installer alias normalization under uppercase/mixed-case inputs,
+  - strict protocol alias normalization under uppercase/mixed-case inputs,
+  - release/debug stability for case-insensitive parser behavior.
+- **Issues found during review**
+  1. parser implementation already lowercased inputs, but contract matrix covered aliases mostly in
+     lowercase forms.
+  2. missing uppercase/mixed-case fixtures left a gap where parser-regression changes could pass
+     existing tests while breaking real-world env inputs.
+- **Fix applied**
+  1. added four targeted uppercase/mixed-case alias cases across strict installer/protocol and
+     release/debug paths.
+  2. enforced strict mode labels and pass/fail diagnostics in assertions to lock normalized parser
+     semantics end-to-end.
+- **Post-fix validation criteria**
+  - contract checker passes with all new case-insensitive alias fixtures.
+  - full desktop verify remains green after alias matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-300.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
