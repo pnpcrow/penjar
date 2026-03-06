@@ -190,6 +190,13 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      missing-entry reporting,
    - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
      (`Unit WS-D-240`).
+28. Sign-in parity matrix guard deduplication for signed-in/signed-in-false/signed-out paths:
+   - `desktop/test/parity/auth_session_parity_test.dart` now uses a shared sign-in matrix guard
+     helper across all three direct `authState` matrix checks (signed-in true, signed-in false,
+     signed-out true), preserving missing-entry diagnostics while reducing duplicated alias-loop
+     logic,
+   - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
+     (`Unit WS-D-241`).
 
 ## Remaining integration gaps (auth scope)
 

@@ -11522,6 +11522,61 @@ consistently.
   - helperized implementation keeps wrapper/alias/value coverage identical to pre-refactor scope.
   - targeted auth tests and full desktop verification remain green after deduplication.
 
+## Unit WS-D-241: sign-in parity matrix guard deduplication across authState variants
+
+### Planned objective
+
+Apply the same guard-deduplication pattern to sign-in authState matrix checks so signed-in,
+signed-in-false, and signed-out sign-in symmetry tests share one assertion path.
+
+### Implemented changes
+
+1. Added shared sign-in matrix assertion helper in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - `expectSignInAuthStateMatrixSymmetric(...)`.
+2. Migrated three sign-in direct-wrapper matrix tests to the helper:
+   - `auth/session parity sign-in signed-in authState matrix is symmetric`,
+   - `auth/session parity sign-in signed-in-false authState matrix is symmetric`,
+   - `auth/session parity sign-in signed-out authState matrix is symmetric`.
+3. Kept existing alias sets and expected values unchanged:
+   - signed-in aliases with `true`,
+   - signed-in aliases with `false`,
+   - signed-out aliases with `true`.
+4. Preserved deterministic missing-entry diagnostics (`Missing parity matrix entries`) while
+   removing duplicated per-test loop logic.
+5. Synced continuity docs for WS-D-241 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - sign-in matrix-guard duplication across signed-in/signed-in-false/signed-out test blocks,
+  - parity of assertion behavior after helper extraction,
+  - regression impact against targeted auth suites and full verification chain.
+- **Issues found during review**
+  1. Three sign-in matrix tests each carried near-identical wrapper/alias iteration and
+     missing-entry aggregation code.
+  2. This made future matrix-shape maintenance error-prone because edits could diverge between
+     sign-in matrix variants.
+- **Fix applied**
+  1. Consolidated sign-in matrix assertions into one helper accepting payloads, alias set, and
+     expected value.
+  2. Rewired the three sign-in matrix tests to call the helper with existing payload sources.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification to ensure no behavior
+     regressions.
+- **Post-fix validation criteria**
+  - sign-in matrix guards retain identical alias/wrapper/value coverage and failure semantics.
+  - missing-entry output format remains deterministic for debugging matrix drift.
+  - targeted auth tests and full desktop verification remain green after deduplication.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

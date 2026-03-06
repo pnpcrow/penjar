@@ -41,10 +41,9 @@ This inventory tracks remaining non-Flutter desktop paths and their decommission
 | Export UX | `frontend/src/app/main/ui/exports/files.cljs`, `frontend/src/app/main/data/exports/files.cljs`, `frontend/src/app/main/ui/workspace/sidebar/options/menus/exports.cljs` | Export dialogs and export orchestration are implemented in web UI + data flows | Flutter export flow with parity in format/options/status and save UX | Baseline Flutter export workflow surface and runtime-switchable in-memory/remote-stub contract boundary are implemented; sibling `result`/`data` envelope fallback regression coverage is now added in contract/parity suites (`desktop/test/contracts/workflow_contracts_test.dart`, `desktop/test/parity/export_workflow_parity_test.dart`), and backend export pipeline and native save bridge integration remain pending | Export Pipeline | 2026-09-15 | In progress | [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/) |
 | Diagnostics/recovery UX | `frontend/src/app/main/data/websocket.cljs`, `frontend/src/app/main/data/workspace/mcp.cljs`, `mcp/scripts/verify-live-evidence` | Web runtime handles ws/MCP events; diagnostics are script/tooling-centric and not surfaced via desktop-native UX | Flutter-native diagnostics/recovery surface with embedded MCP health and reconnect guidance | Baseline Flutter diagnostics/recovery surface and runtime-switchable in-memory/remote-stub contract boundary are implemented; sibling `result`/`data` envelope fallback regression coverage is now added in contract/parity suites (`desktop/test/contracts/workflow_contracts_test.dart`, `desktop/test/parity/diagnostics_recovery_parity_test.dart`), and live telemetry ingestion and reconnect policy orchestration remain pending | Platform Reliability | 2026-09-30 | In progress | [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/) |
 
-Latest auth/session continuity evidence update: `Unit WS-D-240` refactors restore-session /
-refresh-token direct `authState` parity matrix checks into a shared guard helper with
-prefiltered payload reuse (signed-out + signed-in-false), and is logged in
-`web-mcp-phase-c-execution-log.md` (`Unit WS-D-240`).
+Latest auth/session continuity evidence update: `Unit WS-D-241` refactors sign-in direct
+`authState` parity matrix checks (signed-in/signed-in-false/signed-out) into a shared guard
+helper, and is logged in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-241`).
 
 ## Review cadence
 

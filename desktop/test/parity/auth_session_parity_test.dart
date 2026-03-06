@@ -4751,6 +4751,35 @@ void main() {
         ),
       ];
 
+  void expectSignInAuthStateMatrixSymmetric({
+    required Iterable<Map<String, Object?>> payloads,
+    required Iterable<String> aliases,
+    required bool expectedValue,
+  }) {
+    final List<String> missingEntries = <String>[];
+
+    for (final String wrapperKey in authStateWrapperKeys) {
+      for (final String alias in aliases) {
+        if (!hasAuthStateAliasPayload(
+          payloads,
+          wrapperKey: wrapperKey,
+          alias: alias,
+          expectedValue: expectedValue,
+        )) {
+          missingEntries.add(
+            'sign-in $wrapperKey authState.$alias=$expectedValue',
+          );
+        }
+      }
+    }
+
+    expect(
+      missingEntries,
+      isEmpty,
+      reason: 'Missing parity matrix entries:\n${missingEntries.join('\n')}',
+    );
+  }
+
   test(
     'auth/session parity sign-in signed-in authState matrix is symmetric',
     () {
@@ -4758,25 +4787,10 @@ void main() {
           authStateSignedInEnvelopeCases.map(
             (caseData) => caseData.signInPayload,
           );
-      final List<String> missingEntries = <String>[];
-
-      for (final String wrapperKey in authStateWrapperKeys) {
-        for (final String alias in authStateSignedInAliases) {
-          if (!hasAuthStateAliasPayload(
-            payloads,
-            wrapperKey: wrapperKey,
-            alias: alias,
-            expectedValue: true,
-          )) {
-            missingEntries.add('sign-in $wrapperKey authState.$alias=true');
-          }
-        }
-      }
-
-      expect(
-        missingEntries,
-        isEmpty,
-        reason: 'Missing parity matrix entries:\n${missingEntries.join('\n')}',
+      expectSignInAuthStateMatrixSymmetric(
+        payloads: payloads,
+        aliases: authStateSignedInAliases,
+        expectedValue: true,
       );
     },
   );
@@ -5061,25 +5075,10 @@ void main() {
           authStateSignedInFalseEnvelopeCases.map(
             (caseData) => caseData.signInPayload,
           );
-      final List<String> missingEntries = <String>[];
-
-      for (final String wrapperKey in authStateWrapperKeys) {
-        for (final String alias in authStateSignedInAliases) {
-          if (!hasAuthStateAliasPayload(
-            payloads,
-            wrapperKey: wrapperKey,
-            alias: alias,
-            expectedValue: false,
-          )) {
-            missingEntries.add('sign-in $wrapperKey authState.$alias=false');
-          }
-        }
-      }
-
-      expect(
-        missingEntries,
-        isEmpty,
-        reason: 'Missing parity matrix entries:\n${missingEntries.join('\n')}',
+      expectSignInAuthStateMatrixSymmetric(
+        payloads: payloads,
+        aliases: authStateSignedInAliases,
+        expectedValue: false,
       );
     },
   );
@@ -5311,25 +5310,10 @@ void main() {
           authStateSignedOutSignInEnvelopeCases.map(
             (caseData) => caseData.signInPayload,
           );
-      final List<String> missingEntries = <String>[];
-
-      for (final String wrapperKey in authStateWrapperKeys) {
-        for (final String alias in authStateSignedOutAliases) {
-          if (!hasAuthStateAliasPayload(
-            payloads,
-            wrapperKey: wrapperKey,
-            alias: alias,
-            expectedValue: true,
-          )) {
-            missingEntries.add('sign-in $wrapperKey authState.$alias=true');
-          }
-        }
-      }
-
-      expect(
-        missingEntries,
-        isEmpty,
-        reason: 'Missing parity matrix entries:\n${missingEntries.join('\n')}',
+      expectSignInAuthStateMatrixSymmetric(
+        payloads: payloads,
+        aliases: authStateSignedOutAliases,
+        expectedValue: true,
       );
     },
   );
