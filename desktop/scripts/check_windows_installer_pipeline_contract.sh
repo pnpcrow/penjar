@@ -219,6 +219,30 @@ run_case \
   "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=placeholder"
 
 run_case \
+  "strict-installer-protocol-command-failure-fail" \
+  "fail" \
+  "Strict installer mode must fail when protocol command execution returns non-zero in release mode." \
+  setup_release_runner_case \
+  "1" \
+  "release" \
+  "- Protocol error: protocol register command failed" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=true" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=false"
+
+run_case \
+  "debug-mode-strict-installer-protocol-command-failure-fail" \
+  "fail" \
+  "Strict installer mode must fail when protocol command execution returns non-zero in debug mode." \
+  setup_debug_runner_case \
+  "1" \
+  "debug" \
+  "- Protocol error: protocol register command failed" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=true" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=false"
+
+run_case \
   "debug-mode-strict-installer-clear-command-pass" \
   "pass" \
   "Debug build mode should resolve debug runner directory and pass strict installer execution with a clear command." \

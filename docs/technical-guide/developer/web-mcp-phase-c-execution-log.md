@@ -14500,6 +14500,49 @@ and protocol command exits across release/debug build modes.
   - strict command-failure diagnostics remain deterministic in report/log outputs.
   - full desktop verify remains green after matrix expansion.
 
+## Unit WS-D-291: strict installer-protocol failure interaction coverage
+
+### Planned objective
+
+Close strict interaction gaps by adding explicit contract coverage for protocol command non-zero
+failures while strict installer mode is enabled, across release/debug build modes.
+
+### Implemented changes
+
+1. Expanded contract checker interaction matrix in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-protocol-command-failure-fail`,
+   - added `debug-mode-strict-installer-protocol-command-failure-fail`.
+2. Locked strict installer + protocol execution interaction behavior:
+   - when strict installer mode is enabled and installer command succeeds, protocol non-zero exit
+     now has explicit report/log assertion coverage in release/debug matrices.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-291
+     strict installer-protocol interaction release evidence lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     strict installer + protocol non-zero interaction coverage in checker inventory notes.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict installer mode behavior when protocol command execution returns non-zero,
+  - interaction parity across release/debug runner paths,
+  - deterministic strict failure diagnostics for protocol command execution failures.
+- **Issues found during review**
+  1. strict installer + protocol placeholder interaction was covered, but non-placeholder protocol
+     command failures under strict installer mode were not explicitly locked.
+  2. release/debug parity for this strict interaction path was not explicitly asserted.
+- **Fix applied**
+  1. introduced release/debug strict installer-protocol command-failure interaction cases.
+  2. added explicit report/log assertions for strict protocol command failure diagnostics.
+- **Post-fix validation criteria**
+  - contract checker passes with strict installer-protocol command-failure interaction cases.
+  - strict interaction diagnostics remain deterministic in release/debug report/log outputs.
+  - full desktop verify remains green after matrix expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
