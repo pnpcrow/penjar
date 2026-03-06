@@ -22,6 +22,12 @@ case_rows=""
 failure_count=0
 total_cases=0
 escaped_markdown_cell=""
+scratch_root="$(mktemp -d)"
+
+cleanup_contract_scratch() {
+  rm -rf "$scratch_root"
+}
+trap cleanup_contract_scratch EXIT
 
 escape_markdown_cell() {
   local value="$1"
@@ -91,17 +97,19 @@ run_case() {
   shift 8
   local env_overrides=("$@")
 
-  local tmp_root tmp_report tmp_log rc actual result report_assertion log_assertion
+  local case_index case_root tmp_report tmp_log rc actual result report_assertion log_assertion
   local report_content log_content
-  tmp_root="$(mktemp -d)"
-  tmp_report="$tmp_root/windows_installer_pipeline_report.md"
-  tmp_log="$tmp_root/windows_installer_pipeline.log"
+  case_index=$((total_cases + 1))
+  case_root="$scratch_root/case_${case_index}"
+  mkdir -p "$case_root"
+  tmp_report="$case_root/windows_installer_pipeline_report.md"
+  tmp_log="$case_root/windows_installer_pipeline.log"
 
-  "$setup_fn" "$tmp_root"
+  "$setup_fn" "$case_root"
 
   set +e
   (
-    cd "$tmp_root"
+    cd "$case_root"
     if [[ "${#env_overrides[@]}" -gt 0 ]]; then
       env "${env_overrides[@]}" "$pipeline_script" "$strict_arg" "$build_mode" "$tmp_report"
     else
@@ -149,7 +157,7 @@ run_case() {
   total_cases=$((total_cases + 1))
   append_case_row "$case_name" "$expected" "$actual" "$report_assertion" "$log_assertion" "$result" "$summary"
 
-  rm -rf "$tmp_root"
+  rm -rf "$case_root"
 }
 
 run_case \

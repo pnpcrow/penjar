@@ -340,6 +340,9 @@ CI baseline note:
   - contract checker now performs pipeline-script preflight (file existence + executable bit)
     before running matrix cases, failing fast with explicit diagnostics on invalid local script
     state.
+  - contract checker temp workspace path now uses single scratch-root allocation + per-case
+    subdirectories (with exit trap cleanup) instead of per-case `mktemp -d`, reducing matrix
+    filesystem/process overhead while preserving isolation.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.

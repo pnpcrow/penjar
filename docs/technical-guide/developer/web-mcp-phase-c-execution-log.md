@@ -15743,6 +15743,50 @@ before running the installer/protocol contract matrix.
   - full desktop verify remains green after checker preflight hardening.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-316.
 
+## Unit WS-D-317: contract matrix scratch workspace allocation optimization
+
+### Planned objective
+
+Reduce matrix temp-directory overhead by switching from per-case `mktemp -d` allocation to a
+single scratch root with per-case subdirectories.
+
+### Implemented changes
+
+1. Optimized temp workspace lifecycle in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - introduced single `scratch_root="$(mktemp -d)"`,
+   - added `cleanup_contract_scratch()` with `trap ... EXIT` for deterministic teardown,
+   - `run_case()` now creates/removes per-case subdirectories under shared scratch root instead of
+     allocating independent `mktemp -d` roots.
+2. Preserved case isolation and report/log file path behavior within per-case subdirectories.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-317
+     scratch allocation optimization lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     shared scratch-root temp workspace behavior.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - contract matrix temp-directory allocation overhead characteristics,
+  - cleanup determinism on normal/abnormal script exits,
+  - case isolation correctness after temp workspace lifecycle refactor.
+- **Issues found during review**
+  1. prior path allocated one `mktemp -d` per case, increasing filesystem/process overhead as matrix
+     size grew.
+  2. repeated temp-root allocation was unnecessary because case-level isolation can be preserved via
+     subdirectories under one scratch root.
+- **Fix applied**
+  1. centralized scratch-root allocation with exit-trap cleanup.
+  2. maintained per-case directory isolation and explicit per-case cleanup to preserve behavior.
+- **Post-fix validation criteria**
+  - contract checker passes with shared scratch-root allocation path.
+  - full desktop verify remains green after temp-workspace optimization.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-317.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
