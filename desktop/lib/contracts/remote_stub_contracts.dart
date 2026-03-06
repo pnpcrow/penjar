@@ -1405,31 +1405,50 @@ const List<String> _backendSessionExpiredCodeMarkers = <String>[
 
 _BackendCodeClassification _classifyBackendCode(String rawCode) {
   final String trimmed = rawCode.trim();
-  bool signedOut =
-      trimmed == '401' ||
-      trimmed == '403' ||
-      trimmed == '419' ||
-      trimmed == '440';
-  bool sessionExpired = signedOut && (trimmed == '419' || trimmed == '440');
+  if (trimmed == '419' || trimmed == '440') {
+    return const _BackendCodeClassification(
+      signedOut: true,
+      sessionExpired: true,
+    );
+  }
+  if (trimmed == '401' || trimmed == '403') {
+    return const _BackendCodeClassification(
+      signedOut: true,
+      sessionExpired: false,
+    );
+  }
   final String compact = _compactBackendCode(rawCode);
-  if (compact.isNotEmpty && !signedOut) {
-    for (final String marker in _backendSignedOutCodeMarkers) {
-      if (compact.contains(marker)) {
-        signedOut = true;
-        break;
-      }
+  if (compact.isEmpty) {
+    return const _BackendCodeClassification(
+      signedOut: false,
+      sessionExpired: false,
+    );
+  }
+
+  bool signedOut = false;
+  for (final String marker in _backendSignedOutCodeMarkers) {
+    if (compact.contains(marker)) {
+      signedOut = true;
+      break;
     }
   }
-  if (signedOut && compact.isNotEmpty && !sessionExpired) {
-    for (final String marker in _backendSessionExpiredCodeMarkers) {
-      if (compact.contains(marker)) {
-        sessionExpired = true;
-        break;
-      }
+  if (!signedOut) {
+    return const _BackendCodeClassification(
+      signedOut: false,
+      sessionExpired: false,
+    );
+  }
+
+  bool sessionExpired = false;
+  for (final String marker in _backendSessionExpiredCodeMarkers) {
+    if (compact.contains(marker)) {
+      sessionExpired = true;
+      break;
     }
   }
+
   return _BackendCodeClassification(
-    signedOut: signedOut,
+    signedOut: true,
     sessionExpired: sessionExpired,
   );
 }

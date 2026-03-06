@@ -225,6 +225,13 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      backend-code compact/marker scans in auth-state inference,
    - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
      (`Unit WS-D-245`).
+33. Backend code classification fast-path optimization for numeric auth statuses:
+   - `_classifyBackendCode(...)` now short-circuits direct numeric auth status codes
+     (`401`/`403`/`419`/`440`) and empty compact-code inputs before marker-loop scans, preserving
+     signed-out/session-expired semantics while reducing unnecessary compact/marker traversal on
+     common backend status paths,
+   - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
+     (`Unit WS-D-246`).
 
 ## Remaining integration gaps (auth scope)
 

@@ -11806,6 +11806,59 @@ state/status semantics.
   - backend-code classification no longer performs duplicate compact/marker scans per payload.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-246: backend code classification fast-path optimization
+
+### Planned objective
+
+Optimize backend-code classification hot paths further by short-circuiting common numeric auth
+status codes and empty compact-code cases before marker-loop scans, while preserving existing
+signed-out/session-expired semantics.
+
+### Implemented changes
+
+1. Updated `_classifyBackendCode(...)` in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - added direct fast returns for numeric auth codes:
+     - `419`/`440` -> `signedOut=true`, `sessionExpired=true`,
+     - `401`/`403` -> `signedOut=true`, `sessionExpired=false`.
+2. Added explicit empty compact-code short-circuit:
+   - when `_compactBackendCode(rawCode)` is empty, classification now returns false/false without
+     marker-loop traversal.
+3. Preserved marker-based classification semantics for non-numeric/non-empty code paths:
+   - signed-out marker loop still gates session-expired marker loop.
+4. Synced continuity docs for WS-D-246 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+5. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - residual overhead in `_classifyBackendCode(...)` after WS-D-245 consolidation,
+  - semantic equivalence of signed-out/session-expired outcomes after fast-path insertion,
+  - regression impact across auth contract/parity/mode-parity suites and full verification chain.
+- **Issues found during review**
+  1. Even after single-path consolidation, `_classifyBackendCode(...)` still compacted and scanned
+     marker lists for numeric status-code inputs where the outcome is deterministic.
+  2. Empty compact-code inputs still flowed through marker-loop setup despite no possible marker
+     matches.
+- **Fix applied**
+  1. Inserted deterministic numeric-code fast-path returns (`401`/`403`/`419`/`440`).
+  2. Added early return for empty compact-code results.
+  3. Kept non-fast-path classification logic and gating semantics unchanged, then re-ran formatter,
+     targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - numeric and marker-based signed-out/session-expired outcomes remain unchanged versus prior
+    behavior.
+  - classification path avoids unnecessary compact/marker-loop work on common numeric/empty inputs.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
