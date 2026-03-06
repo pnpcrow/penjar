@@ -15517,6 +15517,51 @@ non-strict paths in installer/protocol inference.
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-311.
 
+## Unit WS-D-312: CRLF strict alias boundary regression coverage
+
+### Planned objective
+
+Close mixed line-ending boundary gaps by explicitly locking CRLF-wrapped strict aliases in
+installer/protocol strict parser paths.
+
+### Implemented changes
+
+1. Expanded strict installer CRLF coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-crlf-whitespace-yes-alias-placeholder-fail`,
+   - strict argument fixture `\r\nYES\r\n` now asserts strict placeholder failure behavior.
+2. Expanded strict protocol CRLF coverage in the same checker:
+   - added `strict-protocol-crlf-whitespace-true-alias-missing-command-fail`,
+   - env fixture `STRICT_WINDOWS_PROTOCOL_REGISTRATION=\r\nTRUE\r\n` now asserts strict
+     missing-command failure behavior.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-312
+     CRLF strict alias lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     CRLF strict alias matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict parser behavior under mixed `\r\n` line-ending boundaries,
+  - compatibility of trim normalization across combined carriage-return/newline wrappers,
+  - deterministic strict fail-path semantics after CRLF normalization.
+- **Issues found during review**
+  1. individual CR and newline wrappers were covered, but combined CRLF wrappers were not
+     explicitly locked.
+  2. Windows-derived env/template streams can include CRLF boundaries; without direct fixtures,
+     parser regressions could bypass strict coverage.
+- **Fix applied**
+  1. added installer/protocol CRLF strict fixtures with explicit strict failure assertions.
+  2. preserved full verification gate to ensure no collateral behavior drift.
+- **Post-fix validation criteria**
+  - contract checker passes with CRLF strict alias fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-312.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

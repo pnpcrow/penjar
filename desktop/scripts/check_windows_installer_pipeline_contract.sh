@@ -425,6 +425,17 @@ run_case \
   "PENJAR_WINDOWS_INSTALLER_COMMAND=placeholder"
 
 run_case \
+  "strict-installer-crlf-whitespace-yes-alias-placeholder-fail" \
+  "fail" \
+  "Strict installer mode parser should trim CRLF-wrapped strict input alias and fail on placeholder installer command for '\\r\\nYES\\r\\n'." \
+  setup_release_runner_case \
+  $'\r\nYES\r\n' \
+  "release" \
+  "- Strict mode: 1" \
+  "[windows-installer-pipeline] strict mode failed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=placeholder"
+
+run_case \
   "strict-installer-formfeed-whitespace-yes-alias-placeholder-fail" \
   "fail" \
   "Strict installer mode parser should trim form-feed-wrapped strict input alias and fail on placeholder installer command for '\\fYES\\f'." \
@@ -690,6 +701,17 @@ run_case \
   "- Strict protocol registration mode: 1" \
   "[windows-installer-pipeline] strict mode failed." \
   $'STRICT_WINDOWS_PROTOCOL_REGISTRATION=\rTRUE\r'
+
+run_case \
+  "strict-protocol-crlf-whitespace-true-alias-missing-command-fail" \
+  "fail" \
+  "Strict protocol mode parser should trim CRLF-wrapped protocol alias and fail on missing protocol command for '\\r\\nTRUE\\r\\n'." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Strict protocol registration mode: 1" \
+  "[windows-installer-pipeline] strict mode failed." \
+  $'STRICT_WINDOWS_PROTOCOL_REGISTRATION=\r\nTRUE\r\n'
 
 run_case \
   "strict-protocol-formfeed-whitespace-true-alias-missing-command-fail" \

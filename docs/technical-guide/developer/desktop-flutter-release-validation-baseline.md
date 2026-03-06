@@ -327,6 +327,8 @@ CI baseline note:
   - contract matrix now also locks non-strict guard alias behavior (`false`, `off`, and
     whitespace-wrapped ` false `) so strict parser inference does not overmatch unknown/negative
     toggle values for installer/protocol paths.
+  - contract matrix now also locks CRLF-wrapped strict alias handling (`"\r\nYES\r\n"`,
+    `"\r\nTRUE\r\n"`) to prevent mixed Windows line-ending boundary regressions.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
