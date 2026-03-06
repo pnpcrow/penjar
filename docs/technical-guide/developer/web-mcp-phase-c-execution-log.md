@@ -12908,6 +12908,69 @@ normalization detects a first non-compact non-ASCII character.
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-264: compact delimiter-path prefix reuse optimization
+
+### Planned objective
+
+Reduce duplicate scan overhead in compact normalization by reusing pre-scanned prefix segments
+before delimiter-driven normalization.
+
+### Implemented changes
+
+1. Updated compact normalization path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_compactBackendCodeFromTrimmed(...)` now appends pre-scanned prefix (`0..firstNonCompactIndex`)
+     once and continues normalization from `firstNonCompactIndex`, instead of rescanning from
+     index `0`,
+   - added `_appendCompactBackendAsciiLowercaseRange(...)` helper for shared ASCII lowercase
+     prefix append behavior.
+2. Preserved existing fallback semantics:
+   - compact-only, Unicode-fallback, and marker-classification semantics remain unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only mixed-case delimited unauthorized payload maps authentication-required fallback status`
+     (`code: "Unauthorized::TOKEN"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendMixedCaseDelimitedUnauthorizedParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps mixed-case delimited unauthorized backend failure to deterministic auth-required status`.
+5. Synced continuity docs for WS-D-264 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - compact normalization delimiter-path scan duplication (`0..firstNonCompactIndex`),
+  - deterministic auth-required fallback behavior for mixed-case delimited `Unauthorized::TOKEN`,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. WS-D-263 still rescanned the compact prefix in delimiter-path normalization after the initial
+     detection pass.
+  2. Mixed-case delimited unauthorized marker behavior (`Unauthorized::TOKEN`) was not explicitly
+     parity-locked.
+- **Fix applied**
+  1. Reused pre-scanned prefix segments and started delimiter-path normalization loop from
+     `firstNonCompactIndex`.
+  2. Added dedicated contract/parity regressions for `Unauthorized::TOKEN` deterministic
+     auth-required fallback behavior.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - delimiter-path normalization avoids duplicate prefix rescans on pre-scanned segments.
+  - mixed-case delimited `Unauthorized::TOKEN` payloads map to deterministic auth-required
+    fallback behavior in contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

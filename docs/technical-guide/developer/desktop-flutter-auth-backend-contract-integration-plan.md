@@ -358,6 +358,14 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      suffix (`UNAUTHORIZED토큰`) to preserve deterministic auth-required fallback mapping on the
      early Unicode-fallback path; execution evidence is recorded in
      `web-mcp-phase-c-execution-log.md` (`Unit WS-D-263`).
+51. Backend code delimiter-path prefix reuse optimization for compact normalization:
+   - `_compactBackendCodeFromTrimmed(...)` now reuses the pre-scanned compact prefix (`0..firstNonCompactIndex`)
+     by appending it once and continuing normalization from `firstNonCompactIndex`, reducing
+     duplicate prefix scan overhead on delimiter-heavy ASCII code paths,
+   - contract/parity suites now lock mixed-case delimited unauthorized marker behavior
+     (`Unauthorized::TOKEN`) to preserve deterministic auth-required fallback mapping across the
+     optimized prefix-reuse path; execution evidence is recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-264`).
 
 ## Remaining integration gaps (auth scope)
 

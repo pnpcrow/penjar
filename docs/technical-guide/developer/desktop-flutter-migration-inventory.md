@@ -41,11 +41,12 @@ This inventory tracks remaining non-Flutter desktop paths and their decommission
 | Export UX | `frontend/src/app/main/ui/exports/files.cljs`, `frontend/src/app/main/data/exports/files.cljs`, `frontend/src/app/main/ui/workspace/sidebar/options/menus/exports.cljs` | Export dialogs and export orchestration are implemented in web UI + data flows | Flutter export flow with parity in format/options/status and save UX | Baseline Flutter export workflow surface and runtime-switchable in-memory/remote-stub contract boundary are implemented; sibling `result`/`data` envelope fallback regression coverage is now added in contract/parity suites (`desktop/test/contracts/workflow_contracts_test.dart`, `desktop/test/parity/export_workflow_parity_test.dart`), and backend export pipeline and native save bridge integration remain pending | Export Pipeline | 2026-09-15 | In progress | [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/) |
 | Diagnostics/recovery UX | `frontend/src/app/main/data/websocket.cljs`, `frontend/src/app/main/data/workspace/mcp.cljs`, `mcp/scripts/verify-live-evidence` | Web runtime handles ws/MCP events; diagnostics are script/tooling-centric and not surfaced via desktop-native UX | Flutter-native diagnostics/recovery surface with embedded MCP health and reconnect guidance | Baseline Flutter diagnostics/recovery surface and runtime-switchable in-memory/remote-stub contract boundary are implemented; sibling `result`/`data` envelope fallback regression coverage is now added in contract/parity suites (`desktop/test/contracts/workflow_contracts_test.dart`, `desktop/test/parity/diagnostics_recovery_parity_test.dart`), and live telemetry ingestion and reconnect policy orchestration remain pending | Platform Reliability | 2026-09-30 | In progress | [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/) |
 
-Latest auth/session continuity evidence update: `Unit WS-D-263` optimizes Unicode-fallback
-branching in `_compactBackendCodeFromTrimmed(...)` by short-circuiting when the first non-compact
-character is non-ASCII, and locks compact uppercase `UNAUTHORIZED토큰` auth-required fallback
-behavior in contract/parity suites while preserving existing classification semantics; evidence is
-logged in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-263`).
+Latest auth/session continuity evidence update: `Unit WS-D-264` optimizes delimiter-path compact
+normalization in `_compactBackendCodeFromTrimmed(...)` by reusing pre-scanned compact prefix
+segments and continuing from `firstNonCompactIndex`, and locks mixed-case delimited
+`Unauthorized::TOKEN` auth-required fallback behavior in contract/parity suites while preserving
+existing classification semantics; evidence is logged in
+`web-mcp-phase-c-execution-log.md` (`Unit WS-D-264`).
 
 ## Review cadence
 

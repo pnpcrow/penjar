@@ -5684,6 +5684,39 @@ void main() {
     );
 
     test(
+      'auth backend code-only mixed-case delimited unauthorized payload maps authentication-required fallback status',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'code': 'Unauthorized::TOKEN',
+                'state': <String, Object?>{
+                  'sessionToken': 'code-only-mixed-case-delimited-unauthorized',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(
+              transportClient: transportClient,
+              initialState: const AuthSessionState(
+                rememberSession: true,
+                signedIn: true,
+                status: 'Previously signed in.',
+              ),
+            );
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(authContract.state.rememberSession, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Authentication required.',
+        );
+      },
+    );
+
+    test(
       'auth backend code-only delimited uppercase unauthorized with non-ascii suffix maps authentication-required fallback status',
       () {
         final _BackendResponseTransportClient transportClient =

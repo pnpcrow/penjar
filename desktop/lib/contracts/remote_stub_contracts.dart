@@ -1559,7 +1559,18 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
     );
   }
   final StringBuffer asciiBuffer = StringBuffer();
-  for (int index = 0; index < trimmedCode.length; index++) {
+  if (firstNonCompactIndex > 0) {
+    if (hasUppercaseCompactCodeUnit) {
+      _appendCompactBackendAsciiLowercaseRange(
+        asciiBuffer,
+        trimmedCode,
+        endExclusive: firstNonCompactIndex,
+      );
+    } else {
+      asciiBuffer.write(trimmedCode.substring(0, firstNonCompactIndex));
+    }
+  }
+  for (int index = firstNonCompactIndex; index < trimmedCode.length; index++) {
     final int codeUnit = trimmedCode.codeUnitAt(index);
     if (codeUnit > 127) {
       return _compactBackendCodeFromTrimmedUnicodeFallback(
@@ -1580,7 +1591,20 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
 
 String _compactBackendAsciiLowercase(String code) {
   final StringBuffer buffer = StringBuffer();
-  for (int index = 0; index < code.length; index++) {
+  _appendCompactBackendAsciiLowercaseRange(
+    buffer,
+    code,
+    endExclusive: code.length,
+  );
+  return buffer.toString();
+}
+
+void _appendCompactBackendAsciiLowercaseRange(
+  StringBuffer buffer,
+  String code, {
+  required int endExclusive,
+}) {
+  for (int index = 0; index < endExclusive; index++) {
     final int codeUnit = code.codeUnitAt(index);
     buffer.writeCharCode(
       _isBackendCodeAsciiUpperAlphaCodeUnit(codeUnit)
@@ -1588,7 +1612,6 @@ String _compactBackendAsciiLowercase(String code) {
           : codeUnit,
     );
   }
-  return buffer.toString();
 }
 
 String _compactBackendCodeFromTrimmedUnicodeFallback(
