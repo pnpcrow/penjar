@@ -405,6 +405,19 @@ run_case \
   "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=true"
 
 run_case \
+  "strict-protocol-installer-placeholder-warning-pass" \
+  "pass" \
+  "Strict protocol mode should keep installer placeholder commands non-blocking when protocol command succeeds in release mode." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Installer command placeholder status: detected" \
+  "[windows-installer-pipeline] warning: placeholder installer command detected." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=1" \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=placeholder" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=true"
+
+run_case \
   "debug-mode-strict-protocol-installer-command-failure-warning-pass" \
   "pass" \
   "Strict protocol mode should keep installer command non-zero failures non-blocking when protocol command succeeds in debug mode." \
@@ -415,6 +428,19 @@ run_case \
   "[windows-installer-pipeline] warning: pipeline failed." \
   "STRICT_WINDOWS_PROTOCOL_REGISTRATION=1" \
   "PENJAR_WINDOWS_INSTALLER_COMMAND=false" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=true"
+
+run_case \
+  "debug-mode-strict-protocol-installer-placeholder-warning-pass" \
+  "pass" \
+  "Strict protocol mode should keep installer placeholder commands non-blocking when protocol command succeeds in debug mode." \
+  setup_debug_runner_case \
+  "0" \
+  "debug" \
+  "- Installer command placeholder status: detected" \
+  "[windows-installer-pipeline] warning: placeholder installer command detected." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=1" \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=placeholder" \
   "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=true"
 
 run_case \

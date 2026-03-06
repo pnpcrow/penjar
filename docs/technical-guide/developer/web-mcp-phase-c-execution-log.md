@@ -14700,6 +14700,51 @@ is not enabled.
   - strict protocol mode still fails deterministically on protocol command failures.
   - full desktop verify remains green after gating fix.
 
+## Unit WS-D-295: strict-protocol installer-placeholder interaction coverage
+
+### Planned objective
+
+Close strict-protocol interaction gaps by locking installer placeholder behavior as non-blocking
+when strict protocol mode is enabled and protocol registration succeeds.
+
+### Implemented changes
+
+1. Expanded strict protocol interaction matrix in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-protocol-installer-placeholder-warning-pass`,
+   - added `debug-mode-strict-protocol-installer-placeholder-warning-pass`.
+2. Locked deterministic warning-path diagnostics for strict protocol + installer placeholder:
+   - report assertion: `- Installer command placeholder status: detected`,
+   - log assertion:
+     `[windows-installer-pipeline] warning: placeholder installer command detected.`,
+   - strict protocol mode remains pass/non-blocking when protocol command succeeds.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-295
+     strict protocol placeholder-interaction release evidence lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     strict protocol placeholder-interaction matrix coverage in checker inventory notes.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict protocol mode behavior when installer command is placeholder and protocol command
+    succeeds,
+  - release/debug interaction parity and warning diagnostic determinism.
+- **Issues found during review**
+  1. strict protocol installer non-zero failure interaction was covered, but installer placeholder
+     interaction lacked direct regression locks.
+  2. release/debug parity for this placeholder interaction could drift without explicit assertions.
+- **Fix applied**
+  1. added release/debug strict protocol installer-placeholder warning cases.
+  2. locked warning report/log assertions for installer-placeholder interaction path.
+- **Post-fix validation criteria**
+  - contract checker passes with strict protocol installer-placeholder interaction cases.
+  - strict protocol + installer placeholder remains non-blocking with deterministic warnings.
+  - full desktop verify remains green after matrix expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
