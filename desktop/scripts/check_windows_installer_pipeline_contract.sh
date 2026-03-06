@@ -547,6 +547,32 @@ run_case \
   "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=true"
 
 run_case \
+  "strict-protocol-installer-removes-runner-skips-protocol-pass" \
+  "pass" \
+  "Strict protocol mode should skip protocol execution and remain non-blocking when installer command removes the runner directory in release mode." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Protocol registration status: simulated" \
+  "[windows-installer-pipeline] completed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=1" \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=rm -rf \"\$PENJAR_WINDOWS_RUNNER_DIR\"; true" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=false"
+
+run_case \
+  "debug-mode-strict-protocol-installer-removes-runner-skips-protocol-pass" \
+  "pass" \
+  "Strict protocol mode should skip protocol execution and remain non-blocking when installer command removes the runner directory in debug mode." \
+  setup_debug_runner_case \
+  "0" \
+  "debug" \
+  "- Protocol registration status: simulated" \
+  "[windows-installer-pipeline] completed." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=1" \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=rm -rf \"\$PENJAR_WINDOWS_RUNNER_DIR\"; true" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=false"
+
+run_case \
   "strict-protocol-command-failure-fail" \
   "fail" \
   "Strict protocol mode must fail when protocol registration command returns non-zero in release mode." \

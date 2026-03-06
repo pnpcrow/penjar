@@ -14898,6 +14898,57 @@ under installer side effects.
   - full desktop verification remains green with updated runtime branch logic.
   - release continuity docs remain synchronized to WS-D-298 behavior.
 
+## Unit WS-D-299: runner-mutation protocol-skip regression coverage
+
+### Planned objective
+
+Prevent regressions in the WS-D-298 stale-state safeguard by explicitly locking strict-protocol
+behavior when installer commands mutate/remove runner artifacts before protocol-stage evaluation.
+
+### Implemented changes
+
+1. Expanded `desktop/scripts/check_windows_installer_pipeline_contract.sh` with release-mode
+   mutation coverage:
+   - added `strict-protocol-installer-removes-runner-skips-protocol-pass`,
+   - installer command removes `"$PENJAR_WINDOWS_RUNNER_DIR"` before protocol stage,
+   - strict protocol mode with failing protocol command fixture now asserts pass/non-blocking
+     completion because protocol stage is skipped after runner revalidation.
+2. Expanded the same checker with debug-mode mutation symmetry coverage:
+   - added `debug-mode-strict-protocol-installer-removes-runner-skips-protocol-pass`,
+   - mirrors release mutation scenario to lock build-mode parity for protocol-skip semantics.
+3. Locked deterministic assertions for both new mutation cases:
+   - report assertion: `- Protocol registration status: simulated`,
+   - log assertion: `[windows-installer-pipeline] completed.`
+4. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-299
+     runner-mutation regression coverage lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     release/debug mutation-path protocol-skip matrix coverage.
+5. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict protocol behavior when runner artifacts change after installer command execution,
+  - release/debug parity for mutation-path protocol-stage gating,
+  - contract-level guard depth for WS-D-298 stale-state fix.
+- **Issues found during review**
+  1. WS-D-298 implemented protocol-stage revalidation, but mutation-path behavior was not yet
+     contract-locked.
+  2. without explicit mutation cases, future refactors could unintentionally reintroduce stale
+     cached-runner behavior and force protocol command execution/failures.
+- **Fix applied**
+  1. added release/debug mutation scenarios that remove runner artifacts between installer/protocol
+     phases and assert protocol status remains `simulated`.
+  2. enforced completed/non-blocking log expectations to guarantee strict-protocol stability for
+     the mutation path.
+- **Post-fix validation criteria**
+  - contract checker passes with both runner-mutation regression cases.
+  - full desktop verify remains green after contract matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-299.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
