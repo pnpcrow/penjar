@@ -11056,6 +11056,70 @@ all signed-in aliases map deterministically on both `result.authState` and `data
     regression (`Authentication required.`) for each alias/wrapper combination.
   - targeted auth tests and full desktop verification remain green after expansion.
 
+## Unit WS-D-233: restore-session direct-wrapper signed-in alias success symmetry (`isAuthenticated`/`loggedIn`/`isLoggedIn`/`is_authenticated`/`signedIn`/`authenticated`/`signed_in`/`is_signed_in`/`logged_in`/`is_logged_in`)
+
+### Planned objective
+
+Close restore-session direct-wrapper positive-state gaps by extending contract and parity fixtures
+so all signed-in aliases map deterministically on both `result.authState` and `data.authState`.
+
+### Implemented changes
+
+1. Expanded restore-session contract fixture matrix in
+   `desktop/test/contracts/workflow_contracts_test.dart` with direct `result/data.authState`
+   signed-in alias success coverage for ten aliases:
+   - `isAuthenticated=true`,
+   - `loggedIn=true`,
+   - `isLoggedIn=true`,
+   - `is_authenticated=true`,
+   - `signedIn=true`,
+   - `authenticated=true`,
+   - `signed_in=true`,
+   - `is_signed_in=true`,
+   - `logged_in=true`,
+   - `is_logged_in=true`.
+2. Added restore-session signed-in parity loop in
+   `desktop/test/parity/auth_session_parity_test.dart` with matching `result/data.authState`
+   alias fixtures and signed-in status assertions for the same ten aliases.
+3. Synced continuity docs for latest restore-session signed-in direct-wrapper evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && dart format test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - restore-session direct-wrapper signed-in alias coverage against existing sign-in/refresh
+    matrix,
+  - contract/parity consistency for wrapper (`result`/`data`) and alias permutations,
+  - continuity-doc evidence alignment after restore positive-path fixture expansion.
+- **Issues found during review**
+  1. Restore-session direct-wrapper signed-in alias success coverage was incomplete compared with
+     refresh-token direct-wrapper coverage.
+  2. During fixture/parity insertion, an intermediate draft introduced a malformed fixture block
+     header and an orphaned parity-case declaration line, which could break suite compilation if
+     left uncorrected.
+- **Fix applied**
+  1. Added twenty restore-session contract fixtures (ten aliases × result/data wrappers) with
+     expected signed-in + remember-session state and deterministic status assertions.
+  2. Added twenty parity restore-session cases using the same alias/wrapper matrix with signed-in
+     persistence assertions.
+  3. Repaired malformed fixture/parity insertion points and re-ran formatter + tests to confirm
+     structure integrity.
+  4. Updated continuity docs so current auth baseline points to WS-D-233 evidence.
+- **Post-fix validation criteria**
+  - restore-session direct wrappers now lock signed-in alias success behavior for all ten variants
+    on both `result` and `data` envelopes.
+  - parity restore flow keeps signed-in state, keeps remember-session toggled, and avoids fallback
+    regression (`Authentication required.`) for each alias/wrapper combination.
+  - targeted auth tests and full desktop verification remain green after expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

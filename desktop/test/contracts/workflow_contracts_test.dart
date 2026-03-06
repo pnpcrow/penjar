@@ -3163,6 +3163,375 @@ void main() {
       ),
       const _AuthBackendFixtureCase(
         name:
+            'restore-session result envelope authState isAuthenticated alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'detail':
+                'Fixture restore result envelope isAuthenticated alias applied.',
+            'authState': <String, Object?>{
+              'isAuthenticated': true,
+              'remember': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore result envelope isAuthenticated alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session data envelope authState isAuthenticated alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'data': <String, Object?>{
+            'detail':
+                'Fixture restore data envelope isAuthenticated alias applied.',
+            'authState': <String, Object?>{
+              'isAuthenticated': true,
+              'remember': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore data envelope isAuthenticated alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name: 'restore-session data envelope authState loggedIn alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'data': <String, Object?>{
+            'detail': 'Fixture restore data envelope loggedIn alias applied.',
+            'authState': <String, Object?>{
+              'loggedIn': true,
+              'persistSession': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore data envelope loggedIn alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session result envelope authState loggedIn alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'detail': 'Fixture restore result envelope loggedIn alias applied.',
+            'authState': <String, Object?>{
+              'loggedIn': true,
+              'persistSession': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore result envelope loggedIn alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session result envelope authState isLoggedIn alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'detail':
+                'Fixture restore result envelope isLoggedIn alias applied.',
+            'authState': <String, Object?>{
+              'isLoggedIn': true,
+              'persistSession': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore result envelope isLoggedIn alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session data envelope authState isLoggedIn alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'data': <String, Object?>{
+            'detail': 'Fixture restore data envelope isLoggedIn alias applied.',
+            'authState': <String, Object?>{
+              'isLoggedIn': true,
+              'persistSession': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore data envelope isLoggedIn alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session data envelope authState is_authenticated alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'data': <String, Object?>{
+            'detail':
+                'Fixture restore data envelope is_authenticated alias applied.',
+            'authState': <String, Object?>{
+              'is_authenticated': true,
+              'remember_session': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore data envelope is_authenticated alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session result envelope authState is_authenticated alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'detail':
+                'Fixture restore result envelope is_authenticated alias applied.',
+            'authState': <String, Object?>{
+              'is_authenticated': true,
+              'remember_session': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore result envelope is_authenticated alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session result envelope authState signedIn alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'detail': 'Fixture restore result envelope signedIn alias applied.',
+            'authState': <String, Object?>{
+              'signedIn': true,
+              'persistSession': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore result envelope signedIn alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name: 'restore-session data envelope authState signedIn alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'data': <String, Object?>{
+            'detail': 'Fixture restore data envelope signedIn alias applied.',
+            'authState': <String, Object?>{
+              'signedIn': true,
+              'persistSession': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore data envelope signedIn alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session data envelope authState authenticated alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'data': <String, Object?>{
+            'detail':
+                'Fixture restore data envelope authenticated alias applied.',
+            'authState': <String, Object?>{
+              'authenticated': true,
+              'remember': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore data envelope authenticated alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session result envelope authState authenticated alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'detail':
+                'Fixture restore result envelope authenticated alias applied.',
+            'authState': <String, Object?>{
+              'authenticated': true,
+              'remember': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore result envelope authenticated alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session result envelope authState signed_in alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'detail':
+                'Fixture restore result envelope signed_in alias applied.',
+            'authState': <String, Object?>{
+              'signed_in': true,
+              'remember_session': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore result envelope signed_in alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name: 'restore-session data envelope authState signed_in alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'data': <String, Object?>{
+            'detail': 'Fixture restore data envelope signed_in alias applied.',
+            'authState': <String, Object?>{
+              'signed_in': true,
+              'remember_session': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore data envelope signed_in alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session result envelope authState is_signed_in alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'detail':
+                'Fixture restore result envelope is_signed_in alias applied.',
+            'authState': <String, Object?>{
+              'is_signed_in': true,
+              'remember_session': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore result envelope is_signed_in alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session data envelope authState is_signed_in alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'data': <String, Object?>{
+            'detail':
+                'Fixture restore data envelope is_signed_in alias applied.',
+            'authState': <String, Object?>{
+              'is_signed_in': true,
+              'remember_session': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore data envelope is_signed_in alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session result envelope authState logged_in alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'detail':
+                'Fixture restore result envelope logged_in alias applied.',
+            'authState': <String, Object?>{
+              'logged_in': true,
+              'remember_session': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore result envelope logged_in alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name: 'restore-session data envelope authState logged_in alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'data': <String, Object?>{
+            'detail': 'Fixture restore data envelope logged_in alias applied.',
+            'authState': <String, Object?>{
+              'logged_in': true,
+              'remember_session': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore data envelope logged_in alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session data envelope authState is_logged_in alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'data': <String, Object?>{
+            'detail':
+                'Fixture restore data envelope is_logged_in alias applied.',
+            'authState': <String, Object?>{
+              'is_logged_in': true,
+              'remember_session': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore data envelope is_logged_in alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session result envelope authState is_logged_in alias success',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'detail':
+                'Fixture restore result envelope is_logged_in alias applied.',
+            'authState': <String, Object?>{
+              'is_logged_in': true,
+              'remember_session': true,
+            },
+          },
+        },
+        expectedSignedIn: true,
+        expectedRememberSession: true,
+        expectedStatus:
+            '[remote-stub] Fixture restore result envelope is_logged_in alias applied.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
             'refresh-token result payload envelope authState signed_out alias maps fallback status',
         operationId: RemoteStubOperationIds.refreshToken,
         responsePayload: <String, Object?>{

@@ -5118,6 +5118,370 @@ void main() {
   final List<
     ({
       String description,
+      Map<String, Object?> restoreSessionPayload,
+      String expectedStatus,
+    })
+  >
+  authStateSignedInRestoreEnvelopeCases =
+      <
+        ({
+          String description,
+          Map<String, Object?> restoreSessionPayload,
+          String expectedStatus,
+        })
+      >[
+        (
+          description: 'result envelope authState isAuthenticated alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail':
+                  'Backend restore result envelope isAuthenticated applied.',
+              'authState': <String, Object?>{
+                'isAuthenticated': true,
+                'remember': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend restore result envelope isAuthenticated applied.',
+        ),
+        (
+          description: 'data envelope authState isAuthenticated alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail':
+                  'Backend restore data envelope isAuthenticated applied.',
+              'authState': <String, Object?>{
+                'isAuthenticated': true,
+                'remember': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend restore data envelope isAuthenticated applied.',
+        ),
+        (
+          description: 'data envelope authState loggedIn alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend restore data envelope loggedIn applied.',
+              'authState': <String, Object?>{
+                'loggedIn': true,
+                'persistSession': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend restore data envelope loggedIn applied.',
+        ),
+        (
+          description: 'result envelope authState loggedIn alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail': 'Backend restore result envelope loggedIn applied.',
+              'authState': <String, Object?>{
+                'loggedIn': true,
+                'persistSession': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend restore result envelope loggedIn applied.',
+        ),
+        (
+          description: 'result envelope authState isLoggedIn alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail': 'Backend restore result envelope isLoggedIn applied.',
+              'authState': <String, Object?>{
+                'isLoggedIn': true,
+                'persistSession': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend restore result envelope isLoggedIn applied.',
+        ),
+        (
+          description: 'data envelope authState isLoggedIn alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend restore data envelope isLoggedIn applied.',
+              'authState': <String, Object?>{
+                'isLoggedIn': true,
+                'persistSession': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend restore data envelope isLoggedIn applied.',
+        ),
+        (
+          description: 'data envelope authState is_authenticated alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail':
+                  'Backend restore data envelope is_authenticated applied.',
+              'authState': <String, Object?>{
+                'is_authenticated': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend restore data envelope is_authenticated applied.',
+        ),
+        (
+          description: 'result envelope authState is_authenticated alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail':
+                  'Backend restore result envelope is_authenticated applied.',
+              'authState': <String, Object?>{
+                'is_authenticated': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend restore result envelope is_authenticated applied.',
+        ),
+        (
+          description: 'result envelope authState signedIn alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail': 'Backend restore result envelope signedIn applied.',
+              'authState': <String, Object?>{
+                'signedIn': true,
+                'persistSession': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend restore result envelope signedIn applied.',
+        ),
+        (
+          description: 'data envelope authState signedIn alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend restore data envelope signedIn applied.',
+              'authState': <String, Object?>{
+                'signedIn': true,
+                'persistSession': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend restore data envelope signedIn applied.',
+        ),
+        (
+          description: 'data envelope authState authenticated alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend restore data envelope authenticated applied.',
+              'authState': <String, Object?>{
+                'authenticated': true,
+                'remember': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend restore data envelope authenticated applied.',
+        ),
+        (
+          description: 'result envelope authState authenticated alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail':
+                  'Backend restore result envelope authenticated applied.',
+              'authState': <String, Object?>{
+                'authenticated': true,
+                'remember': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend restore result envelope authenticated applied.',
+        ),
+        (
+          description: 'result envelope authState signed_in alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail': 'Backend restore result envelope signed_in applied.',
+              'authState': <String, Object?>{
+                'signed_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend restore result envelope signed_in applied.',
+        ),
+        (
+          description: 'data envelope authState signed_in alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend restore data envelope signed_in applied.',
+              'authState': <String, Object?>{
+                'signed_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend restore data envelope signed_in applied.',
+        ),
+        (
+          description: 'result envelope authState is_signed_in alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail': 'Backend restore result envelope is_signed_in applied.',
+              'authState': <String, Object?>{
+                'is_signed_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend restore result envelope is_signed_in applied.',
+        ),
+        (
+          description: 'data envelope authState is_signed_in alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend restore data envelope is_signed_in applied.',
+              'authState': <String, Object?>{
+                'is_signed_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend restore data envelope is_signed_in applied.',
+        ),
+        (
+          description: 'result envelope authState logged_in alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail': 'Backend restore result envelope logged_in applied.',
+              'authState': <String, Object?>{
+                'logged_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend restore result envelope logged_in applied.',
+        ),
+        (
+          description: 'data envelope authState logged_in alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend restore data envelope logged_in applied.',
+              'authState': <String, Object?>{
+                'logged_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend restore data envelope logged_in applied.',
+        ),
+        (
+          description: 'data envelope authState is_logged_in alias',
+          restoreSessionPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend restore data envelope is_logged_in applied.',
+              'authState': <String, Object?>{
+                'is_logged_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend restore data envelope is_logged_in applied.',
+        ),
+        (
+          description: 'result envelope authState is_logged_in alias',
+          restoreSessionPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail': 'Backend restore result envelope is_logged_in applied.',
+              'authState': <String, Object?>{
+                'is_logged_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend restore result envelope is_logged_in applied.',
+        ),
+      ];
+
+  for (final ({
+        String description,
+        Map<String, Object?> restoreSessionPayload,
+        String expectedStatus,
+      })
+      caseData
+      in authStateSignedInRestoreEnvelopeCases) {
+    testWidgets(
+      'auth/session parity normalizes restore-session ${caseData.description} sign-in snapshot',
+      (WidgetTester tester) async {
+        await pumpDesktopApp(
+          tester,
+          contracts: DesktopContractBundle.fromMode(
+            DesktopContractMode.remoteStub,
+            remoteStubTransportClient:
+                _AuthBackendAuthStateEnvelopeFixtureParityTransportClient(
+                  signInPayload: const <String, Object?>{
+                    'status': 'Backend sign-in baseline snapshot applied.',
+                    'state': <String, Object?>{
+                      'signedIn': true,
+                      'rememberSession': true,
+                    },
+                  },
+                  restoreSessionPayload: caseData.restoreSessionPayload,
+                ),
+          ),
+        );
+        await openWorkflowSection(tester, 'auth');
+
+        await tester.enterText(
+          find.byKey(const ValueKey<String>('auth-password')),
+          'desktop-pass',
+        );
+        await tester.ensureVisible(
+          find.byKey(const ValueKey<String>('auth-sign-in')),
+        );
+        await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining(
+            'Status: [remote-stub] Backend sign-in baseline snapshot applied.',
+          ),
+          findsOneWidget,
+        );
+
+        await tester.ensureVisible(
+          find.byKey(const ValueKey<String>('auth-restore-session')),
+        );
+        await tester.tap(
+          find.byKey(const ValueKey<String>('auth-restore-session')),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining(
+            'Status: [remote-stub] ${caseData.expectedStatus}',
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('Status: [remote-stub] Authentication required.'),
+          findsNothing,
+        );
+        expect(
+          find.textContaining('Session restored (simulated).'),
+          findsNothing,
+        );
+        final CheckboxListTile rememberSessionTile = tester.widget(
+          find.byKey(const ValueKey<String>('auth-remember')),
+        );
+        expect(rememberSessionTile.value, isTrue);
+      },
+    );
+  }
+
+  final List<
+    ({
+      String description,
       Map<String, Object?>? restoreSessionPayload,
       Map<String, Object?>? refreshTokenPayload,
       ValueKey<String> actionKey,
