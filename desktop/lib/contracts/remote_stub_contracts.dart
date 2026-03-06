@@ -1559,18 +1559,26 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
   }
   final StringBuffer asciiBuffer = StringBuffer();
   if (firstNonCompactIndex > 0) {
-    if (firstUppercaseCompactIndex != -1) {
-      _appendCompactBackendAsciiLowercaseRange(
+    if (firstUppercaseCompactIndex == -1) {
+      _appendCompactBackendAsciiRange(
         asciiBuffer,
         trimmedCode,
         startInclusive: 0,
         endExclusive: firstNonCompactIndex,
       );
     } else {
-      _appendCompactBackendAsciiRange(
+      if (firstUppercaseCompactIndex > 0) {
+        _appendCompactBackendAsciiRange(
+          asciiBuffer,
+          trimmedCode,
+          startInclusive: 0,
+          endExclusive: firstUppercaseCompactIndex,
+        );
+      }
+      _appendCompactBackendAsciiLowercaseRange(
         asciiBuffer,
         trimmedCode,
-        startInclusive: 0,
+        startInclusive: firstUppercaseCompactIndex,
         endExclusive: firstNonCompactIndex,
       );
     }

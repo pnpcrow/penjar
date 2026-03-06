@@ -403,6 +403,17 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      behavior (`unauthorizedTOKEN`) to preserve deterministic auth-required fallback mapping on the
      start-indexed compact-uppercase normalization path; execution evidence is recorded in
      `web-mcp-phase-c-execution-log.md` (`Unit WS-D-268`).
+56. Backend code delimiter-path uppercase-prefix start-index normalization optimization:
+   - `_compactBackendCodeFromTrimmed(...)` now reuses `firstUppercaseCompactIndex` on
+     delimiter-path prefix normalization by appending known-lowercase compact prefix segments
+     (`0..firstUppercaseCompactIndex`) via `_appendCompactBackendAsciiRange(...)` and lowercasing
+     only `firstUppercaseCompactIndex..firstNonCompactIndex`,
+   - this removes redundant lowercase-branch checks on delimiter-path prefix units already known
+     to be lowercase/digit compact characters,
+   - contract/parity suites now lock lowercase-prefix uppercase-before-delimiter unauthorized
+     marker behavior (`unauthoriZed::token`) to preserve deterministic auth-required fallback
+     mapping on the delimiter-prefix start-indexed lowercase path; execution evidence is recorded
+     in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-269`).
 
 ## Remaining integration gaps (auth scope)
 
