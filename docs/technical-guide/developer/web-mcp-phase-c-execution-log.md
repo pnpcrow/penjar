@@ -11248,6 +11248,58 @@ all explicit signed-out aliases map deterministically on both `result.authState`
     at default false for signed-out sign-in fixtures.
   - targeted auth tests and full desktop verification remain green after expansion.
 
+## Unit WS-D-236: restore-session result-wrapper signed-out alias fixture closure (`signedOut`/`loggedOut`)
+
+### Planned objective
+
+Close residual restore-session direct-wrapper fixture gaps by adding missing `result.authState`
+signed-out aliases so contract matrix symmetry matches existing `data.authState` and parity locks.
+
+### Implemented changes
+
+1. Expanded restore-session contract fallback fixture matrix in
+   `desktop/test/contracts/workflow_contracts_test.dart` with direct `result.authState`
+   signed-out alias coverage for:
+   - `signedOut=true`,
+   - `loggedOut=true`.
+2. Locked deterministic fallback assertions for both fixtures:
+   - `expectedSignedIn: false`,
+   - `expectedStatus: '[remote-stub] Authentication required.'`.
+3. Synced continuity docs for latest restore-session signed-out fixture-closure evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && dart format test/contracts/workflow_contracts_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - restore-session signed-out alias fixture symmetry between `result` and `data` direct wrappers,
+  - deterministic fallback status/assertion stability under signed-out restore payloads,
+  - continuity-doc traceability for WS-D-236 evidence linkage.
+- **Issues found during review**
+  1. Fixture matrix scan showed residual restore-session `result.authState.signedOut` and
+     `result.authState.loggedOut` gaps while equivalent `data`/other signed-out aliases were
+     already locked.
+  2. This asymmetry left a narrow operation-scoped regression blind spot for direct
+     result-wrapper restore payloads.
+- **Fix applied**
+  1. Added the missing two restore-session result-wrapper signed-out fixtures.
+  2. Re-ran targeted auth contract/parity suites and full desktop verification chain.
+  3. Updated all continuity-linked docs to reference WS-D-236 as latest evidence.
+- **Post-fix validation criteria**
+  - restore-session direct-wrapper signed-out fallback coverage now includes both
+    `result.authState` and `data.authState` for `signedOut`/`loggedOut` plus existing
+    `is*`/snake_case variants.
+  - each added fixture deterministically maps to signed-out fallback state/status
+    (`Authentication required.`) without ambiguity.
+  - targeted auth tests and full desktop verification remain green after fixture closure.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

@@ -155,6 +155,12 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      `logged_out`, `isLoggedOut`, `is_signed_out`, and `is_logged_out`,
    - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
      (`Unit WS-D-235`).
+23. Restore-session direct-wrapper signed-out alias fixture matrix completion:
+   - auth fixture matrix now includes direct `result.authState` restore-session signed-out
+     alias fallback coverage for `signedOut` and `loggedOut`, closing the residual result-wrapper
+     gap against existing `data.authState` + snake_case/`is*` signed-out coverage,
+   - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
+     (`Unit WS-D-236`).
 
 ## Remaining integration gaps (auth scope)
 

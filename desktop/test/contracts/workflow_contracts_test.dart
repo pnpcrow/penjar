@@ -3656,6 +3656,21 @@ void main() {
       ),
       const _AuthBackendFixtureCase(
         name:
+            'restore-session result envelope authState signedOut alias maps fallback status',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'authState': <String, Object?>{
+              'signedOut': true,
+              'sessionToken': 'fixture-signed-out-result-camel-token',
+            },
+          },
+        },
+        expectedSignedIn: false,
+        expectedStatus: '[remote-stub] Authentication required.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
             'refresh-token result envelope authState isSignedOut alias maps fallback status',
         operationId: RemoteStubOperationIds.refreshToken,
         responsePayload: <String, Object?>{
@@ -3786,6 +3801,21 @@ void main() {
             'authState': <String, Object?>{
               'loggedOut': true,
               'sessionToken': 'fixture-logged-out-data-camel-token',
+            },
+          },
+        },
+        expectedSignedIn: false,
+        expectedStatus: '[remote-stub] Authentication required.',
+      ),
+      const _AuthBackendFixtureCase(
+        name:
+            'restore-session result envelope authState loggedOut alias maps fallback status',
+        operationId: RemoteStubOperationIds.restoreSession,
+        responsePayload: <String, Object?>{
+          'result': <String, Object?>{
+            'authState': <String, Object?>{
+              'loggedOut': true,
+              'sessionToken': 'fixture-logged-out-result-camel-token',
             },
           },
         },
