@@ -1401,6 +1401,11 @@ const List<String> _backendSignedOutCodeMarkers = <String>[
   ..._backendSessionExpiredCodeMarkers,
 ];
 
+final Set<String> _backendSessionExpiredCodeMarkerSet =
+    _backendSessionExpiredCodeMarkers.toSet();
+final Set<String> _backendSignedOutCodeMarkerSet = _backendSignedOutCodeMarkers
+    .toSet();
+
 _BackendCodeClassification _classifyBackendCode(String rawCode) {
   final String trimmed = rawCode.trim();
   if (trimmed == '419' || trimmed == '440') {
@@ -1420,6 +1425,12 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
     return const _BackendCodeClassification(
       signedOut: false,
       sessionExpired: false,
+    );
+  }
+  if (_backendSignedOutCodeMarkerSet.contains(compact)) {
+    return _BackendCodeClassification(
+      signedOut: true,
+      sessionExpired: _backendSessionExpiredCodeMarkerSet.contains(compact),
     );
   }
 

@@ -11986,8 +11986,59 @@ Close residual marker-catalog drift risk by ensuring `session-expired` code mark
 - **Post-fix validation criteria**
   - code-only `ACCESS_TOKEN_EXPIRED` / `REFRESH_TOKEN_EXPIRED` payloads now map to deterministic
     session-expired fallback behavior.
-  - explicit signed-in state still overrides refresh-token-expired code-based signed-out inference.
-  - signed-out/session-expired marker drift of this class is prevented by construction.
+- explicit signed-in state still overrides refresh-token-expired code-based signed-out inference.
+- signed-out/session-expired marker drift of this class is prevented by construction.
+- contract/parity/mode-parity suites and full desktop verification remain green.
+
+## Unit WS-D-249: backend code exact-marker fast-path optimization
+
+### Planned objective
+
+Reduce auth backend-code classification hot-path cost further by fast-pathing exact compact marker
+matches via precomputed marker sets, while preserving existing substring fallback semantics.
+
+### Implemented changes
+
+1. Updated backend code classifier in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - added precomputed marker sets:
+     - `_backendSignedOutCodeMarkerSet`,
+     - `_backendSessionExpiredCodeMarkerSet`,
+   - inserted exact-match short-circuit in `_classifyBackendCode(...)` after compact-code
+     normalization:
+     - exact signed-out marker match now returns immediately,
+     - session-expired flag is resolved by exact membership in session-expired set.
+2. Preserved existing substring-loop fallback behavior:
+   - non-exact/composite code values still flow through prior `contains(...)` marker scans.
+3. Synced continuity docs for WS-D-249 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - residual classifier overhead after numeric/empty fast paths and marker-catalog cohesion fixes,
+  - semantic equivalence of signed-out/session-expired results under exact-marker and composite
+    code variants,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. Even after prior fast paths, exact compact marker values still traversed substring loops.
+  2. Common backend code values (auth-required/session-timeout/token-expired variants) frequently
+     arrive as direct marker-equivalent strings and can bypass loop scans safely.
+- **Fix applied**
+  1. Added exact-marker set membership short-circuit before substring loops.
+  2. Kept existing loop-based fallback for composite payloads to preserve prior behavior.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - exact compact marker codes classify without substring-loop traversal.
+  - composite codes still classify through existing fallback marker scans.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
 ## Remaining Phase C setup gaps

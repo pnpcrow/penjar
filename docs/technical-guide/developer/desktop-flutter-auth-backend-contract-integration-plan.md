@@ -248,6 +248,13 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      deterministic session-expired fallback coverage and explicit signed-in override regression
      coverage, with execution evidence recorded in `web-mcp-phase-c-execution-log.md`
      (`Unit WS-D-248`).
+36. Backend code exact-marker fast-path optimization:
+   - `_classifyBackendCode(...)` now uses precomputed exact-marker sets for signed-out and
+     session-expired catalogs, allowing direct classification for common compact code values
+     (`AUTH_REQUIRED`, `SESSION_TIMEOUT`, `REFRESH_TOKEN_EXPIRED`, etc.) before marker substring
+     scans,
+   - existing substring fallback behavior remains unchanged for composite code payloads, with
+     execution evidence recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-249`).
 
 ## Remaining integration gaps (auth scope)
 
