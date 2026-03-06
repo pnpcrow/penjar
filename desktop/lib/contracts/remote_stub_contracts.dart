@@ -1496,9 +1496,11 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
   }
 
   if (compactLength >= _backendSessionExpiredCodeMarkerMinLength) {
-    final int markerCount = _backendSessionExpiredCodeMarkers.length;
+    final List<String> sessionExpiredMarkers =
+        _backendSessionExpiredCodeMarkers;
+    final int markerCount = sessionExpiredMarkers.length;
     for (int markerIndex = 0; markerIndex < markerCount; markerIndex++) {
-      if (compact.contains(_backendSessionExpiredCodeMarkers[markerIndex])) {
+      if (compact.contains(sessionExpiredMarkers[markerIndex])) {
         return const _BackendCodeClassification(
           signedOut: true,
           sessionExpired: true,
@@ -1514,9 +1516,10 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
     );
   }
 
-  final int markerCount = _backendSignedOutOnlyCodeMarkers.length;
+  final List<String> signedOutOnlyMarkers = _backendSignedOutOnlyCodeMarkers;
+  final int markerCount = signedOutOnlyMarkers.length;
   for (int markerIndex = 0; markerIndex < markerCount; markerIndex++) {
-    if (compact.contains(_backendSignedOutOnlyCodeMarkers[markerIndex])) {
+    if (compact.contains(signedOutOnlyMarkers[markerIndex])) {
       return const _BackendCodeClassification(
         signedOut: true,
         sessionExpired: false,

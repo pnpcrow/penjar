@@ -13662,6 +13662,64 @@ across empty/min-length checks while preserving signed-out/session-expired infer
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-276: classifier marker-list reference caching
+
+### Planned objective
+
+Reduce backend code classifier marker-loop overhead by caching marker-list references locally before
+index traversal while preserving signed-out/session-expired inference behavior.
+
+### Implemented changes
+
+1. Updated backend classifier marker loops in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_classifyBackendCode(...)` now caches marker lists as local references
+     (`sessionExpiredMarkers`, `signedOutOnlyMarkers`) before index traversal.
+   - session-expired and signed-out marker loops now reuse those references for per-index lookups.
+2. Preserved existing fallback semantics:
+   - marker precedence, raw/compact exact classification, and fallback status mapping behavior
+     remain unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only capitalized compact authrequired payload maps authentication-required fallback status`
+     (`code: "AuthRequired"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendCapitalizedCompactAuthRequiredParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps capitalized compact authrequired backend failure to deterministic auth-required status`.
+5. Synced continuity docs for WS-D-276 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - marker-list reference caching in `_classifyBackendCode(...)`,
+  - capitalized compact auth-required marker fallback mapping on signed-out marker path,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. marker-loop body still repeated top-level marker-list lookups on each index.
+  2. capitalized compact `AuthRequired` marker behavior was not explicitly parity-locked.
+- **Fix applied**
+  1. cached marker lists as local references before index traversal.
+  2. added dedicated contract/parity regressions for capitalized compact auth-required mapping.
+  3. re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - marker-list reference caching does not alter classification precedence or fallback mapping.
+  - capitalized compact `code: "AuthRequired"` payloads map to auth-required fallback status in
+    contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
