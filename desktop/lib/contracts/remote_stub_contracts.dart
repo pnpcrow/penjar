@@ -1399,16 +1399,33 @@ const List<String> _backendSignedOutCodeMarkers = <String>[
   ..._backendSessionExpiredCodeMarkers,
 ];
 
-final Set<String> _backendSessionExpiredCodeMarkerSet =
-    _backendSessionExpiredCodeMarkers.toSet();
-final Set<String> _backendSignedOutCodeMarkerSet = _backendSignedOutCodeMarkers
-    .toSet();
+final Map<String, _BackendCodeClassification> _backendExactCodeClassifications =
+    _buildBackendExactCodeClassifications();
 final int _backendSignedOutCodeMarkerMinLength = _markerMinLength(
   _backendSignedOutCodeMarkers,
 );
 final int _backendSessionExpiredCodeMarkerMinLength = _markerMinLength(
   _backendSessionExpiredCodeMarkers,
 );
+
+Map<String, _BackendCodeClassification>
+_buildBackendExactCodeClassifications() {
+  final Map<String, _BackendCodeClassification> classifications =
+      <String, _BackendCodeClassification>{};
+  for (final String marker in _backendSignedOutOnlyCodeMarkers) {
+    classifications[marker] = const _BackendCodeClassification(
+      signedOut: true,
+      sessionExpired: false,
+    );
+  }
+  for (final String marker in _backendSessionExpiredCodeMarkers) {
+    classifications[marker] = const _BackendCodeClassification(
+      signedOut: true,
+      sessionExpired: true,
+    );
+  }
+  return Map<String, _BackendCodeClassification>.unmodifiable(classifications);
+}
 
 int _markerMinLength(List<String> markers) {
   if (markers.isEmpty) {
@@ -1445,11 +1462,10 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
       sessionExpired: false,
     );
   }
-  if (_backendSignedOutCodeMarkerSet.contains(compact)) {
-    return _BackendCodeClassification(
-      signedOut: true,
-      sessionExpired: _backendSessionExpiredCodeMarkerSet.contains(compact),
-    );
+  final _BackendCodeClassification? exactClassification =
+      _backendExactCodeClassifications[compact];
+  if (exactClassification != null) {
+    return exactClassification;
   }
   if (compact.length < _backendSignedOutCodeMarkerMinLength) {
     return const _BackendCodeClassification(

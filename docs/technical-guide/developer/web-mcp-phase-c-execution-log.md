@@ -12270,6 +12270,70 @@ non-compact inputs.
   - delimiter/uppercase normalization behavior remains intact through existing fallback path.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-254: backend code exact-marker single-map lookup
+
+### Planned objective
+
+Trim exact-marker classification overhead by unifying exact signed-out/session-expired marker lookup
+into one map access path, while preserving existing marker catalogs and fallback behavior.
+
+### Implemented changes
+
+1. Updated exact-marker classification plumbing in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - replaced dual exact-marker sets with a unified
+     `_backendExactCodeClassifications` map,
+   - added `_buildBackendExactCodeClassifications()` to construct immutable exact-marker
+     classifications for signed-out-only and session-expired catalogs.
+2. Updated `_classifyBackendCode(...)`:
+   - replaced dual set membership checks with single map lookup:
+     `_backendExactCodeClassifications[compact]`.
+3. Preserved classifier behavior ordering:
+   - numeric fast paths, compact normalization, marker-length short-circuits, and substring
+     fallback loops remain unchanged.
+4. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only compact unauthorized payload maps authentication-required fallback status`
+     (`code: "unauthorized"`).
+5. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendCompactUnauthorizedParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps compact unauthorized backend failure to deterministic auth-required status`.
+6. Synced continuity docs for WS-D-254 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+7. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - exact-marker classification path efficiency after compact normalization optimizations,
+  - signed-out-only exact marker behavior under compact lowercase payloads,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. Exact marker classification still used dual-set lookup (`signed-out` + `session-expired`),
+     adding avoidable lookup duplication for a hot exact path.
+  2. Compact lowercase signed-out marker behavior (`unauthorized`) was not explicitly parity-locked
+     as a code-string exact path.
+- **Fix applied**
+  1. Consolidated exact marker classification into immutable single-map lookup.
+  2. Added contract/parity regressions for compact lowercase `unauthorized` fallback behavior.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - exact marker classification now resolves through a single map lookup.
+  - compact lowercase `unauthorized` payloads map to deterministic auth-required fallback behavior
+    in contract/parity suites.
+  - numeric/marker-length/substring fallback classifier semantics remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

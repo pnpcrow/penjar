@@ -281,6 +281,13 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
    - contract/parity suites now lock compact lowercase session-expiry code fallback behavior
      (`refreshtokenexpired`) to ensure parity stability across compact-input fast paths; execution
      evidence is recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-253`).
+41. Backend code exact-marker single-map lookup optimization:
+   - `_classifyBackendCode(...)` now uses `_backendExactCodeClassifications` for single-lookup
+     exact marker classification (signed-out-only + session-expired) instead of dual set
+     membership checks, preserving exact marker semantics while trimming exact-path lookup work,
+   - contract/parity suites now lock compact lowercase signed-out marker fallback behavior
+     (`unauthorized`) to keep auth-required mapping parity stable on exact compact code paths;
+     execution evidence is recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-254`).
 
 ## Remaining integration gaps (auth scope)
 
