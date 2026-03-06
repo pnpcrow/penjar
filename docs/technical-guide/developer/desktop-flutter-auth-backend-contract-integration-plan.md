@@ -296,6 +296,13 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      (`UNAUTHORIZED_REFRESH_TOKEN_EXPIRED` -> session-expired fallback) to keep deterministic
      fallback parity stable on composite marker paths; execution evidence is recorded in
      `web-mcp-phase-c-execution-log.md` (`Unit WS-D-255`).
+43. Backend code uppercase-compact fast-path optimization:
+   - `_compactBackendCodeFromTrimmed(...)` now detects fully ASCII alphanumeric compact inputs
+     containing uppercase letters and returns direct lowercase output without entering the
+     delimiter-filter buffer loop, while preserving normalization semantics for non-compact inputs,
+   - contract/parity suites now lock uppercase compact signed-out marker fallback behavior
+     (`UNAUTHORIZED`) to keep auth-required mapping parity stable on uppercase compact code paths;
+     execution evidence is recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-256`).
 
 ## Remaining integration gaps (auth scope)
 

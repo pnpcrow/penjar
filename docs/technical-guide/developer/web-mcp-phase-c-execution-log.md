@@ -12398,6 +12398,70 @@ markers first and signed-out-only markers second, while preserving composite mar
   - numeric/exact/marker-length fallback semantics remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-256: backend code uppercase-compact fast path
+
+### Planned objective
+
+Reduce uppercase compact backend-code normalization overhead by avoiding delimiter-filter buffer
+work when the trimmed input is already ASCII alphanumeric and only case normalization is needed.
+
+### Implemented changes
+
+1. Updated compact normalization path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_compactBackendCodeFromTrimmed(...)` now tracks uppercase compact code units while scanning
+     trimmed input.
+2. Added compact-uppercase direct return behavior:
+   - if the trimmed input is fully ASCII alphanumeric and includes uppercase letters, classifier
+     path now returns `trimmedCode.toLowerCase()` directly,
+   - if fully compact lowercase/digits, existing zero-allocation direct return remains unchanged.
+3. Preserved non-compact normalization behavior:
+   - delimiter/non-alphanumeric inputs still follow lowercase + ASCII alphanumeric filtering path,
+     preserving compact semantics for composite code payloads.
+4. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only uppercase compact unauthorized payload maps authentication-required fallback status`
+     (`code: "UNAUTHORIZED"`).
+5. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendUppercaseCompactUnauthorizedParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps uppercase compact unauthorized backend failure to deterministic auth-required status`.
+6. Synced continuity docs for WS-D-256 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+7. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - compact backend-code normalization hot-path behavior for uppercase alphanumeric inputs,
+  - exact signed-out marker classification behavior on compact uppercase code values,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. After WS-D-253, compact uppercase inputs still entered lowercase + delimiter-filter buffer
+     loop despite having no delimiters/non-alphanumeric characters.
+  2. Uppercase compact signed-out exact-marker behavior (`UNAUTHORIZED`) was not explicitly
+     parity-locked in contract/parity suites.
+- **Fix applied**
+  1. Added uppercase-compact direct lowercase return path in
+     `_compactBackendCodeFromTrimmed(...)`.
+  2. Added contract/parity regressions for uppercase compact `UNAUTHORIZED` fallback behavior.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - compact uppercase alphanumeric code inputs avoid delimiter-filter buffer loop work.
+  - uppercase compact `UNAUTHORIZED` payloads map to deterministic auth-required fallback behavior
+    in contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

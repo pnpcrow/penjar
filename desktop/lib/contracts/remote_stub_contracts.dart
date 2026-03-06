@@ -1508,15 +1508,24 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
 }
 
 String _compactBackendCodeFromTrimmed(String trimmedCode) {
+  bool hasUppercaseCompactCodeUnit = false;
   int firstNonCompactIndex = -1;
   for (int index = 0; index < trimmedCode.length; index++) {
-    if (!_isBackendCodeCompactCodeUnit(trimmedCode.codeUnitAt(index))) {
-      firstNonCompactIndex = index;
-      break;
+    final int codeUnit = trimmedCode.codeUnitAt(index);
+    if (_isBackendCodeCompactCodeUnit(codeUnit)) {
+      continue;
     }
+    if (_isBackendCodeAsciiUpperAlphaCodeUnit(codeUnit)) {
+      hasUppercaseCompactCodeUnit = true;
+      continue;
+    }
+    firstNonCompactIndex = index;
+    break;
   }
   if (firstNonCompactIndex == -1) {
-    return trimmedCode;
+    return hasUppercaseCompactCodeUnit
+        ? trimmedCode.toLowerCase()
+        : trimmedCode;
   }
   final String lowered = trimmedCode.toLowerCase();
   final StringBuffer buffer = StringBuffer();
@@ -1535,6 +1544,10 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
 bool _isBackendCodeCompactCodeUnit(int codeUnit) {
   return (codeUnit >= 48 && codeUnit <= 57) ||
       (codeUnit >= 97 && codeUnit <= 122);
+}
+
+bool _isBackendCodeAsciiUpperAlphaCodeUnit(int codeUnit) {
+  return codeUnit >= 65 && codeUnit <= 90;
 }
 
 int _clampIndex(int index, {required int itemCount}) {
