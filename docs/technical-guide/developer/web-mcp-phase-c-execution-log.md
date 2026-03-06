@@ -10996,6 +10996,66 @@ docs so latest evidence reflects the expanded refresh matrix.
     simulated token-refresh success text in parity UI flow.
   - targeted auth tests and full desktop verification remain green after expansion.
 
+## Unit WS-D-232: refresh-token direct-wrapper signed-in alias success symmetry (`isAuthenticated`/`loggedIn`/`isLoggedIn`/`is_authenticated`/`signedIn`/`authenticated`/`signed_in`/`is_signed_in`/`logged_in`/`is_logged_in`)
+
+### Planned objective
+
+Close refresh-token direct-wrapper positive-state gaps by extending contract and parity fixtures so
+all signed-in aliases map deterministically on both `result.authState` and `data.authState`.
+
+### Implemented changes
+
+1. Expanded refresh-token contract fixture matrix in
+   `desktop/test/contracts/workflow_contracts_test.dart` with direct `result/data.authState`
+   signed-in alias success coverage for ten aliases:
+   - `isAuthenticated=true`,
+   - `loggedIn=true`,
+   - `isLoggedIn=true`,
+   - `is_authenticated=true`,
+   - `signedIn=true`,
+   - `authenticated=true`,
+   - `signed_in=true`,
+   - `is_signed_in=true`,
+   - `logged_in=true`,
+   - `is_logged_in=true`.
+2. Added refresh-token signed-in parity loop in
+   `desktop/test/parity/auth_session_parity_test.dart` with matching `result/data.authState`
+   alias fixtures and signed-in status assertions for the same ten aliases.
+3. Synced continuity docs for latest refresh-token signed-in direct-wrapper evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+4. Re-ran validation commands:
+   - `cd desktop && dart format test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - refresh-token direct-wrapper signed-in alias coverage against existing sign-in/restore matrix,
+  - contract/parity consistency for wrapper (`result`/`data`) and alias permutations,
+  - doc evidence continuity after expanding refresh positive-path fixtures.
+- **Issues found during review**
+  1. Signed-out and explicit-false refresh wrappers were locked, but explicit signed-in refresh
+     wrappers were still anchored mostly in sign-in snapshots.
+  2. This left a residual gap where refresh backend payloads using `authState` signed-in aliases
+     could regress without direct operation-scoped fixture protection.
+- **Fix applied**
+  1. Added twenty refresh-token contract fixtures (ten aliases × result/data wrappers) with
+     expected signed-in + remember-session state and deterministic status assertions.
+  2. Added twenty parity refresh cases using the same alias/wrapper matrix with signed-in
+     persistence assertions.
+  3. Updated continuity docs so current baseline points to WS-D-232 evidence.
+- **Post-fix validation criteria**
+  - refresh-token direct wrappers now lock signed-in alias success behavior for all ten variants on
+    both `result` and `data` envelopes.
+  - parity refresh flow keeps signed-in state, keeps remember-session toggled, and avoids fallback
+    regression (`Authentication required.`) for each alias/wrapper combination.
+  - targeted auth tests and full desktop verification remain green after expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

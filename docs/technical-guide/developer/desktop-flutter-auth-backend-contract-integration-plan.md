@@ -128,6 +128,13 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      `logged_in`, and `is_logged_in`,
    - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
      (`Unit WS-D-231`).
+19. Refresh-token direct-wrapper signed-in alias parity completion:
+   - auth fixture + parity suites now include direct `result/data.authState` refresh-token
+     signed-in alias success coverage for `isAuthenticated`, `loggedIn`, `isLoggedIn`,
+     `is_authenticated`, `signedIn`, `authenticated`, `signed_in`, `is_signed_in`,
+     `logged_in`, and `is_logged_in`,
+   - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
+     (`Unit WS-D-232`).
 
 ## Remaining integration gaps (auth scope)
 

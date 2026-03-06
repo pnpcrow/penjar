@@ -4754,6 +4754,370 @@ void main() {
   final List<
     ({
       String description,
+      Map<String, Object?> refreshTokenPayload,
+      String expectedStatus,
+    })
+  >
+  authStateSignedInRefreshEnvelopeCases =
+      <
+        ({
+          String description,
+          Map<String, Object?> refreshTokenPayload,
+          String expectedStatus,
+        })
+      >[
+        (
+          description: 'result envelope authState isAuthenticated alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail':
+                  'Backend refresh result envelope isAuthenticated applied.',
+              'authState': <String, Object?>{
+                'isAuthenticated': true,
+                'remember': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend refresh result envelope isAuthenticated applied.',
+        ),
+        (
+          description: 'data envelope authState isAuthenticated alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail':
+                  'Backend refresh data envelope isAuthenticated applied.',
+              'authState': <String, Object?>{
+                'isAuthenticated': true,
+                'remember': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend refresh data envelope isAuthenticated applied.',
+        ),
+        (
+          description: 'data envelope authState loggedIn alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend refresh data envelope loggedIn applied.',
+              'authState': <String, Object?>{
+                'loggedIn': true,
+                'persistSession': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend refresh data envelope loggedIn applied.',
+        ),
+        (
+          description: 'result envelope authState loggedIn alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail': 'Backend refresh result envelope loggedIn applied.',
+              'authState': <String, Object?>{
+                'loggedIn': true,
+                'persistSession': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend refresh result envelope loggedIn applied.',
+        ),
+        (
+          description: 'result envelope authState isLoggedIn alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail': 'Backend refresh result envelope isLoggedIn applied.',
+              'authState': <String, Object?>{
+                'isLoggedIn': true,
+                'persistSession': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend refresh result envelope isLoggedIn applied.',
+        ),
+        (
+          description: 'data envelope authState isLoggedIn alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend refresh data envelope isLoggedIn applied.',
+              'authState': <String, Object?>{
+                'isLoggedIn': true,
+                'persistSession': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend refresh data envelope isLoggedIn applied.',
+        ),
+        (
+          description: 'data envelope authState is_authenticated alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail':
+                  'Backend refresh data envelope is_authenticated applied.',
+              'authState': <String, Object?>{
+                'is_authenticated': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend refresh data envelope is_authenticated applied.',
+        ),
+        (
+          description: 'result envelope authState is_authenticated alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail':
+                  'Backend refresh result envelope is_authenticated applied.',
+              'authState': <String, Object?>{
+                'is_authenticated': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend refresh result envelope is_authenticated applied.',
+        ),
+        (
+          description: 'result envelope authState signedIn alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail': 'Backend refresh result envelope signedIn applied.',
+              'authState': <String, Object?>{
+                'signedIn': true,
+                'persistSession': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend refresh result envelope signedIn applied.',
+        ),
+        (
+          description: 'data envelope authState signedIn alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend refresh data envelope signedIn applied.',
+              'authState': <String, Object?>{
+                'signedIn': true,
+                'persistSession': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend refresh data envelope signedIn applied.',
+        ),
+        (
+          description: 'data envelope authState authenticated alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend refresh data envelope authenticated applied.',
+              'authState': <String, Object?>{
+                'authenticated': true,
+                'remember': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend refresh data envelope authenticated applied.',
+        ),
+        (
+          description: 'result envelope authState authenticated alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail':
+                  'Backend refresh result envelope authenticated applied.',
+              'authState': <String, Object?>{
+                'authenticated': true,
+                'remember': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend refresh result envelope authenticated applied.',
+        ),
+        (
+          description: 'result envelope authState signed_in alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail': 'Backend refresh result envelope signed_in applied.',
+              'authState': <String, Object?>{
+                'signed_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend refresh result envelope signed_in applied.',
+        ),
+        (
+          description: 'data envelope authState signed_in alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend refresh data envelope signed_in applied.',
+              'authState': <String, Object?>{
+                'signed_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend refresh data envelope signed_in applied.',
+        ),
+        (
+          description: 'result envelope authState is_signed_in alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail': 'Backend refresh result envelope is_signed_in applied.',
+              'authState': <String, Object?>{
+                'is_signed_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend refresh result envelope is_signed_in applied.',
+        ),
+        (
+          description: 'data envelope authState is_signed_in alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend refresh data envelope is_signed_in applied.',
+              'authState': <String, Object?>{
+                'is_signed_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend refresh data envelope is_signed_in applied.',
+        ),
+        (
+          description: 'result envelope authState logged_in alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail': 'Backend refresh result envelope logged_in applied.',
+              'authState': <String, Object?>{
+                'logged_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend refresh result envelope logged_in applied.',
+        ),
+        (
+          description: 'data envelope authState logged_in alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend refresh data envelope logged_in applied.',
+              'authState': <String, Object?>{
+                'logged_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend refresh data envelope logged_in applied.',
+        ),
+        (
+          description: 'data envelope authState is_logged_in alias',
+          refreshTokenPayload: <String, Object?>{
+            'data': <String, Object?>{
+              'detail': 'Backend refresh data envelope is_logged_in applied.',
+              'authState': <String, Object?>{
+                'is_logged_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus: 'Backend refresh data envelope is_logged_in applied.',
+        ),
+        (
+          description: 'result envelope authState is_logged_in alias',
+          refreshTokenPayload: <String, Object?>{
+            'result': <String, Object?>{
+              'detail': 'Backend refresh result envelope is_logged_in applied.',
+              'authState': <String, Object?>{
+                'is_logged_in': true,
+                'remember_session': true,
+              },
+            },
+          },
+          expectedStatus:
+              'Backend refresh result envelope is_logged_in applied.',
+        ),
+      ];
+
+  for (final ({
+        String description,
+        Map<String, Object?> refreshTokenPayload,
+        String expectedStatus,
+      })
+      caseData
+      in authStateSignedInRefreshEnvelopeCases) {
+    testWidgets(
+      'auth/session parity normalizes refresh-token ${caseData.description} sign-in snapshot',
+      (WidgetTester tester) async {
+        await pumpDesktopApp(
+          tester,
+          contracts: DesktopContractBundle.fromMode(
+            DesktopContractMode.remoteStub,
+            remoteStubTransportClient:
+                _AuthBackendAuthStateEnvelopeFixtureParityTransportClient(
+                  signInPayload: const <String, Object?>{
+                    'status': 'Backend sign-in baseline snapshot applied.',
+                    'state': <String, Object?>{
+                      'signedIn': true,
+                      'rememberSession': true,
+                    },
+                  },
+                  refreshTokenPayload: caseData.refreshTokenPayload,
+                ),
+          ),
+        );
+        await openWorkflowSection(tester, 'auth');
+
+        await tester.enterText(
+          find.byKey(const ValueKey<String>('auth-password')),
+          'desktop-pass',
+        );
+        await tester.ensureVisible(
+          find.byKey(const ValueKey<String>('auth-sign-in')),
+        );
+        await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining(
+            'Status: [remote-stub] Backend sign-in baseline snapshot applied.',
+          ),
+          findsOneWidget,
+        );
+
+        await tester.ensureVisible(
+          find.byKey(const ValueKey<String>('auth-refresh-token')),
+        );
+        await tester.tap(
+          find.byKey(const ValueKey<String>('auth-refresh-token')),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining(
+            'Status: [remote-stub] ${caseData.expectedStatus}',
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('Status: [remote-stub] Authentication required.'),
+          findsNothing,
+        );
+        expect(
+          find.textContaining('Token refreshed (simulated).'),
+          findsNothing,
+        );
+        final CheckboxListTile rememberSessionTile = tester.widget(
+          find.byKey(const ValueKey<String>('auth-remember')),
+        );
+        expect(rememberSessionTile.value, isTrue);
+      },
+    );
+  }
+
+  final List<
+    ({
+      String description,
       Map<String, Object?>? restoreSessionPayload,
       Map<String, Object?>? refreshTokenPayload,
       ValueKey<String> actionKey,
