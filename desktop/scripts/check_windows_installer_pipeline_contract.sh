@@ -395,6 +395,17 @@ run_case \
   "[windows-installer-pipeline] completed."
 
 run_case \
+  "strict-installer-nearmatch-truee-placeholder-warning-pass" \
+  "pass" \
+  "Strict installer mode parser should keep near-match alias 'truee' non-strict and preserve placeholder warning behavior." \
+  setup_release_runner_case \
+  "truee" \
+  "release" \
+  "- Strict mode: 0" \
+  "[windows-installer-pipeline] warning: placeholder installer command detected." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=placeholder"
+
+run_case \
   "strict-installer-strict-alias-clear-command-pass" \
   "pass" \
   "Strict installer mode parser should treat strict input alias 'strict' as strict and pass when installer command succeeds." \
@@ -737,6 +748,18 @@ run_case \
   "- Strict protocol registration mode: 0" \
   "[windows-installer-pipeline] completed." \
   "STRICT_WINDOWS_PROTOCOL_REGISTRATION=strict-mode"
+
+run_case \
+  "strict-protocol-nearmatch-truee-placeholder-warning-pass" \
+  "pass" \
+  "Strict protocol mode parser should keep near-match alias 'truee' non-strict and preserve protocol placeholder warning behavior." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Strict protocol registration mode: 0" \
+  "[windows-installer-pipeline] warning: placeholder protocol command detected." \
+  "STRICT_WINDOWS_PROTOCOL_REGISTRATION=truee" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=placeholder"
 
 run_case \
   "strict-protocol-uppercase-true-alias-missing-command-fail" \

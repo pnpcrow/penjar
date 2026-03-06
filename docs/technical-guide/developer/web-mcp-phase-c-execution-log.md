@@ -15787,6 +15787,53 @@ single scratch root with per-case subdirectories.
   - full desktop verify remains green after temp-workspace optimization.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-317.
 
+## Unit WS-D-318: near-match alias placeholder-warning path regression coverage
+
+### Planned objective
+
+Ensure near-match aliases stay non-strict not only on missing-command paths but also on
+placeholder-warning paths for installer/protocol command execution branches.
+
+### Implemented changes
+
+1. Expanded strict installer near-match warning coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-nearmatch-truee-placeholder-warning-pass`,
+   - fixture asserts `- Strict mode: 0` and warning log
+     `[windows-installer-pipeline] warning: placeholder installer command detected.`.
+2. Expanded strict protocol near-match warning coverage in the same checker:
+   - added `strict-protocol-nearmatch-truee-placeholder-warning-pass`,
+   - fixture asserts `- Strict protocol registration mode: 0` and warning log
+     `[windows-installer-pipeline] warning: placeholder protocol command detected.`.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-318
+     near-match placeholder-warning lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     near-match placeholder-warning matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict near-match alias behavior on placeholder-warning execution branches,
+  - installer/protocol warning-path compatibility with exact-match strict parser boundaries,
+  - regression risk between missing-command and placeholder-command non-strict semantics.
+- **Issues found during review**
+  1. near-match aliases were locked only for missing-command flows; placeholder-warning branches were
+     not explicitly covered.
+  2. without dedicated warning-path fixtures, future parser or warning-branch refactors could
+     accidentally route near-match aliases into strict failures.
+- **Fix applied**
+  1. added installer/protocol near-match placeholder-warning pass fixtures with strict-mode-zero
+     assertions.
+  2. preserved existing strict-positive/strict-negative matrix semantics.
+- **Post-fix validation criteria**
+  - contract checker passes with near-match placeholder-warning fixtures.
+  - full desktop verify remains green after warning-path matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-318.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
