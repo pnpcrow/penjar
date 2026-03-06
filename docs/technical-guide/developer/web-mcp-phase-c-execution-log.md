@@ -14745,6 +14745,58 @@ when strict protocol mode is enabled and protocol registration succeeds.
   - strict protocol + installer placeholder remains non-blocking with deterministic warnings.
   - full desktop verify remains green after matrix expansion.
 
+## Unit WS-D-296: strict mode alias parsing contract coverage
+
+### Planned objective
+
+Close mode-parser regression gaps by locking strict/strict-protocol alias handling (`true|yes|strict`)
+in Windows installer pipeline contract coverage.
+
+### Implemented changes
+
+1. Expanded strict installer alias matrix in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-true-alias-missing-command-fail`,
+   - added `strict-installer-strict-alias-clear-command-pass`.
+2. Expanded strict protocol alias matrix in the same checker:
+   - added `strict-protocol-true-alias-missing-command-fail`,
+   - added `strict-protocol-yes-alias-clear-command-pass`,
+   - added `strict-protocol-strict-alias-installer-placeholder-warning-pass`.
+3. Locked alias-normalized diagnostics and outcomes:
+   - strict installer alias cases now explicitly assert `- Strict mode: 1`,
+   - strict protocol alias cases now explicitly assert
+     `- Strict protocol registration mode: 1`,
+   - strict protocol alias interaction case explicitly keeps installer placeholder path
+     warning-based and non-blocking.
+4. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-296
+     alias-parsing release evidence lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     strict alias matrix coverage in checker inventory notes.
+5. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict installer toggle alias parsing behavior (`true|strict`) and resulting strict semantics,
+  - strict protocol toggle alias parsing behavior (`true|yes|strict`) and resulting strict semantics,
+  - alias-parsed strict protocol interaction with installer placeholder warning path.
+- **Issues found during review**
+  1. strict behavior was covered primarily through numeric toggles (`1`), leaving alias parsing
+     behavior less explicitly locked.
+  2. strict protocol alias interaction path with installer placeholder warnings could regress
+     without direct contract assertions.
+- **Fix applied**
+  1. added dedicated strict installer/protocol alias parsing cases with report/log assertions.
+  2. added strict protocol alias interaction case preserving non-blocking installer-placeholder
+     warning behavior.
+- **Post-fix validation criteria**
+  - contract checker passes with alias parsing cases.
+  - strict alias inputs resolve deterministically to strict semantics.
+  - full desktop verify remains green after alias matrix expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
