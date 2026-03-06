@@ -436,6 +436,16 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      unintended auth-required/session-expired fallback mapping on non-ASCII-only compact-empty
      normalization paths; execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
      (`Unit WS-D-271`).
+59. Backend code compact normalization loop-local buffer reuse optimization:
+   - `_compactBackendCodeFromTrimmed(...)` now reuses a single loop-local output buffer reference
+     across delimiter-path suffix scans (`outputBuffer`) so compact/uppercase append branches avoid
+     repeated null-coalescing assignment expressions on hot loop iterations,
+   - existing delimiter/no-delimiter normalization and Unicode fallback semantics remain unchanged
+     while compact-empty outputs still resolve deterministically to `''`,
+   - contract/parity suites now lock leading-delimiter uppercase unauthorized marker behavior
+     (`code: "::UNAUTHORIZED"`) to preserve deterministic auth-required fallback mapping on
+     prefix-empty delimiter-path normalization and loop-local append-buffer reuse paths; execution
+     evidence is recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-272`).
 
 ## Remaining integration gaps (auth scope)
 

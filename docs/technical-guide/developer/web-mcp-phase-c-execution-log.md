@@ -13414,6 +13414,68 @@ preserving the existing lazy allocation behavior and normalization semantics.
     overhead on append paths.
   - unicode-only `code: "\uC138\uC158\uB9CC\uB8CC"` payloads keep signed-in/status stability
     without unintended auth-required/session-expired fallback mapping in contract/parity suites.
+- numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+- contract/parity/mode-parity suites and full desktop verification remain green.
+
+## Unit WS-D-272: compact normalization loop-local buffer reuse
+
+### Planned objective
+
+Reduce delimiter-path compact normalization hot-loop overhead by reusing a loop-local output buffer
+reference across suffix scans while preserving existing fallback semantics.
+
+### Implemented changes
+
+1. Updated compact normalization path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_compactBackendCodeFromTrimmed(...)` now reuses `outputBuffer` across delimiter-path suffix
+     scans so compact/uppercase append branches avoid repeated null-coalescing assignment
+     expressions in loop iterations.
+2. Preserved existing fallback semantics:
+   - delimiter/no-delimiter normalization, Unicode fallback, marker classification, and non-exact
+     fallback behavior remain unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only leading-delimiter uppercase unauthorized payload maps authentication-required fallback status`
+     (`code: "::UNAUTHORIZED"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendLeadingDelimiterUppercaseUnauthorizedParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps leading-delimiter uppercase unauthorized backend failure to deterministic auth-required status`.
+5. Synced continuity docs for WS-D-272 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - compact normalization delimiter-loop append behavior in
+    `_compactBackendCodeFromTrimmed(...)`,
+  - leading-delimiter uppercase unauthorized marker (`code: "::UNAUTHORIZED"`) fallback mapping,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. WS-D-271 still repeated null-coalescing append-buffer assignments in delimiter-path suffix loop
+     branches.
+  2. Leading-delimiter uppercase unauthorized marker behavior was not explicitly parity-locked.
+- **Fix applied**
+  1. Reused a loop-local output buffer reference (`outputBuffer`) for delimiter-path suffix appends.
+  2. Added dedicated contract/parity regressions for leading-delimiter uppercase unauthorized
+     mapping.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - delimiter-path suffix scans reuse loop-local buffer reference while preserving lazy
+    allocation semantics.
+  - leading-delimiter uppercase `code: "::UNAUTHORIZED"` payloads map deterministically to
+    auth-required fallback in contract/parity suites.
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 

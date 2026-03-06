@@ -1557,9 +1557,9 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
             startInclusive: firstUppercaseCompactIndex,
           );
   }
-  StringBuffer? asciiBuffer;
+  StringBuffer? outputBuffer;
   if (firstNonCompactIndex > 0) {
-    final StringBuffer prefixBuffer = asciiBuffer ??= StringBuffer();
+    final StringBuffer prefixBuffer = outputBuffer ??= StringBuffer();
     if (firstUppercaseCompactIndex == -1) {
       _appendCompactBackendAsciiRange(
         prefixBuffer,
@@ -1585,12 +1585,13 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
     }
   }
   if (trimmedCode.codeUnitAt(firstNonCompactIndex) > 127) {
+    final StringBuffer unicodeBuffer = outputBuffer ??= StringBuffer();
     _appendCompactBackendUnicodeLowercasedRange(
-      asciiBuffer ??= StringBuffer(),
+      unicodeBuffer,
       trimmedCode,
       startInclusive: firstNonCompactIndex,
     );
-    return asciiBuffer.toString();
+    return unicodeBuffer.toString();
   }
   for (
     int index = firstNonCompactIndex + 1;
@@ -1599,24 +1600,25 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
   ) {
     final int codeUnit = trimmedCode.codeUnitAt(index);
     if (codeUnit > 127) {
+      final StringBuffer unicodeBuffer = outputBuffer ??= StringBuffer();
       _appendCompactBackendUnicodeLowercasedRange(
-        asciiBuffer ??= StringBuffer(),
+        unicodeBuffer,
         trimmedCode,
         startInclusive: index,
       );
-      return asciiBuffer.toString();
+      return unicodeBuffer.toString();
     }
     if (_isBackendCodeCompactCodeUnit(codeUnit)) {
-      (asciiBuffer ??= StringBuffer()).writeCharCode(codeUnit);
+      final StringBuffer appendBuffer = outputBuffer ??= StringBuffer();
+      appendBuffer.writeCharCode(codeUnit);
       continue;
     }
     if (_isBackendCodeAsciiUpperAlphaCodeUnit(codeUnit)) {
-      (asciiBuffer ??= StringBuffer()).writeCharCode(
-        _toLowerAsciiCodeUnit(codeUnit),
-      );
+      final StringBuffer appendBuffer = outputBuffer ??= StringBuffer();
+      appendBuffer.writeCharCode(_toLowerAsciiCodeUnit(codeUnit));
     }
   }
-  return asciiBuffer?.toString() ?? '';
+  return outputBuffer?.toString() ?? '';
 }
 
 String _compactBackendAsciiLowercase(
