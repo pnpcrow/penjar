@@ -11859,6 +11859,67 @@ signed-out/session-expired semantics.
   - classification path avoids unnecessary compact/marker-loop work on common numeric/empty inputs.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-247: JWT-expired backend code normalization and precedence coverage
+
+### Planned objective
+
+Close a session-expiry code-variant gap by normalizing `JWT_EXPIRED` into the signed-out/session-
+expired classification path, then lock both fallback mapping and explicit signed-in override
+precedence in contract/parity suites.
+
+### Implemented changes
+
+1. Updated auth parser code markers in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - added `jwtexpired` to `_backendSignedOutCodeMarkers` so `JWT_EXPIRED` code-only payloads
+     follow signed-out/session-expired handling.
+2. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only jwt-expired payload maps session-expired fallback status`,
+   - `auth backend explicit signed-in state overrides jwt-expired code variant`.
+3. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport clients:
+     - `_AuthBackendJwtExpiredParityTransportClient`,
+     - `_AuthBackendJwtExpiredSignedInOverrideParityTransportClient`,
+   - new parity tests:
+     - `auth/session parity maps jwt-expired backend failure to deterministic session-expired status`,
+     - `auth/session parity keeps signed-in state when jwt-expired backend failure has explicit signed-in override`.
+4. Synced continuity docs for WS-D-247 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+5. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - session-expired variant completeness in backend code normalization,
+  - signed-out fallback behavior for `JWT_EXPIRED` code-only payloads,
+  - explicit signed-in precedence integrity under `JWT_EXPIRED` collisions,
+  - regression impact across contract/parity/mode-parity suites and full verification.
+- **Issues found during review**
+  1. `JWT_EXPIRED` was included in session-expired markers but absent from signed-out markers,
+     leaving code-only `JWT_EXPIRED` payloads outside signed-out/session-expired fallback handling.
+  2. Contract/parity suites had no dedicated `JWT_EXPIRED` fallback/override regression locks,
+     leaving the gap unguarded.
+- **Fix applied**
+  1. Added `jwtexpired` to signed-out marker catalog to align classifier behavior with existing
+     session-expired marker policy.
+  2. Added contract and parity regression tests for both fallback mapping and explicit signed-in
+     override precedence under `JWT_EXPIRED`.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification to confirm no
+     regressions.
+- **Post-fix validation criteria**
+  - code-only `JWT_EXPIRED` payloads now map to deterministic session-expired fallback behavior.
+  - explicit signed-in state still overrides `JWT_EXPIRED` code-based signed-out inference.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

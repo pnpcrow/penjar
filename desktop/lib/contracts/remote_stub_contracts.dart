@@ -1386,6 +1386,7 @@ const List<String> _backendSignedOutCodeMarkers = <String>[
   'expiredtoken',
   'expiredsession',
   'invalidtoken',
+  'jwtexpired',
   'signedout',
   'loggedout',
 ];

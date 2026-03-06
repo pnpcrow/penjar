@@ -232,6 +232,13 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      common backend status paths,
    - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
      (`Unit WS-D-246`).
+34. JWT-expired backend code variant session-expired parity completion:
+   - auth parser signed-out code markers now include `JWT_EXPIRED` normalized form
+     (`jwtexpired`) so code-only backend JWT-expired responses follow signed-out/session-expired
+     fallback handling,
+   - contract/parity suites now include JWT-expired fallback and explicit signed-in override
+     regression coverage, with execution evidence recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-247`).
 
 ## Remaining integration gaps (auth scope)
 

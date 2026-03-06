@@ -40,10 +40,9 @@ This checklist tracks user-facing workflow parity for the Flutter desktop full-p
 | Export workflows | PNG/SVG export and save | In progress | Export Pipeline | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) | Flutter export-workflow parity scaffold, parity harness, runtime-switchable in-memory/remote-stub contract boundary, backend response-driven state mutation wiring, and sibling `result`/`data` envelope fallback regression coverage (contract + parity) are added; backend export pipeline/native save integration is pending. |
 | Diagnostics/recovery | Runtime health, reconnect, remediation | In progress | Platform Reliability | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) | Flutter diagnostics/recovery parity scaffold, parity harness, runtime-switchable in-memory/remote-stub contract boundary, HTTP health-probe remote transport gating, operation-level backend request metadata mapping, backend execution-path status propagation, backend response-driven state mutation wiring, and sibling `result`/`data` envelope fallback regression coverage (contract + parity) are added; live telemetry/reconnect policy integration is pending. |
 
-Latest auth/session parity evidence update: `Unit WS-D-246` adds backend-code classification
-fast-path handling for numeric auth status codes (`401`/`403`/`419`/`440`) and empty compact-code
-inputs, preserving existing signed-out/session-expired parity expectations while reducing marker
-scan work in auth parser hot paths.
+Latest auth/session parity evidence update: `Unit WS-D-247` adds `JWT_EXPIRED` backend-code
+normalization coverage to signed-out/session-expired inference and locks parity expectations for
+both deterministic session-expired fallback and explicit signed-in override precedence.
 
 ## Cross-cutting shell/release routing note
 

@@ -5768,6 +5768,31 @@ void main() {
     );
 
     test(
+      'auth backend code-only jwt-expired payload maps session-expired fallback status',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'code': 'JWT_EXPIRED',
+                'state': <String, Object?>{
+                  'sessionToken': 'code-only-jwt-expired-token',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend session expired.',
+        );
+      },
+    );
+
+    test(
       'auth backend explicit message keeps precedence over code-based fallback mapping',
       () {
         final _BackendResponseTransportClient transportClient =
@@ -6450,6 +6475,29 @@ void main() {
             _BackendResponseTransportClient(<String, Map<String, Object?>>{
               RemoteStubOperationIds.restoreSession: <String, Object?>{
                 'code': 'EXPIRED_TOKEN',
+                'state': <String, Object?>{
+                  'signedIn': true,
+                  'rememberSession': true,
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.restoreSession();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+      },
+    );
+
+    test(
+      'auth backend explicit signed-in state overrides jwt-expired code variant',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.restoreSession: <String, Object?>{
+                'code': 'JWT_EXPIRED',
                 'state': <String, Object?>{
                   'signedIn': true,
                   'rememberSession': true,
