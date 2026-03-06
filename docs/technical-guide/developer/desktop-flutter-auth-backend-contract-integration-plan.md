@@ -392,6 +392,17 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      (`unauthorized::`) to preserve deterministic auth-required fallback mapping while exercising
      the adjusted delimiter-loop start path; execution evidence is recorded in
      `web-mcp-phase-c-execution-log.md` (`Unit WS-D-267`).
+55. Backend code compact no-delimiter uppercase-tail normalization optimization:
+   - `_compactBackendCodeFromTrimmed(...)` now tracks `firstUppercaseCompactIndex` during compact
+     scan and, when delimiter-free compact normalization is required, lowercases only from that
+     index onward while preserving known-lowercase prefix as-is,
+   - `_compactBackendAsciiLowercase(...)` and `_appendCompactBackendAsciiLowercaseRange(...)` now
+     support `startInclusive` to avoid redundant lowercase checks on prefix segments already known
+     to be lowercase/digit compact units,
+   - contract/parity suites now lock lowercase-prefix uppercase-suffix compact unauthorized marker
+     behavior (`unauthorizedTOKEN`) to preserve deterministic auth-required fallback mapping on the
+     start-indexed compact-uppercase normalization path; execution evidence is recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-268`).
 
 ## Remaining integration gaps (auth scope)
 

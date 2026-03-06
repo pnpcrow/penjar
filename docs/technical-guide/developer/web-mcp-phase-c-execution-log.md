@@ -13162,6 +13162,77 @@ non-compact delimiter index during compact normalization scanning.
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-268: compact no-delimiter uppercase-tail start-index normalization
+
+### Planned objective
+
+Reduce compact no-delimiter normalization overhead by avoiding redundant lowercase-prefix rescans
+when the first uppercase compact unit appears after an already-lowercase prefix.
+
+### Implemented changes
+
+1. Updated compact normalization path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_compactBackendCodeFromTrimmed(...)` now tracks `firstUppercaseCompactIndex` during compact
+     scan and, when no delimiter/non-compact unit is found, lowercases only from that index
+     forward instead of rescanning known-lowercase prefix units,
+   - no-delimiter compact inputs with no uppercase compact units still return the original trimmed
+     value unchanged.
+2. Updated start-indexed lowercase helpers:
+   - `_compactBackendAsciiLowercase(...)` now accepts `startInclusive`, reuses
+     `_appendCompactBackendAsciiRange(...)` for unchanged prefix segments, and lowercases only the
+     tail range,
+   - `_appendCompactBackendAsciiLowercaseRange(...)` now accepts `startInclusive` to support
+     targeted tail normalization.
+3. Preserved existing fallback semantics:
+   - compact-only/no-delimiter normalization, delimiter-path normalization, Unicode fallback,
+     marker classification, and non-exact fallback behavior remain unchanged.
+4. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only lowercase-prefix uppercase-suffix compact unauthorized payload maps authentication-required fallback status`
+     (`code: "unauthorizedTOKEN"`).
+5. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendLowercasePrefixUppercaseSuffixCompactUnauthorizedParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps lowercase-prefix uppercase-suffix compact unauthorized backend failure to deterministic auth-required status`.
+6. Synced continuity docs for WS-D-268 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+7. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - compact no-delimiter uppercase-tail normalization in `_compactBackendCodeFromTrimmed(...)`,
+  - deterministic auth-required fallback behavior for lowercase-prefix uppercase-suffix compact
+    unauthorized marker `unauthorizedTOKEN`,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. WS-D-267 no-delimiter compact path still rescanned prefix units already known to be
+     lowercase/digit when any uppercase compact unit existed.
+  2. Lowercase-prefix uppercase-suffix compact unauthorized behavior (`unauthorizedTOKEN`) was not
+     explicitly parity-locked.
+- **Fix applied**
+  1. Tracked first uppercase compact index and normalized only tail range from that index onward
+     for no-delimiter compact inputs.
+  2. Added dedicated contract/parity regressions for `unauthorizedTOKEN` deterministic
+     auth-required fallback behavior.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - no-delimiter compact normalization lowers only from `firstUppercaseCompactIndex` onward.
+  - lowercase-prefix uppercase-suffix compact `unauthorizedTOKEN` payloads map to deterministic
+    auth-required fallback behavior in contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
