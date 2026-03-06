@@ -1476,10 +1476,11 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
       sessionExpired: false,
     );
   }
-  final _BackendCodeClassification? uppercaseExactClassification =
+  final _BackendCodeClassification? rawExactClassification =
+      _backendExactCodeClassifications[trimmed] ??
       _backendUppercaseExactCodeClassifications[trimmed];
-  if (uppercaseExactClassification != null) {
-    return uppercaseExactClassification;
+  if (rawExactClassification != null) {
+    return rawExactClassification;
   }
   final String compact = _compactBackendCodeFromTrimmed(trimmed);
   if (compact.isEmpty) {
