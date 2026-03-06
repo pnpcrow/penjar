@@ -5889,6 +5889,43 @@ void main() {
     );
 
     test(
+      'auth backend code-only lowercase compact marker-length candidate near-miss keeps signed-in state without fallback status',
+      () {
+        final _BackendResponseTransportClient
+        transportClient = _BackendResponseTransportClient(<
+          String,
+          Map<String, Object?>
+        >{
+          RemoteStubOperationIds.refreshToken: <String, Object?>{
+            'code': 'granttoken',
+            'state': <String, Object?>{
+              'sessionToken':
+                  'code-only-lowercase-compact-marker-length-candidate-near-miss',
+            },
+          },
+        });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(
+              transportClient: transportClient,
+              initialState: const AuthSessionState(
+                rememberSession: true,
+                signedIn: true,
+                status: 'Previously signed in.',
+              ),
+            );
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isTrue);
+        expect(authContract.state.rememberSession, isTrue);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Previously signed in.',
+        );
+      },
+    );
+
+    test(
       'auth backend code-only capitalized compact authrequired payload maps authentication-required fallback status',
       () {
         final _BackendResponseTransportClient transportClient =

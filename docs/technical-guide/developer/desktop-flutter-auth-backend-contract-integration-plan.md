@@ -557,6 +557,17 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      (`code: "GrantToken"`) to preserve signed-in/status stability (no unintended
      auth-required/session-expired fallback) on candidate-reuse paths; execution evidence is
      recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-283`).
+71. Backend code classification unchanged-compact exact-probe skip optimization:
+   - `_classifyBackendCode(...)` now skips compact exact-map probing when compact normalization
+     reuses the original trimmed code value (`compactLength == trimmedLength` and identical compact
+     reference), eliminating redundant exact-map lookups on unchanged compact paths while
+     preserving existing raw exact-map coverage,
+   - existing numeric shortcuts, short/long guards, marker precedence, and
+     signed-out/session-expired fallback semantics remain unchanged,
+   - contract/parity suites now lock lowercase compact marker-length-candidate near-miss behavior
+     (`code: "granttoken"`) to preserve signed-in/status stability (no unintended
+     auth-required/session-expired fallback) on unchanged-compact paths; execution evidence is
+     recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-284`).
 
 ## Remaining integration gaps (auth scope)
 

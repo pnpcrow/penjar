@@ -1547,7 +1547,9 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
   final bool compactExactLengthCandidate = compactLength == trimmedLength
       ? trimmedExactLengthCandidate
       : _isBackendSignedOutCodeMarkerLength(compactLength);
-  if (compactExactLengthCandidate) {
+  final bool compactReusesTrimmedValue =
+      compactLength == trimmedLength && identical(compact, trimmed);
+  if (compactExactLengthCandidate && !compactReusesTrimmedValue) {
     final _BackendCodeClassification? exactClassification =
         _backendExactCodeClassifications[compact];
     if (exactClassification != null) {

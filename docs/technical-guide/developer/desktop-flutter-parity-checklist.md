@@ -40,11 +40,11 @@ This checklist tracks user-facing workflow parity for the Flutter desktop full-p
 | Export workflows | PNG/SVG export and save | In progress | Export Pipeline | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) | Flutter export-workflow parity scaffold, parity harness, runtime-switchable in-memory/remote-stub contract boundary, backend response-driven state mutation wiring, and sibling `result`/`data` envelope fallback regression coverage (contract + parity) are added; backend export pipeline/native save integration is pending. |
 | Diagnostics/recovery | Runtime health, reconnect, remediation | In progress | Platform Reliability | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) | Flutter diagnostics/recovery parity scaffold, parity harness, runtime-switchable in-memory/remote-stub contract boundary, HTTP health-probe remote transport gating, operation-level backend request metadata mapping, backend execution-path status propagation, backend response-driven state mutation wiring, and sibling `result`/`data` envelope fallback regression coverage (contract + parity) are added; live telemetry/reconnect policy integration is pending. |
 
-Latest auth/session parity evidence update: `Unit WS-D-283` optimizes exact-length candidate reuse
-in `_classifyBackendCode(...)` when `compactLength == trimmedLength` while preserving existing
-parity behavior, and locking capitalized compact marker-length-candidate near-miss
-`code: "GrantToken"` signed-in/status stability behavior (no unintended
-auth-required/session-expired fallback).
+Latest auth/session parity evidence update: `Unit WS-D-284` optimizes unchanged-compact exact
+probing in `_classifyBackendCode(...)` by skipping compact exact-map lookup when compact
+normalization reuses the trimmed input reference while preserving existing parity behavior, and
+locking lowercase compact marker-length-candidate near-miss `code: "granttoken"` signed-in/status
+stability behavior (no unintended auth-required/session-expired fallback).
 
 ## Cross-cutting shell/release routing note
 
