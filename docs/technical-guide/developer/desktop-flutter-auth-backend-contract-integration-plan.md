@@ -255,6 +255,11 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      scans,
    - existing substring fallback behavior remains unchanged for composite code payloads, with
      execution evidence recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-249`).
+37. Backend code marker-length short-circuit optimization:
+   - classifier now precomputes minimum marker lengths for signed-out/session-expired catalogs and
+     short-circuits impossible short compact inputs before substring loop scans,
+   - exact-marker fast path and composite substring fallback behavior remain intact, with execution
+     evidence recorded in `web-mcp-phase-c-execution-log.md` (`Unit WS-D-250`).
 
 ## Remaining integration gaps (auth scope)
 

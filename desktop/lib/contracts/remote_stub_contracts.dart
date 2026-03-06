@@ -1405,6 +1405,26 @@ final Set<String> _backendSessionExpiredCodeMarkerSet =
     _backendSessionExpiredCodeMarkers.toSet();
 final Set<String> _backendSignedOutCodeMarkerSet = _backendSignedOutCodeMarkers
     .toSet();
+final int _backendSignedOutCodeMarkerMinLength = _markerMinLength(
+  _backendSignedOutCodeMarkers,
+);
+final int _backendSessionExpiredCodeMarkerMinLength = _markerMinLength(
+  _backendSessionExpiredCodeMarkers,
+);
+
+int _markerMinLength(List<String> markers) {
+  if (markers.isEmpty) {
+    return 0;
+  }
+  int minLength = markers.first.length;
+  for (int index = 1; index < markers.length; index++) {
+    final int markerLength = markers[index].length;
+    if (markerLength < minLength) {
+      minLength = markerLength;
+    }
+  }
+  return minLength;
+}
 
 _BackendCodeClassification _classifyBackendCode(String rawCode) {
   final String trimmed = rawCode.trim();
@@ -1433,6 +1453,12 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
       sessionExpired: _backendSessionExpiredCodeMarkerSet.contains(compact),
     );
   }
+  if (compact.length < _backendSignedOutCodeMarkerMinLength) {
+    return const _BackendCodeClassification(
+      signedOut: false,
+      sessionExpired: false,
+    );
+  }
 
   bool signedOut = false;
   for (final String marker in _backendSignedOutCodeMarkers) {
@@ -1444,6 +1470,12 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
   if (!signedOut) {
     return const _BackendCodeClassification(
       signedOut: false,
+      sessionExpired: false,
+    );
+  }
+  if (compact.length < _backendSessionExpiredCodeMarkerMinLength) {
+    return const _BackendCodeClassification(
+      signedOut: true,
       sessionExpired: false,
     );
   }

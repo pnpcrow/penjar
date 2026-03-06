@@ -12037,8 +12037,60 @@ matches via precomputed marker sets, while preserving existing substring fallbac
   2. Kept existing loop-based fallback for composite payloads to preserve prior behavior.
   3. Re-ran formatter, targeted auth suites, and full desktop verification.
 - **Post-fix validation criteria**
-  - exact compact marker codes classify without substring-loop traversal.
-  - composite codes still classify through existing fallback marker scans.
+- exact compact marker codes classify without substring-loop traversal.
+- composite codes still classify through existing fallback marker scans.
+- contract/parity/mode-parity suites and full desktop verification remain green.
+
+## Unit WS-D-250: backend code marker-length short-circuit optimization
+
+### Planned objective
+
+Trim remaining avoidable classification work by short-circuiting compact codes that are shorter
+than the minimum marker lengths for signed-out/session-expired catalogs, while preserving existing
+exact-marker and composite fallback behavior.
+
+### Implemented changes
+
+1. Updated classifier constants in `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - added `_backendSignedOutCodeMarkerMinLength`,
+   - added `_backendSessionExpiredCodeMarkerMinLength`,
+   - added shared `_markerMinLength(...)` helper.
+2. Updated `_classifyBackendCode(...)`:
+   - added signed-out early return when compact input length is shorter than minimum signed-out
+     marker length,
+   - added session-expired early return when signed-out path is active but compact input length is
+     shorter than minimum session-expired marker length.
+3. Preserved existing behavior ordering:
+   - numeric fast paths (`401/403/419/440`) and exact-marker set fast path remain ahead of
+     substring loops,
+   - composite code values still use existing `contains(...)` marker-loop fallback.
+4. Synced continuity docs for WS-D-250 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+5. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - residual substring-loop work after numeric/exact fast-path improvements,
+  - semantic integrity of signed-out/session-expired classification under short compact-code inputs,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. Codes shorter than any marker length still entered substring-loop checks.
+  2. For these short inputs, loop scans are guaranteed misses and can be skipped safely.
+- **Fix applied**
+  1. Added minimum-marker-length precomputation for signed-out/session-expired catalogs.
+  2. Added short-input early returns in classifier before respective substring loops.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - impossible short compact inputs now bypass signed-out/session-expired substring loops.
+  - numeric/exact/composite classification semantics remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
 ## Remaining Phase C setup gaps
