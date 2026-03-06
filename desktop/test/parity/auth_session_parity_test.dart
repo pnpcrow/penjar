@@ -4433,26 +4433,45 @@ void main() {
     'is_logged_in',
   ];
 
-  bool hasAuthStateAliasPayload(
-    Iterable<Map<String, Object?>> payloads, {
+  String authStateMatrixEntryKey({
     required String wrapperKey,
     required String alias,
-    required Object? expectedValue,
+    required Object? value,
   }) {
+    return '$wrapperKey::$alias::$value';
+  }
+
+  Set<String> buildAuthStateMatrixEntrySet(
+    Iterable<Map<String, Object?>> payloads,
+  ) {
+    final Set<String> matrixEntries = <String>{};
+
     for (final Map<String, Object?> payload in payloads) {
-      final Object? wrapperPayload = payload[wrapperKey];
-      if (wrapperPayload is! Map) {
-        continue;
-      }
-      final Object? authStatePayload = wrapperPayload['authState'];
-      if (authStatePayload is! Map) {
-        continue;
-      }
-      if (authStatePayload[alias] == expectedValue) {
-        return true;
+      for (final String wrapperKey in authStateWrapperKeys) {
+        final Object? wrapperPayload = payload[wrapperKey];
+        if (wrapperPayload is! Map) {
+          continue;
+        }
+        final Object? authStatePayload = wrapperPayload['authState'];
+        if (authStatePayload is! Map) {
+          continue;
+        }
+        authStatePayload.forEach((Object? aliasKey, Object? aliasValue) {
+          if (aliasKey is! String) {
+            return;
+          }
+          matrixEntries.add(
+            authStateMatrixEntryKey(
+              wrapperKey: wrapperKey,
+              alias: aliasKey,
+              value: aliasValue,
+            ),
+          );
+        });
       }
     }
-    return false;
+
+    return matrixEntries;
   }
 
   void appendMissingAuthStateMatrixEntries({
@@ -4462,13 +4481,16 @@ void main() {
     required Iterable<String> aliases,
     required bool expectedValue,
   }) {
+    final Set<String> matrixEntries = buildAuthStateMatrixEntrySet(payloads);
+
     for (final String wrapperKey in authStateWrapperKeys) {
       for (final String alias in aliases) {
-        if (!hasAuthStateAliasPayload(
-          payloads,
-          wrapperKey: wrapperKey,
-          alias: alias,
-          expectedValue: expectedValue,
+        if (!matrixEntries.contains(
+          authStateMatrixEntryKey(
+            wrapperKey: wrapperKey,
+            alias: alias,
+            value: expectedValue,
+          ),
         )) {
           missingEntries.add(
             '$operationLabel $wrapperKey authState.$alias=$expectedValue',

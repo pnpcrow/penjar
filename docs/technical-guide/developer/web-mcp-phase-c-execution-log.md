@@ -11632,6 +11632,61 @@ one reusable append/expect path.
   - operation labels, alias sets, wrappers, and expected-value semantics remain unchanged.
   - targeted auth tests and full desktop verification remain green after consolidation.
 
+## Unit WS-D-243: authState matrix lookup performance indexing
+
+### Planned objective
+
+Improve parity matrix-guard execution efficiency by replacing repeated payload scans with indexed
+matrix membership checks, while preserving existing assertion semantics and diagnostics.
+
+### Implemented changes
+
+1. Replaced repeated scan helper `hasAuthStateAliasPayload(...)` with indexed lookup helpers in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - `authStateMatrixEntryKey(...)`,
+   - `buildAuthStateMatrixEntrySet(...)`.
+2. Updated shared append helper to build matrix entries once per payload set:
+   - `appendMissingAuthStateMatrixEntries(...)` now calls
+     `buildAuthStateMatrixEntrySet(...)` and performs keyed membership checks for each required
+     wrapper/alias/value tuple.
+3. Kept operation-level and combined-operation guard wiring unchanged:
+   - `expectOperationAuthStateMatrixSymmetric(...)`,
+   - sign-in / refresh-token / restore-session matrix tests,
+   - restore/refresh combined signed-out and signed-in-false matrix tests.
+4. Synced continuity docs for WS-D-243 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+5. Re-ran validation commands:
+   - `cd desktop && dart format test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - computational overhead in helper-level matrix assertion loops,
+  - correctness parity between scan-based and index-based matrix detection,
+  - regression impact on targeted auth suites and full verification chain.
+- **Issues found during review**
+  1. Matrix guards were repeatedly re-scanning payload iterables per alias/wrapper requirement,
+     resulting in avoidable O(wrapper * alias * payload) scan churn.
+  2. This overhead was amplified after broadening matrix-guard coverage across operations and
+     alias variants.
+- **Fix applied**
+  1. Introduced per-payload-set matrix entry indexing and switched checks to keyed membership
+     lookups.
+  2. Preserved existing missing-entry message format and operation-label semantics to avoid
+     downstream diagnostic drift.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification to confirm behavior
+     equivalence and zero regressions.
+- **Post-fix validation criteria**
+  - matrix guard failure semantics and diagnostics remain unchanged.
+  - helper-level assertion path now avoids repeated full payload scans per alias check.
+  - targeted auth tests and full desktop verification remain green after indexing rollout.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

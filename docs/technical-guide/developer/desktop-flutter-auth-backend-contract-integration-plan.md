@@ -204,6 +204,12 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      wrapper/alias iteration logic while preserving deterministic failure diagnostics,
    - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
      (`Unit WS-D-242`).
+30. authState matrix lookup performance indexing:
+   - parity matrix assertion helpers now build per-payload-set authState entry indexes once and use
+     keyed membership checks for wrapper/alias/value matrix assertions instead of repeated full
+     payload scans, reducing guard evaluation overhead while keeping failure semantics unchanged,
+   - execution evidence is recorded in `web-mcp-phase-c-execution-log.md`
+     (`Unit WS-D-243`).
 
 ## Remaining integration gaps (auth scope)
 
