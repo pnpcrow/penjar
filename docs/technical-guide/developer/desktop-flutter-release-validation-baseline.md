@@ -310,6 +310,8 @@ CI baseline note:
     to prevent whitespace-class normalization regressions.
   - contract matrix now also locks newline-wrapped strict alias handling (`"\nYES\n"`,
     `"\nTRUE\n"`) to prevent whitespace-class normalization regressions.
+  - strict toggle runtime parser now uses builtin case-pattern matching after trim normalization to
+    avoid repeated external lowercase command execution while preserving strict semantics.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.

@@ -15141,6 +15141,56 @@ for strict installer/protocol toggles.
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-303.
 
+## Unit WS-D-304: builtin strict-toggle parser optimization
+
+### Planned objective
+
+Improve Windows installer pipeline toggle-parser runtime efficiency by removing repeated external
+lowercase command execution and replacing it with builtin case-pattern matching while preserving
+strict semantics.
+
+### Implemented changes
+
+1. Refactored strict toggle normalization in
+   `desktop/scripts/run_windows_installer_pipeline.sh`:
+   - `normalize_toggle_input()` now handles trim-only normalization,
+   - introduced `is_strict_toggle()` helper with builtin case patterns:
+     `1|[Tt][Rr][Uu][Ee]|[Yy][Ee][Ss]|[Ss][Tt][Rr][Ii][Cc][Tt]`.
+2. Updated strict toggle evaluation paths:
+   - `strict_mode` now derives from `if is_strict_toggle "$strict_input"`,
+   - `strict_protocol_mode` now derives from
+     `if is_strict_toggle "$strict_protocol_input"`.
+3. Preserved behavior contract via existing expanded matrix:
+   - lowercase, uppercase, mixed-case, and whitespace-wrapped alias fixtures continue to pass
+     unchanged under the refactored parser.
+4. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-304
+     parser optimization lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     builtin parser optimization note.
+5. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict toggle parser runtime path complexity and external command dependency,
+  - semantic parity for all strict alias variants after parser refactor,
+  - regression safety through full contract/parity verification chain.
+- **Issues found during review**
+  1. prior parser executed an external lowercase command (`tr`) per strict toggle evaluation,
+     adding avoidable process overhead and external-tool dependency.
+  2. strict behavior was correct but implementation could be simplified with builtin pattern
+     matching after trim normalization.
+- **Fix applied**
+  1. replaced external lowercase normalization with builtin case-pattern strict detection helper.
+  2. reused helper for both installer/protocol strict toggles to keep parser logic centralized.
+- **Post-fix validation criteria**
+  - contract checker passes with no alias/whitespace regression.
+  - full desktop verify remains green after parser optimization.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-304.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

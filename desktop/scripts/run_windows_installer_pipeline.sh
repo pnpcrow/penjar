@@ -14,18 +14,27 @@ normalize_toggle_input() {
   local value="$1"
   value="${value#"${value%%[![:space:]]*}"}"
   value="${value%"${value##*[![:space:]]}"}"
-  printf '%s' "$value" | tr '[:upper:]' '[:lower:]'
+  printf '%s' "$value"
+}
+
+is_strict_toggle() {
+  local value
+  value="$(normalize_toggle_input "$1")"
+  case "$value" in
+    1|[Tt][Rr][Uu][Ee]|[Yy][Ee][Ss]|[Ss][Tt][Rr][Ii][Cc][Tt]) return 0 ;;
+  esac
+  return 1
 }
 
 strict_mode=0
-case "$(normalize_toggle_input "$strict_input")" in
-  1|true|yes|strict) strict_mode=1 ;;
-esac
+if is_strict_toggle "$strict_input"; then
+  strict_mode=1
+fi
 
 strict_protocol_mode=0
-case "$(normalize_toggle_input "$strict_protocol_input")" in
-  1|true|yes|strict) strict_protocol_mode=1 ;;
-esac
+if is_strict_toggle "$strict_protocol_input"; then
+  strict_protocol_mode=1
+fi
 
 mode_dir=""
 case "$build_mode" in
