@@ -40,10 +40,10 @@ This checklist tracks user-facing workflow parity for the Flutter desktop full-p
 | Export workflows | PNG/SVG export and save | In progress | Export Pipeline | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) | Flutter export-workflow parity scaffold, parity harness, runtime-switchable in-memory/remote-stub contract boundary, backend response-driven state mutation wiring, and sibling `result`/`data` envelope fallback regression coverage (contract + parity) are added; backend export pipeline/native save integration is pending. |
 | Diagnostics/recovery | Runtime health, reconnect, remediation | In progress | Platform Reliability | [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/) | Flutter diagnostics/recovery parity scaffold, parity harness, runtime-switchable in-memory/remote-stub contract boundary, HTTP health-probe remote transport gating, operation-level backend request metadata mapping, backend execution-path status propagation, backend response-driven state mutation wiring, and sibling `result`/`data` envelope fallback regression coverage (contract + parity) are added; live telemetry/reconnect policy integration is pending. |
 
-Latest auth/session parity evidence update: `Unit WS-D-276` optimizes marker-loop list access in
-`_classifyBackendCode(...)` via cached marker-list references while preserving existing parity
-behavior, and locking capitalized compact `code: "AuthRequired"` deterministic auth-required
-fallback behavior.
+Latest auth/session parity evidence update: `Unit WS-D-277` optimizes marker-threshold guard access
+in `_classifyBackendCode(...)` via cached minimum-length thresholds while preserving existing parity
+behavior, and locking capitalized compact `code: "SignedOut"` deterministic auth-required fallback
+behavior.
 
 ## Cross-cutting shell/release routing note
 

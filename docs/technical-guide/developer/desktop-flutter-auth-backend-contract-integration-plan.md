@@ -485,6 +485,15 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      (`code: "AuthRequired"`) to preserve deterministic auth-required fallback mapping on
      signed-out marker paths after loop reference-caching changes; execution evidence is recorded in
      `web-mcp-phase-c-execution-log.md` (`Unit WS-D-276`).
+64. Backend code classification marker-threshold local caching optimization:
+   - `_classifyBackendCode(...)` now caches marker minimum-length thresholds as local values
+     (`sessionExpiredMarkerMinLength`, `signedOutOnlyMarkerMinLength`) before threshold guards to
+     reduce repeated top-level constant lookups on classifier hot paths,
+   - existing marker precedence and exact/raw code classification semantics remain unchanged,
+   - contract/parity suites now lock capitalized compact signed-out marker behavior
+     (`code: "SignedOut"`) to preserve deterministic auth-required fallback mapping on signed-out
+     marker paths after local threshold caching changes; execution evidence is recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-277`).
 
 ## Remaining integration gaps (auth scope)
 

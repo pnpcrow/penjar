@@ -1495,7 +1495,9 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
     return exactClassification;
   }
 
-  if (compactLength >= _backendSessionExpiredCodeMarkerMinLength) {
+  final int sessionExpiredMarkerMinLength =
+      _backendSessionExpiredCodeMarkerMinLength;
+  if (compactLength >= sessionExpiredMarkerMinLength) {
     final List<String> sessionExpiredMarkers =
         _backendSessionExpiredCodeMarkers;
     final int markerCount = sessionExpiredMarkers.length;
@@ -1509,7 +1511,9 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
     }
   }
 
-  if (compactLength < _backendSignedOutOnlyCodeMarkerMinLength) {
+  final int signedOutOnlyMarkerMinLength =
+      _backendSignedOutOnlyCodeMarkerMinLength;
+  if (compactLength < signedOutOnlyMarkerMinLength) {
     return const _BackendCodeClassification(
       signedOut: false,
       sessionExpired: false,

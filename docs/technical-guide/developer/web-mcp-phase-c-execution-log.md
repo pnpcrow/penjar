@@ -13720,6 +13720,64 @@ index traversal while preserving signed-out/session-expired inference behavior.
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-277: classifier marker-threshold local caching
+
+### Planned objective
+
+Reduce backend code classifier threshold-guard overhead by caching marker minimum-length thresholds
+as local values before guard checks while preserving signed-out/session-expired inference behavior.
+
+### Implemented changes
+
+1. Updated backend classifier threshold guards in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_classifyBackendCode(...)` now caches marker thresholds as local values
+     (`sessionExpiredMarkerMinLength`, `signedOutOnlyMarkerMinLength`).
+   - session-expired and signed-out-only threshold checks now reuse those local values.
+2. Preserved existing fallback semantics:
+   - marker precedence, raw/compact exact classification, and fallback status mapping behavior
+     remain unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only capitalized compact signedout payload maps authentication-required fallback status`
+     (`code: "SignedOut"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendCapitalizedCompactSignedOutParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps capitalized compact signedout backend failure to deterministic auth-required status`.
+5. Synced continuity docs for WS-D-277 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - marker-threshold local caching in `_classifyBackendCode(...)`,
+  - capitalized compact signed-out marker fallback mapping on signed-out marker path,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. marker-threshold guards still referenced top-level threshold values directly on each check.
+  2. capitalized compact `SignedOut` marker behavior was not explicitly parity-locked.
+- **Fix applied**
+  1. cached marker threshold values as locals before guard checks.
+  2. added dedicated contract/parity regressions for capitalized compact signed-out mapping.
+  3. re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - marker-threshold local caching does not alter classification precedence or fallback mapping.
+  - capitalized compact `code: "SignedOut"` payloads map to auth-required fallback status in
+    contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
