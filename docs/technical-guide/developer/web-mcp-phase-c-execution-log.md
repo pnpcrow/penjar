@@ -12971,6 +12971,72 @@ before delimiter-driven normalization.
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-265: delimiter-path Unicode-suffix incremental normalization optimization
+
+### Planned objective
+
+Reduce delimiter-path Unicode fallback overhead by appending normalized suffix output from the
+first encountered non-ASCII index without rescanning already-normalized ASCII segments.
+
+### Implemented changes
+
+1. Updated compact normalization path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - `_compactBackendCodeFromTrimmed(...)` now appends pre-normalized compact prefix once, then
+     when non-ASCII appears (at `firstNonCompactIndex` or later) it appends
+     Unicode-lowercased compact suffix units through
+     `_appendCompactBackendUnicodeLowercasedRange(...)`,
+   - removed full-path Unicode fallback rebuild (`_compactBackendCodeFromTrimmedUnicodeFallback(...)`)
+     to avoid delimiter-path full-string lowercase + prefix rescan duplication.
+2. Preserved existing fallback semantics:
+   - compact-only, ASCII delimiter-path, marker-classification, and non-exact fallback behavior
+     remain unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only mixed-case delimited unauthorized with non-ascii suffix maps authentication-required fallback status`
+     (`code: "Unauthorized::TOKEN토큰"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendMixedCaseDelimitedUnauthorizedNonAsciiSuffixParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps mixed-case delimited unauthorized backend failure with non-ascii suffix to deterministic auth-required status`.
+5. Synced continuity docs for WS-D-265 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - delimiter-path Unicode fallback rebuild overhead after partial ASCII normalization,
+  - deterministic auth-required fallback behavior for mixed-case delimited `Unauthorized::TOKEN토큰`,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. WS-D-264 still rebuilt Unicode fallback output from delimiter start using full-string lowercase
+     when non-ASCII was encountered after already-normalized ASCII segments.
+  2. Mixed-case delimited unauthorized marker behavior with non-ASCII suffix
+     (`Unauthorized::TOKEN토큰`) was not explicitly parity-locked.
+- **Fix applied**
+  1. Added incremental Unicode-suffix append helper and reused existing delimiter-path buffer state
+     instead of rebuilding from delimiter start.
+  2. Added dedicated contract/parity regressions for
+     `Unauthorized::TOKEN토큰` deterministic auth-required fallback behavior.
+  3. Re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - delimiter-path normalization appends Unicode suffix output from first non-ASCII index without
+    duplicate prefix/suffix rescans.
+  - mixed-case delimited `Unauthorized::TOKEN토큰` payloads map to deterministic auth-required
+    fallback behavior in contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

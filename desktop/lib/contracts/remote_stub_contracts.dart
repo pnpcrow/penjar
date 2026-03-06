@@ -1552,12 +1552,6 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
         ? _compactBackendAsciiLowercase(trimmedCode)
         : trimmedCode;
   }
-  if (trimmedCode.codeUnitAt(firstNonCompactIndex) > 127) {
-    return _compactBackendCodeFromTrimmedUnicodeFallback(
-      trimmedCode,
-      firstNonCompactIndex: firstNonCompactIndex,
-    );
-  }
   final StringBuffer asciiBuffer = StringBuffer();
   if (firstNonCompactIndex > 0) {
     if (hasUppercaseCompactCodeUnit) {
@@ -1570,13 +1564,23 @@ String _compactBackendCodeFromTrimmed(String trimmedCode) {
       asciiBuffer.write(trimmedCode.substring(0, firstNonCompactIndex));
     }
   }
+  if (trimmedCode.codeUnitAt(firstNonCompactIndex) > 127) {
+    _appendCompactBackendUnicodeLowercasedRange(
+      asciiBuffer,
+      trimmedCode,
+      startInclusive: firstNonCompactIndex,
+    );
+    return asciiBuffer.toString();
+  }
   for (int index = firstNonCompactIndex; index < trimmedCode.length; index++) {
     final int codeUnit = trimmedCode.codeUnitAt(index);
     if (codeUnit > 127) {
-      return _compactBackendCodeFromTrimmedUnicodeFallback(
+      _appendCompactBackendUnicodeLowercasedRange(
+        asciiBuffer,
         trimmedCode,
-        firstNonCompactIndex: firstNonCompactIndex,
+        startInclusive: index,
       );
+      return asciiBuffer.toString();
     }
     if (_isBackendCodeCompactCodeUnit(codeUnit)) {
       asciiBuffer.writeCharCode(codeUnit);
@@ -1614,22 +1618,20 @@ void _appendCompactBackendAsciiLowercaseRange(
   }
 }
 
-String _compactBackendCodeFromTrimmedUnicodeFallback(
-  String trimmedCode, {
-  required int firstNonCompactIndex,
+void _appendCompactBackendUnicodeLowercasedRange(
+  StringBuffer buffer,
+  String code, {
+  required int startInclusive,
 }) {
-  final String lowered = trimmedCode.toLowerCase();
-  final StringBuffer buffer = StringBuffer();
-  if (firstNonCompactIndex > 0) {
-    buffer.write(lowered.substring(0, firstNonCompactIndex));
-  }
-  for (int index = firstNonCompactIndex; index < lowered.length; index++) {
+  final String lowered = startInclusive == 0
+      ? code.toLowerCase()
+      : code.substring(startInclusive).toLowerCase();
+  for (int index = 0; index < lowered.length; index++) {
     final int codeUnit = lowered.codeUnitAt(index);
     if (_isBackendCodeCompactCodeUnit(codeUnit)) {
       buffer.writeCharCode(codeUnit);
     }
   }
-  return buffer.toString();
 }
 
 bool _isBackendCodeCompactCodeUnit(int codeUnit) {
