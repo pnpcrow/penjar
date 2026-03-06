@@ -320,6 +320,8 @@ CI baseline note:
     (`"\fYES\f"`, `"\vTRUE\v"`) to prevent remaining whitespace-class trim regressions.
   - contract report row rendering now escapes control-character, backslash, and pipe content in
     case/result cells so mismatch diagnostics remain Markdown-table safe.
+  - markdown cell escaping path now uses a subshell-free helper handoff (shared escaped buffer)
+    instead of per-cell command substitutions to reduce shell overhead in large matrices.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.

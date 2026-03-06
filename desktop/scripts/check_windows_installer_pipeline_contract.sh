@@ -11,6 +11,7 @@ mkdir -p "$(dirname "$report_file")"
 case_rows=""
 failure_count=0
 total_cases=0
+escaped_markdown_cell=""
 
 escape_markdown_cell() {
   local value="$1"
@@ -21,7 +22,7 @@ escape_markdown_cell() {
   value="${value//$'\t'/\\t}"
   value="${value//$'\f'/\\f}"
   value="${value//$'\v'/\\v}"
-  printf '%s' "$value"
+  escaped_markdown_cell="$value"
 }
 
 append_case_row() {
@@ -32,7 +33,25 @@ append_case_row() {
   local log_assertion="$5"
   local result="$6"
   local summary="$7"
-  case_rows+="| $(escape_markdown_cell "$case_name") | $(escape_markdown_cell "$expected") | $(escape_markdown_cell "$actual") | $(escape_markdown_cell "$report_assertion") | $(escape_markdown_cell "$log_assertion") | $(escape_markdown_cell "$result") | $(escape_markdown_cell "$summary") |"$'\n'
+  local case_name_escaped expected_escaped actual_escaped report_assertion_escaped
+  local log_assertion_escaped result_escaped summary_escaped
+
+  escape_markdown_cell "$case_name"
+  case_name_escaped="$escaped_markdown_cell"
+  escape_markdown_cell "$expected"
+  expected_escaped="$escaped_markdown_cell"
+  escape_markdown_cell "$actual"
+  actual_escaped="$escaped_markdown_cell"
+  escape_markdown_cell "$report_assertion"
+  report_assertion_escaped="$escaped_markdown_cell"
+  escape_markdown_cell "$log_assertion"
+  log_assertion_escaped="$escaped_markdown_cell"
+  escape_markdown_cell "$result"
+  result_escaped="$escaped_markdown_cell"
+  escape_markdown_cell "$summary"
+  summary_escaped="$escaped_markdown_cell"
+
+  case_rows+="| ${case_name_escaped} | ${expected_escaped} | ${actual_escaped} | ${report_assertion_escaped} | ${log_assertion_escaped} | ${result_escaped} | ${summary_escaped} |"$'\n'
 }
 
 setup_empty_case() {

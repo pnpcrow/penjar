@@ -15377,6 +15377,51 @@ pipe/backslash content from strict alias fixtures.
   - full desktop verify remains green with unchanged pass-path behavior.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-308.
 
+## Unit WS-D-309: contract report escaping path subshell overhead optimization
+
+### Planned objective
+
+Preserve markdown-cell escaping behavior while removing per-cell command-substitution subshell
+overhead in contract report row assembly.
+
+### Implemented changes
+
+1. Optimized escaping helper plumbing in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - introduced shared buffer `escaped_markdown_cell`,
+   - `escape_markdown_cell()` now writes escaped output to the shared buffer instead of emitting via
+     command substitution.
+2. Refactored `append_case_row()` to:
+   - resolve each escaped field through the shared helper,
+   - assemble row content from local escaped variables without `$(...)` per cell.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-309
+     subshell-free escaping optimization lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     reduced shell-overhead escaping path behavior.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - shell-overhead characteristics in contract report row assembly,
+  - output parity of escaped markdown cells after helper-plumbing refactor,
+  - compatibility with strict alias matrix execution flow.
+- **Issues found during review**
+  1. WS-D-308 escaping called `escape_markdown_cell` via per-cell command substitution; this
+     incurred avoidable subshell overhead across each matrix row.
+  2. matrix size growth amplifies shell process churn, so maintaining behavior with lower overhead
+     improves sustained verification throughput.
+- **Fix applied**
+  1. replaced command-substitution return path with shared-buffer helper handoff.
+  2. kept escaped-output semantics unchanged while eliminating per-cell subshell creation.
+- **Post-fix validation criteria**
+  - contract checker passes with unchanged escaping behavior.
+  - full desktop verify remains green after helper path optimization.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-309.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
