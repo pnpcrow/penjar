@@ -15466,6 +15466,57 @@ calls with internal bash string containment checks.
   - full desktop verify remains green after process-reduction refactor.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-310.
 
+## Unit WS-D-311: strict parser non-overmatch guard alias regression coverage
+
+### Planned objective
+
+Prevent strict-mode overmatching by locking negative/non-strict toggle aliases as explicit
+non-strict paths in installer/protocol inference.
+
+### Implemented changes
+
+1. Expanded strict installer parser guard coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-false-alias-missing-command-pass`,
+   - added `strict-installer-whitespace-false-alias-missing-command-pass`,
+   - added `strict-installer-off-alias-missing-command-pass`,
+   - each case asserts `- Strict mode: 0` and non-blocking completion with missing installer
+     command.
+2. Expanded strict protocol parser guard coverage in the same checker:
+   - added `strict-protocol-false-alias-missing-command-pass`,
+   - added `strict-protocol-whitespace-false-alias-missing-command-pass`,
+   - added `strict-protocol-off-alias-missing-command-pass`,
+   - each case asserts `- Strict protocol registration mode: 0` and non-blocking completion with
+     missing protocol command.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-311
+     non-overmatch alias lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     negative/non-strict alias coverage in strict parser matrix.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict toggle inference boundaries for negative/non-strict aliases,
+  - installer/protocol strict parser non-overmatch behavior under missing-command conditions,
+  - compatibility with existing strict-positive alias matrix.
+- **Issues found during review**
+  1. positive strict alias coverage was broad, but explicit non-strict alias guards (`false`,
+     `off`) were not directly locked.
+  2. without dedicated non-overmatch fixtures, future parser refactors could accidentally widen
+     strict detection and convert intended non-strict paths into blocking failures.
+- **Fix applied**
+  1. added installer/protocol negative alias guard fixtures with strict-mode-zero assertions.
+  2. locked whitespace-trimmed negative alias behavior (` false `) to ensure trim path does not
+     alter non-strict semantics.
+- **Post-fix validation criteria**
+  - contract checker passes with non-overmatch guard alias fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-311.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

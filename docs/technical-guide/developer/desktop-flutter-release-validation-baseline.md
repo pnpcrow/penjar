@@ -324,6 +324,9 @@ CI baseline note:
     instead of per-cell command substitutions to reduce shell overhead in large matrices.
   - run-case report/log assertion checks now use bash internal string containment over loaded
     artifacts, avoiding repeated external `grep` process invocations per matrix case.
+  - contract matrix now also locks non-strict guard alias behavior (`false`, `off`, and
+    whitespace-wrapped ` false `) so strict parser inference does not overmatch unknown/negative
+    toggle values for installer/protocol paths.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
