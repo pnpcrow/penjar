@@ -15971,6 +15971,54 @@ non-strict paths.
   - full desktop verify remains green after matrix expansion.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-321.
 
+## Unit WS-D-322: signed/exponent numeric near-match strict alias regression coverage
+
+### Planned objective
+
+Prevent strict numeric alias broadening toward signed/exponent parsing by locking signed/exponent
+numeric near matches as non-strict paths.
+
+### Implemented changes
+
+1. Expanded strict installer signed/exponent near-match coverage in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `strict-installer-nearmatch-plus-one-alias-missing-command-pass`,
+   - added `strict-installer-nearmatch-scientific-one-e-zero-alias-missing-command-pass`,
+   - fixtures `+1` and `1e0` assert `- Strict mode: 0` with non-blocking completion.
+2. Expanded strict protocol signed/exponent near-match coverage in the same checker:
+   - added `strict-protocol-nearmatch-plus-one-alias-missing-command-pass`,
+   - added `strict-protocol-nearmatch-scientific-one-e-zero-alias-missing-command-pass`,
+   - fixtures `STRICT_WINDOWS_PROTOCOL_REGISTRATION=+1` and `=1e0` assert
+     `- Strict protocol registration mode: 0` with non-blocking completion.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-322
+     signed/exponent numeric near-match boundary lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     signed/exponent numeric near-match strict boundary matrix coverage.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - strict numeric alias exact-match boundaries under signed/exponent-looking values,
+  - installer/protocol non-overmatch behavior for `+1` and `1e0`,
+  - compatibility with canonical strict numeric alias fixture (`"1"` / `" 1 "`).
+- **Issues found during review**
+  1. numeric near-match lock existed for leading-zero and decimal variants (`01`, `1.0`) but not
+     for signed/exponent variants (`+1`, `1e0`).
+  2. absent signed/exponent fixtures could allow future parser refactors to over-accept numeric
+     variants if coercive numeric parsing is introduced.
+- **Fix applied**
+  1. added installer/protocol signed/exponent near-match pass fixtures with strict-mode-zero
+     assertions.
+  2. retained strict-positive numeric alias and placeholder-warning behavior unchanged.
+- **Post-fix validation criteria**
+  - contract checker passes with signed/exponent near-match fixtures.
+  - full desktop verify remains green after matrix expansion.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-322.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

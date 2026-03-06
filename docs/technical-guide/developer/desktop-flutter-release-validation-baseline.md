@@ -352,6 +352,8 @@ CI baseline note:
     (`"\nTRUEE\n"`) so trim + case normalization still preserves exact-match strict boundaries.
   - contract matrix now also locks numeric near-match alias behavior (`"01"`, `"1.0"`) so strict
     numeric alias inference stays exact (`"1"`) and does not broaden to non-canonical variants.
+  - contract matrix now also locks signed/exponent numeric near-match alias behavior (`"+1"`,
+    `"1e0"`) so strict numeric alias inference remains exact (`"1"`) without numeric parser drift.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.
