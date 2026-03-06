@@ -6732,6 +6732,31 @@ void main() {
     );
 
     test(
+      'auth backend code-only capitalized compact jwt-expired suffix payload maps session-expired fallback status',
+      () {
+        final _BackendResponseTransportClient transportClient =
+            _BackendResponseTransportClient(<String, Map<String, Object?>>{
+              RemoteStubOperationIds.refreshToken: <String, Object?>{
+                'code': 'JwtExpiredErr',
+                'state': <String, Object?>{
+                  'sessionToken': 'code-only-capitalized-compact-jwt-expired',
+                },
+              },
+            });
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.refreshToken();
+
+        expect(authContract.state.signedIn, isFalse);
+        expect(
+          authContract.state.status,
+          '[remote-stub] Backend session expired.',
+        );
+      },
+    );
+
+    test(
       'auth backend code-only access-token-expired payload maps session-expired fallback status',
       () {
         final _BackendResponseTransportClient transportClient =

@@ -537,6 +537,16 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      (`code: "SignedOutErr"`) to preserve deterministic auth-required fallback mapping on
      non-catalog exact-length-gated paths; execution evidence is recorded in
      `web-mcp-phase-c-execution-log.md` (`Unit WS-D-281`).
+69. Backend code classification exact-length bitmask gating optimization:
+   - `_classifyBackendCode(...)` now reuses bitmask-based marker-length membership checks
+     (`_backendSignedOutCodeMarkerLengthMask`) via `_isBackendSignedOutCodeMarkerLength(...)` to
+     gate raw/compact exact-map probes without set lookups on classifier hot paths,
+   - existing numeric shortcuts, short/long length guards, marker precedence, and
+     signed-out/session-expired fallback semantics remain unchanged,
+   - contract/parity suites now lock capitalized compact JWT-expired suffix behavior
+     (`code: "JwtExpiredErr"`) to preserve deterministic session-expired fallback mapping on
+     exact-length bitmask-gated paths; execution evidence is recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-282`).
 
 ## Remaining integration gaps (auth scope)
 

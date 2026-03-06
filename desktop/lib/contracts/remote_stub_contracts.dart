@@ -1421,7 +1421,7 @@ final int _backendSignedOutCodeMarkerMaxLength = _markerMaxLength(
 );
 final int _backendSignedOutOnlyCodeMarkerCount =
     _backendSignedOutOnlyCodeMarkers.length;
-final Set<int> _backendSignedOutCodeMarkerLengths = _buildMarkerLengthSet(
+final int _backendSignedOutCodeMarkerLengthMask = _buildMarkerLengthMask(
   _backendSignedOutCodeMarkers,
 );
 
@@ -1489,12 +1489,20 @@ int _markerMaxLength(List<String> markers) {
   return maxLength;
 }
 
-Set<int> _buildMarkerLengthSet(List<String> markers) {
-  final Set<int> markerLengths = <int>{};
+int _buildMarkerLengthMask(List<String> markers) {
+  int markerLengthMask = 0;
   for (final String marker in markers) {
-    markerLengths.add(marker.length);
+    markerLengthMask |= 1 << marker.length;
   }
-  return Set<int>.unmodifiable(markerLengths);
+  return markerLengthMask;
+}
+
+bool _isBackendSignedOutCodeMarkerLength(int length) {
+  if (length < _backendSignedOutCodeMarkerMinLength ||
+      length > _backendSignedOutCodeMarkerMaxLength) {
+    return false;
+  }
+  return (_backendSignedOutCodeMarkerLengthMask & (1 << length)) != 0;
 }
 
 _BackendCodeClassification _classifyBackendCode(String rawCode) {
@@ -1518,9 +1526,7 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
       sessionExpired: false,
     );
   }
-  final int signedOutMarkerMaxLength = _backendSignedOutCodeMarkerMaxLength;
-  if (trimmedLength <= signedOutMarkerMaxLength &&
-      _backendSignedOutCodeMarkerLengths.contains(trimmedLength)) {
+  if (_isBackendSignedOutCodeMarkerLength(trimmedLength)) {
     final _BackendCodeClassification? rawExactClassification =
         _backendRawExactCodeClassifications[trimmed];
     if (rawExactClassification != null) {
@@ -1535,8 +1541,7 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
       sessionExpired: false,
     );
   }
-  if (compactLength <= signedOutMarkerMaxLength &&
-      _backendSignedOutCodeMarkerLengths.contains(compactLength)) {
+  if (_isBackendSignedOutCodeMarkerLength(compactLength)) {
     final _BackendCodeClassification? exactClassification =
         _backendExactCodeClassifications[compact];
     if (exactClassification != null) {

@@ -14026,6 +14026,69 @@ matches known marker lengths.
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-282: classifier exact-length bitmask gating
+
+### Planned objective
+
+Reduce backend code classifier exact-length candidate overhead by replacing set-based length checks
+with bitmask membership guards on raw/compact exact-map probe paths.
+
+### Implemented changes
+
+1. Updated backend classifier exact-gating path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - replaced `_backendSignedOutCodeMarkerLengths` set membership with
+     `_backendSignedOutCodeMarkerLengthMask`.
+   - replaced `_buildMarkerLengthSet(...)` with `_buildMarkerLengthMask(...)`.
+   - added `_isBackendSignedOutCodeMarkerLength(...)` helper to gate exact-map probes with
+     bitmask membership checks.
+   - raw/compact exact-map lookups now reuse the bitmask helper on both `trimmedLength` and
+     `compactLength`.
+2. Preserved existing fallback semantics:
+   - numeric shortcuts, short-code/long-code guards, marker precedence, and substring fallback
+     behavior remain unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only capitalized compact jwt-expired suffix payload maps session-expired fallback status`
+     (`code: "JwtExpiredErr"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendCapitalizedCompactJwtExpiredSuffixParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps capitalized compact jwt-expired suffix backend failure to deterministic session-expired status`.
+5. Synced continuity docs for WS-D-282 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - bitmask-based exact-length gating behavior in `_classifyBackendCode(...)`,
+  - session-expired fallback continuity for capitalized compact JWT-expired suffix codes,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. exact-length candidate gating still relied on set membership in classifier hot paths.
+  2. capitalized compact JWT-expired suffix behavior was not explicitly parity-locked for
+     bitmask-gated exact paths.
+- **Fix applied**
+  1. replaced set-based exact-length checks with bitmask membership helper.
+  2. added contract/parity regressions for `code: "JwtExpiredErr"` session-expired fallback.
+  3. re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - bitmask gating does not alter numeric shortcuts, short/long guards, or marker precedence.
+  - capitalized compact JWT-expired suffix code remains deterministic session-expired fallback in
+    contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
