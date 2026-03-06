@@ -111,6 +111,52 @@ run_case \
   "[windows-installer-pipeline] warning: pipeline skipped."
 
 run_case \
+  "non-strict-installer-command-failure-warning-pass" \
+  "pass" \
+  "Non-strict mode should keep installer command non-zero failures non-blocking with warning diagnostics." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Error: installer command failed" \
+  "[windows-installer-pipeline] warning: pipeline failed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=false"
+
+run_case \
+  "non-strict-installer-placeholder-warning-pass" \
+  "pass" \
+  "Non-strict mode should keep installer placeholder commands non-blocking with warning diagnostics." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Installer command placeholder status: detected" \
+  "[windows-installer-pipeline] warning: placeholder installer command detected." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=placeholder"
+
+run_case \
+  "non-strict-protocol-command-failure-warning-pass" \
+  "pass" \
+  "Non-strict mode should keep protocol command non-zero failures non-blocking with warning diagnostics." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Protocol error: protocol register command failed" \
+  "[windows-installer-pipeline] warning: protocol registration failed." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=true" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=false"
+
+run_case \
+  "non-strict-protocol-placeholder-warning-pass" \
+  "pass" \
+  "Non-strict mode should keep protocol placeholder commands non-blocking with warning diagnostics." \
+  setup_release_runner_case \
+  "0" \
+  "release" \
+  "- Protocol command placeholder status: detected" \
+  "[windows-installer-pipeline] warning: placeholder protocol command detected." \
+  "PENJAR_WINDOWS_INSTALLER_COMMAND=true" \
+  "PENJAR_WINDOWS_PROTOCOL_REGISTER_COMMAND=placeholder"
+
+run_case \
   "strict-installer-missing-runner-fail" \
   "fail" \
   "Strict installer mode must fail when the runner directory is missing in release mode." \

@@ -14543,6 +14543,61 @@ failures while strict installer mode is enabled, across release/debug build mode
   - strict interaction diagnostics remain deterministic in release/debug report/log outputs.
   - full desktop verify remains green after matrix expansion.
 
+## Unit WS-D-292: non-strict warning-path contract coverage
+
+### Planned objective
+
+Close non-strict behavior gaps by explicitly locking warning-based non-blocking behavior for
+installer/protocol command failures and placeholder commands in release-mode runner paths.
+
+### Implemented changes
+
+1. Expanded non-strict installer warning matrix in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh`:
+   - added `non-strict-installer-command-failure-warning-pass`,
+   - added `non-strict-installer-placeholder-warning-pass`.
+2. Expanded non-strict protocol warning matrix in the same checker:
+   - added `non-strict-protocol-command-failure-warning-pass`,
+   - added `non-strict-protocol-placeholder-warning-pass`.
+3. Locked deterministic non-strict warning diagnostics:
+   - installer command failure path now explicitly asserts
+     `[windows-installer-pipeline] warning: pipeline failed.`,
+   - installer placeholder path now explicitly asserts
+     `[windows-installer-pipeline] warning: placeholder installer command detected.`,
+   - protocol command failure path now explicitly asserts
+     `[windows-installer-pipeline] warning: protocol registration failed.`,
+   - protocol placeholder path now explicitly asserts
+     `[windows-installer-pipeline] warning: placeholder protocol command detected.`.
+4. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-292
+     non-strict warning-path release evidence lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     non-strict warning-path matrix coverage in checker inventory notes.
+5. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - non-strict installer command failure/placeholder behavior in release mode,
+  - non-strict protocol command failure/placeholder behavior in release mode,
+  - warning-based non-blocking exit semantics and diagnostics determinism.
+- **Issues found during review**
+  1. strict-mode regressions were strongly covered, but non-strict warning-path behavior was not
+     explicitly contract-locked.
+  2. warning message determinism for non-strict command failure/placeholder paths was not
+     guaranteed by contract assertions.
+- **Fix applied**
+  1. added four non-strict warning-path matrix cases for installer/protocol failure+placeholder
+     permutations.
+  2. added report/log assertions that lock warning diagnostics and non-blocking outcomes.
+- **Post-fix validation criteria**
+  - contract checker passes with non-strict warning-path cases.
+  - non-strict installer/protocol failure and placeholder paths remain non-blocking with stable
+    warning diagnostics.
+  - full desktop verify remains green after matrix expansion.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
