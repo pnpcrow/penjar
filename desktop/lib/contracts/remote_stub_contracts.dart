@@ -1411,12 +1411,16 @@ final int _backendSignedOutOnlyCodeMarkerMinLength = _markerMinLength(
 final int _backendSessionExpiredCodeMarkerMinLength = _markerMinLength(
   _backendSessionExpiredCodeMarkers,
 );
+final int _backendSessionExpiredCodeMarkerCount =
+    _backendSessionExpiredCodeMarkers.length;
 final int _backendSignedOutCodeMarkerMinLength = _markerMinLength(
   _backendSignedOutCodeMarkers,
 );
 final int _backendSignedOutCodeMarkerMaxLength = _markerMaxLength(
   _backendSignedOutCodeMarkers,
 );
+final int _backendSignedOutOnlyCodeMarkerCount =
+    _backendSignedOutOnlyCodeMarkers.length;
 
 Map<String, _BackendCodeClassification>
 _buildBackendExactCodeClassifications() {
@@ -1532,8 +1536,11 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
   if (compactLength >= sessionExpiredMarkerMinLength) {
     final List<String> sessionExpiredMarkers =
         _backendSessionExpiredCodeMarkers;
-    final int markerCount = sessionExpiredMarkers.length;
-    for (int markerIndex = 0; markerIndex < markerCount; markerIndex++) {
+    for (
+      int markerIndex = 0;
+      markerIndex < _backendSessionExpiredCodeMarkerCount;
+      markerIndex++
+    ) {
       if (compact.contains(sessionExpiredMarkers[markerIndex])) {
         return const _BackendCodeClassification(
           signedOut: true,
@@ -1553,8 +1560,11 @@ _BackendCodeClassification _classifyBackendCode(String rawCode) {
   }
 
   final List<String> signedOutOnlyMarkers = _backendSignedOutOnlyCodeMarkers;
-  final int markerCount = signedOutOnlyMarkers.length;
-  for (int markerIndex = 0; markerIndex < markerCount; markerIndex++) {
+  for (
+    int markerIndex = 0;
+    markerIndex < _backendSignedOutOnlyCodeMarkerCount;
+    markerIndex++
+  ) {
     if (compact.contains(signedOutOnlyMarkers[markerIndex])) {
       return const _BackendCodeClassification(
         signedOut: true,

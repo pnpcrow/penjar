@@ -515,6 +515,17 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
      (`code: "SignedOutSessionStateMismatch"`) to preserve deterministic auth-required fallback
      mapping on long-code exact-lookup guard paths; execution evidence is recorded in
      `web-mcp-phase-c-execution-log.md` (`Unit WS-D-279`).
+67. Backend code classification marker-count static caching optimization:
+   - `_classifyBackendCode(...)` now reuses top-level marker-count constants
+     (`_backendSessionExpiredCodeMarkerCount`, `_backendSignedOutOnlyCodeMarkerCount`) for
+     index-based marker scans, avoiding repeated per-call marker-length reads on session-expired and
+     signed-out-only loops,
+   - existing numeric shortcuts, short-code/long-code exact-lookup guards, and marker precedence
+     semantics remain unchanged,
+   - contract/parity suites now lock capitalized compact mixed marker behavior
+     (`code: "UnauthorizedSessionTimeoutContinuation"`) to preserve deterministic session-expired
+     fallback precedence on long mixed-marker paths; execution evidence is recorded in
+     `web-mcp-phase-c-execution-log.md` (`Unit WS-D-280`).
 
 ## Remaining integration gaps (auth scope)
 

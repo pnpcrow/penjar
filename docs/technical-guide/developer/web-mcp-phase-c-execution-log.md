@@ -13901,6 +13901,68 @@ marker matches are impossible due to input length.
   - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
   - contract/parity/mode-parity suites and full desktop verification remain green.
 
+## Unit WS-D-280: classifier marker-count static cache guard
+
+### Planned objective
+
+Reduce backend code classifier hot-loop overhead by replacing per-call marker-count reads with
+static marker-count constants for marker index scans.
+
+### Implemented changes
+
+1. Updated backend classifier marker-loop path in
+   `desktop/lib/contracts/remote_stub_contracts.dart`:
+   - introduced `_backendSessionExpiredCodeMarkerCount` and
+     `_backendSignedOutOnlyCodeMarkerCount` as top-level marker-count constants.
+   - `_classifyBackendCode(...)` now reuses those constants in session-expired and signed-out-only
+     marker loops.
+2. Preserved existing fallback semantics:
+   - numeric shortcuts, short-code/long-code exact-lookup guards, and
+     session-expired-over-signed-out marker precedence remain unchanged.
+3. Added contract regression coverage in
+   `desktop/test/contracts/workflow_contracts_test.dart`:
+   - `auth backend code-only capitalized compact unauthorized-sessiontimeout payload maps session-expired fallback status`
+     (`code: "UnauthorizedSessionTimeoutContinuation"`).
+4. Added parity regression coverage in
+   `desktop/test/parity/auth_session_parity_test.dart`:
+   - new transport client:
+     `_AuthBackendCapitalizedCompactUnauthorizedSessionTimeoutParityTransportClient`,
+   - new parity test:
+     `auth/session parity maps capitalized compact unauthorized-sessiontimeout backend failure to deterministic session-expired status`.
+5. Synced continuity docs for WS-D-280 evidence:
+   - `docs/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan.md`,
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md`,
+   - `docs/technical-guide/developer/desktop-flutter-migration-inventory.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-checklist.md`,
+   - `docs/technical-guide/developer/desktop-flutter-parity-acceptance-baseline.md`.
+6. Re-ran validation commands:
+   - `cd desktop && dart format lib/contracts/remote_stub_contracts.dart test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart`
+   - `cd desktop && flutter test test/contracts/workflow_contracts_test.dart test/parity/auth_session_parity_test.dart test/parity/remote_stub_mode_parity_test.dart`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - static marker-count reuse behavior in `_classifyBackendCode(...)` index scans,
+  - mixed-marker precedence continuity for long capitalized compact backend codes,
+  - regression impact across contract/parity/mode-parity suites and full desktop verification.
+- **Issues found during review**
+  1. marker-loop paths still re-read marker-list counts on each classifier call.
+  2. long mixed-marker session-expired precedence for capitalized compact code was not explicitly
+     locked in dedicated parity coverage.
+- **Fix applied**
+  1. added top-level marker-count constants and reused them in both marker loops.
+  2. added contract/parity regressions for
+     `code: "UnauthorizedSessionTimeoutContinuation"` session-expired precedence.
+  3. re-ran formatter, targeted auth suites, and full desktop verification.
+- **Post-fix validation criteria**
+  - static marker-count reuse does not alter numeric shortcuts, short-code/long-code guards, or
+    marker precedence behavior.
+  - capitalized compact mixed-marker code remains deterministic session-expired fallback in
+    contract/parity suites.
+  - numeric/exact/marker-length/substring fallback semantics for non-exact codes remain unchanged.
+  - contract/parity/mode-parity suites and full desktop verification remain green.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.

@@ -281,6 +281,35 @@ class _AuthBackendCapitalizedCompactAuthRequiredParityTransportClient
   }
 }
 
+class _AuthBackendCapitalizedCompactUnauthorizedSessionTimeoutParityTransportClient
+    extends RemoteStubTransportClient {
+  const _AuthBackendCapitalizedCompactUnauthorizedSessionTimeoutParityTransportClient();
+
+  @override
+  RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
+    if (request.operation == RemoteStubOperationIds.signIn) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'status': 'Backend sign-in snapshot applied.',
+          'state': <String, Object?>{'signedIn': true, 'rememberSession': true},
+        },
+      );
+    }
+    if (request.operation == RemoteStubOperationIds.refreshToken) {
+      return RemoteStubTransportResult.allowedWithPayload(
+        const <String, Object?>{
+          'code': 'UnauthorizedSessionTimeoutContinuation',
+          'state': <String, Object?>{
+            'sessionToken':
+                'capitalized-compact-unauthorized-sessiontimeout-session',
+          },
+        },
+      );
+    }
+    return RemoteStubTransportResult.allow;
+  }
+}
+
 class _AuthBackendUppercaseCompactUnauthorizedParityTransportClient
     extends RemoteStubTransportClient {
   const _AuthBackendUppercaseCompactUnauthorizedParityTransportClient();
@@ -3313,6 +3342,54 @@ void main() {
       expect(
         find.textContaining('Status: [remote-stub] Authentication required.'),
         findsOneWidget,
+      );
+      expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'auth/session parity maps capitalized compact unauthorized-sessiontimeout backend failure to deterministic session-expired status',
+    (WidgetTester tester) async {
+      await pumpDesktopApp(
+        tester,
+        contracts: DesktopContractBundle.fromMode(
+          DesktopContractMode.remoteStub,
+          remoteStubTransportClient:
+              const _AuthBackendCapitalizedCompactUnauthorizedSessionTimeoutParityTransportClient(),
+        ),
+      );
+      await openWorkflowSection(tester, 'auth');
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('auth-password')),
+        'desktop-pass',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-sign-in')),
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('auth-sign-in')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(
+          'Status: [remote-stub] Backend sign-in snapshot applied.',
+        ),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('auth-refresh-token')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Status: [remote-stub] Backend session expired.'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('Status: [remote-stub] Authentication required.'),
+        findsNothing,
       );
       expect(find.textContaining('Token refreshed (simulated).'), findsNothing);
     },
