@@ -372,6 +372,8 @@ CI baseline note:
     `"1\\t0"`) so control-character token boundaries cannot widen strict numeric alias acceptance.
   - contract matrix now also locks expression-style numeric near-match alias behavior (`"1+0"`,
     `"1-0"`) so expression-like numeric values cannot widen strict numeric alias acceptance.
+  - contract matrix now also locks increment-decrement expression numeric near-match alias behavior
+    (`"1++"`, `"1--"`) so increment/decrement forms cannot widen strict acceptance.
   - contract matrix now also locks arithmetic-operator numeric near-match alias behavior
     (`"1*1"`, `"1/1"`) so operator-style numeric values cannot widen strict numeric alias acceptance.
   - contract matrix now also locks extended arithmetic numeric near-match alias behavior
