@@ -82,6 +82,7 @@ run_case() {
   local env_overrides=("$@")
 
   local tmp_root tmp_report tmp_log rc actual result report_assertion log_assertion
+  local report_content log_content
   tmp_root="$(mktemp -d)"
   tmp_report="$tmp_root/windows_installer_pipeline_report.md"
   tmp_log="$tmp_root/windows_installer_pipeline.log"
@@ -107,15 +108,25 @@ run_case() {
 
   report_assertion="ok"
   if [[ -n "$required_report_pattern" ]]; then
-    if [[ ! -f "$tmp_report" ]] || ! grep -Fq -- "$required_report_pattern" "$tmp_report"; then
+    if [[ ! -f "$tmp_report" ]]; then
       report_assertion="missing: ${required_report_pattern}"
+    else
+      report_content="$(<"$tmp_report")"
+      if [[ "$report_content" != *"$required_report_pattern"* ]]; then
+        report_assertion="missing: ${required_report_pattern}"
+      fi
     fi
   fi
 
   log_assertion="ok"
   if [[ -n "$required_log_pattern" ]]; then
-    if ! grep -Fq -- "$required_log_pattern" "$tmp_log"; then
+    if [[ ! -f "$tmp_log" ]]; then
       log_assertion="missing: ${required_log_pattern}"
+    else
+      log_content="$(<"$tmp_log")"
+      if [[ "$log_content" != *"$required_log_pattern"* ]]; then
+        log_assertion="missing: ${required_log_pattern}"
+      fi
     fi
   fi
 

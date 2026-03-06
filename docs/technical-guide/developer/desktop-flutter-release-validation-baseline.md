@@ -322,6 +322,8 @@ CI baseline note:
     case/result cells so mismatch diagnostics remain Markdown-table safe.
   - markdown cell escaping path now uses a subshell-free helper handoff (shared escaped buffer)
     instead of per-cell command substitutions to reduce shell overhead in large matrices.
+  - run-case report/log assertion checks now use bash internal string containment over loaded
+    artifacts, avoiding repeated external `grep` process invocations per matrix case.
 - Contract test runner: `desktop/scripts/run_contract_tests.sh`.
 - Release evidence row generator: `desktop/scripts/generate_release_evidence_row.sh`.
 - Release evidence bundle summary generator: `desktop/scripts/generate_release_evidence_bundle.sh`.

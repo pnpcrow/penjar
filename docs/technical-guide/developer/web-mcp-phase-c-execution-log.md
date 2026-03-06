@@ -15422,6 +15422,50 @@ overhead in contract report row assembly.
   - full desktop verify remains green after helper path optimization.
   - runbook/baseline/execution-log continuity remains synchronized to WS-D-309.
 
+## Unit WS-D-310: run-case assertion matching hot-path process reduction
+
+### Planned objective
+
+Reduce per-case shell process churn in contract checks by replacing repeated external text search
+calls with internal bash string containment checks.
+
+### Implemented changes
+
+1. Optimized assertion evaluation in
+   `desktop/scripts/check_windows_installer_pipeline_contract.sh` `run_case()`:
+   - added `report_content`/`log_content` buffers,
+   - replaced external `grep -Fq` report/log probes with bash `[[ ... == *...* ]]` checks over
+     loaded content.
+2. Preserved existing missing-artifact behavior:
+   - report/log file absence still maps to the same `missing: <pattern>` assertion outputs.
+3. Synced continuity docs:
+   - `docs/technical-guide/developer/desktop-flutter-development-runbook.md` now records WS-D-310
+     internal-matcher optimization lock,
+   - `docs/technical-guide/developer/desktop-flutter-release-validation-baseline.md` now records
+     per-case external process reduction in assertion checks.
+4. Re-ran validation commands:
+   - `cd desktop && ./scripts/check_windows_installer_pipeline_contract.sh`
+   - `cd desktop && SKIP_PUB_GET=1 pnpm run desktop:verify:full`
+
+### Unit review (detailed)
+
+- **Review scope**
+  - process overhead within run-case assertion loops,
+  - semantic parity of report/log pattern detection after matcher refactor,
+  - file-missing fallback behavior preservation.
+- **Issues found during review**
+  1. each case performed up to two external `grep` invocations, amplifying process overhead as the
+     matrix grows.
+  2. repeated process spawn cost in hot loops is avoidable because assertions only require simple
+     containment checks.
+- **Fix applied**
+  1. switched to internal bash containment matching on loaded artifact content.
+  2. retained explicit missing-file guards and unchanged mismatch text for compatibility.
+- **Post-fix validation criteria**
+  - contract checker passes with internal matcher path.
+  - full desktop verify remains green after process-reduction refactor.
+  - runbook/baseline/execution-log continuity remains synchronized to WS-D-310.
+
 ## Remaining Phase C setup gaps
 
 - Role-level owners are assigned, but named individual assignees are not yet confirmed.
