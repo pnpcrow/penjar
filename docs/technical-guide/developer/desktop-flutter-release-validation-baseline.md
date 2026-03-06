@@ -396,6 +396,8 @@ CI baseline note:
     (`"1+=0"`, `"1-=0"`) so assignment-style values cannot widen strict acceptance.
   - contract matrix now also locks multiplicative-assignment numeric near-match alias behavior
     (`"1*=1"`, `"1/=1"`) so multiplicative-assignment values cannot widen strict acceptance.
+  - contract matrix now also locks modulo-xor-assignment numeric near-match alias behavior
+    (`"1%=1"`, `"1^=1"`) so modulo/xor-assignment values cannot widen strict acceptance.
   - assertion scanning in `desktop/scripts/check_windows_installer_pipeline_contract.sh` now uses
     fixed-string file checks (`grep -Fq`) for report/log pattern verification instead of loading
     full file contents into shell variables per case.
