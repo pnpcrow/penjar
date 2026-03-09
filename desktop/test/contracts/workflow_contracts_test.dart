@@ -1040,6 +1040,62 @@ void main() {
       );
     });
 
+    test(
+      'http transport client limits backend execution to configured operations',
+      () {
+        int probeCount = 0;
+        final List<RemoteStubHttpBackendExecutionRequest> executedRequests =
+            <RemoteStubHttpBackendExecutionRequest>[];
+        final RemoteStubHttpTransportClient transportClient =
+            RemoteStubHttpTransportClient(
+              healthUrl: 'http://127.0.0.1:28080/health',
+              backendBaseUrl: 'https://api.penjar.app',
+              backendExecutionOperations: const <String>{
+                RemoteStubOperationIds.signIn,
+              },
+              probe: (RemoteStubHttpTransportProbeRequest request) {
+                probeCount += 1;
+                expect(request.operation, RemoteStubOperationIds.signIn);
+                return const RemoteStubHttpTransportProbeResult.allowed();
+              },
+              executionProbe: (RemoteStubHttpBackendExecutionRequest request) {
+                executedRequests.add(request);
+                expect(
+                  request.transportRequest.operation,
+                  RemoteStubOperationIds.signIn,
+                );
+                return const RemoteStubHttpBackendExecutionResult.allowed();
+              },
+            );
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+        final RemoteStubProjectLifecycleContract projectContract =
+            RemoteStubProjectLifecycleContract(
+              transportClient: transportClient,
+            );
+
+        authContract.signIn(
+          const AuthSignInRequest(
+            email: 'designer@penjar.app',
+            password: 'desktop-pass',
+          ),
+        );
+
+        expect(probeCount, 1);
+        expect(executedRequests, hasLength(1));
+        expect(authContract.state.signedIn, isTrue);
+
+        projectContract.createProject('Delegated Project');
+
+        expect(probeCount, 1);
+        expect(executedRequests, hasLength(1));
+        expect(
+          projectContract.state.status,
+          '[remote-stub] Project created: Delegated Project.',
+        );
+      },
+    );
+
     test('http transport client blocks operation on backend execution error', () {
       final List<RemoteStubHttpBackendExecutionRequest> executedRequests =
           <RemoteStubHttpBackendExecutionRequest>[];
@@ -1162,6 +1218,67 @@ void main() {
           authContract.state.status,
           '[remote-stub] Remote backend execution failed: sign-in. overridden endpoint unreachable',
         );
+      },
+    );
+
+    test(
+      'http transport client forwards explicit cookie jar path to backend execution',
+      () {
+        final List<RemoteStubHttpBackendExecutionRequest> executedRequests =
+            <RemoteStubHttpBackendExecutionRequest>[];
+        final RemoteStubHttpTransportClient transportClient =
+            RemoteStubHttpTransportClient(
+              backendBaseUrl: 'https://api.penjar.app',
+              cookieJarPath: '/tmp/penjar-desktop-auth-cookies.txt',
+              executionProbe: (RemoteStubHttpBackendExecutionRequest request) {
+                executedRequests.add(request);
+                expect(
+                  request.cookieJarPath,
+                  '/tmp/penjar-desktop-auth-cookies.txt',
+                );
+                return const RemoteStubHttpBackendExecutionResult.allowed();
+              },
+            );
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.signIn(
+          const AuthSignInRequest(
+            email: 'designer@penjar.app',
+            password: 'desktop-pass',
+          ),
+        );
+
+        expect(executedRequests, hasLength(1));
+      },
+    );
+
+    test(
+      'http transport client resolves default cookie jar path for backend execution',
+      () {
+        final List<RemoteStubHttpBackendExecutionRequest> executedRequests =
+            <RemoteStubHttpBackendExecutionRequest>[];
+        final RemoteStubHttpTransportClient transportClient =
+            RemoteStubHttpTransportClient(
+              backendBaseUrl: 'https://api.penjar.app',
+              executionProbe: (RemoteStubHttpBackendExecutionRequest request) {
+                executedRequests.add(request);
+                expect(request.cookieJarPath, isNotNull);
+                expect(request.cookieJarPath, isNotEmpty);
+                return const RemoteStubHttpBackendExecutionResult.allowed();
+              },
+            );
+        final RemoteStubAuthSessionContract authContract =
+            RemoteStubAuthSessionContract(transportClient: transportClient);
+
+        authContract.signIn(
+          const AuthSignInRequest(
+            email: 'designer@penjar.app',
+            password: 'desktop-pass',
+          ),
+        );
+
+        expect(executedRequests, hasLength(1));
       },
     );
 

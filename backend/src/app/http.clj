@@ -15,6 +15,7 @@
    [app.http.access-token :as actoken]
    [app.http.assets :as-alias assets]
    [app.http.awsns :as-alias awsns]
+   [app.http.desktop :as-alias desktop]
    [app.http.debug :as-alias debug]
    [app.http.errors :as errors]
    [app.http.management :as mgmt]
@@ -150,6 +151,7 @@
    [::oidc/routes schema:routes]
    [::assets/routes schema:routes]
    [::debug/routes schema:routes]
+   [::desktop/routes schema:routes]
    [::mtx/routes schema:routes]
    [::awsns/routes schema:routes]
    [::mgmt/routes schema:routes]
@@ -177,6 +179,7 @@
 
      (::mtx/routes cfg)
      (::assets/routes cfg)
+     (::desktop/routes cfg)
      (::debug/routes cfg)
 
      ["/webhooks"

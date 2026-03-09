@@ -486,6 +486,7 @@ class RemoteStubHttpBackendExecutionRequest {
     required this.baseUrl,
     required this.timeout,
     required this.blockedReason,
+    this.cookieJarPath,
     this.authToken,
   });
 
@@ -493,6 +494,7 @@ class RemoteStubHttpBackendExecutionRequest {
   final String baseUrl;
   final Duration timeout;
   final String blockedReason;
+  final String? cookieJarPath;
   final String? authToken;
 
   String get endpointUrl =>
@@ -584,6 +586,57 @@ String _resolveBackendEndpointUrl(String baseUrl, String endpoint) {
       ? trimmedEndpoint
       : '/$trimmedEndpoint';
   return '$normalizedBase$normalizedEndpoint';
+}
+
+String _joinPlatformPath(String basePath, String child) {
+  if (basePath.isEmpty) {
+    return child;
+  }
+  final String separator = Platform.pathSeparator;
+  final String normalizedBase = basePath.endsWith(separator)
+      ? basePath.substring(0, basePath.length - separator.length)
+      : basePath;
+  return '$normalizedBase$separator$child';
+}
+
+String _defaultBackendCookieJarDirectory() {
+  if (Platform.isWindows) {
+    final String appData = Platform.environment['APPDATA']?.trim() ?? '';
+    if (appData.isNotEmpty) {
+      return _joinPlatformPath(appData, 'Penjar\\Desktop');
+    }
+    final String userProfile =
+        Platform.environment['USERPROFILE']?.trim() ?? '';
+    if (userProfile.isNotEmpty) {
+      return _joinPlatformPath(
+        _joinPlatformPath(userProfile, 'AppData\\Roaming'),
+        'Penjar\\Desktop',
+      );
+    }
+  } else {
+    final String home = Platform.environment['HOME']?.trim() ?? '';
+    if (home.isNotEmpty) {
+      return _joinPlatformPath(_joinPlatformPath(home, '.penjar'), 'desktop');
+    }
+  }
+  return _joinPlatformPath(Directory.systemTemp.path, 'penjar-desktop');
+}
+
+String _resolveBackendCookieJarPath(
+  String cookieJarPath, {
+  required String backendBaseUrl,
+}) {
+  if (backendBaseUrl.trim().isEmpty) {
+    return '';
+  }
+  final String trimmed = cookieJarPath.trim();
+  if (trimmed.isNotEmpty) {
+    return trimmed;
+  }
+  return _joinPlatformPath(
+    _defaultBackendCookieJarDirectory(),
+    'remote_stub_auth_cookies.txt',
+  );
 }
 
 Map<String, String> _normalizeBackendEndpointOverrides(
@@ -2499,6 +2552,22 @@ RemoteStubHttpBackendExecutionResult _defaultHttpBackendExecutionProbe(
   }
 
   final double timeoutSeconds = request.timeout.inMilliseconds / 1000;
+  final String cookieJarPath = request.cookieJarPath?.trim() ?? '';
+  if (cookieJarPath.isNotEmpty &&
+      request.transportRequest.operation == RemoteStubOperationIds.signIn) {
+    try {
+      File(cookieJarPath).deleteSync();
+    } on FileSystemException {
+      // Missing or locked cookie jars should not block sign-in attempts.
+    }
+  }
+  if (cookieJarPath.isNotEmpty) {
+    try {
+      File(cookieJarPath).parent.createSync(recursive: true);
+    } on FileSystemException {
+      // Curl will report the failure if the cookie jar still cannot be written.
+    }
+  }
   final Map<String, Object?> requestBody = <String, Object?>{
     'operation': request.transportRequest.operation,
     'workflow': request.transportRequest.workflow,
@@ -2514,12 +2583,23 @@ RemoteStubHttpBackendExecutionResult _defaultHttpBackendExecutionProbe(
     request.transportRequest.method,
     '--header',
     'Content-Type: application/json',
+    '--header',
+    'Accept: application/json',
     '--write-out',
     r'\n%{http_code}',
     '--data',
     jsonEncode(requestBody),
     endpointUrl,
   ];
+
+  if (cookieJarPath.isNotEmpty) {
+    args.insertAll(args.length - 5, <String>[
+      '--cookie',
+      cookieJarPath,
+      '--cookie-jar',
+      cookieJarPath,
+    ]);
+  }
 
   final String authToken = request.authToken?.trim() ?? '';
   if (authToken.isNotEmpty) {
@@ -2592,7 +2672,9 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
     this.allowedStatusCodes = const <int>{200},
     this.blockedReason = 'Remote transport unavailable',
     String backendBaseUrl = '',
+    String cookieJarPath = '',
     Map<String, String> backendEndpointOverrides = const <String, String>{},
+    Set<String> backendExecutionOperations = const <String>{},
     this.backendTimeout = const Duration(seconds: 3),
     this.backendBlockedReason = 'Remote backend execution failed',
     this.backendAuthToken,
@@ -2600,8 +2682,15 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
     RemoteStubHttpBackendExecutionProbe? executionProbe,
   }) : healthUrl = healthUrl.trim(),
        backendBaseUrl = backendBaseUrl.trim(),
+       cookieJarPath = _resolveBackendCookieJarPath(
+         cookieJarPath,
+         backendBaseUrl: backendBaseUrl,
+       ),
        backendEndpointOverrides = _normalizeBackendEndpointOverrides(
          backendEndpointOverrides,
+       ),
+       backendExecutionOperations = _normalizedOperationSet(
+         backendExecutionOperations,
        ),
        _probe = probe ?? _defaultHttpTransportProbe,
        _executionProbe = executionProbe ?? _defaultHttpBackendExecutionProbe,
@@ -2616,7 +2705,9 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
   final Set<int> allowedStatusCodes;
   final String blockedReason;
   final String backendBaseUrl;
+  final String cookieJarPath;
   final Map<String, String> backendEndpointOverrides;
+  final Set<String> backendExecutionOperations;
   final Duration backendTimeout;
   final String backendBlockedReason;
   final String? backendAuthToken;
@@ -2643,6 +2734,12 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
   RemoteStubTransportResult execute(RemoteStubTransportRequest request) {
     final RemoteStubTransportRequest effectiveRequest =
         _requestWithBackendEndpointOverride(request);
+    final bool backendExecutionEnabled =
+        backendBaseUrl.isNotEmpty &&
+        _usesBackendExecutionForOperation(effectiveRequest.operation);
+    if (backendBaseUrl.isNotEmpty && !backendExecutionEnabled) {
+      return RemoteStubTransportResult.allow;
+    }
     if (healthUrl.isNotEmpty) {
       final RemoteStubHttpTransportProbeResult probeResult = _probe(
         RemoteStubHttpTransportProbeRequest(
@@ -2659,7 +2756,7 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
       }
     }
 
-    if (backendBaseUrl.isNotEmpty) {
+    if (backendExecutionEnabled) {
       final RemoteStubHttpBackendExecutionResult executionResult =
           _executionProbe(
             RemoteStubHttpBackendExecutionRequest(
@@ -2667,6 +2764,7 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
               baseUrl: backendBaseUrl,
               timeout: backendTimeout,
               blockedReason: backendBlockedReason,
+              cookieJarPath: cookieJarPath,
               authToken: backendAuthToken,
             ),
           );
@@ -2707,6 +2805,13 @@ class RemoteStubHttpTransportClient extends RemoteStubTransportClient {
       endpoint: endpointOverride,
       payload: request.payload,
     );
+  }
+
+  bool _usesBackendExecutionForOperation(String operation) {
+    if (backendExecutionOperations.isEmpty) {
+      return true;
+    }
+    return backendExecutionOperations.contains(_normalizeOperation(operation));
   }
 }
 

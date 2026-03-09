@@ -19,6 +19,7 @@
    [app.http.assets :as-alias http.assets]
    [app.http.awsns :as http.awsns]
    [app.http.client :as-alias http.client]
+   [app.http.desktop :as-alias http.desktop]
    [app.http.debug :as-alias http.debug]
    [app.http.management :as mgmt]
    [app.http.session :as session]
@@ -285,10 +286,15 @@
     ::mtx/routes         (ig/ref ::mtx/routes)
     ::oidc/routes        (ig/ref ::oidc/routes)
     ::mgmt/routes        (ig/ref ::mgmt/routes)
+    ::http.desktop/routes (ig/ref ::http.desktop/routes)
     ::http.debug/routes  (ig/ref ::http.debug/routes)
     ::http.assets/routes (ig/ref ::http.assets/routes)
     ::http.ws/routes     (ig/ref ::http.ws/routes)
     ::http.awsns/routes  (ig/ref ::http.awsns/routes)}
+
+   ::http.desktop/routes
+   {::db/pool         (ig/ref ::db/pool)
+    ::session/manager (ig/ref ::session/manager)}
 
    ::http.debug/routes
    {::db/pool         (ig/ref ::db/pool)

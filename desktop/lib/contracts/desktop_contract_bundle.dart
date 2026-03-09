@@ -296,6 +296,21 @@ Map<String, String> _remoteStubBackendEndpointOverridesFromEnvironment() {
   return overrides;
 }
 
+Set<String> _remoteStubBackendExecutionOperationsFromEnvironment() {
+  return _parseBlockedOperations(
+    const String.fromEnvironment(
+      'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BACKEND_OPERATIONS',
+    ),
+    allowedOperations: RemoteStubOperationIds.all,
+  );
+}
+
+String _remoteStubBackendCookieJarPathFromEnvironment() {
+  return const String.fromEnvironment(
+    'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_COOKIE_JAR_PATH',
+  ).trim();
+}
+
 RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
   final String healthUrl = const String.fromEnvironment(
     'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_HEALTH_URL',
@@ -320,8 +335,12 @@ RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
   final String backendAuthToken = const String.fromEnvironment(
     'PENJAR_DESKTOP_REMOTE_STUB_TRANSPORT_BACKEND_AUTH_TOKEN',
   ).trim();
+  final String backendCookieJarPath =
+      _remoteStubBackendCookieJarPathFromEnvironment();
   final Map<String, String> backendEndpointOverrides =
       _remoteStubBackendEndpointOverridesFromEnvironment();
+  final Set<String> backendExecutionOperations =
+      _remoteStubBackendExecutionOperationsFromEnvironment();
 
   if (healthUrl.isNotEmpty || backendBaseUrl.isNotEmpty) {
     final int timeoutMillis = _parsePositiveIntOrDefault(
@@ -351,12 +370,14 @@ RemoteStubTransportClient _buildRemoteStubTransportClientFromEnvironment() {
           ? 'Remote transport unavailable'
           : blockedReason,
       backendBaseUrl: backendBaseUrl,
+      cookieJarPath: backendCookieJarPath,
       backendTimeout: Duration(milliseconds: backendTimeoutMillis),
       backendBlockedReason: backendBlockedReason.isEmpty
           ? 'Remote backend execution failed'
           : backendBlockedReason,
       backendAuthToken: backendAuthToken.isEmpty ? null : backendAuthToken,
       backendEndpointOverrides: backendEndpointOverrides,
+      backendExecutionOperations: backendExecutionOperations,
     );
   }
 

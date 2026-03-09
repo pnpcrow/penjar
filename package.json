@@ -29,6 +29,7 @@
     "desktop:test:mode-matrix": "cd desktop && ./scripts/run_mode_matrix_tests.sh",
     "desktop:test:mode-matrix:no-pub": "cd desktop && FLUTTER_NO_PUB=1 ./scripts/run_mode_matrix_tests.sh",
     "desktop:analyze": "cd desktop && flutter analyze",
+    "desktop:run:remote-backend": "cd desktop && ./scripts/run_remote_backend.sh",
     "desktop:build:macos:debug": "cd desktop && flutter build macos --debug",
     "desktop:release:scripts:syntax:check": "cd desktop && ./scripts/check_release_script_syntax.sh",
     "desktop:release:scripts:syntax:contract:check": "cd desktop && ./scripts/check_release_script_syntax_contract.sh",
