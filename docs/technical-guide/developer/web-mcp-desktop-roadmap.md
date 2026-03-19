@@ -1,6 +1,6 @@
 ---
-title: Web + MCP + Desktop Delivery Roadmap
-desc: Implementation-first roadmap for fully supporting web client workflows, MCP bridge capabilities, install/setup simplicity, and a Flutter desktop app with embedded MCP.
+title: Web + MCP + Desktop Delivery Roadmap & Plan
+desc: Implementation-first roadmap and execution plan for web client workflows, MCP bridge capabilities, install/setup simplicity, and a Flutter desktop app with embedded MCP.
 ---
 
 # Web + MCP + Desktop Delivery Roadmap
@@ -160,23 +160,113 @@ A task is considered complete only when:
 - **Install scorecard**: time-to-first-run, setup failure rate, and remediation quality.
 - **LLM handoff benchmark**: design-to-structured-code fidelity metrics.
 
+## Workstreams
+
+### WS-A. Capability parity (Web ↔ MCP)
+
+**Objective**: Ensure every production web workflow has an MCP-equivalent operation path.
+
+**Tasks**
+
+1. Build and maintain a living capability matrix.
+2. Map each web workflow to MCP tool/API support status, required auth/permission model, test coverage level, and operational diagnostics.
+3. Prioritize gaps by business frequency and user impact.
+4. Close top-priority gaps with end-to-end tests.
+
+**Deliverables**: `web-mcp-capability-matrix.md` (living artifact), E2E parity checks for P0 workflows.
+
+### WS-B. Setup and operability
+
+**Objective**: Reduce time-to-first-success for developer/operator MCP setup.
+
+**Tasks**
+
+1. Define bootstrap success criteria (fresh machine path).
+2. Add environment preflight validation (ports, node/pnpm, required services).
+3. Add diagnostics for common MCP bridge failures (plugin disconnected, websocket timeout, auth expiry).
+4. Document one-command startup and remediation steps.
+
+**KPIs**: Median local setup completion time, setup failure rate on clean environments, mean time to diagnose connection failures.
+
+### WS-C. Recoverability and durability (Phase B preparation)
+
+**Objective**: Establish autosave/recovery implementation contract before full Phase B delivery.
+
+**Tasks**
+
+1. Define autosave SLA (interval, max acceptable data loss window, retry policy).
+2. Define restore invariants (latest valid snapshot, conflict behavior, partial-failure handling).
+3. Create resilience test matrix for interruption scenarios.
+
+### WS-D. Desktop delivery readiness
+
+**Objective**: De-risk and deliver desktop parity through a full Flutter port with stable contract boundaries.
+
+**Tasks**
+
+1. Freeze API contract subset required by desktop MVP.
+2. Publish parity checklist to track web workflow porting.
+3. Define desktop-specific non-functional requirements (secure credential storage, crash reporting, update strategy).
+4. Maintain migration inventory for remaining non-Flutter desktop paths and decommission plan per path.
+5. Maintain executable workflow acceptance baseline for Flutter parity gates.
+
+### WS-E. LLM structured export readiness
+
+**Objective**: Prepare code-handoff contract so desktop and MCP channels can reuse the same representation.
+
+**Tasks**
+
+1. Define canonical intermediate representation for design-to-code handoff.
+2. Select golden fixtures and expected outputs.
+3. Add fidelity metrics for hierarchy, token mapping, and layout semantics.
+
+## Desktop full-port mandate
+
+- Target desktop end-state is a full Flutter port for user-facing workflows.
+- Hybrid legacy desktop shells are treated as temporary transition paths only when explicitly blocked.
+- Any temporary non-Flutter path must include: blocker reference, owner, removal deadline, parity impact note.
+
+## Milestones
+
+| Milestone | Target outcome | Primary owner role |
+|---|---|---|
+| M1 | Capability matrix v1 published, P0 parity gaps identified | MCP + web platform |
+| M2 | Top P0 gaps closed with automated tests | MCP team |
+| M3 | Setup preflight + diagnostics shipped and documented | DevEx / platform |
+| M4 | Autosave/recovery SLA + resilience suite baseline approved | Backend + reliability |
+| M5 | Desktop contract freeze + parity checklist baseline + full Flutter port tracking baseline | Desktop + API |
+| M6 | Structured export contract + fixtures baseline | Design-to-code |
+
+## Risk register
+
+| Risk | Impact | Mitigation |
+|---|---|---|
+| MCP parity appears complete but misses edge workflows | High | Validate with workflow-based acceptance tests and matrix review cadence |
+| Setup complexity increases with local network/browser security changes | Medium | Keep diagnostics up to date and maintain browser-specific troubleshooting guidance |
+| Desktop parity drifts from web semantics or remains hybrid longer than planned | High | Maintain shared contract tests, enforce parity checklist sign-off, and track non-Flutter path decommission deadlines |
+| Autosave restores inconsistent state under conflicts | High | Add conflict-aware persistence contract and replay tests |
+| LLM export output quality is unstable across design patterns | Medium | Use golden fixture regression gates and fidelity thresholds |
+
+## Operating cadence
+
+- Weekly: capability matrix review and parity status update.
+- Bi-weekly: top risk re-evaluation and mitigation audit.
+- Per release: setup scorecard + resilience test report.
+
 ## Immediate next actions
 
-1. Publish and maintain the capability matrix as a living artifact.
-2. Prioritize MCP parity gaps that block high-frequency web workflows.
-3. Lock autosave + recovery SLAs and validate against storage backends.
-4. Stand up a Flutter desktop spike focused on authentication, file open/save, and embedded MCP bootstrap.
-5. Create an LLM export contract with golden sample fixtures for regression checks.
-## Tracking artifacts published
+1. Publish capability matrix v0 (seed set of high-frequency workflows).
+2. Mark current MCP coverage and identify P0 parity gaps.
+3. Create and prioritize implementation tickets from P0 rows.
+4. Add automated parity checks for the first closed P0 workflows.
+
+## Tracking artifacts
 
 - [Web + MCP + Desktop Documentation Map](/technical-guide/developer/web-mcp-documentation-map/)
-- [Web + MCP + Desktop Detailed Implementation Plan](/technical-guide/developer/web-mcp-desktop-implementation-plan/)
 - [Web ↔ MCP Capability Matrix](/technical-guide/developer/web-mcp-capability-matrix/)
-- [Web ↔ MCP Parity Backlog](/technical-guide/developer/web-mcp-parity-backlog/)
 - [Web + MCP Phase A Execution Log](/technical-guide/developer/web-mcp-phase-a-execution-log/)
 - [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/)
 - [Web ↔ MCP Auth/Session Recovery Contract](/technical-guide/developer/web-mcp-auth-session-recovery-contract/)
 - [Web + MCP Phase A Ticket Seed](/technical-guide/developer/web-mcp-phase-a-ticket-seed/)
-- [Desktop Flutter Parity Checklist](/technical-guide/developer/desktop-flutter-parity-checklist/)
-- [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/)
-- [Desktop Flutter Parity Acceptance Baseline](/technical-guide/developer/desktop-flutter-parity-acceptance-baseline/)
+- [Desktop Flutter Parity Baseline](/technical-guide/developer/desktop-flutter-parity-baseline/)
+- [Desktop Flutter Release Validation](/technical-guide/developer/desktop-flutter-release-validation/)

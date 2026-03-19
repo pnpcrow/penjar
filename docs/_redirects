@@ -237,3 +237,10 @@
 /user-guide/plugins/#plugin-manager	/user-guide/plugins-integrations/#plugin-manager
 /user-guide/plugins/#using-plugins	/user-guide/plugins-integrations/#using-plugins
 /user-guide/plugins/#create-plugin	/user-guide/plugins-integrations/#create-plugin
+/technical-guide/developer/web-mcp-desktop-implementation-plan/	/technical-guide/developer/web-mcp-desktop-roadmap/
+/technical-guide/developer/web-mcp-parity-backlog/	/technical-guide/developer/web-mcp-capability-matrix/
+/technical-guide/developer/desktop-flutter-parity-checklist/	/technical-guide/developer/desktop-flutter-parity-baseline/
+/technical-guide/developer/desktop-flutter-migration-inventory/	/technical-guide/developer/desktop-flutter-parity-baseline/
+/technical-guide/developer/desktop-flutter-parity-acceptance-baseline/	/technical-guide/developer/desktop-flutter-parity-baseline/
+/technical-guide/developer/desktop-flutter-release-validation-baseline/	/technical-guide/developer/desktop-flutter-release-validation/
+/technical-guide/developer/desktop-flutter-release-evidence-index/	/technical-guide/developer/desktop-flutter-release-validation/

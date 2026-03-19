@@ -6,7 +6,7 @@ desc: Detailed implementation record and unit-by-unit review log for Phase C Flu
 # Web + Desktop Phase C Execution Log
 
 This log records execution work for Phase C tasks from the
-[Detailed Implementation Plan](/technical-guide/developer/web-mcp-desktop-implementation-plan/).
+[Delivery Roadmap & Plan](/technical-guide/developer/web-mcp-desktop-roadmap/).
 
 ## Linked planning and tracking artifacts
 
@@ -14,11 +14,8 @@ This log records execution work for Phase C tasks from the
   - [Web + MCP + Desktop Documentation Map](/technical-guide/developer/web-mcp-documentation-map/)
 - Upstream planning:
   - [Web + MCP + Desktop Delivery Roadmap](/technical-guide/developer/web-mcp-desktop-roadmap/)
-  - [Web + MCP + Desktop Detailed Implementation Plan](/technical-guide/developer/web-mcp-desktop-implementation-plan/)
 - Desktop full-port execution artifacts:
-  - [Desktop Flutter Parity Checklist](/technical-guide/developer/desktop-flutter-parity-checklist/)
-  - [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/)
-  - [Desktop Flutter Parity Acceptance Baseline](/technical-guide/developer/desktop-flutter-parity-acceptance-baseline/)
+  - [Desktop Flutter Parity Baseline](/technical-guide/developer/desktop-flutter-parity-baseline/)
 
 ## Execution baseline
 
@@ -58,10 +55,10 @@ Create concrete Phase C execution artifacts required by the Flutter full-port ma
 ### Implemented changes
 
 1. Added workflow-level checklist:
-   - [Desktop Flutter Parity Checklist](/technical-guide/developer/desktop-flutter-parity-checklist/)
+   - [Desktop Flutter Parity Baseline](/technical-guide/developer/desktop-flutter-parity-baseline/)
    - includes domain rows, status legend, owner/evidence fields, and per-row completion criteria.
 2. Added component-level migration inventory:
-   - [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/)
+   - [Desktop Flutter Parity Baseline](/technical-guide/developer/desktop-flutter-parity-baseline/)
    - includes blocker/owner/removal-date policy for temporary non-Flutter paths.
 3. Linked artifacts into continuity chain:
    - `web-mcp-documentation-map.md` Phase C anchor updated to this execution log plus checklist/inventory trackers.

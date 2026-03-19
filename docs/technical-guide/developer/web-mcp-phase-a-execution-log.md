@@ -6,7 +6,7 @@ desc: Detailed implementation record and unit-by-unit review log for Phase A del
 # Web + MCP Phase A Execution Log
 
 This log records execution work for Phase A tasks from the
-[Detailed Implementation Plan](/technical-guide/developer/web-mcp-desktop-implementation-plan/).
+[Delivery Roadmap & Plan](/technical-guide/developer/web-mcp-desktop-roadmap/).
 
 ## Linked planning and tracking artifacts
 
@@ -14,10 +14,8 @@ This log records execution work for Phase A tasks from the
   - [Web + MCP + Desktop Documentation Map](/technical-guide/developer/web-mcp-documentation-map/)
 - Upstream planning:
   - [Web + MCP + Desktop Delivery Roadmap](/technical-guide/developer/web-mcp-desktop-roadmap/)
-  - [Web + MCP + Desktop Detailed Implementation Plan](/technical-guide/developer/web-mcp-desktop-implementation-plan/)
 - Parallel tracking/evidence:
   - [Web ↔ MCP Capability Matrix](/technical-guide/developer/web-mcp-capability-matrix/)
-  - [Web ↔ MCP Parity Backlog](/technical-guide/developer/web-mcp-parity-backlog/)
   - [Web + MCP Phase A Ticket Seed](/technical-guide/developer/web-mcp-phase-a-ticket-seed/)
   - [Web ↔ MCP Auth/Session Recovery Contract](/technical-guide/developer/web-mcp-auth-session-recovery-contract/)
 
@@ -33,7 +31,6 @@ This log records execution work for Phase A tasks from the
 - Temporary non-Flutter desktop paths are allowed only as explicitly blocked transition items with owner and removal deadline.
 - Policy anchors:
   - [Web + MCP + Desktop Delivery Roadmap](/technical-guide/developer/web-mcp-desktop-roadmap/)
-  - [Web + MCP + Desktop Detailed Implementation Plan](/technical-guide/developer/web-mcp-desktop-implementation-plan/)
 
 ## Unit WS-B-01: Preflight and bootstrap hardening
 
