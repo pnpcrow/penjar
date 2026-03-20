@@ -14,9 +14,7 @@ integration while preserving current parity safeguards.
 - [Web + MCP + Desktop Documentation Map](/technical-guide/developer/web-mcp-documentation-map/)
 - [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/)
 - [Desktop Flutter Development Runbook](/technical-guide/developer/desktop-flutter-development-runbook/)
-- [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/)
-- [Desktop Flutter Parity Checklist](/technical-guide/developer/desktop-flutter-parity-checklist/)
-- [Desktop Flutter Parity Acceptance Baseline](/technical-guide/developer/desktop-flutter-parity-acceptance-baseline/)
+- [Desktop Flutter Parity Baseline](/technical-guide/developer/desktop-flutter-parity-baseline/)
 
 ## Objective and exit criteria
 
@@ -595,7 +593,7 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
 1. Confirm release profiles do not ship with `delegate-enabled` fallback policy for backend execution transport.
 2. Keep strict-schema + required-state diagnostics labels visible during rollout to validate effective mode.
 3. Record per-stage execution evidence in `web-mcp-phase-c-execution-log.md` with explicit commands/results.
-4. Update `desktop-flutter-migration-inventory.md`, `desktop-flutter-parity-checklist.md`, and `desktop-flutter-parity-acceptance-baseline.md` when stage status changes.
+4. Update `desktop-flutter-parity-baseline.md` when stage status changes.
 5. Close runbook next-unit candidate wording only after R3 completion criteria are met.
 6. Mark rollout gap row as closed only when R4 gate evidence is published.
 
@@ -634,8 +632,6 @@ sign-in, restore-session, token-refresh, and signed-out recovery paths.
 
 When this plan changes, update in the same unit:
 
-1. `desktop-flutter-migration-inventory.md` (Auth/session row blocker/notes).
-2. `desktop-flutter-parity-checklist.md` (Auth/session row status notes).
-3. `desktop-flutter-parity-acceptance-baseline.md` (Auth acceptance gate wording).
-4. `web-mcp-phase-c-execution-log.md` (unit evidence + remaining-gap precision).
-5. `desktop-flutter-development-runbook.md` (next-unit candidate ordering/notes).
+1. `desktop-flutter-parity-baseline.md` (Auth/session row blocker/notes, status notes, and acceptance gate wording).
+2. `web-mcp-phase-c-execution-log.md` (unit evidence + remaining-gap precision).
+3. `desktop-flutter-development-runbook.md` (next-unit candidate ordering/notes).

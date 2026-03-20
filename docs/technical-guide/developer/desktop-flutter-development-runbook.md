@@ -11,13 +11,10 @@ This runbook defines the repeatable execution loop for the Flutter desktop full-
 
 - [Web + MCP + Desktop Documentation Map](/technical-guide/developer/web-mcp-documentation-map/)
 - [Web + Desktop Phase C Execution Log](/technical-guide/developer/web-mcp-phase-c-execution-log/)
-- [Desktop Flutter Parity Checklist](/technical-guide/developer/desktop-flutter-parity-checklist/)
-- [Desktop Flutter Migration Inventory](/technical-guide/developer/desktop-flutter-migration-inventory/)
-- [Desktop Flutter Parity Acceptance Baseline](/technical-guide/developer/desktop-flutter-parity-acceptance-baseline/)
+- [Desktop Flutter Parity Baseline](/technical-guide/developer/desktop-flutter-parity-baseline/)
 - [Desktop Flutter Auth Backend Contract Integration Plan](/technical-guide/developer/desktop-flutter-auth-backend-contract-integration-plan/)
-- [Desktop Flutter Release Validation Baseline](/technical-guide/developer/desktop-flutter-release-validation-baseline/)
-- [Desktop Flutter Release Evidence Index](/technical-guide/developer/desktop-flutter-release-evidence-index/)
-- [Web + MCP + Desktop Detailed Implementation Plan](/technical-guide/developer/web-mcp-desktop-implementation-plan/)
+- [Desktop Flutter Release Validation & Evidence](/technical-guide/developer/desktop-flutter-release-validation/)
+- [Web + MCP + Desktop Delivery Roadmap & Plan](/technical-guide/developer/web-mcp-desktop-roadmap/)
 
 ## 1) Session start protocol
 

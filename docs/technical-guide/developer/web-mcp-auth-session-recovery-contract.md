@@ -12,9 +12,8 @@ This document defines the Phase A contract for auth/session recovery in multi-us
 - Navigation and update protocol:
   - [Web + MCP + Desktop Documentation Map](/technical-guide/developer/web-mcp-documentation-map/)
 - Planning and evidence chain:
-  - [Web + MCP + Desktop Detailed Implementation Plan](/technical-guide/developer/web-mcp-desktop-implementation-plan/)
+  - [Web + MCP + Desktop Delivery Roadmap & Plan](/technical-guide/developer/web-mcp-desktop-roadmap/)
   - [Web ↔ MCP Capability Matrix](/technical-guide/developer/web-mcp-capability-matrix/)
-  - [Web ↔ MCP Parity Backlog](/technical-guide/developer/web-mcp-parity-backlog/)
   - [Web + MCP Phase A Execution Log](/technical-guide/developer/web-mcp-phase-a-execution-log/)
 
 ## 1. Scope

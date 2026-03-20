@@ -12,7 +12,6 @@ This document converts the current P0 backlog rows into implementation-ready tic
 - Navigation and update protocol:
   - [Web + MCP + Desktop Documentation Map](/technical-guide/developer/web-mcp-documentation-map/)
 - Source and evidence chain:
-  - [Web ↔ MCP Parity Backlog](/technical-guide/developer/web-mcp-parity-backlog/)
   - [Web ↔ MCP Capability Matrix](/technical-guide/developer/web-mcp-capability-matrix/)
   - [Web + MCP Phase A Execution Log](/technical-guide/developer/web-mcp-phase-a-execution-log/)
 

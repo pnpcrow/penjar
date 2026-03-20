@@ -18,6 +18,7 @@ import { FileLifecycleTool } from "./tools/FileLifecycleTool";
 import { CanvasEditingTool } from "./tools/CanvasEditingTool";
 import { InspectHandoffTool } from "./tools/InspectHandoffTool";
 import { CollaborationContextTool } from "./tools/CollaborationContextTool";
+import { StructuredCodeDeliveryTool } from "./tools/StructuredCodeDeliveryTool";
 
 /**
  * Session context for request-scoped data.
@@ -154,6 +155,7 @@ export class PenjarMcpServer {
             new CanvasEditingTool(this),
             new InspectHandoffTool(this),
             new CollaborationContextTool(this),
+            new StructuredCodeDeliveryTool(this),
             new HighLevelOverviewTool(this),
             new PenjarApiInfoTool(this, this.apiDocs),
             new ExportShapeTool(this),
