@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:penjar_desktop/contracts/penpot_api_client.dart';
+import 'package:penjar_desktop/contracts/penpot_contracts.dart';
 import 'package:penjar_desktop/contracts/remote_stub_contracts.dart';
 import 'package:penjar_desktop/contracts/workflow_contracts.dart';
 
@@ -532,7 +534,8 @@ _resolveRemoteStubAuthStateStoreFromEnvironmentAsync({
 
 enum DesktopContractMode {
   inMemory,
-  remoteStub;
+  remoteStub,
+  penpot;
 
   static DesktopContractMode fromEnv(String? rawMode) {
     switch (rawMode?.trim().toLowerCase()) {
@@ -540,6 +543,10 @@ enum DesktopContractMode {
       case 'remote_stub':
       case 'remote':
         return DesktopContractMode.remoteStub;
+      case 'penpot':
+      case 'backend':
+      case 'live':
+        return DesktopContractMode.penpot;
       default:
         return DesktopContractMode.inMemory;
     }
@@ -548,6 +555,7 @@ enum DesktopContractMode {
   String get label => switch (this) {
     DesktopContractMode.inMemory => 'in-memory',
     DesktopContractMode.remoteStub => 'remote-stub',
+    DesktopContractMode.penpot => 'penpot',
   };
 }
 
@@ -638,6 +646,7 @@ class DesktopContractBundle {
     required this.exportWorkflow,
     required this.diagnosticsRecovery,
     this.remoteStubProfile,
+    this.penpotApiClient,
   });
 
   factory DesktopContractBundle.fromEnvironment() {
@@ -774,6 +783,7 @@ class DesktopContractBundle {
 
     return switch (mode) {
       DesktopContractMode.inMemory => DesktopContractBundle.inMemory(),
+      DesktopContractMode.penpot => DesktopContractBundle.penpot(),
       DesktopContractMode.remoteStub => DesktopContractBundle.remoteStub(
         faultProfile: remoteStubFaultProfile,
         transportClient: remoteStubTransportClient,
@@ -811,6 +821,40 @@ class DesktopContractBundle {
       inspectHandoff: InMemoryInspectHandoffContract(),
       exportWorkflow: InMemoryExportWorkflowContract(),
       diagnosticsRecovery: InMemoryDiagnosticsRecoveryContract(),
+    );
+  }
+
+  factory DesktopContractBundle.penpot({
+    String? baseUrl,
+    Duration? timeout,
+  }) {
+    final String resolvedBaseUrl = baseUrl ??
+        const String.fromEnvironment(
+          'PENJAR_DESKTOP_PENPOT_BASE_URL',
+          defaultValue: 'http://localhost:9090',
+        );
+    final int timeoutMs = _parsePositiveIntOrDefault(
+      const String.fromEnvironment(
+        'PENJAR_DESKTOP_PENPOT_TIMEOUT_MS',
+      ),
+      fallback: 10000,
+    );
+    final PenpotApiClient apiClient = PenpotApiClient(
+      baseUrl: resolvedBaseUrl,
+      timeout: timeout ?? Duration(milliseconds: timeoutMs),
+    );
+
+    return DesktopContractBundle(
+      mode: DesktopContractMode.penpot,
+      authSession: PenpotAuthSessionContract(api: apiClient),
+      projectLifecycle: PenpotProjectLifecycleContract(api: apiClient),
+      canvasEditing: PenpotCanvasEditingContract(api: apiClient),
+      assetManagement: PenpotAssetManagementContract(api: apiClient),
+      collaborationContext: PenpotCollaborationContextContract(api: apiClient),
+      inspectHandoff: PenpotInspectHandoffContract(api: apiClient),
+      exportWorkflow: PenpotExportWorkflowContract(api: apiClient),
+      diagnosticsRecovery: PenpotDiagnosticsRecoveryContract(api: apiClient),
+      penpotApiClient: apiClient,
     );
   }
 
@@ -895,4 +939,5 @@ class DesktopContractBundle {
   final ExportWorkflowContract exportWorkflow;
   final DiagnosticsRecoveryContract diagnosticsRecovery;
   final DesktopRemoteStubProfile? remoteStubProfile;
+  final PenpotApiClient? penpotApiClient;
 }

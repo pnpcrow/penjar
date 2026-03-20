@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:penjar_desktop/contracts/desktop_contract_bundle.dart';
+import 'package:penjar_desktop/contracts/penpot_contracts.dart';
 import 'package:penjar_desktop/contracts/workflow_contracts.dart';
+import 'package:penjar_desktop/mcp/embedded_mcp_runtime.dart';
 
 const String kDefaultInitialSectionId = String.fromEnvironment(
   'PENJAR_DESKTOP_INITIAL_SECTION',
@@ -149,6 +151,15 @@ const List<WorkflowSection> kSections = <WorkflowSection>[
     owner: 'Platform Reliability',
     status: 'In progress',
     icon: Icons.health_and_safety_outlined,
+  ),
+  WorkflowSection(
+    id: 'mcp',
+    label: 'Embedded MCP',
+    description:
+        'Embedded MCP server runtime for desktop. Provides LLM assistant integration without separate bridge setup.',
+    owner: 'MCP Integration',
+    status: 'Active',
+    icon: Icons.smart_toy_outlined,
   ),
 ];
 
@@ -505,6 +516,8 @@ class _DesktopShellPageState extends State<DesktopShellPage>
                                             'none')
                                       : '',
                                 )
+                              else if (section.id == 'mcp')
+                                const EmbeddedMcpPanel()
                               else
                                 Text(
                                   section.description,
@@ -557,27 +570,64 @@ class _AuthSessionPanelState extends State<AuthSessionPanel> {
     super.dispose();
   }
 
+  bool _loading = false;
+
   void _signIn() {
-    setState(() {
-      _contract.signIn(
-        AuthSignInRequest(
-          email: _emailController.text,
-          password: _passwordController.text,
-        ),
-      );
-    });
+    if (_contract is PenpotAuthSessionContract) {
+      _signInAsync();
+    } else {
+      setState(() {
+        _contract.signIn(
+          AuthSignInRequest(
+            email: _emailController.text,
+            password: _passwordController.text,
+          ),
+        );
+      });
+    }
+  }
+
+  Future<void> _signInAsync() async {
+    setState(() => _loading = true);
+    await (_contract as PenpotAuthSessionContract).signInAsync(
+      AuthSignInRequest(
+        email: _emailController.text,
+        password: _passwordController.text,
+      ),
+    );
+    if (mounted) setState(() => _loading = false);
   }
 
   void _restoreSession() {
-    setState(() {
-      _contract.restoreSession();
-    });
+    if (_contract is PenpotAuthSessionContract) {
+      _restoreSessionAsync();
+    } else {
+      setState(() {
+        _contract.restoreSession();
+      });
+    }
+  }
+
+  Future<void> _restoreSessionAsync() async {
+    setState(() => _loading = true);
+    await (_contract as PenpotAuthSessionContract).restoreSessionAsync();
+    if (mounted) setState(() => _loading = false);
   }
 
   void _refreshToken() {
-    setState(() {
-      _contract.refreshToken();
-    });
+    if (_contract is PenpotAuthSessionContract) {
+      _refreshTokenAsync();
+    } else {
+      setState(() {
+        _contract.refreshToken();
+      });
+    }
+  }
+
+  Future<void> _refreshTokenAsync() async {
+    setState(() => _loading = true);
+    await (_contract as PenpotAuthSessionContract).refreshTokenAsync();
+    if (mounted) setState(() => _loading = false);
   }
 
   @override
@@ -648,6 +698,11 @@ class _AuthSessionPanelState extends State<AuthSessionPanel> {
           ],
         ),
         const SizedBox(height: 16),
+        if (_loading)
+          const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: LinearProgressIndicator(),
+          ),
         Text(
           'Status: ${authState.status}',
           key: const ValueKey<String>('auth-status'),
@@ -672,6 +727,23 @@ class _ProjectLifecyclePanelState extends State<ProjectLifecyclePanel> {
       widget.contract ?? InMemoryProjectLifecycleContract();
   final TextEditingController _projectNameController = TextEditingController();
   final TextEditingController _fileNameController = TextEditingController();
+  bool _loading = false;
+
+  bool get _isPenpot => _contract is PenpotProjectLifecycleContract;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_isPenpot) {
+      _loadProjects();
+    }
+  }
+
+  Future<void> _loadProjects() async {
+    setState(() => _loading = true);
+    await (_contract as PenpotProjectLifecycleContract).loadProjectsAsync();
+    if (mounted) setState(() => _loading = false);
+  }
 
   @override
   void dispose() {
@@ -681,16 +753,28 @@ class _ProjectLifecyclePanelState extends State<ProjectLifecyclePanel> {
   }
 
   void _createProject() {
-    setState(() {
-      final String previousStatus = _contract.state.status;
-      final ProjectLifecycleState nextState = _contract.createProject(
-        _projectNameController.text,
-      );
-      if (nextState.status != previousStatus &&
-          nextState.status.startsWith('Project created:')) {
-        _projectNameController.clear();
-      }
-    });
+    if (_isPenpot) {
+      _createProjectAsync();
+    } else {
+      setState(() {
+        final String previousStatus = _contract.state.status;
+        final ProjectLifecycleState nextState = _contract.createProject(
+          _projectNameController.text,
+        );
+        if (nextState.status != previousStatus &&
+            nextState.status.startsWith('Project created:')) {
+          _projectNameController.clear();
+        }
+      });
+    }
+  }
+
+  Future<void> _createProjectAsync() async {
+    setState(() => _loading = true);
+    await (_contract as PenpotProjectLifecycleContract)
+        .createProjectAsync(_projectNameController.text);
+    _projectNameController.clear();
+    if (mounted) setState(() => _loading = false);
   }
 
   void _switchProject(int index) {
@@ -700,28 +784,53 @@ class _ProjectLifecyclePanelState extends State<ProjectLifecyclePanel> {
   }
 
   void _createFile() {
-    setState(() {
-      final String previousStatus = _contract.state.status;
-      final ProjectLifecycleState nextState = _contract.createFile(
-        _fileNameController.text,
-      );
-      if (nextState.status != previousStatus &&
-          nextState.status.startsWith('File created in ')) {
-        _fileNameController.clear();
-      }
-    });
+    if (_isPenpot) {
+      _createFileAsync();
+    } else {
+      setState(() {
+        final String previousStatus = _contract.state.status;
+        final ProjectLifecycleState nextState = _contract.createFile(
+          _fileNameController.text,
+        );
+        if (nextState.status != previousStatus &&
+            nextState.status.startsWith('File created in ')) {
+          _fileNameController.clear();
+        }
+      });
+    }
+  }
+
+  Future<void> _createFileAsync() async {
+    setState(() => _loading = true);
+    await (_contract as PenpotProjectLifecycleContract)
+        .createFileAsync(_fileNameController.text);
+    _fileNameController.clear();
+    if (mounted) setState(() => _loading = false);
   }
 
   void _deleteFirstFile() {
-    setState(() {
-      _contract.deleteFirstFile();
-    });
+    if (_isPenpot) {
+      _deleteFirstFileAsync();
+    } else {
+      setState(() {
+        _contract.deleteFirstFile();
+      });
+    }
+  }
+
+  Future<void> _deleteFirstFileAsync() async {
+    setState(() => _loading = true);
+    await (_contract as PenpotProjectLifecycleContract).deleteFirstFileAsync();
+    if (mounted) setState(() => _loading = false);
   }
 
   @override
   Widget build(BuildContext context) {
     final ProjectLifecycleState projectState = _contract.state;
-    final ProjectRecord selectedProject = projectState.selectedProject;
+    final bool hasProjects = projectState.projects.isNotEmpty &&
+        projectState.selectedProjectIndex < projectState.projects.length;
+    final ProjectRecord? selectedProject =
+        hasProjects ? projectState.selectedProject : null;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Column(
@@ -732,9 +841,23 @@ class _ProjectLifecyclePanelState extends State<ProjectLifecyclePanel> {
           'Project/file lifecycle parity scaffold for Flutter desktop.',
           style: textTheme.bodyLarge,
         ),
+        if (_loading)
+          const Padding(
+            padding: EdgeInsets.only(top: 8, bottom: 8),
+            child: LinearProgressIndicator(),
+          ),
+        if (_isPenpot)
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 8),
+            child: OutlinedButton.icon(
+              icon: const Icon(Icons.refresh),
+              label: const Text('Load Projects from Backend'),
+              onPressed: _loading ? null : _loadProjects,
+            ),
+          ),
         const SizedBox(height: 16),
         Text(
-          'Projects: ${projectState.projects.length} · Files in selected: ${selectedProject.files.length}',
+          'Projects: ${projectState.projects.length} · Files in selected: ${selectedProject?.files.length ?? 0}',
           key: const ValueKey<String>('project-summary'),
           style: textTheme.bodyMedium,
         ),
@@ -797,9 +920,11 @@ class _ProjectLifecyclePanelState extends State<ProjectLifecyclePanel> {
           ],
         ),
         const SizedBox(height: 16),
-        if (selectedProject.files.isEmpty)
+        if (selectedProject == null || selectedProject.files.isEmpty)
           Text(
-            'No files in ${selectedProject.name}.',
+            selectedProject == null
+                ? 'No project selected.'
+                : 'No files in ${selectedProject.name}.',
             key: const ValueKey<String>('file-empty'),
           )
         else
@@ -1613,11 +1738,25 @@ class DiagnosticsRecoveryPanel extends StatefulWidget {
 class _DiagnosticsRecoveryPanelState extends State<DiagnosticsRecoveryPanel> {
   late final DiagnosticsRecoveryContract _contract =
       widget.contract ?? InMemoryDiagnosticsRecoveryContract();
+  bool _loading = false;
+
+  bool get _isPenpot => _contract is PenpotDiagnosticsRecoveryContract;
 
   void _runHealthCheck() {
-    setState(() {
-      _contract.runHealthCheck();
-    });
+    if (_isPenpot) {
+      _runHealthCheckAsync();
+    } else {
+      setState(() {
+        _contract.runHealthCheck();
+      });
+    }
+  }
+
+  Future<void> _runHealthCheckAsync() async {
+    setState(() => _loading = true);
+    await (_contract as PenpotDiagnosticsRecoveryContract)
+        .runHealthCheckAsync();
+    if (mounted) setState(() => _loading = false);
   }
 
   void _simulateDrop() {
@@ -1627,9 +1766,20 @@ class _DiagnosticsRecoveryPanelState extends State<DiagnosticsRecoveryPanel> {
   }
 
   void _attemptReconnect() {
-    setState(() {
-      _contract.attemptReconnect();
-    });
+    if (_isPenpot) {
+      _attemptReconnectAsync();
+    } else {
+      setState(() {
+        _contract.attemptReconnect();
+      });
+    }
+  }
+
+  Future<void> _attemptReconnectAsync() async {
+    setState(() => _loading = true);
+    await (_contract as PenpotDiagnosticsRecoveryContract)
+        .attemptReconnectAsync();
+    if (mounted) setState(() => _loading = false);
   }
 
   void _openRecoveryGuide() {
@@ -1702,6 +1852,233 @@ class _DiagnosticsRecoveryPanelState extends State<DiagnosticsRecoveryPanel> {
           key: const ValueKey<String>('diagnostics-status'),
           style: textTheme.bodyMedium,
         ),
+      ],
+    );
+  }
+}
+
+class EmbeddedMcpPanel extends StatefulWidget {
+  const EmbeddedMcpPanel({super.key});
+
+  @override
+  State<EmbeddedMcpPanel> createState() => _EmbeddedMcpPanelState();
+}
+
+class _EmbeddedMcpPanelState extends State<EmbeddedMcpPanel> {
+  late final EmbeddedMcpRuntime _runtime = EmbeddedMcpRuntime();
+  final List<String> _logs = <String>[];
+  McpHealthStatus? _lastHealth;
+  bool _loading = false;
+  StreamSubscription<McpRuntimeEvent>? _eventSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _eventSubscription = _runtime.events.listen(_onEvent);
+  }
+
+  @override
+  void dispose() {
+    _eventSubscription?.cancel();
+    _runtime.dispose();
+    super.dispose();
+  }
+
+  void _onEvent(McpRuntimeEvent event) {
+    if (!mounted) return;
+    setState(() {
+      if (event.type == McpRuntimeEventType.log) {
+        _logs.add(event.message);
+        if (_logs.length > 100) {
+          _logs.removeRange(0, _logs.length - 100);
+        }
+      } else {
+        _logs.add('[${event.type.name}] ${event.message}');
+      }
+    });
+  }
+
+  Future<void> _start() async {
+    setState(() => _loading = true);
+    await _runtime.start();
+    if (mounted) setState(() => _loading = false);
+  }
+
+  Future<void> _stop() async {
+    setState(() => _loading = true);
+    await _runtime.stop();
+    if (mounted) setState(() => _loading = false);
+  }
+
+  Future<void> _restart() async {
+    setState(() => _loading = true);
+    await _runtime.restart();
+    if (mounted) setState(() => _loading = false);
+  }
+
+  Future<void> _checkHealth() async {
+    setState(() => _loading = true);
+    _lastHealth = await _runtime.checkHealth();
+    if (mounted) setState(() => _loading = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final McpRuntimeState runtimeState = _runtime.getState();
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    final Color statusColor = switch (runtimeState.status) {
+      McpRuntimeStatus.running => Colors.green,
+      McpRuntimeStatus.error => Colors.red,
+      McpRuntimeStatus.starting ||
+      McpRuntimeStatus.stopping => Colors.orange,
+      McpRuntimeStatus.stopped => Colors.grey,
+    };
+
+    return Column(
+      key: const ValueKey<String>('mcp-panel'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          'Embedded MCP server runtime for LLM assistant integration.',
+          style: textTheme.bodyLarge,
+        ),
+        const SizedBox(height: 16),
+
+        // Status row
+        Row(
+          children: <Widget>[
+            Icon(Icons.circle, color: statusColor, size: 12),
+            const SizedBox(width: 8),
+            Text(
+              'Status: ${runtimeState.status.label}',
+              style: textTheme.titleMedium,
+            ),
+            if (runtimeState.startedAt != null) ...<Widget>[
+              const SizedBox(width: 16),
+              Text(
+                'Started: ${runtimeState.startedAt}',
+                style: textTheme.bodySmall,
+              ),
+            ],
+          ],
+        ),
+        if (runtimeState.lastError.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              'Error: ${runtimeState.lastError}',
+              style: textTheme.bodySmall?.copyWith(color: Colors.red),
+            ),
+          ),
+        const SizedBox(height: 8),
+
+        // Connection info
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: <Widget>[
+            Chip(label: Text('MCP: ${runtimeState.mcpUrl}')),
+            Chip(label: Text('Port: ${runtimeState.serverPort}')),
+            Chip(label: Text('WS: ${runtimeState.websocketPort}')),
+            if (runtimeState.restartAttempts > 0)
+              Chip(
+                label: Text('Restarts: ${runtimeState.restartAttempts}'),
+                backgroundColor: Colors.orange.shade100,
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        if (_loading)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 8),
+            child: LinearProgressIndicator(),
+          ),
+
+        // Control buttons
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: <Widget>[
+            FilledButton.icon(
+              icon: const Icon(Icons.play_arrow),
+              label: const Text('Start MCP'),
+              onPressed: _loading || _runtime.isRunning ? null : _start,
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.stop),
+              label: const Text('Stop'),
+              onPressed: _loading || !_runtime.isRunning ? null : _stop,
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.refresh),
+              label: const Text('Restart'),
+              onPressed: _loading ? null : _restart,
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.monitor_heart),
+              label: const Text('Health Check'),
+              onPressed: _loading ? null : _checkHealth,
+            ),
+          ],
+        ),
+
+        // Health status
+        if (_lastHealth != null) ...<Widget>[
+          const SizedBox(height: 16),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('Health Check Result', style: textTheme.titleSmall),
+                  const SizedBox(height: 8),
+                  Text('Reachable: ${_lastHealth!.reachable}'),
+                  Text('Status: ${_lastHealth!.status}'),
+                  Text('Plugin Connected: ${_lastHealth!.pluginConnected}'),
+                  if (_lastHealth!.error != null)
+                    Text(
+                      'Error: ${_lastHealth!.error}',
+                      style: TextStyle(color: colorScheme.error),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+
+        // Log output
+        if (_logs.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 16),
+          Text('Server Logs', style: textTheme.titleSmall),
+          const SizedBox(height: 4),
+          Container(
+            height: 200,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade900,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.all(8),
+            child: ListView.builder(
+              reverse: true,
+              itemCount: _logs.length,
+              itemBuilder: (BuildContext context, int index) {
+                final String log = _logs[_logs.length - 1 - index];
+                return Text(
+                  log,
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 11,
+                    color: Colors.greenAccent,
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ],
     );
   }
