@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Penjar Architecture</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; overflow-x: hidden; }
+
+  .header { text-align: center; padding: 40px 20px 20px; }
+  .header h1 { font-size: 2.4rem; color: #58a6ff; letter-spacing: -1px; }
+  .header p { color: #8b949e; margin-top: 8px; font-size: 1rem; }
+
+  .canvas { position: relative; width: 1400px; margin: 30px auto 60px; min-height: 1700px; }
+
+  /* ─── Component Nodes ─── */
+  .node { position: absolute; border-radius: 16px; padding: 20px; transition: transform .2s, box-shadow .2s; }
+  .node:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,.5); }
+  .node h3 { font-size: 1.05rem; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .node .tech { font-size: .72rem; color: #8b949e; margin-bottom: 8px; }
+  .node .desc { font-size: .78rem; line-height: 1.5; color: #b1bac4; }
+  .node .port { display: inline-block; background: rgba(255,255,255,.08); border-radius: 6px; padding: 2px 8px; font-size: .7rem; color: #79c0ff; margin: 2px 2px 0 0; }
+
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+  /* Color Themes */
+  .n-backend   { background: linear-gradient(135deg, #1a1e2e 0%, #161b22 100%); border: 1px solid #2d4a7a; }
+  .n-frontend  { background: linear-gradient(135deg, #1e1a2e 0%, #161b22 100%); border: 1px solid #5e3d7a; }
+  .n-desktop   { background: linear-gradient(135deg, #1a2e1e 0%, #161b22 100%); border: 1px solid #2d7a3d; }
+  .n-mcp       { background: linear-gradient(135deg, #2e2a1a 0%, #161b22 100%); border: 1px solid #7a6a2d; }
+  .n-data      { background: linear-gradient(135deg, #2e1a1a 0%, #161b22 100%); border: 1px solid #7a2d2d; }
+  .n-infra     { background: linear-gradient(135deg, #1a2a2e 0%, #161b22 100%); border: 1px solid #2d6a7a; }
+  .n-wasm      { background: linear-gradient(135deg, #2e1e2a 0%, #161b22 100%); border: 1px solid #7a2d6a; }
+  .n-plugin    { background: linear-gradient(135deg, #2e2e1a 0%, #161b22 100%); border: 1px solid #6a7a2d; }
+
+  /* ─── SVG Connections ─── */
+  svg.connections { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+  .conn { fill: none; stroke-width: 2; opacity: .45; }
+  .conn-rest  { stroke: #58a6ff; stroke-dasharray: 8 4; }
+  .conn-ws    { stroke: #f0883e; }
+  .conn-rpc   { stroke: #bc8cff; stroke-dasharray: 4 4; }
+  .conn-data  { stroke: #f778ba; stroke-dasharray: 12 6; }
+  .conn-embed { stroke: #3fb950; stroke-width: 2.5; }
+  .conn-wasm  { stroke: #d2a8ff; stroke-width: 2; stroke-dasharray: 3 3; }
+
+  /* ─── Legend ─── */
+  .legend { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin: 0 auto 30px; max-width: 1000px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: .78rem; color: #8b949e; }
+  .legend-line { width: 36px; height: 3px; border-radius: 2px; }
+
+  /* ─── Phase Banner ─── */
+  .phases { display: flex; gap: 12px; justify-content: center; margin: 0 auto 40px; flex-wrap: wrap; max-width: 1200px; padding: 0 20px; }
+  .phase { flex: 1; min-width: 200px; max-width: 240px; border-radius: 12px; padding: 16px; text-align: center; }
+  .phase h4 { font-size: .85rem; margin-bottom: 4px; }
+  .phase p { font-size: .7rem; color: #8b949e; line-height: 1.4; }
+  .phase-a { background: #1a2940; border: 1px solid #2d5a8a; }
+  .phase-b { background: #2a1940; border: 1px solid #5a2d8a; }
+  .phase-c { background: #19402a; border: 1px solid #2d8a3d; }
+  .phase-d { background: #40391a; border: 1px solid #8a7a2d; }
+  .phase-e { background: #401a2a; border: 1px solid #8a2d5a; }
+
+  /* ─── Tool List ─── */
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 6px; margin-top: 8px; }
+  .tool-tag { background: rgba(255,255,255,.06); border-radius: 6px; padding: 4px 8px; font-size: .68rem; color: #d2a8ff; }
+
+  /* ─── Section Labels ─── */
+  .zone-label { position: absolute; font-size: .65rem; text-transform: uppercase; letter-spacing: 2px; color: #484f58; font-weight: 600; }
+
+  /* ─── Footer Stats ─── */
+  .stats { display: flex; gap: 30px; justify-content: center; padding: 30px 20px 50px; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat .val { font-size: 2rem; font-weight: 700; color: #58a6ff; }
+  .stat .lbl { font-size: .75rem; color: #8b949e; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Penjar Platform Architecture</h1>
+  <p>Open-source design &amp; code collaboration platform — Full-stack service topology</p>
+</div>
+
+<!-- Phase Banners -->
+<div class="phases">
+  <div class="phase phase-a">
+    <h4 style="color:#58a6ff">Phase A — MCP Bridge</h4>
+    <p>11 tools, health diagnostics, multi-user auth, preflight validation</p>
+  </div>
+  <div class="phase phase-b">
+    <h4 style="color:#bc8cff">Phase B — Storage</h4>
+    <p>User management, autosave, storage durability (Penpot native)</p>
+  </div>
+  <div class="phase phase-c">
+    <h4 style="color:#3fb950">Phase C — Desktop</h4>
+    <p>Flutter app, Penpot RPC client, 8 workflow contracts, async UI</p>
+  </div>
+  <div class="phase phase-d">
+    <h4 style="color:#f0883e">Phase D — Embedded MCP</h4>
+    <p>Node.js child process, health monitor, auto-restart, zero-setup</p>
+  </div>
+  <div class="phase phase-e">
+    <h4 style="color:#f778ba">Phase E — Code Delivery</h4>
+    <p>Design IR extraction, Flutter/React/HTML/SwiftUI scaffolds, LLM prompts</p>
+  </div>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-line" style="background:#58a6ff;opacity:.6"></div> REST / HTTP</div>
+  <div class="legend-item"><div class="legend-line" style="background:#f0883e"></div> WebSocket</div>
+  <div class="legend-item"><div class="legend-line" style="background:#bc8cff;opacity:.7"></div> RPC Call</div>
+  <div class="legend-item"><div class="legend-line" style="background:#f778ba;opacity:.6"></div> Data Layer</div>
+  <div class="legend-item"><div class="legend-line" style="background:#3fb950"></div> Embedded Process</div>
+  <div class="legend-item"><div class="legend-line" style="background:#d2a8ff;opacity:.6"></div> WASM Bridge</div>
+</div>
+
+<!-- Architecture Canvas -->
+<div class="canvas">
+
+  <!-- SVG Connection Lines -->
+  <svg class="connections" viewBox="0 0 1400 1700" preserveAspectRatio="xMidYMid meet">
+    <!-- Frontend → Backend (REST + WS) -->
+    <path class="conn conn-rest" d="M 350 280 C 350 360, 500 360, 500 420"/>
+    <path class="conn conn-ws"   d="M 370 280 C 370 350, 520 350, 520 420"/>
+
+    <!-- Frontend → Render WASM -->
+    <path class="conn conn-wasm" d="M 220 280 C 220 340, 120 340, 120 380"/>
+
+    <!-- Frontend → MCP Plugin Bridge (WS) -->
+    <path class="conn conn-ws" d="M 500 240 C 640 240, 680 300, 780 340"/>
+
+    <!-- Backend → PostgreSQL -->
+    <path class="conn conn-data" d="M 500 580 C 500 640, 320 660, 300 700"/>
+
+    <!-- Backend → Valkey -->
+    <path class="conn conn-data" d="M 600 580 C 620 640, 680 660, 700 700"/>
+
+    <!-- Backend → Exporter -->
+    <path class="conn conn-rpc" d="M 400 580 C 370 640, 150 670, 120 720"/>
+
+    <!-- MCP Server → Plugin Bridge → Frontend Plugin -->
+    <path class="conn conn-ws" d="M 880 520 C 880 420, 820 380, 780 340"/>
+
+    <!-- MCP Server → Backend (health/context) -->
+    <path class="conn conn-rest" d="M 800 480 C 700 480, 650 480, 620 480"/>
+
+    <!-- Desktop App → Backend (RPC) -->
+    <path class="conn conn-rpc" d="M 420 1050 C 420 900, 480 700, 520 580"/>
+
+    <!-- Desktop App → Embedded MCP (embed) -->
+    <path class="conn conn-embed" d="M 560 1100 C 700 1100, 750 1050, 800 1020"/>
+
+    <!-- Embedded MCP ↔ MCP Server concept -->
+    <path class="conn conn-embed" d="M 950 960 C 980 800, 950 650, 920 560"/>
+
+    <!-- Plugins → Plugin Bridge (WS) -->
+    <path class="conn conn-ws" d="M 1150 400 C 1050 400, 980 380, 900 360"/>
+
+    <!-- LLM Agent → MCP Server -->
+    <path class="conn conn-rest" d="M 1150 620 C 1050 590, 990 560, 940 540"/>
+
+    <!-- Desktop → Secure Storage -->
+    <path class="conn conn-data" d="M 350 1140 C 280 1200, 220 1240, 200 1280"/>
+  </svg>
+
+  <!-- ═══════════════ CLIENT TIER ═══════════════ -->
+  <div class="zone-label" style="top:60px; left:30px;">CLIENT TIER</div>
+
+  <!-- Frontend (Web App) -->
+  <div class="node n-frontend" style="top:100px; left:160px; width:420px;">
+    <h3><span class="dot" style="background:#bc8cff"></span> Web Frontend</h3>
+    <div class="tech">ClojureScript + React · Shadow-cljs · Canvas Editor</div>
+    <div class="desc">
+      Full-featured browser design editor. Real-time collaboration via WebSocket.
+      Component system with variants, design tokens, inspect mode.
+    </div>
+    <div style="margin-top:8px">
+      <span class="port">:9001 public</span>
+      <span class="port">:8080 internal</span>
+      <span class="port">WS real-time</span>
+    </div>
+  </div>
+
+  <!-- Render WASM -->
+  <div class="node n-wasm" style="top:380px; left:30px; width:200px;">
+    <h3><span class="dot" style="background:#d2a8ff"></span> Render WASM</h3>
+    <div class="tech">Rust · Skia · WebAssembly</div>
+    <div class="desc">GPU-accelerated canvas rendering. Vector graphics, text layout, SVG.</div>
+  </div>
+
+  <!-- Plugins -->
+  <div class="node n-plugin" style="top:300px; left:1050px; width:310px;">
+    <h3><span class="dot" style="background:#a3be2d"></span> Plugin System</h3>
+    <div class="tech">TypeScript · Vite · Cloudflare Workers</div>
+    <div class="desc">12+ plugins: color tokens, contrast checker, icon manager, tables, palette generator, lorem ipsum.</div>
+    <div style="margin-top:8px">
+      <span class="port">WebSocket Bridge</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SERVICE TIER ═══════════════ -->
+  <div class="zone-label" style="top:370px; left:300px;">SERVICE TIER</div>
+
+  <!-- Backend -->
+  <div class="node n-backend" style="top:420px; left:350px; width:300px;">
+    <h3><span class="dot" style="background:#58a6ff"></span> Backend API</h3>
+    <div class="tech">Clojure · Yetti/Reitit · JDK 21</div>
+    <div class="desc">
+      RPC API at <code>/api/main/methods/{name}</code>.
+      Auth (session cookies, OIDC, LDAP), file management, WebSocket hub, asset storage (FS/S3).
+    </div>
+    <div style="margin-top:8px">
+      <span class="port">:6060</span>
+      <span class="port">REST + WS</span>
+      <span class="port">350MB body</span>
+    </div>
+  </div>
+
+  <!-- MCP Server -->
+  <div class="node n-mcp" style="top:420px; left:720px; width:340px;">
+    <h3><span class="dot" style="background:#f0883e"></span> MCP Server</h3>
+    <div class="tech">TypeScript · Node.js · @modelcontextprotocol/sdk</div>
+    <div class="desc">
+      Model Context Protocol bridge. Streamable HTTP, SSE, WebSocket transports.
+      Multi-user mode with token auth. 60-min session timeout.
+    </div>
+    <div style="margin-top:8px">
+      <span class="port">:4401 HTTP</span>
+      <span class="port">:4402 WS</span>
+      <span class="port">:4403 REPL</span>
+    </div>
+    <div class="tools-grid">
+      <div class="tool-tag">execute_code</div>
+      <div class="tool-tag">active_design_context</div>
+      <div class="tool-tag">file_lifecycle</div>
+      <div class="tool-tag">canvas_editing</div>
+      <div class="tool-tag">inspect_handoff</div>
+      <div class="tool-tag">collaboration_context</div>
+      <div class="tool-tag">export_shape</div>
+      <div class="tool-tag">import_image</div>
+      <div class="tool-tag">penjar_api_info</div>
+      <div class="tool-tag">high_level_overview</div>
+      <div class="tool-tag" style="color:#f778ba; border:1px solid #f778ba44">structured_code_delivery ✨</div>
+    </div>
+  </div>
+
+  <!-- LLM Agent -->
+  <div class="node n-infra" style="top:560px; left:1080px; width:280px;">
+    <h3><span class="dot" style="background:#79c0ff"></span> LLM Agents</h3>
+    <div class="tech">Claude / GPT / Local Models</div>
+    <div class="desc">
+      Connect via MCP protocol. Use tools to read designs, edit canvas, generate code, manage projects.
+    </div>
+    <div style="margin-top:8px">
+      <span class="port">MCP Client</span>
+      <span class="port">Streamable HTTP</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════ DATA TIER ═══════════════ -->
+  <div class="zone-label" style="top:660px; left:30px;">DATA TIER</div>
+
+  <!-- Exporter -->
+  <div class="node n-infra" style="top:720px; left:30px; width:220px;">
+    <h3><span class="dot" style="background:#56d4dd"></span> Exporter</h3>
+    <div class="tech">ClojureScript · Playwright</div>
+    <div class="desc">Headless rendering for PNG, SVG, PDF export. Redis job queue.</div>
+  </div>
+
+  <!-- PostgreSQL -->
+  <div class="node n-data" style="top:700px; left:200px; width:230px;">
+    <h3><span class="dot" style="background:#f778ba"></span> PostgreSQL 15</h3>
+    <div class="tech">Relational Database</div>
+    <div class="desc">Users, teams, projects, files, sessions, access tokens. Migration-managed schema.</div>
+    <div style="margin-top:6px"><span class="port">persistent volume</span></div>
+  </div>
+
+  <!-- Valkey -->
+  <div class="node n-data" style="top:700px; left:580px; width:230px;">
+    <h3><span class="dot" style="background:#f85149"></span> Valkey 8.1</h3>
+    <div class="tech">Redis-Compatible Cache</div>
+    <div class="desc">Session cache, message broker, export job queue. 128MB max memory, LRU eviction.</div>
+  </div>
+
+  <!-- Asset Storage -->
+  <div class="node n-data" style="top:700px; left:870px; width:200px;">
+    <h3><span class="dot" style="background:#e3b341"></span> Asset Storage</h3>
+    <div class="tech">Filesystem / S3</div>
+    <div class="desc">Design files, images, fonts. Shared volume between services.</div>
+  </div>
+
+  <!-- ═══════════════ DESKTOP TIER ═══════════════ -->
+  <div class="zone-label" style="top:870px; left:30px;">DESKTOP TIER</div>
+
+  <!-- Desktop App -->
+  <div class="node n-desktop" style="top:960px; left:160px; width:440px;">
+    <h3><span class="dot" style="background:#3fb950"></span> Desktop Application</h3>
+    <div class="tech">Flutter 3.11 · Dart · macOS + Windows</div>
+    <div class="desc">
+      Native desktop client with 10 workflow panels. Three contract modes:
+      <strong>in-memory</strong> (testing), <strong>remote-stub</strong> (configurable), <strong>penpot</strong> (live backend).
+    </div>
+    <div style="margin-top:8px">
+      <span class="port">PenpotApiClient</span>
+      <span class="port">Session Cookies</span>
+      <span class="port">flutter_secure_storage</span>
+    </div>
+    <div style="margin-top:10px; font-size:.75rem; color:#8b949e;">
+      <strong>Workflow Panels:</strong>
+      Auth · Projects · Files · Canvas · Assets · Collaboration · Inspect · Export · Diagnostics · <span style="color:#f0883e">Embedded MCP</span>
+    </div>
+  </div>
+
+  <!-- Embedded MCP Runtime -->
+  <div class="node n-mcp" style="top:920px; left:700px; width:340px;">
+    <h3><span class="dot" style="background:#f0883e"></span> Embedded MCP Runtime</h3>
+    <div class="tech">Node.js child process · Health monitor</div>
+    <div class="desc">
+      Zero-setup MCP server inside desktop app. Auto-discovery of bundled distribution.
+      Health check every 30s. Auto-restart with exponential backoff (max 5 attempts).
+    </div>
+    <div style="margin-top:8px">
+      <span class="port">:4401 MCP</span>
+      <span class="port">:4402 WS</span>
+      <span class="port">:4400 Plugin</span>
+      <span class="port">:4403 REPL</span>
+    </div>
+  </div>
+
+  <!-- Secure Storage -->
+  <div class="node n-data" style="top:1280px; left:100px; width:220px;">
+    <h3><span class="dot" style="background:#e3b341"></span> Secure Storage</h3>
+    <div class="tech">OS Keychain · flutter_secure_storage</div>
+    <div class="desc">Encrypted credential storage. Auth tokens, session state.</div>
+  </div>
+
+  <!-- ═══════════════ DEPLOYMENT ═══════════════ -->
+  <div class="zone-label" style="top:1360px; left:30px;">DEPLOYMENT</div>
+
+  <!-- Docker Stack -->
+  <div class="node n-infra" style="top:1400px; left:100px; width:1180px;">
+    <h3><span class="dot" style="background:#56d4dd"></span> Docker Compose Stack</h3>
+    <div class="tech">docker-compose.yaml · Traefik reverse proxy (optional)</div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:12px;">
+      <div style="background:rgba(88,166,255,.1); border:1px solid #2d4a7a; border-radius:10px; padding:12px 16px; flex:1; min-width:140px; text-align:center;">
+        <div style="font-size:.8rem; color:#58a6ff; font-weight:600;">penjar-backend</div>
+        <div style="font-size:.65rem; color:#8b949e; margin-top:4px;">JDK 21 + Node 22<br/>Dockerfile.backend</div>
+      </div>
+      <div style="background:rgba(188,140,255,.1); border:1px solid #5e3d7a; border-radius:10px; padding:12px 16px; flex:1; min-width:140px; text-align:center;">
+        <div style="font-size:.8rem; color:#bc8cff; font-weight:600;">penjar-frontend</div>
+        <div style="font-size:.65rem; color:#8b949e; margin-top:4px;">Nginx<br/>Dockerfile.frontend</div>
+      </div>
+      <div style="background:rgba(240,136,62,.1); border:1px solid #7a5a2d; border-radius:10px; padding:12px 16px; flex:1; min-width:140px; text-align:center;">
+        <div style="font-size:.8rem; color:#f0883e; font-weight:600;">penjar-mcp</div>
+        <div style="font-size:.65rem; color:#8b949e; margin-top:4px;">Node 22<br/>Dockerfile.mcp</div>
+      </div>
+      <div style="background:rgba(86,212,221,.1); border:1px solid #2d6a7a; border-radius:10px; padding:12px 16px; flex:1; min-width:140px; text-align:center;">
+        <div style="font-size:.8rem; color:#56d4dd; font-weight:600;">penjar-exporter</div>
+        <div style="font-size:.65rem; color:#8b949e; margin-top:4px;">Node 22 + Playwright<br/>Dockerfile.exporter</div>
+      </div>
+      <div style="background:rgba(247,120,186,.1); border:1px solid #7a2d5a; border-radius:10px; padding:12px 16px; flex:1; min-width:140px; text-align:center;">
+        <div style="font-size:.8rem; color:#f778ba; font-weight:600;">penjar-postgres</div>
+        <div style="font-size:.65rem; color:#8b949e; margin-top:4px;">PostgreSQL 15<br/>Health check enabled</div>
+      </div>
+      <div style="background:rgba(248,81,73,.1); border:1px solid #7a2d2d; border-radius:10px; padding:12px 16px; flex:1; min-width:140px; text-align:center;">
+        <div style="font-size:.8rem; color:#f85149; font-weight:600;">penjar-valkey</div>
+        <div style="font-size:.65rem; color:#8b949e; margin-top:4px;">Valkey 8.1<br/>128MB LRU</div>
+      </div>
+      <div style="background:rgba(139,148,158,.1); border:1px solid #484f58; border-radius:10px; padding:12px 16px; flex:1; min-width:140px; text-align:center;">
+        <div style="font-size:.8rem; color:#8b949e; font-weight:600;">penjar-mailcatch</div>
+        <div style="font-size:.65rem; color:#8b949e; margin-top:4px;">SMTP :1025<br/>UI :1080</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat"><div class="val">9</div><div class="lbl">Services</div></div>
+  <div class="stat"><div class="val">11</div><div class="lbl">MCP Tools</div></div>
+  <div class="stat"><div class="val">6</div><div class="lbl">Languages</div></div>
+  <div class="stat"><div class="val">10</div><div class="lbl">Desktop Panels</div></div>
+  <div class="stat"><div class="val">12+</div><div class="lbl">Plugins</div></div>
+  <div class="stat"><div class="val">5</div><div class="lbl">Phases</div></div>
+</div>
+
+</body>
+</html>
